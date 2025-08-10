@@ -1,78 +1,32 @@
 {
-  "timestamp": "2025-08-10T13:50:07.745Z",
-  "version": "v0.4.0-rc.1",
-  "environment": "production",
-  "headers": [
-    {
-      "name": "Content-Security-Policy",
-      "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.youtube.com https://player.vimeo.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; media-src 'self' https://www.youtube.com https://player.vimeo.com; frame-src 'self' https://www.youtube.com https://player.vimeo.com; connect-src 'self' https:",
-      "purpose": "Prevent XSS and injection attacks",
-      "compliance": [
-        "OWASP",
-        "Security Headers"
+  "version": "0.4.0-rc.2",
+  "generated": "2025-08-10T15:19:44.254Z",
+  "required_headers": {
+    "problem_json": {
+      "Content-Type": "application/problem+json",
+      "routes": [
+        "/api/preview/veo",
+        "/api/jobs/[id]",
+        "/api/export/brief/[id]",
+        "/api/export/json/[id]",
+        "/api/compile/veo3",
+        "/api/ingest",
+        "/api/snap3/turbo",
+        "/api/qa/validate"
       ]
     },
-    {
-      "name": "X-Frame-Options",
-      "value": "SAMEORIGIN",
-      "purpose": "Prevent clickjacking attacks",
-      "compliance": [
-        "OWASP",
-        "Security Headers"
-      ]
+    "security": {
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+      "X-XSS-Protection": "1; mode=block",
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+      "Content-Security-Policy": "default-src 'self'"
     },
-    {
-      "name": "X-Content-Type-Options",
-      "value": "nosniff",
-      "purpose": "Prevent MIME type sniffing",
-      "compliance": [
-        "OWASP",
-        "Security Headers"
-      ]
-    },
-    {
-      "name": "Referrer-Policy",
-      "value": "strict-origin-when-cross-origin",
-      "purpose": "Control referrer information",
-      "compliance": [
-        "Privacy",
-        "Security Headers"
-      ]
-    },
-    {
-      "name": "Permissions-Policy",
-      "value": "camera=(), microphone=(), geolocation=(), payment=()",
-      "purpose": "Control browser features",
-      "compliance": [
-        "Privacy",
-        "Security Headers"
-      ]
-    },
-    {
-      "name": "Strict-Transport-Security",
-      "value": "max-age=31536000; includeSubDomains",
-      "purpose": "Enforce HTTPS connections",
-      "compliance": [
-        "OWASP",
-        "Security Headers"
-      ]
-    },
-    {
-      "name": "Cache-Control",
-      "value": "private, max-age=3600",
-      "purpose": "Control caching for export data",
-      "compliance": [
-        "Privacy",
-        "Performance"
-      ]
+    "cors": {
+      "Access-Control-Allow-Origin": "https://snap3.ai",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Max-Age": "86400"
     }
-  ],
-  "summary": {
-    "total": 7,
-    "compliance": {
-      "owasp": 4,
-      "privacy": 3,
-      "security": 6
-    }
-  }
+  },
+  "validation_status": "enforced"
 }

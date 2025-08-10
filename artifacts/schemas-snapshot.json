@@ -1,34 +1,17 @@
-v0.4.0-rc.1 Schema Validation Results:
-
-> snap3@0.1.0 schemas:check
-> tsx scripts/validate-schemas.ts
-
-[36m[1m🔍 Validating Schema Contracts...[0m
-
-[1m📊 Validation Results:[0m
-════════════════════════════════════════════════════════════
-
-[32m✅ [1mVeo3Prompt:[0m [32mVALID[0m
-  [32m✓ Duration must be const: 8[0m
-  [32m✓ Aspect must be const: "16:9"[0m
-  [32m✓ Resolution must be enum: ["720p", "1080p"][0m
-  [32m✓ Required fields check[0m
-  [32m✓ Zod schema accepts valid data[0m
-  [32m✓ Zod schema rejects invalid duration[0m
-  [32m✓ Zod schema rejects invalid aspect ratio[0m
-  [32m✓ Zod schema rejects invalid quality[0m
-
-[32m✅ [1mError Schemas:[0m [32mVALID[0m
-  [32m✓ InvalidDurationError has correct structure[0m
-  [32m✓ UnsupportedAspectRatioError has correct structure[0m
-  [32m✓ QARuleViolationError has correct structure[0m
-
-════════════════════════════════════════════════════════════
-
-[1mSummary:[0m
-  Total schemas validated: 2
-  Total tests run: 11
-  Tests passed: [32m11[0m
-  Tests failed: [31m0[0m
-
-[32m[1m✅ All schema contracts are valid![0m
+{
+  "version": "0.4.0-rc.2",
+  "generated": "2025-08-10T15:19:44.255Z",
+  "schemas": {
+    "types.ts": {
+      "hash": "b7720b8e",
+      "size": 1758,
+      "modified": "2025-08-10T15:19:44.255Z"
+    }
+  },
+  "total_schemas": 1,
+  "validation": {
+    "json_schema": "2020-12",
+    "openapi": "3.1.0",
+    "zod": "3.x"
+  }
+}

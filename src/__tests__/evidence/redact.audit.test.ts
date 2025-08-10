@@ -5,7 +5,7 @@
  * for Evidence Pack v2 implementation.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from '@jest/globals';
 import { readFileSync } from 'fs';
 import path from 'path';
 

@@ -1,17 +1,18 @@
 import { describe, it, expect } from '@jest/globals';
-import { extractEvidencePack } from '@/lib/exports/brief';
+import { extractEvidencePack } from '@/lib/evidence/extract';
 
 describe('Evidence Pack Extraction', () => {
   const mockVDPFull = {
-    content_id: 'C0008888',
-    metadata: {
+    digest_id: 'C0008888',
+    platform_metadata: {
       platform: 'Instagram',
-      video_origin: 'Real-Footage',
       view_count: 5000000,
       like_count: 80000,
       comment_count: 7000,
       share_count: 30000,
+      upload_date: '2024-01-15T00:00:00Z',
     },
+    video_origin: 'Real-Footage',
     overall_analysis: {
       confidence: {
         overall: 0.95,

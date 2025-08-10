@@ -3,9 +3,58 @@ import '@testing-library/jest-dom'
 // Add Web Streams API polyfill for streaming tests
 if (!globalThis.ReadableStream) {
   try {
-    require('web-streams-polyfill');
+    const { ReadableStream, WritableStream, TransformStream } = require('stream/web');
+    globalThis.ReadableStream = ReadableStream;
+    globalThis.WritableStream = WritableStream;
+    globalThis.TransformStream = TransformStream;
   } catch (error) {
-    console.warn('Web Streams polyfill not available, skipping...');
+    try {
+      require('web-streams-polyfill');
+    } catch (error) {
+      console.warn('Web Streams polyfill not available, using mock...');
+      // Basic mock for tests
+      globalThis.ReadableStream = class ReadableStream {
+        constructor(underlyingSource) {
+          this._controller = null;
+          this._reader = null;
+          if (underlyingSource?.start) {
+            const controller = {
+              enqueue: (chunk) => {
+                if (this._reader) {
+                  this._reader._chunks.push(chunk);
+                }
+              },
+              close: () => {
+                if (this._reader) {
+                  this._reader._closed = true;
+                }
+              }
+            };
+            this._controller = controller;
+            underlyingSource.start(controller);
+          }
+        }
+        getReader() {
+          this._reader = {
+            _chunks: [],
+            _closed: false,
+            read: async function() {
+              if (this._chunks.length > 0) {
+                return { value: this._chunks.shift(), done: false };
+              }
+              if (this._closed) {
+                return { done: true };
+              }
+              // Wait for more chunks
+              return new Promise(resolve => {
+                setTimeout(() => resolve({ done: true }), 0);
+              });
+            }
+          };
+          return this._reader;
+        }
+      };
+    }
   }
 }
 
