@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getJobQueue, getJobTracker } from '@/lib/jobs/worker';
-import { ApiProblems as Problems } from '@/lib/errors/problem';
+import { withErrorHandling } from '@/lib/errors/withErrorHandling';
+import { Problems } from '@/lib/errors/problem';
 import { JobStatus } from '@/lib/jobs/types';
 
-export async function GET(
+export const GET = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
-  try {
+) => {
   const { id } = await params;
   
   // Get job from queue
@@ -16,10 +16,7 @@ export async function GET(
   const job = queue.getJob(id);
   
   if (!job) {
-    return NextResponse.json(
-      Problems.notFound(`Job ${id}`),
-      { status: 404, headers: { 'Content-Type': 'application/problem+json' } }
-    );
+    return Problems.notFound(`Job ${id}`, request.url);
   }
   
   // Build response based on job status
@@ -75,20 +72,10 @@ export async function GET(
   }
   
   return NextResponse.json(response);
-  } catch (error) {
-    console.error('Job API error:', error);
-    return NextResponse.json(
-      Problems.internalServerError('Failed to fetch job status'),
-      { status: 500 }
-    );
-  }
-}
+});
 
 export async function POST() {
-  return NextResponse.json(
-    Problems.notFound('Endpoint not found'),
-    { status: 404, headers: { 'Content-Type': 'application/problem+json' } }
-  );
+  return Problems.notFound('Endpoint', '/api/jobs/[id]');
 }
 
 

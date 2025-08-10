@@ -22,7 +22,7 @@ export function evaluateQA(input: QAInput): QAReport {
   });
   
   const score = Math.max(0, 100 - totalPenalty);
-  // Pass if no MAJOR issues (WARN is acceptable)
+  // Pass if no MAJOR issues (WARN issues are acceptable)
   const pass = !issues.some(issue => issue.severity === 'MAJOR');
   
   return {

@@ -41,8 +41,8 @@ async function getPreviewData(id: string): Promise<PreviewData | null> {
 }
 
 export default async function PreviewPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const data = await getPreviewData(id);
+  const resolvedParams = await params;
+  const data = await getPreviewData(resolvedParams.id);
   
   if (!data) {
     return (

@@ -11,7 +11,7 @@ export interface VDPMin {
 
 // Evidence Types
 export interface EvidenceChip {
-  type: 'engagement' | 'confidence' | 'source' | 'virality';
+  type: 'engagement' | 'confidence' | 'source';
   label: string;
   value: string | number;
   confidence: number;
