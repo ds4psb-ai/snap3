@@ -976,6 +976,18 @@ components:
         prompt:
           type: string
           description: Original prompt
+        attempts:
+          type: integer
+          minimum: 0
+          description: Number of attempts made
+        maxAttempts:
+          type: integer
+          minimum: 1
+          description: Maximum number of attempts allowed
+        nextAttemptAt:
+          type: string
+          format: date-time
+          description: Next retry attempt timestamp (for failed jobs in backoff)
         createdAt:
           type: string
           format: date-time
