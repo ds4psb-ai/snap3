@@ -15,10 +15,11 @@ const paramsSchema = z.object({
 
 export const GET = withErrorHandling(async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   // Validate ID format
-  const validation = paramsSchema.safeParse(params);
+  const resolvedParams = await params;
+  const validation = paramsSchema.safeParse(resolvedParams);
   if (!validation.success) {
     return NextResponse.json(
       Problems.badRequest('Invalid digest ID format'),
@@ -184,7 +185,7 @@ export const GET = withErrorHandling(async (
       userAgent: request.headers.get('User-Agent') || undefined,
       format: 'json',
       streaming: false,
-      cacheStatus: clientETag ? 'miss' : 'bypass' as const,
+      cacheStatus: (clientETag ? 'miss' : 'bypass') as 'hit' | 'miss' | 'bypass',
       redaction: {
         rulesApplied: redactionRules.length,
         fieldsRedacted: redactionResult.redactedCount,

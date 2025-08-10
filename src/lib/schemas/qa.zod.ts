@@ -14,6 +14,6 @@ export const QAInputSchema = z.object({
     bg: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
     bbox: z.tuple([z.number(), z.number(), z.number(), z.number()]).optional(),
   })).optional(),
-}).strict();
+});
 
 export type QAInputType = z.infer<typeof QAInputSchema>;

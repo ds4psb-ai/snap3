@@ -1,0 +1,78 @@
+{
+  "timestamp": "2025-08-10T13:50:07.745Z",
+  "version": "v0.4.0-rc.1",
+  "environment": "production",
+  "headers": [
+    {
+      "name": "Content-Security-Policy",
+      "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.youtube.com https://player.vimeo.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; media-src 'self' https://www.youtube.com https://player.vimeo.com; frame-src 'self' https://www.youtube.com https://player.vimeo.com; connect-src 'self' https:",
+      "purpose": "Prevent XSS and injection attacks",
+      "compliance": [
+        "OWASP",
+        "Security Headers"
+      ]
+    },
+    {
+      "name": "X-Frame-Options",
+      "value": "SAMEORIGIN",
+      "purpose": "Prevent clickjacking attacks",
+      "compliance": [
+        "OWASP",
+        "Security Headers"
+      ]
+    },
+    {
+      "name": "X-Content-Type-Options",
+      "value": "nosniff",
+      "purpose": "Prevent MIME type sniffing",
+      "compliance": [
+        "OWASP",
+        "Security Headers"
+      ]
+    },
+    {
+      "name": "Referrer-Policy",
+      "value": "strict-origin-when-cross-origin",
+      "purpose": "Control referrer information",
+      "compliance": [
+        "Privacy",
+        "Security Headers"
+      ]
+    },
+    {
+      "name": "Permissions-Policy",
+      "value": "camera=(), microphone=(), geolocation=(), payment=()",
+      "purpose": "Control browser features",
+      "compliance": [
+        "Privacy",
+        "Security Headers"
+      ]
+    },
+    {
+      "name": "Strict-Transport-Security",
+      "value": "max-age=31536000; includeSubDomains",
+      "purpose": "Enforce HTTPS connections",
+      "compliance": [
+        "OWASP",
+        "Security Headers"
+      ]
+    },
+    {
+      "name": "Cache-Control",
+      "value": "private, max-age=3600",
+      "purpose": "Control caching for export data",
+      "compliance": [
+        "Privacy",
+        "Performance"
+      ]
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "compliance": {
+      "owasp": 4,
+      "privacy": 3,
+      "security": 6
+    }
+  }
+}

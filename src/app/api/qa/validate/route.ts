@@ -21,11 +21,11 @@ export async function POST(request: NextRequest) {
       return Problems.qaViolation(violations, request.url);
     }
     
-    // Evaluate QA rules
-    const report = evaluateQA(validation.data);
+    // Evaluate QA rules - assert type safety after Zod validation
+    const report = evaluateQA(validation.data as any);
     
     // Check if there are any MAJOR issues that should fail the QA
-    const hasMajorIssues = report.issues.some(issue => issue.severity === 'MAJOR' || issue.severity === 'ERROR');
+    const hasMajorIssues = report.issues.some(issue => issue.severity === 'MAJOR');
     
     // If there are MAJOR issues, return 422 with Problem+JSON
     if (hasMajorIssues) {

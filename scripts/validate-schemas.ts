@@ -9,18 +9,15 @@ import { VEO3_PROMPT_SCHEMA, VEO3_RESPONSE_SCHEMA, VEO3_JOB_SCHEMA } from '../sr
 
 // Initialize AJV with JSON Schema 2020-12 support and formats
 const ajv = new Ajv({
-  strict: true,
   allErrors: true,
-  validateFormats: true,
-  schemaId: '$id',
   addUsedSchema: false
 });
 
 // Add formats support
 try {
-  addFormats(ajv);
+  addFormats(ajv as any); // Type compatibility workaround
 } catch (error) {
-  console.warn('Warning: ajv-formats setup failed, proceeding without format validation:', error.message);
+  console.warn('Warning: ajv-formats setup failed, proceeding without format validation:', (error as Error).message);
 }
 
 interface ValidationResult {

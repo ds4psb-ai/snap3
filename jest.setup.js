@@ -2,7 +2,11 @@ import '@testing-library/jest-dom'
 
 // Add Web Streams API polyfill for streaming tests
 if (!globalThis.ReadableStream) {
-  require('web-streams-polyfill/polyfill');
+  try {
+    require('web-streams-polyfill');
+  } catch (error) {
+    console.warn('Web Streams polyfill not available, skipping...');
+  }
 }
 
 // Add TextEncoder/TextDecoder polyfill for streaming tests

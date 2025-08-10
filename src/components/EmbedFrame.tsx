@@ -77,9 +77,6 @@ export function EmbedFrame({
       // Accessibility and SEO
       frameBorder="0"
       allowFullScreen
-      
-      // Additional security
-      credentialless="true"
     />
   );
 }

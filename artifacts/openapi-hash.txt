@@ -1,0 +1,1 @@
+SHA2-256(openapi/openapi.yaml)= 4c1e5fa33d456fa0d0d51c50fb9667ffcb1fe63d08ebd92143abfc845c7099fe

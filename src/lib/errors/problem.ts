@@ -139,115 +139,53 @@ export const Problems = {
     };
   },
 
-  // Response-based helpers (existing code)
-  validation(violations: Array<{ field: string; message: string; code?: string }>, instance?: string) {
-    return problemResponse(ErrorCode.VALIDATION_ERROR, {
-      detail: `Validation failed for ${violations.length} field(s)`,
-      violations,
-      instance,
-    });
-  },
-
-  badRequest(detail?: string, instance?: string) {
-    return problemResponse(ErrorCode.BAD_REQUEST, {
-      detail: detail || 'Bad request',
-      instance,
-    });
-  },
-
-  notFound(resource?: string, instance?: string) {
-    return problemResponse(ErrorCode.RESOURCE_NOT_FOUND, {
-      detail: resource ? `Resource '${resource}' not found` : undefined,
-      instance,
-    });
-  },
-
-  unauthorized(detail?: string, instance?: string) {
-    return problemResponse(ErrorCode.UNAUTHORIZED, {
-      detail,
-      instance,
-    });
-  },
-
-  forbidden(detail?: string, instance?: string) {
-    return problemResponse(ErrorCode.FORBIDDEN, {
-      detail,
-      instance,
-    });
-  },
-
-  rateLimited(retryAfter = 60, instance?: string) {
-    return problemResponse(ErrorCode.RATE_LIMITED, {
-      retryAfter,
-      instance,
-    });
-  },
-
-  invalidDuration(actual: number, instance?: string) {
-    return problemResponse(ErrorCode.INVALID_DURATION, {
+  invalidDuration(actual: number) {
+    return buildProblemJSON(ErrorCode.INVALID_DURATION, {
       detail: `Duration must be exactly 8 seconds, got ${actual}`,
       violations: [{
         field: 'duration',
         message: 'Must be 8 seconds',
         code: 'INVALID_DURATION',
       }],
-      instance,
     });
   },
 
-  unsupportedAspectRatio(requested: string, instance?: string) {
-    return problemResponse(ErrorCode.UNSUPPORTED_AR_FOR_PREVIEW, {
+  unsupportedAspectRatio(requested: string) {
+    return buildProblemJSON(ErrorCode.UNSUPPORTED_AR_FOR_PREVIEW, {
       detail: `Requested ${requested} aspect ratio, but preview only supports 16:9. Will provide crop-proxy metadata.`,
-      instance,
     });
   },
 
-  qaViolation(violations: Array<{ field: string; message: string; code?: string }>, instance?: string) {
-    return problemResponse(ErrorCode.QA_RULE_VIOLATION, {
+  qaViolation(violations: Array<{ field: string; message: string; code?: string }>) {
+    return buildProblemJSON(ErrorCode.QA_RULE_VIOLATION, {
       detail: `QA validation failed with ${violations.length} violation(s)`,
       violations,
-      instance,
     });
   },
 
-  providerQuotaExceeded(retryAfter = 3600, provider?: string, instance?: string) {
-    return problemResponse(ErrorCode.PROVIDER_QUOTA_EXCEEDED, {
-      detail: provider ? `Quota exceeded for provider: ${provider}` : undefined,
-      retryAfter,
-      instance,
+  validation(violations: Array<{ field: string; message: string; code?: string }>) {
+    return buildProblemJSON(ErrorCode.VALIDATION_ERROR, {
+      detail: `Validation failed for ${violations.length} field(s)`,
+      violations,
     });
   },
 
-  embedDenied(url: string, reason?: string, instance?: string) {
-    return problemResponse(ErrorCode.EMBED_DENIED, {
-      detail: reason || `Embedding denied for URL: ${url}`,
-      instance,
-    });
-  },
-
-  methodNotAllowed(method?: string, allowed?: string[], instance?: string) {
-    return problemResponse(ErrorCode.METHOD_NOT_ALLOWED, {
+  methodNotAllowed(method?: string, allowed?: string[]) {
+    return buildProblemJSON(ErrorCode.METHOD_NOT_ALLOWED, {
       detail: method 
         ? `Method ${method} is not allowed for this endpoint`
         : allowed?.length 
           ? `Allowed methods: ${allowed.join(', ')}`
-          : undefined,
-      instance,
-    });
-  },
-
-  tooManyRequests(detail?: string, retryAfter = 60, instance?: string) {
-    return problemResponse(ErrorCode.RATE_LIMITED, {
-      detail,
-      retryAfter,
-      instance,
-    });
-  },
-
-  internalServerError(detail?: string, instance?: string) {
-    return problemResponse(ErrorCode.INTERNAL_ERROR, {
-      detail: detail || 'Internal server error',
-      instance,
+          : 'Method not allowed',
     });
   },
 };
+
+// Utility to wrap Problems in NextResponse for API routes
+export function wrapProblem(problem: Problem, status: number = 400) {
+  const { NextResponse } = require('next/server');
+  return NextResponse.json(problem, {
+    status,
+    headers: { 'Content-Type': 'application/problem+json' }
+  });
+}

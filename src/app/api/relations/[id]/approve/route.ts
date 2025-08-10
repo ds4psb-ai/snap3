@@ -8,12 +8,12 @@ const ApprovalSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const instance = `/api/relations/${params.id}/approve`;
+  const { id } = await params;
+  const instance = `/api/relations/${id}/approve`;
   
   try {
-    const { id } = params;
     const body = await request.json();
     const validatedData = ApprovalSchema.parse(body);
     

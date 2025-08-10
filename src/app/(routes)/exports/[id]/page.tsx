@@ -3,11 +3,11 @@ import { notFound } from 'next/navigation';
 import { ExportPanel } from '@/components/ExportPanel';
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = params;
+  const { id } = await params;
   
   // Validate ID format
   if (!id.match(/^[A-Z0-9]{8}$/)) {
@@ -43,7 +43,7 @@ async function fetchExportMetadata(id: string) {
 }
 
 export default async function ExportPage({ params }: PageProps) {
-  const { id } = params;
+  const { id } = await params;
   
   // Validate ID format
   if (!id.match(/^[A-Z0-9]{8}$/)) {

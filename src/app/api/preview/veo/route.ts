@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getJobQueue, getJobTracker, getJobWorker } from '@/lib/jobs/worker';
 import { JobPriority } from '@/lib/jobs/types';
-import { withErrorHandling } from '@/middleware/error-handler';
 import { Problems } from '@/lib/errors/problem';
 import { AppError } from '@/lib/errors/app-error';
 import { ErrorCode } from '@/lib/errors/codes';
@@ -15,7 +14,8 @@ const PreviewRequestSchema = z.object({
   quality: z.enum(['720p', '1080p']),
 });
 
-export const POST = withErrorHandling(async (request: NextRequest) => {
+export async function POST(request: NextRequest) {
+  try {
   // Validate request body
   const body = await request.json();
   const validation = PreviewRequestSchema.safeParse(body);
@@ -76,7 +76,6 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
                    request.headers.get('CF-Ray') ?? 
                    `req-${Date.now()}`;
   
-  try {
     // Create job
     const job = queue.enqueue({
       type: 'preview',
@@ -115,21 +114,19 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     
     return response;
   } catch (error) {
-    if (error instanceof AppError) {
-      // Already a proper error, let error handler deal with it
-      throw error;
-    }
-    
-    // Unknown error
-    throw new AppError(ErrorCode.INTERNAL_SERVER_ERROR, {
-      detail: 'Failed to create preview job',
-      instance: request.url,
-    });
+    console.error('Preview job creation error:', error);
+    return NextResponse.json(
+      Problems.internalServerError('Failed to create preview job'),
+      { status: 500 }
+    );
   }
-});
+}
 
 export async function GET() {
-  return Problems.notFound('Endpoint', '/api/preview/veo');
+  return NextResponse.json(
+    Problems.notFound('Endpoint not found'),
+    { status: 404, headers: { 'Content-Type': 'application/problem+json' } }
+  );
 }
 
 
