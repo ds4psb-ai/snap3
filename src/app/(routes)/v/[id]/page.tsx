@@ -1,60 +1,88 @@
-'use client';
+import { PreviewPlayer } from '@/components/PreviewPlayer';
+import { Problem } from '@/lib/errors/problem';
 
-import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-
-interface VDP {
+interface PreviewData {
   id: string;
-  title: string;
-  content: string;
-  createdAt: string;
+  status: 'queued' | 'processing' | 'completed' | 'failed';
+  result?: {
+    videoUrl: string;
+    duration: number;
+    aspectRatio: string;
+    quality: string;
+  };
+  metadata?: {
+    synthIdDetected?: boolean;
+  };
+  error?: Problem;
 }
 
-export default function VDPPage() {
-  const params = useParams();
-  const [vdp, setVdp] = useState<VDP | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchVDP = async () => {
-      try {
-        const response = await fetch(`/api/vdp/${params.id}`);
-        const data = await response.json();
-        setVdp(data.vdp);
-      } catch (error) {
-        console.error('Error fetching VDP:', error);
-      } finally {
-        setLoading(false);
-      }
+async function getPreviewData(id: string): Promise<PreviewData | null> {
+  try {
+    // In real app, this would fetch from API
+    // For testing, we'll mock the response
+    const mockData: PreviewData = {
+      id,
+      status: 'completed',
+      result: {
+        videoUrl: `https://example.com/preview/${id}.mp4`,
+        duration: 8,
+        aspectRatio: '16:9',
+        quality: '720p',
+      },
+      metadata: {
+        synthIdDetected: false,
+      },
     };
-
-    if (params.id) {
-      fetchVDP();
-    }
-  }, [params.id]);
-
-  if (loading) {
-    return <div className="p-8">Loading...</div>;
+    
+    return mockData;
+  } catch (error) {
+    return null;
   }
+}
 
-  if (!vdp) {
-    return <div className="p-8">VDP not found</div>;
-  }
-
-  return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-4">{vdp.title}</h1>
-      <div className="prose max-w-none">
-        <p>{vdp.content}</p>
+export default async function PreviewPage({ params }: { params: { id: string } }) {
+  const data = await getPreviewData(params.id);
+  
+  if (!data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-white text-xl">Preview not found</div>
       </div>
-      <div className="mt-4 text-sm text-gray-500">
-        Created: {new Date(vdp.createdAt).toLocaleDateString()}
+    );
+  }
+  
+  if (data.status === 'failed' && data.error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <PreviewPlayer
+          src=""
+          problem={data.error}
+        />
+      </div>
+    );
+  }
+  
+  if (data.status === 'queued' || data.status === 'processing') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="text-white text-xl">
+          {data.status === 'queued' ? '⏳ Queued...' : '🔄 Processing...'}
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="min-h-screen bg-gray-900 p-4">
+      <div className="max-w-6xl mx-auto">
+        <PreviewPlayer
+          src={data.result?.videoUrl || ''}
+          target="vertical"
+          qualities={['720p', '1080p']}
+          defaultQuality="720p"
+          synthIdDetected={data.metadata?.synthIdDetected}
+        />
       </div>
     </div>
   );
 }
-
-
-
-
-
