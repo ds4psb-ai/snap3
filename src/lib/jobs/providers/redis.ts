@@ -48,7 +48,7 @@ interface RedisProviderConfig {
 }
 
 export class RedisQueueProvider implements JobQueueProvider {
-  private redis: Redis;
+  private redis: InstanceType<typeof Redis>;
   private config: Required<Omit<RedisProviderConfig, 'redisUrl' | 'upstashUrl' | 'upstashToken'>>;
   private readonly QUEUE_KEY: string;
   private readonly PROCESSING_KEY: string;
@@ -125,7 +125,7 @@ export class RedisQueueProvider implements JobQueueProvider {
             }
           } else if (existingJob.status === JobStatus.QUEUED || existingJob.status === JobStatus.PROCESSING) {
             // Return existing job
-            return this.redisJobToJob(existingJob);
+            return existingJob;
           }
         }
       }
@@ -593,7 +593,8 @@ export class RedisQueueProvider implements JobQueueProvider {
    * Higher priority = lower score (processed first)
    */
   private calculateQueueScore(priority: JobPriority, timestamp: number): number {
-    const priorityWeight = {
+    const priorityWeight: Record<JobPriority, number> = {
+      [JobPriority.URGENT]: -1000000000, // Highest priority (lowest score)
       [JobPriority.HIGH]: 0,
       [JobPriority.NORMAL]: 1000000000,
       [JobPriority.LOW]: 2000000000,
@@ -628,7 +629,7 @@ export class RedisQueueProvider implements JobQueueProvider {
       requestId: redisJob.requestId,
       idempotencyKey: redisJob.idempotencyKey,
       metadata: redisJob.metadata,
-      result: redisJob.result,
+      result: redisJob.result ?? null,
       error: redisJob.error,
     };
   }

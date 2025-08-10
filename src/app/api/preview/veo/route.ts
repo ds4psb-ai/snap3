@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { getJobQueue, getJobTracker, getJobWorker } from '@/lib/jobs/worker';
 import { JobPriority } from '@/lib/jobs/types';
 import { withErrorHandling } from '@/lib/errors/withErrorHandling';
-import { Problems } from '@/lib/errors/problem';
+import { ApiProblems } from '@/lib/errors/problem';
 import { AppError } from '@/lib/errors/app-error';
 import { ErrorCode } from '@/lib/errors/codes';
 
@@ -24,12 +24,12 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     // Check for specific validation errors
     const durationError = validation.error.issues.find(i => i.path.includes('duration'));
     if (durationError) {
-      return Problems.invalidDuration(body.duration, request.url);
+      return ApiProblems.badRequest(`Invalid duration: ${body.duration}. Expected: 8`);
     }
     
     const aspectError = validation.error.issues.find(i => i.path.includes('aspectRatio'));
     if (aspectError) {
-      return Problems.unsupportedAspectRatio(body.aspectRatio, request.url);
+      return ApiProblems.badRequest(`Unsupported aspect ratio: ${body.aspectRatio}. Expected: 16:9`);
     }
     
     // Generic validation error
@@ -38,7 +38,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       message: issue.message,
       code: issue.code,
     }));
-    return Problems.validation(violations, request.url);
+    return ApiProblems.validation(violations);
   }
   
   const validatedData = validation.data;
@@ -85,8 +85,8 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       requestId,
       idempotencyKey,
       metadata: {
-        userAgent: request.headers.get('User-Agent'),
-        ip: request.headers.get('X-Forwarded-For') ?? request.headers.get('X-Real-IP'),
+        userAgent: request.headers.get('User-Agent') || undefined,
+        ip: (request.headers.get('X-Forwarded-For') ?? request.headers.get('X-Real-IP')) || undefined,
       },
     });
     
@@ -129,7 +129,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 });
 
 export async function GET() {
-  return Problems.notFound('Endpoint', '/api/preview/veo');
+  return ApiProblems.notFound('GET method not supported for /api/preview/veo');
 }
 
 

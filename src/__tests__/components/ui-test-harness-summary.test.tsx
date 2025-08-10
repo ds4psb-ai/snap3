@@ -139,7 +139,7 @@ describe('UI Test Harness - Commit 21 Verification', () => {
       errorDiv.textContent = 'Network error occurred';
       
       expect(errorDiv).toHaveAttribute('role', 'alert');
-      expect(errorDiv).toHaveClass('p-4', 'bg-red-50', 'text-red-800');
+      expect(errorDiv).toHaveClass('p-4 bg-red-50 text-red-800');
     });
   });
 

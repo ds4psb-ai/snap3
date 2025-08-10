@@ -12,8 +12,8 @@ describe('GET /api/export/brief/[id]', () => {
       
       // RFC 9457 Problem+JSON structure
       expect(body).toMatchObject({
-        type: 'about:blank',
-        title: 'Not Found',
+        type: 'https://api.snap3.com/problems/not-found',
+        title: 'Resource not found',
         status: 404,
         detail: expect.stringContaining('Export not found'),
       });
@@ -30,8 +30,8 @@ describe('GET /api/export/brief/[id]', () => {
       const body = await response.json();
       
       expect(body).toMatchObject({
-        type: 'about:blank',
-        title: 'Bad Request',
+        type: 'https://api.snap3.com/problems/bad-request',
+        title: 'Bad request',
         status: 400,
         detail: 'Invalid digest ID format',
       });
@@ -108,8 +108,8 @@ describe('GET /api/export/brief/[id]', () => {
         const body = await response.json();
         
         expect(body).toMatchObject({
-          type: 'about:blank',
-          title: 'Too Many Requests',
+          type: 'https://api.snap3.com/problems/rate-limited',
+          title: 'Too many requests',
           status: 429,
           detail: expect.stringContaining('rate limit'),
         });

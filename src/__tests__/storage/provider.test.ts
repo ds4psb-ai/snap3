@@ -10,6 +10,16 @@ class FakeStorageProvider implements StorageProvider {
   private objects = new Map<string, boolean>();
   private uploadUrls = new Map<string, string>();
 
+  async headObject(key: string) {
+    const exists = this.objects.has(key);
+    return {
+      exists,
+      size: exists ? 1024 : undefined,
+      contentType: exists ? 'application/octet-stream' : undefined,
+      lastModified: exists ? new Date() : undefined,
+    };
+  }
+
   async createSignedUploadUrl(
     key: string,
     contentType: string,
@@ -226,7 +236,7 @@ describe('StorageProvider Contract', () => {
 
   describe('URL Security', () => {
     it('should not expose bucket names in URLs', async () => {
-      const uploadResult = await provider.createSignedUploadUrl('test.mp4');
+      const uploadResult = await provider.createSignedUploadUrl('test.mp4', 'video/mp4');
       provider._addObject('test.mp4');
       const readResult = await provider.getSignedReadUrl('test.mp4');
       

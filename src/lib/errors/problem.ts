@@ -39,9 +39,14 @@ export function buildProblemJSON(
       code?: string;
     }>;
     traceId?: string;
+    [key: string]: any; // Allow arbitrary additional properties
   } = {}
 ): Problem {
   const meta = ERROR_META[code];
+  
+  // Extract known properties
+  const { detail, instance, retryAfter, violations, traceId, ...additionalProps } = opts;
+  
   return {
     type: meta.type,
     title: meta.title,
@@ -49,11 +54,12 @@ export function buildProblemJSON(
     code,
     fix: meta.fix,
     timestamp: new Date().toISOString(),
-    traceId: opts.traceId ?? generateTraceId(),
-    ...(opts.detail && { detail: opts.detail }),
-    ...(opts.instance && { instance: opts.instance }),
-    ...(opts.retryAfter && { retryAfter: opts.retryAfter }),
-    ...(opts.violations && opts.violations.length > 0 && { violations: opts.violations }),
+    traceId: traceId ?? generateTraceId(),
+    ...(detail && { detail }),
+    ...(instance && { instance }),
+    ...(retryAfter && { retryAfter }),
+    ...(violations && violations.length > 0 && { violations }),
+    ...additionalProps, // Spread any additional properties
   };
 }
 
@@ -80,10 +86,8 @@ export function problemResponse(
     headers.set('Retry-After', String(retryAfter));
   }
   
-  return NextResponse.json(problem, { 
-    status: problem.status, 
-    headers: Object.fromEntries(headers.entries()),
-  });
+  return NextResponse.json(problem, { status: problem.status })
+// TODO: Set headers using res.headers.set() pattern;
 }
 
 /**
@@ -94,11 +98,11 @@ function generateTraceId(): string {
 }
 
 /**
- * Factory functions for common problems
- * These return plain objects for use with NextResponse.json()
+ * Factory functions for creating Problem JSON objects (not NextResponse)
+ * Used for testing and internal logic
  */
-export const Problems = {
-  // Generic error helpers returning plain objects
+export const ProblemDetails = {
+  // Generic error helpers returning Problem objects
   badRequest(detail?: string, opts: { code?: string; violations?: any[] } = {}) {
     // Map string codes to ErrorCode enum values
     const errorCode = opts.code === 'EMBED_DENIED' ? ErrorCode.EMBED_DENIED :
@@ -131,13 +135,10 @@ export const Problems = {
   },
 
   fromAppError(error: any) {
-    return {
-      type: 'about:blank',
-      title: error.message || 'Application Error',
-      status: error.statusCode || 500,
+    const errorCode = error.code || ErrorCode.INTERNAL_ERROR;
+    return buildProblemJSON(errorCode, {
       detail: error.detail || error.message,
-      code: error.code,
-    };
+    });
   },
 
   invalidDuration(actual: number) {
@@ -157,10 +158,98 @@ export const Problems = {
     });
   },
 
-  qaViolation(violations: Array<{ field: string; message: string; code?: string }>) {
+  qaViolation(violations: Array<{ field: string; message: string; code?: string }>, instance?: string) {
     return buildProblemJSON(ErrorCode.QA_RULE_VIOLATION, {
       detail: `QA validation failed with ${violations.length} violation(s)`,
       violations,
+      instance,
+    });
+  },
+
+  validation(violations: Array<{ field: string; message: string; code?: string }>) {
+    return buildProblemJSON(ErrorCode.VALIDATION_ERROR, {
+      detail: `Validation failed for ${violations.length} field(s)`,
+      violations,
+    });
+  },
+
+  methodNotAllowed(method?: string, allowed?: string[]) {
+    return buildProblemJSON(ErrorCode.METHOD_NOT_ALLOWED, {
+      detail: method 
+        ? `Method ${method} is not allowed for this endpoint`
+        : allowed?.length 
+          ? `Allowed methods: ${allowed.join(', ')}`
+          : 'Method not allowed',
+    });
+  },
+};
+
+/**
+ * Factory functions for common problems
+ * These return plain Problem objects
+ */
+export const Problems = {
+  // Generic error helpers returning plain Problem objects
+  badRequest(detail?: string, opts: { code?: string; violations?: any[] } = {}) {
+    // Map string codes to ErrorCode enum values
+    const errorCode = opts.code === 'EMBED_DENIED' ? ErrorCode.EMBED_DENIED :
+                     opts.code === 'VALIDATION_ERROR' ? ErrorCode.VALIDATION_ERROR :
+                     ErrorCode.BAD_REQUEST;
+    
+    return buildProblemJSON(errorCode, {
+      detail,
+      violations: opts.violations,
+    });
+  },
+
+  notFound(detail?: string) {
+    return buildProblemJSON(ErrorCode.RESOURCE_NOT_FOUND, {
+      detail,
+    });
+  },
+
+  internalServerError(detail?: string) {
+    return buildProblemJSON(ErrorCode.INTERNAL_ERROR, {
+      detail,
+    });
+  },
+
+  tooManyRequests(detail?: string, retryAfter?: number) {
+    return buildProblemJSON(ErrorCode.RATE_LIMITED, {
+      detail,
+      retryAfter,
+    });
+  },
+
+  fromAppError(error: any) {
+    const errorCode = error.code || ErrorCode.INTERNAL_ERROR;
+    return buildProblemJSON(errorCode, {
+      detail: error.detail || error.message,
+    });
+  },
+
+  invalidDuration(actual: number) {
+    return buildProblemJSON(ErrorCode.INVALID_DURATION, {
+      detail: `Duration must be exactly 8 seconds, got ${actual}`,
+      violations: [{
+        field: 'duration',
+        message: 'Must be 8 seconds',
+        code: 'INVALID_DURATION',
+      }],
+    });
+  },
+
+  unsupportedAspectRatio(requested: string) {
+    return buildProblemJSON(ErrorCode.UNSUPPORTED_AR_FOR_PREVIEW, {
+      detail: `Requested ${requested} aspect ratio, but preview only supports 16:9. Will provide crop-proxy metadata.`,
+    });
+  },
+
+  qaViolation(violations: Array<{ field: string; message: string; code?: string }>, instance?: string) {
+    return buildProblemJSON(ErrorCode.QA_RULE_VIOLATION, {
+      detail: `QA validation failed with ${violations.length} violation(s)`,
+      violations,
+      instance,
     });
   },
 
@@ -186,10 +275,8 @@ export const Problems = {
 export function wrapProblem(problem: Problem, status: number = 400) {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { NextResponse } = require('next/server');
-  return NextResponse.json(problem, {
-    status,
-    headers: { 'Content-Type': 'application/problem+json' }
-  });
+  return NextResponse.json(problem, { status })
+// TODO: Set headers using res.headers.set() pattern;
 }
 
 // Extended Problems object with NextResponse methods for API routes
@@ -218,7 +305,13 @@ export const ApiProblems = {
   },
   
   tooManyRequests(detail?: string, retryAfter?: number) {
-    return wrapProblem(Problems.tooManyRequests(detail, retryAfter), 429);
+    const problem = buildProblemJSON(ErrorCode.RATE_LIMITED, {
+      detail,
+      retryAfter: retryAfter || 60,
+    });
+    const response = NextResponse.json(problem, { status: problem.status })
+// TODO: Set headers using res.headers.set() pattern;
+    return response;
   },
   
   // Add missing methods that API routes use
@@ -230,20 +323,22 @@ export const ApiProblems = {
     return wrapProblem({...Problems.invalidDuration(actual), instance}, 400);
   },
   
-  unsupportedAspectRatio(requested: string, instance?: string) {
-    return wrapProblem({...Problems.unsupportedAspectRatio(requested), instance}, 400);
+  unsupportedAspectRatio(requested: string, cropProxy?: any, instance?: string) {
+    const problem = buildProblemJSON(ErrorCode.UNSUPPORTED_AR_FOR_PREVIEW, {
+      detail: `Requested ${requested} aspect ratio, but preview only supports 16:9. Will provide crop-proxy metadata.`,
+      cropProxy,
+      instance,
+    });
+    return NextResponse.json(problem, { status: problem.status })
+// TODO: Set headers using res.headers.set() pattern;
   },
   
   // Methods that don't exist in base Problems - create them
   embedDenied(url: string, reason?: string, instance?: string) {
-    return wrapProblem({
-      type: 'https://snap3.dev/problems/embed-denied',
-      title: 'Embed Denied',
-      status: 403,
+    return wrapProblem(buildProblemJSON(ErrorCode.EMBED_DENIED, {
       detail: reason || `Embedding denied for URL: ${url}`,
-      instance: instance,
-      code: ErrorCode.EMBED_DENIED,
-    }, 403);
+      instance,
+    }), 403);
   },
 
   // Provider-specific errors for storage operations

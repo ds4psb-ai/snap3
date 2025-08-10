@@ -455,7 +455,7 @@ describe('Export Panel Accessibility', () => {
 
       // Tab through elements and verify focus is visible
       await user.tab();
-      let focused = document.activeElement;
+      const focused = document.activeElement;
       
       // Check that focused element has some visual indication
       // This would typically check for focus styles in actual implementation

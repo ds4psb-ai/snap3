@@ -234,7 +234,7 @@ describe('Toast Accessibility Tests', () => {
       await waitFor(() => {
         const alert = screen.getByRole('alert');
         // Error toasts should have destructive variant class
-        expect(alert).toHaveClass(/destructive/);
+        expect(alert).toHaveClass('destructive');
       });
     });
   });

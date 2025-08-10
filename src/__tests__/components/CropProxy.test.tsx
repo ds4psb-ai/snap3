@@ -199,19 +199,7 @@ describe('CropProxy', () => {
       
       const slider = screen.getByRole('slider');
       
-      expect(slider).toHaveClass(
-        'absolute',
-        'top-0',
-        'h-full',
-        'border-2',
-        'border-white',
-        'bg-transparent',
-        'pointer-events-auto',
-        'cursor-move',
-        'focus:outline-none',
-        'focus:ring-2',
-        'focus:ring-blue-500'
-      );
+      expect(slider).toHaveClass('absolute top-0 h-full border-2 border-white bg-transparent pointer-events-auto cursor-move focus:outline-none focus:ring-2 focus:ring-blue-500');
     });
   });
 

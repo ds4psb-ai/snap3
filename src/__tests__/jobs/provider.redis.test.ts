@@ -13,7 +13,7 @@ const REDIS_URL = process.env.TEST_REDIS_URL || 'redis://localhost:6379/15'; // 
 
 describe('RedisQueueProvider', () => {
   let provider: RedisQueueProvider;
-  let redis: Redis;
+  let redis: InstanceType<typeof Redis>;
 
   beforeAll(async () => {
     // Check if Redis is available

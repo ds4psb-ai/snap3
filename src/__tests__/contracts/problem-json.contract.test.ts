@@ -5,7 +5,7 @@
 
 import { describe, test, expect } from '@jest/globals';
 import { ErrorCode, ERROR_META } from '@/lib/errors/codes';
-import { buildProblemJSON, Problems } from '@/lib/errors/problem';
+import { buildProblemJSON, ProblemDetails } from '@/lib/errors/problem';
 
 describe('RFC 9457 Problem+JSON Contract Tests', () => {
   describe('Problem Details Structure Validation', () => {
@@ -38,7 +38,7 @@ describe('RFC 9457 Problem+JSON Contract Tests', () => {
     });
 
     test('Problems factory methods should generate valid Problem Details', () => {
-      const validationProblem = Problems.validation([
+      const validationProblem = ProblemDetails.validation([
         { field: 'duration', message: 'Must be 8 seconds' }
       ]);
       
@@ -47,7 +47,7 @@ describe('RFC 9457 Problem+JSON Contract Tests', () => {
     });
 
     test('Rate limiting responses should include Retry-After field', () => {
-      const rateLimitProblem = Problems.tooManyRequests('Rate limited', 300);
+      const rateLimitProblem = ProblemDetails.tooManyRequests('Rate limited', 300);
       
       expect(rateLimitProblem.retryAfter).toBe(300);
       expect(rateLimitProblem.status).toBe(429);
@@ -97,7 +97,7 @@ describe('RFC 9457 Problem+JSON Contract Tests', () => {
       });
 
       test('should return Problem+JSON for method not allowed', async () => {
-        const methodNotAllowedProblem = Problems.methodNotAllowed('GET', ['POST']);
+        const methodNotAllowedProblem = ProblemDetails.methodNotAllowed('GET', ['POST']);
         expect(methodNotAllowedProblem.status).toBe(405);
         expect(methodNotAllowedProblem.type).toBeDefined();
       });
@@ -119,7 +119,7 @@ describe('RFC 9457 Problem+JSON Contract Tests', () => {
       apiRoutes.forEach(route => {
         test(`${route} should use application/problem+json content-type for errors`, () => {
           // Contract test - verifies the expected behavior
-          const errorResponse = Problems.validation([
+          const errorResponse = ProblemDetails.validation([
             { field: 'test', message: 'validation failed' }
           ]);
           
@@ -162,7 +162,7 @@ describe('RFC 9457 Problem+JSON Contract Tests', () => {
         ];
 
         rateLimitCodes.forEach(code => {
-          const problem = Problems.tooManyRequests('Rate limited', 120);
+          const problem = ProblemDetails.tooManyRequests('Rate limited', 120);
           
           expect(problem.retryAfter).toBeDefined();
           expect(problem.retryAfter).toBe(120);
@@ -176,7 +176,7 @@ describe('RFC 9457 Problem+JSON Contract Tests', () => {
           { field: 'aspectRatio', message: 'Must be 16:9', code: 'INVALID_ASPECT' },
         ];
         
-        const problem = Problems.validation(violations);
+        const problem = ProblemDetails.validation(violations);
         expect(problem.status).toBe(400);
         expect(problem.violations).toEqual(violations);
       });

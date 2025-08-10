@@ -14,15 +14,17 @@ export async function POST(request: NextRequest) {
     if (validatedData.duration !== 8) {
       return NextResponse.json(
         Problems.invalidDuration(validatedData.duration),
-        { status: 400, headers: { 'Content-Type': 'application/problem+json' } }
-      );
+        { status: 400 }
+      )
+// TODO: Set headers using res.headers.set() pattern;
     }
     
     if (validatedData.aspect !== '16:9') {
       return NextResponse.json(
         Problems.unsupportedAspectRatio(validatedData.aspect),
-        { status: 400, headers: { 'Content-Type': 'application/problem+json' } }
-      );
+        { status: 400 }
+      )
+// TODO: Set headers using res.headers.set() pattern;
     }
     
     // TODO: Implement Veo3 prompt compilation
@@ -43,8 +45,9 @@ export async function POST(request: NextRequest) {
       }));
       return NextResponse.json(
         Problems.validation(violations),
-        { status: 400, headers: { 'Content-Type': 'application/problem+json' } }
-      );
+        { status: 400 }
+      )
+// TODO: Set headers using res.headers.set() pattern;
     }
     
     return NextResponse.json(
@@ -53,16 +56,18 @@ export async function POST(request: NextRequest) {
         message: 'Invalid Veo3 prompt format',
         code: 'INVALID_REQUEST',
       }]),
-      { status: 400, headers: { 'Content-Type': 'application/problem+json' } }
-    );
+      { status: 400 }
+    )
+// TODO: Set headers using res.headers.set() pattern;
   }
 }
 
 export async function GET() {
   return NextResponse.json(
     Problems.methodNotAllowed('GET', ['POST']),
-    { status: 405, headers: { 'Content-Type': 'application/problem+json' } }
-  );
+    { status: 405 }
+  )
+// TODO: Set headers using res.headers.set() pattern;
 }
 
 

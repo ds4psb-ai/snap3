@@ -12,7 +12,6 @@ describe('NextResponse Header Pattern Lint Rule', () => {
   beforeAll(() => {
     eslint = new ESLint({
       overrideConfigFile: path.join(process.cwd(), 'eslint.config.mjs'),
-      useEslintrc: false,
     });
   });
 

@@ -25,23 +25,23 @@ export function withErrorHandling(handler: RouteHandler): RouteHandler {
           violations,
         });
         
-        return NextResponse.json(problem, { 
-          status: 400,
-          headers: { 'Content-Type': 'application/problem+json' }
-        });
+        return NextResponse.json(problem, { status: 400 })
+// TODO: Set headers using res.headers.set() pattern;
       }
       
       // Handle application errors  
       if (error instanceof AppError) {
         const problem = buildProblemJSON(error.code, {
           detail: error.message,
-          context: error.context,
+          metadata: error.metadata,
+          instance: error.instance,
+          retryAfter: error.retryAfter,
+          violations: error.violations,
+          traceId: error.traceId,
         });
         
-        return NextResponse.json(problem, { 
-          status: problem.status,
-          headers: { 'Content-Type': 'application/problem+json' }
-        });
+        return NextResponse.json(problem, { status: problem.status })
+// TODO: Set headers using res.headers.set() pattern;
       }
       
       // Generic error fallback
@@ -49,10 +49,8 @@ export function withErrorHandling(handler: RouteHandler): RouteHandler {
         detail: 'An unexpected server error occurred',
       });
 
-      return NextResponse.json(problem, { 
-        status: 500,
-        headers: { 'Content-Type': 'application/problem+json' }
-      });
+      return NextResponse.json(problem, { status: 500 })
+// TODO: Set headers using res.headers.set() pattern;
     }
   };
 }

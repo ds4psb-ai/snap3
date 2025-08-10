@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandling } from '@/lib/errors/withErrorHandling';
 import { ApiProblems as Problems } from '@/lib/errors/problem';
-import { generateBriefExport } from '@/lib/exports/brief';
-import { generateEvidencePack } from '@/lib/schemas/evidence_pack.zod';
+import { generateBriefExport, extractEvidencePack } from '@/lib/exports/brief';
 import { redactEvidence, loadRedactionRules } from '@/lib/evidence/redact';
 import { evidenceDigest, auditRecord, createExportHeaders, logAuditEntry, validateETag } from '@/lib/evidence/audit';
 import { z } from 'zod';
@@ -25,12 +24,7 @@ export const GET = withErrorHandling(async (
   const resolvedParams = await params;
   const validation = paramsSchema.safeParse(resolvedParams);
   if (!validation.success) {
-    const res = NextResponse.json(
-      Problems.badRequest('Invalid digest ID format'),
-      { status: 400 }
-    );
-    res.headers.set('Content-Type', 'application/problem+json');
-    return res;
+    return Problems.badRequest('Invalid digest ID format');
   }
   
   const { id } = validation.data;
@@ -38,24 +32,13 @@ export const GET = withErrorHandling(async (
   // Mock data retrieval (replace with actual DB/storage call)
   const vdpData = await fetchVDPData(id);
   if (!vdpData) {
-    const res = NextResponse.json(
-      Problems.notFound(`Export not found for ID: ${id}`),
-      { status: 404 }
-    );
-    res.headers.set('Content-Type', 'application/problem+json');
-    return res;
+    return Problems.notFound(`Export not found for ID: ${id}`);
   }
   
   // Check rate limits (test mode)
   const rateLimitExceeded = request.headers.get('X-Rate-Limit-Test') === 'true';
   if (rateLimitExceeded) {
-    const res = NextResponse.json(
-      Problems.tooManyRequests('Export rate limit exceeded', 60),
-      { status: 429 }
-    );
-    res.headers.set('Retry-After', '60');
-    res.headers.set('Content-Type', 'application/problem+json');
-    return res;
+    return Problems.tooManyRequests('Export rate limit exceeded', 60);
   }
   
   
@@ -85,7 +68,7 @@ export const GET = withErrorHandling(async (
     const redactedVDP = redactionResult.data;
     
     // Generate evidence pack from redacted data
-    const evidencePack = generateEvidencePack(redactedVDP);
+    const evidencePack = extractEvidencePack(redactedVDP);
     
     // Generate VDP_MIN
     const vdpMin = {
@@ -95,6 +78,7 @@ export const GET = withErrorHandling(async (
       tempoBucket: 'medium',
       source: {
         embedEligible: true,
+        platform: redactedVDP.platform_metadata?.platform || 'unknown',
       },
     };
     
@@ -215,10 +199,7 @@ export const GET = withErrorHandling(async (
     return res;
   } catch (error) {
     console.error('Brief export error:', error);
-    return NextResponse.json(
-      Problems.internalServerError('Failed to generate brief export'),
-      { status: 500 }
-    );
+    return Problems.internalServerError('Failed to generate brief export');
   }
 });
 

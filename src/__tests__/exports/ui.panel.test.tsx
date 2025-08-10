@@ -242,7 +242,7 @@ describe('ExportPanel Component', () => {
       const downloadButton = screen.getByText('Download JSON');
       
       // Check button has proper contrast classes
-      expect(downloadButton).toHaveClass('bg-blue-600', 'text-white');
+      expect(downloadButton).toHaveClass('bg-blue-600 text-white');
     });
   });
 });

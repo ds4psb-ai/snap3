@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandling } from '@/lib/errors/withErrorHandling';
-import { ApiProblems as Problems } from '@/lib/errors/problem';
+import { ApiProblems as Problems, buildProblemJSON } from '@/lib/errors/problem';
+import { ErrorCode } from '@/lib/errors/codes';
 import { generateEvidencePack } from '@/lib/schemas/evidence_pack.zod';
 import { redactEvidence, loadRedactionRules } from '@/lib/evidence/redact';
 import { evidenceDigest, auditRecord, createExportHeaders, logAuditEntry, validateETag } from '@/lib/evidence/audit';
@@ -21,12 +22,7 @@ export const GET = withErrorHandling(async (
   const resolvedParams = await params;
   const validation = paramsSchema.safeParse(resolvedParams);
   if (!validation.success) {
-    const res = NextResponse.json(
-      Problems.badRequest('Invalid digest ID format'),
-      { status: 400 }
-    );
-    res.headers.set('Content-Type', 'application/problem+json');
-    return res;
+    return Problems.badRequest('Invalid digest ID format');
   }
   
   const { id } = validation.data;
@@ -35,49 +31,28 @@ export const GET = withErrorHandling(async (
   const aspectRatio = request.headers.get('X-Aspect-Ratio');
   if (aspectRatio === '9:16') {
     // Return crop-proxy metadata only
-    const res = NextResponse.json(
-      {
-        ...Problems.badRequest('Preview must be 16:9. Use crop-proxy for 9:16'),
-        code: 'UNSUPPORTED_AR_FOR_PREVIEW',
-        cropProxy: {
-          sourceAspect: '16:9',
-          targetAspect: '9:16',
-          cropRegion: { 
-            x: 0.34375,  // Center crop: (1 - 0.3125) / 2
-            y: 0,
-            width: 0.3125,  // 9:16 width in 16:9 frame
-            height: 1,
-          },
-        },
+    return Problems.unsupportedAspectRatio('9:16', {
+      sourceAspect: '16:9',
+      targetAspect: '9:16',
+      cropRegion: { 
+        x: 0.34375,  // Center crop: (1 - 0.3125) / 2
+        y: 0,
+        width: 0.3125,  // 9:16 width in 16:9 frame
+        height: 1,
       },
-      { status: 400 }
-    );
-    res.headers.set('Content-Type', 'application/problem+json');
-    return res;
+    });
   }
   
   // Validate embed eligibility
   const embedUrl = request.headers.get('X-Embed-URL');
   if (embedUrl && !isOfficialEmbed(embedUrl)) {
-    const res = NextResponse.json(
-      Problems.badRequest('Only YouTube and Vimeo embeds are allowed', {
-        code: 'EMBED_DENIED'
-      }),
-      { status: 400 }
-    );
-    res.headers.set('Content-Type', 'application/problem+json');
-    return res;
+    return Problems.embedDenied(embedUrl, 'Only YouTube and Vimeo embeds are allowed');
   }
   
   // Fetch VDP data
   const vdpData = await fetchVDPData(id);
   if (!vdpData) {
-    const res = NextResponse.json(
-      Problems.notFound(`Export not found for ID: ${id}`),
-      { status: 404 }
-    );
-    res.headers.set('Content-Type', 'application/problem+json');
-    return res;
+    return Problems.notFound(`Export not found for ID: ${id}`);
   }
   
   try {
@@ -215,10 +190,7 @@ export const GET = withErrorHandling(async (
     return res;
   } catch (error) {
     console.error('JSON export error:', error);
-    return NextResponse.json(
-      Problems.internalServerError('Failed to generate JSON export'),
-      { status: 500 }
-    );
+    return Problems.internalServerError('Failed to generate JSON export');
   }
 });
 
