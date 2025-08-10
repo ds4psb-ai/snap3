@@ -99,43 +99,34 @@ function generateTraceId(): string {
 export const Problems = {
   // Generic error helpers returning plain objects
   badRequest(detail?: string, opts: { code?: string; violations?: any[] } = {}) {
-    return {
-      type: 'about:blank',
-      title: 'Bad Request',
-      status: 400,
-      code: opts.code || 'BAD_REQUEST',
+    // Map string codes to ErrorCode enum values
+    const errorCode = opts.code === 'EMBED_DENIED' ? ErrorCode.EMBED_DENIED :
+                     opts.code === 'VALIDATION_ERROR' ? ErrorCode.VALIDATION_ERROR :
+                     ErrorCode.BAD_REQUEST;
+    
+    return buildProblemJSON(errorCode, {
       detail,
-      ...opts,
-    };
+      violations: opts.violations,
+    });
   },
 
   notFound(detail?: string) {
-    return {
-      type: 'about:blank',
-      title: 'Not Found',
-      status: 404,
-      code: 'NOT_FOUND',
+    return buildProblemJSON(ErrorCode.RESOURCE_NOT_FOUND, {
       detail,
-    };
+    });
   },
 
   internalServerError(detail?: string) {
-    return {
-      type: 'about:blank',
-      title: 'Internal Server Error',
-      status: 500,
+    return buildProblemJSON(ErrorCode.INTERNAL_ERROR, {
       detail,
-    };
+    });
   },
 
   tooManyRequests(detail?: string, retryAfter?: number) {
-    return {
-      type: 'about:blank',
-      title: 'Too Many Requests',
-      status: 429,
+    return buildProblemJSON(ErrorCode.RATE_LIMITED, {
       detail,
-      ...(retryAfter && { retryAfter }),
-    };
+      retryAfter,
+    });
   },
 
   fromAppError(error: any) {

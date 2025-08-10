@@ -90,13 +90,16 @@ async function checkRedactionPipelineUsage() {
     }
     
     // Check for evidence pack generation from redacted data
-    const hasEvidenceGeneration = content.includes('generateEvidencePack');
-    const hasRedactionBeforeEvidence = content.indexOf('redactEvidence') < content.indexOf('generateEvidencePack');
+    // Look for actual function calls, not just imports
+    const redactEvidenceCallIndex = content.search(/redactEvidence\s*\(/);
+    const generateEvidenceCallIndex = content.search(/generateEvidencePack\s*\(/);
+    const hasEvidenceGeneration = generateEvidenceCallIndex !== -1;
+    const hasRedactionCall = redactEvidenceCallIndex !== -1;
     
-    if (hasEvidenceGeneration && hasVDPUsage && !hasRedactionBeforeEvidence) {
+    if (hasEvidenceGeneration && hasVDPUsage && hasRedactionCall && redactEvidenceCallIndex > generateEvidenceCallIndex) {
       pipelineViolations.push({
         file,
-        line: content.split('\n').findIndex(line => line.includes('generateEvidencePack')) + 1,
+        line: content.split('\n').findIndex(line => line.includes('generateEvidencePack(')) + 1,
         pattern: 'Evidence pack from unredacted data',
         context: 'generateEvidencePack called before redactEvidence',
       });

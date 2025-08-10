@@ -60,10 +60,9 @@ export const GET = withErrorHandling(async (
   // Validate embed eligibility
   const embedUrl = request.headers.get('X-Embed-URL');
   if (embedUrl && !isOfficialEmbed(embedUrl)) {
-    const problemData = {
-      ...Problems.badRequest('Only YouTube and Vimeo embeds are allowed'),
-      code: 'EMBED_DENIED',
-    };
+    const problemData = Problems.badRequest('Only YouTube and Vimeo embeds are allowed', {
+      code: 'EMBED_DENIED'
+    });
     
     const response = NextResponse.json(problemData, { status: 400 });
     response.headers.set('Content-Type', 'application/problem+json');
