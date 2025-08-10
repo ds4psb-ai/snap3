@@ -29,6 +29,9 @@ export enum ErrorCode {
   FORBIDDEN = 'FORBIDDEN',
   METHOD_NOT_ALLOWED = 'METHOD_NOT_ALLOWED',
   INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
+  CONFLICT = 'CONFLICT',
+  TIMEOUT = 'TIMEOUT',
+  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
 }
 
@@ -160,11 +163,36 @@ export const ERROR_META: Record<ErrorCode, ErrorMetadata> = {
     retryAfter: 30,
   },
   
+  [ErrorCode.CONFLICT]: {
+    status: 409,
+    title: 'Resource conflict',
+    fix: 'Resolve the conflict and retry.',
+    type: 'https://api.snap3.com/problems/conflict',
+  },
+  
+  [ErrorCode.TIMEOUT]: {
+    status: 504,
+    title: 'Request timeout',
+    fix: 'Retry with smaller payload or longer timeout.',
+    type: 'https://api.snap3.com/problems/timeout',
+    retryable: true,
+    retryAfter: 10,
+  },
+  
+  [ErrorCode.SERVICE_UNAVAILABLE]: {
+    status: 503,
+    title: 'Service temporarily unavailable',
+    fix: 'Wait and retry.',
+    type: 'https://api.snap3.com/problems/service-unavailable',
+    retryable: true,
+    retryAfter: 30,
+  },
+  
   [ErrorCode.INTERNAL_ERROR]: {
     status: 500,
-    title: 'Internal server error',
+    title: 'Internal error',
     fix: 'Contact support if issue persists.',
-    type: 'https://api.snap3.com/problems/internal-error',
+    type: 'https://api.snap3.com/problems/internal',
     retryable: true,
     retryAfter: 30,
   },

@@ -4,6 +4,8 @@
  */
 
 import { Job, JobStatus, JobPriority, JobPayload, JobResult, JobError, QueueStats } from '../types';
+import { logger, generateTraceId } from '../../logging/logger';
+import { metricsCollector } from '../../metrics/collector';
 
 /**
  * Retry policy configuration for jobs

@@ -8,6 +8,8 @@ import { JobQueue } from '../queue';
 import { JobQueueProvider, JobEnqueueRequest, RetryPolicy, calculateBackoffMs } from './index';
 import { AppError } from '@/lib/errors/app-error';
 import { ErrorCode } from '@/lib/errors/codes';
+import { logger, createJobLogger, generateTraceId } from '../../logging/logger';
+import { metricsCollector } from '../../metrics/collector';
 import crypto from 'crypto';
 
 interface Reservation {
@@ -45,6 +47,11 @@ export class InMemoryQueueProvider implements JobQueueProvider {
   }
 
   async enqueue(request: JobEnqueueRequest): Promise<Job> {
+    const traceId = generateTraceId();
+    const log = logger.child({ traceId, queueName: 'inmemory', operation: 'enqueue' });
+    
+    log.info('Enqueueing job', { type: request.type, idempotencyKey: request.idempotencyKey });
+    
     // Check idempotency
     if (request.idempotencyKey) {
       // FIRST check if in backoff period (regardless of whether job exists)
@@ -92,6 +99,18 @@ export class InMemoryQueueProvider implements JobQueueProvider {
         this.idempotencyTimestamps.set(request.idempotencyKey, Date.now());
       }
       
+      // Emit metrics
+      const retryPolicy = this.retryPolicies.get(request.idempotencyKey || job.id);
+      metricsCollector.recordJobAttempt({
+        queueName: 'inmemory',
+        jobId: job.id,
+        traceId,
+        attempts: 1,
+        maxAttempts: retryPolicy?.maxAttempts || 1,
+        status: 'queued'
+      });
+      
+      log.info('Job enqueued successfully', { jobId: job.id });
       return job;
     } catch (error) {
       // Ensure rate limit errors include retryAfter
@@ -110,6 +129,11 @@ export class InMemoryQueueProvider implements JobQueueProvider {
   }
 
   async reserve(workerId: string, types?: string[]): Promise<Job | null> {
+    const traceId = generateTraceId();
+    const log = logger.child({ traceId, queueName: 'inmemory', operation: 'reserve', workerId });
+    
+    log.debug('Worker attempting to reserve job', { types });
+    
     // Clean expired reservations
     this.cleanExpiredReservations();
     
@@ -126,6 +150,20 @@ export class InMemoryQueueProvider implements JobQueueProvider {
             jobId: job.id,
             workerId,
             expiresAt: Date.now() + this.LEASE_DURATION_MS,
+          });
+          
+          log.info('Job reserved by worker', { jobId: job.id });
+          
+          // Emit metrics
+          const retryPolicy = this.retryPolicies.get(job.idempotencyKey || job.id);
+          const failure = this.failures.get(job.idempotencyKey || job.id);
+          metricsCollector.recordJobAttempt({
+            queueName: 'inmemory',
+            jobId: job.id,
+            traceId,
+            attempts: (failure?.count || 0) + 1,
+            maxAttempts: retryPolicy?.maxAttempts || 1,
+            status: 'processing'
           });
           
           return job;
@@ -145,6 +183,20 @@ export class InMemoryQueueProvider implements JobQueueProvider {
       jobId: job.id,
       workerId,
       expiresAt: Date.now() + this.LEASE_DURATION_MS,
+    });
+    
+    log.info('Job reserved by worker', { jobId: job.id });
+    
+    // Emit metrics
+    const retryPolicy = this.retryPolicies.get(job.idempotencyKey || job.id);
+    const failure = this.failures.get(job.idempotencyKey || job.id);
+    metricsCollector.recordJobAttempt({
+      queueName: 'inmemory',
+      jobId: job.id,
+      traceId,
+      attempts: (failure?.count || 0) + 1,
+      maxAttempts: retryPolicy?.maxAttempts || 1,
+      status: 'processing'
     });
     
     return job;
@@ -177,6 +229,11 @@ export class InMemoryQueueProvider implements JobQueueProvider {
   }
 
   async complete(jobId: string, workerId: string, result: JobResult): Promise<void> {
+    const traceId = generateTraceId();
+    const log = createJobLogger(jobId, traceId, 'inmemory');
+    
+    log.info('Completing job', { workerId });
+    
     const reservation = this.reservations.get(jobId);
     
     if (!reservation || reservation.workerId !== workerId) {
@@ -195,9 +252,31 @@ export class InMemoryQueueProvider implements JobQueueProvider {
     if (job?.idempotencyKey) {
       this.failures.delete(job.idempotencyKey);
     }
+    
+    // Emit metrics
+    if (job) {
+      const processingTime = job.completedAt && job.startedAt ? 
+        new Date(job.completedAt).getTime() - new Date(job.startedAt).getTime() : 0;
+      const failure = this.failures.get(job.idempotencyKey || jobId);
+      
+      metricsCollector.recordJobCompletion(
+        'inmemory',
+        jobId,
+        traceId,
+        processingTime,
+        (failure?.count || 0) + 1
+      );
+    }
+    
+    log.info('Job completed successfully');
   }
 
   async fail(jobId: string, workerId: string, error: JobError): Promise<void> {
+    const traceId = generateTraceId();
+    const log = createJobLogger(jobId, traceId, 'inmemory');
+    
+    log.warn('Job failed', { workerId, error: error.message });
+    
     const reservation = this.reservations.get(jobId);
     
     if (!reservation || reservation.workerId !== workerId) {
@@ -230,10 +309,43 @@ export class InMemoryQueueProvider implements JobQueueProvider {
       
       // Store the failure record BEFORE updating job status
       this.failures.set(failureKey, failure);
+      
+      // Emit metrics with nextAttemptAt
+      metricsCollector.recordJobFailure(
+        'inmemory',
+        jobId,
+        traceId,
+        failure.count,
+        retryPolicy.maxAttempts,
+        new Date(failure.nextRetryAt),
+        error.message
+      );
+      
+      log.info('Job will be retried', { 
+        attempts: failure.count, 
+        maxAttempts: retryPolicy.maxAttempts,
+        nextAttemptAt: new Date(failure.nextRetryAt).toISOString()
+      });
     } else {
       // No more retries
       error.retryAfter = undefined;
       this.failures.set(failureKey, failure);
+      
+      // Emit final failure metrics
+      metricsCollector.recordJobFailure(
+        'inmemory',
+        jobId,
+        traceId,
+        failure.count,
+        retryPolicy?.maxAttempts || 1,
+        undefined,
+        error.message
+      );
+      
+      log.error('Job failed permanently', { 
+        attempts: failure.count,
+        error: error.message 
+      });
     }
     
     // Update job status
@@ -283,6 +395,11 @@ export class InMemoryQueueProvider implements JobQueueProvider {
         const job = this.queue.getJob(jobId);
         if (job && job.status === JobStatus.PROCESSING) {
           this.queue.updateStatus(jobId, JobStatus.QUEUED);
+          
+          const log = logger.child({ jobId, queueName: 'inmemory' });
+          log.warn('Job lease expired, returning to queue', { 
+            workerId: reservation.workerId 
+          });
         }
         this.reservations.delete(jobId);
       }
