@@ -1,5 +1,5 @@
 import { VEO3_PROMPT_SCHEMA } from '../../lib/schemas/veo3.zod';
-import { VEO3_VALID_FIXTURES, VEO3_INVALID_FIXTURES, VEO3_TEST_MATRIX } from './helpers/test-fixtures';
+import { VEO3_VALID_FIXTURES, VEO3_INVALID_FIXTURES, VEO3_TEST_MATRIX } from '../fixtures/veo3-fixtures.data';
 
 describe('Veo3 Contract Tests', () => {
   describe('Table-Driven Test Matrix', () => {
@@ -24,8 +24,8 @@ describe('Veo3 Contract Tests', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.duration).toBe(8);
-        expect(result.data.aspectRatio).toBe('16:9');
-        expect(['720p', '1080p']).toContain(result.data.quality);
+        expect(result.data.aspect).toBe('16:9');
+        expect(['720p', '1080p']).toContain(result.data.resolution);
       }
     });
   });
@@ -55,17 +55,17 @@ describe('Veo3 Contract Tests', () => {
 
   describe('Aspect Ratio Constraints (literal: "16:9")', () => {
     const aspectRatioCases = [
-      { aspectRatio: '16:9', shouldFail: false },
-      { aspectRatio: '9:16', shouldFail: true },
-      { aspectRatio: '4:3', shouldFail: true },
-      { aspectRatio: '1:1', shouldFail: true },
-      { aspectRatio: '21:9', shouldFail: true },
+      { aspect: '16:9', shouldFail: false },
+      { aspect: '9:16', shouldFail: true },
+      { aspect: '4:3', shouldFail: true },
+      { aspect: '1:1', shouldFail: true },
+      { aspect: '21:9', shouldFail: true },
     ];
 
     test.each(aspectRatioCases)(
-      'aspectRatio=$aspectRatio should fail=$shouldFail',
-      ({ aspectRatio, shouldFail }) => {
-        const fixture = { ...VEO3_VALID_FIXTURES.minimal, aspectRatio };
+      'aspect=$aspect should fail=$shouldFail',
+      ({ aspect, shouldFail }) => {
+        const fixture = { ...VEO3_VALID_FIXTURES.minimal, aspect };
         const result = VEO3_PROMPT_SCHEMA.safeParse(fixture);
         expect(result.success).toBe(!shouldFail);
         if (!result.success && shouldFail) {
@@ -77,19 +77,19 @@ describe('Veo3 Contract Tests', () => {
 
   describe('Quality Constraints (enum: ["720p", "1080p"])', () => {
     const qualityCases = [
-      { quality: '720p', shouldFail: false },
-      { quality: '1080p', shouldFail: false },
-      { quality: '480p', shouldFail: true },
-      { quality: '540p', shouldFail: true },
-      { quality: '4K', shouldFail: true },
-      { quality: '2K', shouldFail: true },
-      { quality: '360p', shouldFail: true },
+      { resolution: '720p', shouldFail: false },
+      { resolution: '1080p', shouldFail: false },
+      { resolution: '480p', shouldFail: true },
+      { resolution: '540p', shouldFail: true },
+      { resolution: '4K', shouldFail: true },
+      { resolution: '2K', shouldFail: true },
+      { resolution: '360p', shouldFail: true },
     ];
 
     test.each(qualityCases)(
-      'quality=$quality should fail=$shouldFail',
-      ({ quality, shouldFail }) => {
-        const fixture = { ...VEO3_VALID_FIXTURES.minimal, quality };
+      'resolution=$resolution should fail=$shouldFail',
+      ({ resolution, shouldFail }) => {
+        const fixture = { ...VEO3_VALID_FIXTURES.minimal, resolution };
         const result = VEO3_PROMPT_SCHEMA.safeParse(fixture);
         expect(result.success).toBe(!shouldFail);
         if (!result.success && shouldFail) {
@@ -104,14 +104,14 @@ describe('Veo3 Contract Tests', () => {
       const fixture = { ...VEO3_VALID_FIXTURES.minimal, prompt: '' };
       const result = VEO3_PROMPT_SCHEMA.safeParse(fixture);
       expect(result.success).toBe(false);
-      expect(result.error.errors[0].message).toContain('String must contain at least 1 character');
+      expect(result.error.errors[0].message).toContain('Prompt is required');
     });
 
     test('should reject prompt over 1000 characters', () => {
       const fixture = { ...VEO3_VALID_FIXTURES.minimal, prompt: 'a'.repeat(1001) };
       const result = VEO3_PROMPT_SCHEMA.safeParse(fixture);
       expect(result.success).toBe(false);
-      expect(result.error.errors[0].message).toContain('String must contain at most 1000 character');
+      expect(result.error.errors[0].message).toContain('Prompt must not exceed 1000 characters');
     });
 
     test('should accept valid prompt', () => {
@@ -193,7 +193,7 @@ describe('Veo3 Contract Tests', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const error = result.error.errors[0];
-        expect(error.path).toEqual(['aspectRatio']);
+        expect(error.path).toEqual(['aspect']);
         expect(error.message).toContain('Invalid literal value');
       }
     });
@@ -203,7 +203,7 @@ describe('Veo3 Contract Tests', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         const error = result.error.errors[0];
-        expect(error.path).toEqual(['quality']);
+        expect(error.path).toEqual(['resolution']);
         expect(error.message).toContain('Invalid enum value');
       }
     });

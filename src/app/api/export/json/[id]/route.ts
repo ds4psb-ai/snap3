@@ -75,12 +75,9 @@ export const GET = withErrorHandling(async (
     
     const jsonExport = generateJSONExport(id, videoGenIR, veo3Prompt, evidencePack);
     
-    return NextResponse.json(jsonExport, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'private, max-age=3600',
-      },
-    });
+    const response = NextResponse.json(jsonExport);
+    response.headers.set('Cache-Control', 'private, max-age=3600');
+    return response;
   } catch (error) {
     console.error('JSON export error:', error);
     return Problems.internalServerError('Failed to generate JSON export');

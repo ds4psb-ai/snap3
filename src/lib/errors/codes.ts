@@ -22,11 +22,14 @@ export enum ErrorCode {
   
   // Additional common errors
   VALIDATION_ERROR = 'VALIDATION_ERROR',
+  BAD_REQUEST = 'BAD_REQUEST',
   RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
+  NOT_FOUND = 'NOT_FOUND',
   UNAUTHORIZED = 'UNAUTHORIZED',
   FORBIDDEN = 'FORBIDDEN',
   METHOD_NOT_ALLOWED = 'METHOD_NOT_ALLOWED',
   INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
 }
 
 export interface ErrorMetadata {
@@ -106,9 +109,23 @@ export const ERROR_META: Record<ErrorCode, ErrorMetadata> = {
     type: 'https://api.snap3.com/problems/validation-error',
   },
   
+  [ErrorCode.BAD_REQUEST]: {
+    status: 400,
+    title: 'Bad request',
+    fix: 'Check request format and required fields.',
+    type: 'https://api.snap3.com/problems/bad-request',
+  },
+  
   [ErrorCode.RESOURCE_NOT_FOUND]: {
     status: 404,
     title: 'Resource not found',
+    fix: 'Check resource ID and try again.',
+    type: 'https://api.snap3.com/problems/not-found',
+  },
+  
+  [ErrorCode.NOT_FOUND]: {
+    status: 404,
+    title: 'Not found',
     fix: 'Check resource ID and try again.',
     type: 'https://api.snap3.com/problems/not-found',
   },
@@ -135,6 +152,15 @@ export const ERROR_META: Record<ErrorCode, ErrorMetadata> = {
   },
   
   [ErrorCode.INTERNAL_SERVER_ERROR]: {
+    status: 500,
+    title: 'Internal server error',
+    fix: 'Contact support if issue persists.',
+    type: 'https://api.snap3.com/problems/internal-error',
+    retryable: true,
+    retryAfter: 30,
+  },
+  
+  [ErrorCode.INTERNAL_ERROR]: {
     status: 500,
     title: 'Internal server error',
     fix: 'Contact support if issue persists.',

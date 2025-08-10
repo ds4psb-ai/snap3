@@ -104,6 +104,13 @@ export const Problems = {
     });
   },
 
+  badRequest(detail?: string, instance?: string) {
+    return problemResponse(ErrorCode.BAD_REQUEST, {
+      detail: detail || 'Bad request',
+      instance,
+    });
+  },
+
   notFound(resource?: string, instance?: string) {
     return problemResponse(ErrorCode.RESOURCE_NOT_FOUND, {
       detail: resource ? `Resource '${resource}' not found` : undefined,
@@ -181,6 +188,21 @@ export const Problems = {
         : allowed?.length 
           ? `Allowed methods: ${allowed.join(', ')}`
           : undefined,
+      instance,
+    });
+  },
+
+  tooManyRequests(detail?: string, retryAfter = 60, instance?: string) {
+    return problemResponse(ErrorCode.RATE_LIMITED, {
+      detail,
+      retryAfter,
+      instance,
+    });
+  },
+
+  internalServerError(detail?: string, instance?: string) {
+    return problemResponse(ErrorCode.INTERNAL_ERROR, {
+      detail: detail || 'Internal server error',
       instance,
     });
   },

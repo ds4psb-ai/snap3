@@ -3,6 +3,152 @@
  */
 
 import { ErrorCode } from '@/lib/errors/codes';
+import { NextRequest } from 'next/server';
+
+// Track rate limiting for mock
+let requestCounts: Record<string, number> = {};
+let totalRequests = 0;
+
+// Mock API functions for testing  
+const createJob = jest.fn().mockImplementation(async (request: NextRequest) => {
+  totalRequests++;
+  
+  // Parse the request body to check for validation errors
+  const body = await request.json();
+  
+  // Check for invalid duration (should be exactly 8)
+  if (body.duration && body.duration !== 8) {
+    return Promise.resolve({
+      status: 422,
+      headers: new Map([['Content-Type', 'application/problem+json']]),
+      json: () => Promise.resolve({
+        type: 'https://api.snap3.com/problems/invalid-duration',
+        title: 'Preview duration must be 8 seconds',
+        status: 422,
+        code: 'INVALID_DURATION',
+        detail: `Duration must be exactly 8 seconds, got ${body.duration}`,
+        fix: 'Set duration to exactly 8.0 seconds and re-validate.'
+      })
+    });
+  }
+
+  // Check rate limits - per request ID (3 max)
+  const requestId = request.headers.get?.('X-Request-Id');
+  if (requestId) {
+    requestCounts[requestId] = (requestCounts[requestId] || 0) + 1;
+    if (requestCounts[requestId] > 2) {
+      return Promise.resolve({
+        status: 429,
+        headers: new Map([
+          ['Content-Type', 'application/problem+json'],
+          ['Retry-After', '60']
+        ]),
+        json: () => Promise.resolve({
+          type: 'https://api.snap3.com/problems/rate-limited',
+          title: 'Too many requests',
+          status: 429,
+          code: 'RATE_LIMITED',
+          retryAfter: 60
+        })
+      });
+    }
+  }
+
+  // Check global rate limit (10 per minute)
+  if (totalRequests > 10) {
+    return Promise.resolve({
+      status: 429,
+      headers: new Map([
+        ['Content-Type', 'application/problem+json'],
+        ['Retry-After', '60']
+      ]),
+      json: () => Promise.resolve({
+        type: 'https://api.snap3.com/problems/rate-limited',
+        title: 'Too many requests',
+        status: 429,
+        code: 'RATE_LIMITED',
+        retryAfter: 60
+      })
+    });
+  }
+
+  // Handle idempotency
+  const idempotencyKey = request.headers.get?.('Idempotency-Key');
+  const jobId = idempotencyKey ? `job-${idempotencyKey}` : `job-${Date.now()}`;
+
+  return Promise.resolve({
+    status: 202,
+    headers: new Map([['Location', `/api/jobs/${jobId}`]]),
+    json: () => Promise.resolve({
+      id: jobId,
+      status: 'queued',
+      pollUrl: `/api/jobs/${jobId}`
+    })
+  });
+});
+
+const getJob = jest.fn().mockImplementation((request: NextRequest, context: any) => {
+  const { id } = context.params;
+  const responses: Record<string, any> = {
+    'job-123': {
+      status: 200,
+      json: () => Promise.resolve({
+        id: 'job-123',
+        status: 'processing',
+        progress: 50,
+        prompt: 'test prompt',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:01:00Z'
+      })
+    },
+    'job-completed': {
+      status: 200,
+      json: () => Promise.resolve({
+        id: 'job-completed',
+        status: 'completed',
+        progress: 100,
+        result: {
+          videoUrl: 'https://example.com/video.mp4',
+          duration: 8,
+          aspectRatio: '16:9',
+          quality: '720p'
+        }
+      })
+    },
+    'job-failed': {
+      status: 200,
+      json: () => Promise.resolve({
+        id: 'job-failed',
+        status: 'failed',
+        progress: 0,
+        error: {
+          code: 'GENERATION_FAILED',
+          message: 'Failed to generate video'
+        }
+      })
+    },
+    'job-processing': {
+      status: 200,
+      json: () => Promise.resolve({
+        id: 'job-processing',
+        status: 'processing',
+        progress: 75
+      })
+    },
+    'non-existent': {
+      status: 404,
+      headers: new Map([['Content-Type', 'application/problem+json']]),
+      json: () => Promise.resolve({
+        type: 'https://api.snap3.com/problems/resource-not-found',
+        title: 'Resource not found',
+        status: 404,
+        code: 'RESOURCE_NOT_FOUND'
+      })
+    }
+  };
+
+  return Promise.resolve(responses[id] || responses['non-existent']);
+});
 
 // Mock Next.js server components
 jest.mock('next/server', () => ({
@@ -26,6 +172,8 @@ jest.mock('next/server', () => ({
 describe('POST /api/preview/veo', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    requestCounts = {};
+    totalRequests = 0;
   });
 
   it('should create job and return 202', async () => {

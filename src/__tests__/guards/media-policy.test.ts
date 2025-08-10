@@ -143,9 +143,17 @@ function checkCropProxyWidth(code: string): Array<{ violation: string }> {
 function checkUnofficialEmbeds(code: string): Array<{ violation: string }> {
   const violations = [];
   
-  // Check for unofficial iframe embeds
-  if (/<iframe.*src=["'][^"']*(?!youtube\.com|vimeo\.com)/i.test(code)) {
-    violations.push({ violation: 'Unofficial embed detected (use official embeds only)' });
+  // Check for iframe embeds
+  const iframeMatches = code.match(/<iframe.*?src=["']([^"']+)["']/gi) || [];
+  for (const iframeMatch of iframeMatches) {
+    const srcMatch = iframeMatch.match(/src=["']([^"']+)["']/i);
+    if (srcMatch) {
+      const src = srcMatch[1];
+      // Check if it's NOT an official YouTube or Vimeo embed
+      if (!src.includes('youtube.com') && !src.includes('vimeo.com')) {
+        violations.push({ violation: 'Unofficial embed detected (use official embeds only)' });
+      }
+    }
   }
   
   // Check for direct MP4 hosting

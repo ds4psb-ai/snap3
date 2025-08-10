@@ -58,7 +58,7 @@ describe('Export API Tests', () => {
       expect(problem.type).toBeDefined();
       expect(problem.title).toBeDefined();
       expect(problem.status).toBe(404);
-      expect(problem.code).toBe('NOT_FOUND');
+      expect(problem.code).toBe('RESOURCE_NOT_FOUND');
     });
 
     it('returns 400 Problem+JSON for invalid ID format', async () => {
@@ -172,7 +172,7 @@ describe('Export API Tests', () => {
       expect(problem.type).toBeDefined();
       expect(problem.title).toBeDefined();
       expect(problem.status).toBe(404);
-      expect(problem.code).toBe('NOT_FOUND');
+      expect(problem.code).toBe('RESOURCE_NOT_FOUND');
     });
 
     it('includes cache headers in response', async () => {

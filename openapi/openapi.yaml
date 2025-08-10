@@ -1260,11 +1260,14 @@ components:
             - EMBED_DENIED
             - QA_RULE_VIOLATION
             - VALIDATION_ERROR
+            - BAD_REQUEST
             - RESOURCE_NOT_FOUND
+            - NOT_FOUND
             - UNAUTHORIZED
             - FORBIDDEN
             - METHOD_NOT_ALLOWED
             - INTERNAL_SERVER_ERROR
+            - INTERNAL_ERROR
           description: Application-specific error code
         fix:
           type: string
