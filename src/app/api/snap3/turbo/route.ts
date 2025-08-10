@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Problems } from '@/lib/errors/problem';
 
 const TurboRequestSchema = z.object({
   ingestId: z.string(),
@@ -43,18 +44,23 @@ export async function POST(request: NextRequest) {
       evidencePack: validatedData.evidencePack,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid turbo request' },
-      { status: 400 }
+    if (error instanceof z.ZodError) {
+      const violations = error.issues.map(issue => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+        code: issue.code,
+      }));
+      return Problems.validation(violations, request.url);
+    }
+    return Problems.validation(
+      [{ field: 'request', message: 'Invalid turbo request' }],
+      request.url
     );
   }
 }
 
-export async function GET() {
-  return NextResponse.json(
-    { error: 'Method not allowed' },
-    { status: 405 }
-  );
+export async function GET(request: NextRequest) {
+  return Problems.methodNotAllowed('GET', ['POST'], request.url);
 }
 
 

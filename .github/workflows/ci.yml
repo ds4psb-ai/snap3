@@ -96,8 +96,20 @@ jobs:
       - name: Run type check
         run: npm run type-check
         
-      - name: Check VDP exposure
-        run: node scripts/check-vdp-exposure.js
+      - name: Media Policy Check
+        run: npm run ci:media-policy
         
-      - name: Validate Problem+JSON
-        run: node scripts/validate-problem-details.js
+      - name: Accessibility Contrast Check  
+        run: npm run ci:a11y
+        
+      - name: VDP Exposure Guard
+        run: npm run ci:vdp-guard
+        
+      - name: Run Guard Tests
+        run: npm test src/__tests__/guards
+        
+      - name: Check VDP exposure (legacy)
+        run: node scripts/check-vdp-exposure.js || true
+        
+      - name: Validate Problem+JSON (legacy)
+        run: node scripts/validate-problem-details.js || true

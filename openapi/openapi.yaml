@@ -65,6 +65,10 @@ paths:
                 $ref: '#/components/schemas/Problem'
         '405':
           description: Method not allowed
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
 
   /snap3/turbo:
     post:
@@ -115,6 +119,10 @@ paths:
                 $ref: '#/components/schemas/Problem'
         '405':
           description: Method not allowed
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
 
   /compile/veo3:
     post:
@@ -386,6 +394,10 @@ paths:
                         code: 'FPS_TOO_LOW'
         '405':
           description: Method not allowed
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
 
   /export/brief/{id}:
     get:
@@ -413,6 +425,10 @@ paths:
                 $ref: '#/components/schemas/Problem'
         '405':
           description: Method not allowed
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
 
   /export/json/{id}:
     get:
@@ -440,6 +456,10 @@ paths:
                 $ref: '#/components/schemas/Problem'
         '405':
           description: Method not allowed
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
 
 components:
   schemas:
@@ -509,40 +529,55 @@ components:
     EvidencePack:
       type: object
       required:
-        - id
-        - vdpId
-        - evidence
-        - metadata
+        - digestId
+        - trustScore
+        - evidenceChips
+        - synthIdDetected
       properties:
-        id:
+        digestId:
           type: string
-          format: uuid
-        vdpId:
-          type: string
-          format: uuid
-        evidence:
+        trustScore:
+          type: number
+          minimum: 0
+          maximum: 100
+        evidenceChips:
           type: array
+          minItems: 3
+          maxItems: 5
           items:
-            $ref: '#/components/schemas/Evidence'
-        metadata:
+            $ref: '#/components/schemas/EvidenceChip'
+        synthIdDetected:
+          type: boolean
+        provenance:
           type: object
-          required:
-            - source
-            - confidence
-            - timestamp
           properties:
             source:
               type: string
-            confidence:
-              type: number
-              minimum: 0
-              maximum: 1
             timestamp:
               type: string
               format: date-time
-            version:
-              type: string
-              default: '1.0'
+    
+    EvidenceChip:
+      type: object
+      required:
+        - type
+        - label
+        - value
+        - confidence
+      properties:
+        type:
+          type: string
+          enum: [engagement, confidence, source, virality]
+        label:
+          type: string
+        value:
+          oneOf:
+            - type: string
+            - type: number
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
 
     Textboard:
       type: object
@@ -612,45 +647,31 @@ components:
     Veo3Prompt:
       type: object
       required:
-        - prompt
         - duration
-        - aspectRatio
-        - quality
+        - aspect
+        - resolution
+        - shots
       properties:
-        prompt:
-          type: string
-          minLength: 1
-          maxLength: 1000
         duration:
           type: number
           const: 8
-        aspectRatio:
+        aspect:
           type: string
           const: '16:9'
-        quality:
+        resolution:
           type: string
-          enum: [720p, 1080p]
-        model:
-          type: string
-          default: 'veo-3'
-        parameters:
-          type: object
-          properties:
-            temperature:
-              type: number
-              minimum: 0
-              maximum: 1
-              default: 0.7
-            topP:
-              type: number
-              minimum: 0
-              maximum: 1
-              default: 0.9
-            maxTokens:
-              type: number
-              minimum: 1
-              maximum: 1000
-              default: 500
+          enum: ['720p', '1080p']
+        shots:
+          type: array
+          items:
+            type: object
+            properties:
+              duration:
+                type: number
+              description:
+                type: string
+              camera:
+                type: string
 
     JobStatus:
       type: object
@@ -851,66 +872,93 @@ components:
     BriefExport:
       type: object
       required:
-        - id
+        - digestId
         - title
-        - description
-        - category
-        - createdAt
-        - updatedAt
-        - evidence
+        - scenes
+        - evidencePack
+        - exportedAt
       properties:
-        id:
+        digestId:
           type: string
-          format: uuid
+          pattern: '^[A-Z0-9]{8}$'
         title:
           type: string
-        description:
-          type: string
-        category:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        evidence:
+        scenes:
           type: array
           items:
-            $ref: '#/components/schemas/Evidence'
+            $ref: '#/components/schemas/TextboardScene'
+        evidencePack:
+          $ref: '#/components/schemas/EvidencePack'
+        exportedAt:
+          type: string
+          format: date-time
+
+    TextboardScene:
+      type: object
+      required:
+        - role
+        - durationSec
+        - visual
+        - audio
+      properties:
+        role:
+          type: string
+          enum: [hook, development, climax]
+        durationSec:
+          type: number
+        visual:
+          type: string
+        audio:
+          type: string
 
     JSONExport:
       type: object
       required:
-        - id
-        - type
-        - version
-        - timestamp
-        - data
+        - digestId
+        - videoGenIR
+        - veo3Prompt
+        - evidencePack
+        - exportedAt
       properties:
-        id:
+        digestId:
           type: string
-          format: uuid
-        type:
-          type: string
-          const: json
-        version:
-          type: string
-        timestamp:
+          pattern: '^[A-Z0-9]{8}$'
+        videoGenIR:
+          $ref: '#/components/schemas/VideoGenIR'
+        veo3Prompt:
+          $ref: '#/components/schemas/Veo3Prompt'
+        evidencePack:
+          $ref: '#/components/schemas/EvidencePack'
+        exportedAt:
           type: string
           format: date-time
-        data:
-          type: object
-          required:
-            - vdp_min
-            - evidence
-          properties:
-            vdp_min:
-              $ref: '#/components/schemas/VDP_MIN'
-            evidence:
-              type: array
-              items:
-                $ref: '#/components/schemas/Evidence'
+    
+    VideoGenIR:
+      type: object
+      required:
+        - durationSec
+        - aspect
+        - resolution
+        - cuts
+      properties:
+        durationSec:
+          type: number
+          const: 8
+        aspect:
+          type: string
+          const: '16:9'
+        resolution:
+          type: string
+          enum: ['720p', '1080p']
+        cuts:
+          type: array
+          items:
+            type: object
+            properties:
+              timestamp:
+                type: number
+              type:
+                type: string
 
     Error:
       type: object
@@ -1021,6 +1069,7 @@ components:
             - RESOURCE_NOT_FOUND
             - UNAUTHORIZED
             - FORBIDDEN
+            - METHOD_NOT_ALLOWED
             - INTERNAL_SERVER_ERROR
           description: Application-specific error code
         fix:
@@ -1054,7 +1103,7 @@ components:
           description: When the problem occurred
         traceId:
           type: string
-          description: Unique identifier for tracing this error
+          description: Unique identifier for request tracing
 
   securitySchemes:
     ApiKeyAuth:

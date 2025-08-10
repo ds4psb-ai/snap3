@@ -54,6 +54,64 @@ Claude Code 실행 시 자동으로 이 디렉토리에서 시작:
 - **Veo3Prompt** — durationSec=8; aspect=16:9; resolution(720p|1080p); shots[2–3]
 - **QAReport** — target; pass; issues[{code;severity;fix}]
 
+### VDP (Video Data Package) 구조 — 아웃라이어 숏폼 분석 체계
+**샘플**: `/Users/ted/Desktop/co-pilot/vdp-C000888.json`, `vdp-C000889.json`
+
+> ⚠️ **개발 컨텍스트**: 현재 VDP 빅데이터 수집 중 (목표: 수백~수만개). 샘플 2개로 전체 시스템 선행 개발 중.
+> - VDP 파일 없어도 에러 당황 ❌ → Mock 데이터로 진행
+> - 실제 VDP 대량 수집 전 인터페이스/플로우 완성이 목표
+> - 나중에 실제 데이터 연결 시 자연스럽게 전환될 구조로 설계
+
+#### 1. 메타데이터 계층
+- **플랫폼 정보**: Instagram, TikTok, YouTube Shorts
+- **인게이지먼트**: view_count, like_count, comment_count, share_count
+- **비디오 오리진**: Real-Footage | AI-Generated
+- **해시태그/CTA**: 바이럴 요소 추적
+
+#### 2. 전체 분석 (overall_analysis)
+- **감정 아크**: 시작→절정→결말 감정 흐름 (예: Curiosity→Relatability→Satisfaction)
+- **청중 반응**: 
+  - overall_sentiment: "Highly Positive and Inquisitive"
+  - notable_comments: 실제 댓글 + 번역
+  - common_reactions: 주요 반응 패턴
+- **ASR/OCR 추출**:
+  - asr_transcript: 음성→텍스트 (한국어)
+  - asr_translation_en: 영어 번역
+  - ocr_text: 화면 텍스트 캡처
+- **밈 잠재력**: potential_meme_template
+- **신뢰도**: confidence scores (0.9~0.98)
+
+#### 3. 씬 분해 (scenes[])
+- **내러티브 유닛**:
+  - narrative_role: Hook | Demonstration | Problem_Solution
+  - rhetoric: storytelling, curiosity_gap, pathos
+  - comedic_device: relatability
+- **샷 디테일** (shots[]):
+  - camera: angle(eye/high), move(static/handheld), shot(CU/ECU/MS)
+  - keyframes: desc, role(start/peak/end), t_rel_shot
+  - composition: grid, notes
+- **시각적 스타일**:
+  - lighting: "Bright, natural daylight"
+  - mood_palette: ["Clean", "Modern", "Appealing"]
+  - edit_grammar: cut_speed, subtitle_style
+- **오디오 스타일**:
+  - music, tone, ambient_sound
+  - audio_events: [{event, intensity, timestamp}]
+
+#### 4. 제품/서비스 언급
+- **product_mentions[]**:
+  - name, type, category
+  - time_ranges: [[start, end]]
+  - evidence: OCR/ASR/Visual 소스
+  - confidence: high/medium/low
+
+#### VDP → Snap3 Turbo 변환 포인트
+- **Hook 추출**: scenes[0] (첫 3초 critical importance)
+- **Evidence Pack**: confidence scores + notable_comments
+- **Textboard 생성**: narrative_unit.summary → 2-4 씬 압축
+- **QA 검증**: Hook≤3s, 자막 가독성, fps/bitrate 체크
+- **9:16 crop-proxy**: 16:9 원본에서 세로 영역 메타데이터
+
 ---
 
 ## Typed Errors (taxonomy & one‑line fix)

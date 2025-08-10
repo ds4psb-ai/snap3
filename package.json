@@ -16,7 +16,11 @@
     "test:contracts": "npm run schemas:check && npm run schemas:test",
     "guard:vdp": "node scripts/check-vdp-exposure.js",
     "guard:problem-json": "node scripts/validate-problem-details.js",
-    "guards": "npm run guard:vdp && npm run guard:problem-json"
+    "guards": "npm run guard:vdp && npm run guard:problem-json",
+    "ci:media-policy": "tsx scripts/lint-media-policy.ts",
+    "ci:a11y": "tsx scripts/lint-a11y-contrast.ts",
+    "ci:vdp-guard": "tsx scripts/check-vdp-exposure.ts",
+    "ci:all": "npm run ci:media-policy && npm run ci:a11y && npm run ci:vdp-guard"
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^1.0.72",

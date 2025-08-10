@@ -49,30 +49,30 @@ function validateVeo3Constraints(): ValidationResult {
 
   // Test 2: Aspect ratio constraint
   const aspectRatioTest = {
-    name: 'AspectRatio must be const: "16:9"',
-    passed: veo3Spec.properties.aspectRatio.const === '16:9',
-    error: veo3Spec.properties.aspectRatio.const !== '16:9'
-      ? `Expected const: '16:9', got: ${veo3Spec.properties.aspectRatio.const}`
+    name: 'Aspect must be const: "16:9"',
+    passed: veo3Spec.properties.aspect?.const === '16:9',
+    error: veo3Spec.properties.aspect?.const !== '16:9'
+      ? `Expected const: '16:9', got: ${veo3Spec.properties.aspect?.const}`
       : undefined
   };
   tests.push(aspectRatioTest);
   if (!aspectRatioTest.passed && aspectRatioTest.error) errors.push(aspectRatioTest.error);
 
-  // Test 3: Quality enum
-  const expectedQualities = ['720p', '1080p'];
-  const actualQualities = veo3Spec.properties.quality.enum;
-  const qualityTest = {
-    name: 'Quality must be enum: ["720p", "1080p"]',
-    passed: JSON.stringify(actualQualities) === JSON.stringify(expectedQualities),
-    error: JSON.stringify(actualQualities) !== JSON.stringify(expectedQualities)
-      ? `Expected: ${JSON.stringify(expectedQualities)}, got: ${JSON.stringify(actualQualities)}`
+  // Test 3: Resolution enum (changed from quality)
+  const expectedResolutions = ['720p', '1080p'];
+  const actualResolutions = veo3Spec.properties.resolution?.enum;
+  const resolutionTest = {
+    name: 'Resolution must be enum: ["720p", "1080p"]',
+    passed: JSON.stringify(actualResolutions) === JSON.stringify(expectedResolutions),
+    error: JSON.stringify(actualResolutions) !== JSON.stringify(expectedResolutions)
+      ? `Expected: ${JSON.stringify(expectedResolutions)}, got: ${JSON.stringify(actualResolutions)}`
       : undefined
   };
-  tests.push(qualityTest);
-  if (!qualityTest.passed && qualityTest.error) errors.push(qualityTest.error);
+  tests.push(resolutionTest);
+  if (!resolutionTest.passed && resolutionTest.error) errors.push(resolutionTest.error);
 
   // Test 4: Required fields
-  const requiredFields = ['prompt', 'duration', 'aspectRatio', 'quality'];
+  const requiredFields = ['duration', 'aspect', 'resolution', 'shots'];
   const actualRequired = veo3Spec.required || [];
   const requiredTest = {
     name: 'Required fields check',
@@ -92,10 +92,10 @@ function validateVeo3Constraints(): ValidationResult {
   };
   try {
     const testData = {
-      prompt: 'test video generation',
       duration: 8,
-      aspectRatio: '16:9',
-      quality: '720p',
+      aspect: '16:9',
+      resolution: '720p',
+      shots: [],
     };
     VEO3_PROMPT_SCHEMA.parse(testData);
     zodValidTest.passed = true;

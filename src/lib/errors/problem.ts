@@ -63,6 +63,11 @@ export function problemResponse(
   code: ErrorCode,
   opts: Parameters<typeof buildProblemJSON>[1] = {}
 ): Response {
+  // For rate limiting codes, ensure retryAfter is set
+  if ((code === ErrorCode.RATE_LIMITED || code === ErrorCode.PROVIDER_QUOTA_EXCEEDED) && !opts.retryAfter) {
+    opts.retryAfter = ERROR_META[code].retryAfter ?? 60;
+  }
+  
   const problem = buildProblemJSON(code, opts);
   const headers = new Headers({ 
     'Content-Type': 'application/problem+json',
@@ -70,7 +75,7 @@ export function problemResponse(
   
   // Add Retry-After header for rate limiting
   if (code === ErrorCode.RATE_LIMITED || code === ErrorCode.PROVIDER_QUOTA_EXCEEDED) {
-    const retryAfter = opts.retryAfter ?? ERROR_META[code].retryAfter ?? 60;
+    const retryAfter = problem.retryAfter ?? ERROR_META[code].retryAfter ?? 60;
     headers.set('Retry-After', String(retryAfter));
   }
   
@@ -165,6 +170,17 @@ export const Problems = {
   embedDenied(url: string, reason?: string, instance?: string) {
     return problemResponse(ErrorCode.EMBED_DENIED, {
       detail: reason || `Embedding denied for URL: ${url}`,
+      instance,
+    });
+  },
+
+  methodNotAllowed(method?: string, allowed?: string[], instance?: string) {
+    return problemResponse(ErrorCode.METHOD_NOT_ALLOWED, {
+      detail: method 
+        ? `Method ${method} is not allowed for this endpoint`
+        : allowed?.length 
+          ? `Allowed methods: ${allowed.join(', ')}`
+          : undefined,
       instance,
     });
   },

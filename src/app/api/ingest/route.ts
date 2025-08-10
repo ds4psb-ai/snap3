@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { Problems } from '@/lib/errors/problem';
 
 const IngestSchema = z.object({
   type: z.enum(['url', 'text', 'upload']),
@@ -20,32 +21,31 @@ export async function POST(request: NextRequest) {
       embedCompatibility: true,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid ingest data' },
-      { status: 400 }
+    if (error instanceof z.ZodError) {
+      const violations = error.issues.map(issue => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+        code: issue.code,
+      }));
+      return Problems.validation(violations, request.url);
+    }
+    return Problems.validation(
+      [{ field: 'request', message: 'Invalid ingest data' }],
+      request.url
     );
   }
 }
 
-export async function GET() {
-  return NextResponse.json(
-    { error: 'Method not allowed' },
-    { status: 405 }
-  );
+export async function GET(request: NextRequest) {
+  return Problems.methodNotAllowed('GET', ['POST'], request.url);
 }
 
-export async function PUT() {
-  return NextResponse.json(
-    { error: 'Method not allowed' },
-    { status: 405 }
-  );
+export async function PUT(request: NextRequest) {
+  return Problems.methodNotAllowed('PUT', ['POST'], request.url);
 }
 
-export async function DELETE() {
-  return NextResponse.json(
-    { error: 'Method not allowed' },
-    { status: 405 }
-  );
+export async function DELETE(request: NextRequest) {
+  return Problems.methodNotAllowed('DELETE', ['POST'], request.url);
 }
 
 

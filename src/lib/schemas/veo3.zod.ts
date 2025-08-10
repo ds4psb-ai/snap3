@@ -1,17 +1,15 @@
 import { z } from 'zod';
 
-// Veo3Prompt Schema (8s, 16:9, 720p|1080p)
+// Updated Veo3Prompt Schema to match OpenAPI spec
 export const VEO3_PROMPT_SCHEMA = z.object({
-  prompt: z.string().min(1).max(1000),
   duration: z.literal(8), // Fixed 8 seconds
-  aspectRatio: z.literal('16:9'), // Fixed 16:9
-  quality: z.enum(['720p', '1080p']),
-  model: z.string().default('veo-3'),
-  parameters: z.object({
-    temperature: z.number().min(0).max(1).default(0.7),
-    topP: z.number().min(0).max(1).default(0.9),
-    maxTokens: z.number().min(1).max(1000).default(500),
-  }).optional(),
+  aspect: z.literal('16:9'), // Fixed 16:9
+  resolution: z.enum(['720p', '1080p']),
+  shots: z.array(z.object({
+    duration: z.number(),
+    description: z.string(),
+    camera: z.string(),
+  })),
 }).strict(); // No additional properties allowed
 
 export type Veo3Prompt = z.infer<typeof VEO3_PROMPT_SCHEMA>;
@@ -64,7 +62,3 @@ export const VEO3_JOB_SCHEMA = z.object({
 });
 
 export type Veo3Job = z.infer<typeof VEO3_JOB_SCHEMA>;
-
-
-
-

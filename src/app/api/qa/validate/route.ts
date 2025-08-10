@@ -24,8 +24,11 @@ export async function POST(request: NextRequest) {
     // Evaluate QA rules
     const report = evaluateQA(validation.data);
     
-    // If there are issues, return 422 with Problem+JSON
-    if (!report.pass) {
+    // Check if there are any MAJOR issues that should fail the QA
+    const hasMajorIssues = report.issues.some(issue => issue.severity === 'MAJOR' || issue.severity === 'ERROR');
+    
+    // If there are MAJOR issues, return 422 with Problem+JSON
+    if (hasMajorIssues) {
       const violations = report.issues.map(issue => ({
         field: issue.field || '',
         message: issue.message,
@@ -35,7 +38,7 @@ export async function POST(request: NextRequest) {
       return Problems.qaViolation(violations, request.url);
     }
     
-    // Success - return QA report
+    // Success - return QA report (may include INFO/WARN issues)
     return NextResponse.json(report, { status: 200 });
     
   } catch (error) {
@@ -47,11 +50,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
-  return NextResponse.json(
-    { error: 'Method not allowed' },
-    { status: 405 }
-  );
+export async function GET(request: NextRequest) {
+  return Problems.methodNotAllowed('GET', ['POST'], request.url);
 }
 
 

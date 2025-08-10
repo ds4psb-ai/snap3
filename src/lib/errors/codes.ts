@@ -25,6 +25,7 @@ export enum ErrorCode {
   RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
   UNAUTHORIZED = 'UNAUTHORIZED',
   FORBIDDEN = 'FORBIDDEN',
+  METHOD_NOT_ALLOWED = 'METHOD_NOT_ALLOWED',
   INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
 }
 
@@ -124,6 +125,13 @@ export const ERROR_META: Record<ErrorCode, ErrorMetadata> = {
     title: 'Access forbidden',
     fix: 'Check permissions for this resource.',
     type: 'https://api.snap3.com/problems/forbidden',
+  },
+  
+  [ErrorCode.METHOD_NOT_ALLOWED]: {
+    status: 405,
+    title: 'Method not allowed',
+    fix: 'Use a supported HTTP method for this endpoint.',
+    type: 'https://api.snap3.com/problems/method-not-allowed',
   },
   
   [ErrorCode.INTERNAL_SERVER_ERROR]: {
