@@ -4,6 +4,12 @@ import { load } from 'js-yaml';
 import { z } from 'zod';
 import path from 'path';
 import Ajv from 'ajv';
+
+interface TestResult {
+  name: string;
+  passed: boolean;
+  error?: string;
+}
 import addFormats from 'ajv-formats';
 import { VEO3_PROMPT_SCHEMA, VEO3_RESPONSE_SCHEMA, VEO3_JOB_SCHEMA } from '../src/lib/schemas/veo3.zod';
 
@@ -61,10 +67,9 @@ function validateOpenAPISchema(schemaName: string, testData: any): ValidationRes
   }
 
   // Test 1: Schema compilation
-  const compileTest = {
+  const compileTest: TestResult = {
     name: `${schemaName} schema compiles successfully`,
     passed: false,
-    error: undefined
   };
   
   try {
@@ -72,10 +77,9 @@ function validateOpenAPISchema(schemaName: string, testData: any): ValidationRes
     compileTest.passed = true;
     
     // Test 2: Schema validation with test data
-    const validationTest = {
+    const validationTest: TestResult = {
       name: `${schemaName} validates test data correctly`,
       passed: false,
-      error: undefined
     };
     
     try {
@@ -83,8 +87,9 @@ function validateOpenAPISchema(schemaName: string, testData: any): ValidationRes
       if (isValid) {
         validationTest.passed = true;
       } else {
-        validationTest.error = `Validation failed: ${ajv.errorsText(validate.errors)}`;
-        errors.push(validationTest.error);
+        const errorMessage = `Validation failed: ${ajv.errorsText(validate.errors || [])}`;
+        validationTest.error = errorMessage;
+        errors.push(errorMessage);
       }
     } catch (e) {
       validationTest.error = `Validation error: ${e}`;
@@ -163,10 +168,9 @@ function validateVeo3Constraints(): ValidationResult {
   if (!requiredTest.passed && requiredTest.error) errors.push(requiredTest.error);
 
   // Test 5: Zod schema validation with valid data
-  const zodValidTest = {
+  const zodValidTest: TestResult = {
     name: 'Zod schema accepts valid data',
     passed: false,
-    error: undefined
   };
   try {
     const testData = {
@@ -185,10 +189,9 @@ function validateVeo3Constraints(): ValidationResult {
   tests.push(zodValidTest);
 
   // Test 6: Zod schema rejects invalid duration
-  const zodInvalidDurationTest = {
+  const zodInvalidDurationTest: TestResult = {
     name: 'Zod schema rejects invalid duration',
     passed: false,
-    error: undefined
   };
   try {
     const testData = {
@@ -206,10 +209,9 @@ function validateVeo3Constraints(): ValidationResult {
   tests.push(zodInvalidDurationTest);
 
   // Test 7: Zod schema rejects invalid aspect ratio
-  const zodInvalidARTest = {
+  const zodInvalidARTest: TestResult = {
     name: 'Zod schema rejects invalid aspect ratio',
     passed: false,
-    error: undefined
   };
   try {
     const testData = {
@@ -227,10 +229,9 @@ function validateVeo3Constraints(): ValidationResult {
   tests.push(zodInvalidARTest);
 
   // Test 8: Zod schema rejects invalid quality
-  const zodInvalidQualityTest = {
+  const zodInvalidQualityTest: TestResult = {
     name: 'Zod schema rejects invalid quality',
     passed: false,
-    error: undefined
   };
   try {
     const testData = {

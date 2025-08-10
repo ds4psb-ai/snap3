@@ -181,11 +181,67 @@ export const Problems = {
   },
 };
 
-// Utility to wrap Problems in NextResponse for API routes
+// Utility to wrap Problems in NextResponse for API routes  
 export function wrapProblem(problem: Problem, status: number = 400) {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { NextResponse } = require('next/server');
   return NextResponse.json(problem, {
     status,
     headers: { 'Content-Type': 'application/problem+json' }
   });
 }
+
+// Extended Problems object with NextResponse methods for API routes
+export const ApiProblems = {
+  ...Problems,
+  
+  // Override methods to return NextResponse
+  badRequest(detail?: string, opts: { code?: string; violations?: any[] } = {}) {
+    return wrapProblem(Problems.badRequest(detail, opts), 400);
+  },
+  
+  notFound(detail?: string) {
+    return wrapProblem(Problems.notFound(detail), 404);
+  },
+  
+  validation(violations: Array<{ field: string; message: string; code?: string }>, instance?: string) {
+    return wrapProblem({...Problems.validation(violations), instance}, 400);
+  },
+  
+  methodNotAllowed(method?: string, allowed?: string[], instance?: string) {
+    return wrapProblem({...Problems.methodNotAllowed(method, allowed), instance}, 405);
+  },
+  
+  internalServerError(detail?: string) {
+    return wrapProblem(Problems.internalServerError(detail), 500);
+  },
+  
+  tooManyRequests(detail?: string, retryAfter?: number) {
+    return wrapProblem(Problems.tooManyRequests(detail, retryAfter), 429);
+  },
+  
+  // Add missing methods that API routes use
+  qaViolation(violations: Array<{ field: string; message: string; code?: string }>, instance?: string) {
+    return wrapProblem({...Problems.qaViolation(violations), instance}, 422);
+  },
+  
+  invalidDuration(actual: number, instance?: string) {
+    return wrapProblem({...Problems.invalidDuration(actual), instance}, 400);
+  },
+  
+  unsupportedAspectRatio(requested: string, instance?: string) {
+    return wrapProblem({...Problems.unsupportedAspectRatio(requested), instance}, 400);
+  },
+  
+  // Methods that don't exist in base Problems - create them
+  embedDenied(url: string, reason?: string, instance?: string) {
+    return wrapProblem({
+      type: 'https://snap3.dev/problems/embed-denied',
+      title: 'Embed Denied',
+      status: 403,
+      detail: reason || `Embedding denied for URL: ${url}`,
+      instance: instance,
+      code: ErrorCode.EMBED_DENIED,
+    }, 403);
+  },
+};

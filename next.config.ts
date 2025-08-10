@@ -13,6 +13,34 @@ const nextConfig: NextConfig = {
     ],
   },
   
+  // Next.js 15 optimizations
+  experimental: {
+    // Optimized package imports
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
+  
+  // Turbopack configuration (stable in Next.js 15)
+  turbopack: {
+    rules: {
+      '*.svg': ['@svgr/webpack'],
+    },
+  },
+  
+  // Enable strict mode for better performance
+  reactStrictMode: true,
+  
+  // Bundle analyzer
+  ...(process.env.ANALYZE === 'true' && {
+    webpack: (config: any) => {
+      config.plugins.push(
+        new (require('@next/bundle-analyzer')({
+          enabled: true,
+        }))()
+      );
+      return config;
+    },
+  }),
+  
   // Security headers for embed protection and CSP compliance
   async headers() {
     return [

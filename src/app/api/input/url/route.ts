@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Problems } from '@/lib/errors/problem';
+import { ApiProblems as Problems } from '@/lib/errors/problem';
 
 const UrlInputSchema = z.object({
   url: z.string().url('Invalid URL format'),

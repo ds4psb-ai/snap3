@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getJobQueue, getJobTracker, getJobWorker } from '@/lib/jobs/worker';
 import { JobPriority } from '@/lib/jobs/types';
-import { Problems } from '@/lib/errors/problem';
+import { ApiProblems as Problems } from '@/lib/errors/problem';
 import { AppError } from '@/lib/errors/app-error';
 import { ErrorCode } from '@/lib/errors/codes';
 
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
   const worker = getJobWorker();
   
   // Check idempotency
-  const idempotencyKey = request.headers.get('Idempotency-Key');
+  const idempotencyKey = request.headers.get('Idempotency-Key') || undefined;
   if (idempotencyKey) {
     const existingJobId = tracker.getJobByIdempotencyKey(idempotencyKey);
     if (existingJobId) {

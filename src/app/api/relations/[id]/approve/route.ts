@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Problems } from '@/lib/errors/problem';
+import { ApiProblems as Problems } from '@/lib/errors/problem';
 
 const ApprovalSchema = z.object({
   approved: z.boolean({ required_error: 'Approved field is required', invalid_type_error: 'Approved must be a boolean value' }),

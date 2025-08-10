@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createVDP } from '@/lib/db';
 import { analyzeContent } from '@/lib/llm';
-import { Problems } from '@/lib/errors/problem';
+import { ApiProblems as Problems } from '@/lib/errors/problem';
 
 const UploadSchema = z.object({
   fileName: z.string().min(1, 'File name is required'),

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandling } from '@/lib/errors/withErrorHandling';
-import { Problems } from '@/lib/errors/problem';
+import { ApiProblems as Problems } from '@/lib/errors/problem';
 import { generateBriefExport } from '@/lib/exports/brief';
 import { generateEvidencePack } from '@/lib/schemas/evidence_pack.zod';
 import { redactEvidence, loadRedactionRules } from '@/lib/evidence/redact';

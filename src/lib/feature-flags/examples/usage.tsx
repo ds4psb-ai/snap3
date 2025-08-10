@@ -170,11 +170,11 @@ function MainApp() {
   const maintenanceConfig = useFeatureFlagValue('emergency-maintenance', null);
   
   // 긴급 유지보수 모드가 활성화된 경우
-  if (maintenanceConfig) {
+  if (maintenanceConfig && typeof maintenanceConfig === 'object' && 'message' in maintenanceConfig) {
     return (
       <div className="maintenance-mode">
-        <h1>{maintenanceConfig.message}</h1>
-        <a href={maintenanceConfig.redirectUrl}>자세히 보기</a>
+        <h1>{(maintenanceConfig as any).message}</h1>
+        <a href={(maintenanceConfig as any).redirectUrl}>자세히 보기</a>
       </div>
     );
   }

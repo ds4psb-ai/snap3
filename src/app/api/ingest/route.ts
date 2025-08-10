@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Problems } from '@/lib/errors/problem';
+import { ApiProblems } from '@/lib/errors/problem';
 
 const IngestSchema = z.object({
   type: z.enum(['url', 'text', 'upload']),
@@ -27,25 +27,24 @@ export async function POST(request: NextRequest) {
         message: issue.message,
         code: issue.code,
       }));
-      return Problems.validation(violations, request.url);
+      return ApiProblems.validation(violations);
     }
-    return Problems.validation(
-      [{ field: 'request', message: 'Invalid ingest data' }],
-      request.url
-    );
+    return ApiProblems.validation([
+      { field: 'request', message: 'Invalid ingest data' }
+    ]);
   }
 }
 
-export async function GET(request: NextRequest) {
-  return Problems.methodNotAllowed('GET', ['POST'], request.url);
+export async function GET() {
+  return ApiProblems.methodNotAllowed('GET', ['POST']);
 }
 
-export async function PUT(request: NextRequest) {
-  return Problems.methodNotAllowed('PUT', ['POST'], request.url);
+export async function PUT() {
+  return ApiProblems.methodNotAllowed('PUT', ['POST']);
 }
 
-export async function DELETE(request: NextRequest) {
-  return Problems.methodNotAllowed('DELETE', ['POST'], request.url);
+export async function DELETE() {
+  return ApiProblems.methodNotAllowed('DELETE', ['POST']);
 }
 
 

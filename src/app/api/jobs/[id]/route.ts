@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getJobQueue, getJobTracker } from '@/lib/jobs/worker';
-import { Problems } from '@/lib/errors/problem';
+import { ApiProblems as Problems } from '@/lib/errors/problem';
 import { JobStatus } from '@/lib/jobs/types';
 
 export async function GET(

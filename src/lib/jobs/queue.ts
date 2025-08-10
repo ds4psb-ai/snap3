@@ -45,7 +45,7 @@ export class JobQueue {
     }
 
     // Check per-request limit
-    if (params.requestId) {
+    if (params.requestId && this.config.rateLimit?.perRequest) {
       const requestJobs = this.requestJobs.get(params.requestId) ?? [];
       if (requestJobs.length >= this.config.rateLimit.perRequest) {
         throw new AppError(ErrorCode.RATE_LIMITED, {
@@ -61,12 +61,12 @@ export class JobQueue {
     const windowKey = 'global';
     const window = this.rateLimitWindow.get(windowKey) ?? [];
     
-    if (window.length >= this.config.rateLimit.perMinute) {
+    if (this.config.rateLimit?.perMinute && window.length >= this.config.rateLimit.perMinute) {
       const oldestTimestamp = window[0];
       const retryAfter = Math.ceil((oldestTimestamp + 60000 - now) / 1000);
       
       throw new AppError(ErrorCode.RATE_LIMITED, {
-        detail: `Rate limit exceeded (${this.config.rateLimit.perMinute} jobs per minute)`,
+        detail: `Rate limit exceeded (${this.config.rateLimit?.perMinute} jobs per minute)`,
         retryAfter,
       });
     }

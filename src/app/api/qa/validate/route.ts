@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { evaluateQA } from '@/lib/qa/validator';
 import { QAInputSchema } from '@/lib/schemas/qa.zod';
-import { Problems } from '@/lib/errors/problem';
+import { ApiProblems as Problems } from '@/lib/errors/problem';
 
 export async function POST(request: NextRequest) {
   try {

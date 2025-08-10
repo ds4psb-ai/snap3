@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Problems } from '@/lib/errors/problem';
+import { ApiProblems as Problems } from '@/lib/errors/problem';
 import { VEO3_PROMPT_SCHEMA } from '@/lib/schemas/veo3.zod';
 
 export async function POST(request: NextRequest) {

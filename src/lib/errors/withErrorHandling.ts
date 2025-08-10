@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Problems } from './problem';
+import { ApiProblems as Problems } from './problem';
 import { ZodError } from 'zod';
 import { AppError } from './app-error';
 
@@ -16,31 +16,21 @@ export function withErrorHandling(handler: RouteHandler): RouteHandler {
       console.error('API route error:', error);
 
       if (error instanceof ZodError) {
-        return NextResponse.json(
-          Problems.badRequest({
-            detail: 'Validation failed',
-            violations: error.errors.map(err => ({
-              field: err.path.join('.'),
-              message: err.message,
-            })),
-          }),
-          { status: 400 }
-        );
+        const violations = error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message,
+        }));
+        return Problems.validation(violations);
       }
 
       if (error instanceof AppError) {
         return NextResponse.json(
-          Problems[error.type](error.message),
-          { status: error.statusCode }
+          error.toProblemDetails(),
+          { status: error.status }
         );
       }
 
-      return NextResponse.json(
-        Problems.internalServerError({
-          detail: 'An unexpected error occurred',
-        }),
-        { status: 500 }
-      );
+      return Problems.internalServerError('An unexpected error occurred');
     }
   };
 }
