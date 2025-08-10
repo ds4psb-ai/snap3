@@ -83,7 +83,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       payload: validatedData,
       priority: JobPriority.NORMAL,
       requestId,
-      idempotencyKey,
+      idempotencyKey: idempotencyKey || undefined,
       metadata: {
         userAgent: request.headers.get('User-Agent') || undefined,
         ip: (request.headers.get('X-Forwarded-For') ?? request.headers.get('X-Real-IP')) || undefined,
