@@ -1,0 +1,53 @@
+---
+description: Standardize API errors with RFC 9457 Problem Details + our typed error taxonomy.
+globs:
+  - "src/app/api/**/route.ts"
+  - "src/lib/errors/**"
+  - "openapi/**"
+  - "schemas/**"
+alwaysApply: false
+---
+## Error shape — RFC 9457 (application/problem+json)
+All API errors MUST follow Problem Details (RFC 9457). Base fields:
+- type (URI), title, status, detail, instance
+- extensions: `code` (one of our enum), `fix` (one-line fix), optional `retryAfterSec`, `violations[]`
+
+**Do:**
+- Return Content-Type: application/problem+json
+- Map `code` → canonical HTTP status (see below)
+- For 429, set `Retry-After` header and `retryAfterSec` extension.
+
+**Don’t:**
+- Throw raw strings or ad-hoc JSON.
+- Mix multiple formats across routes.
+
+## Typed error taxonomy + suggested status
+- UNSUPPORTED_AR_FOR_PREVIEW → 422 Unprocessable Content (Fix: render 16:9; return crop-proxy or switch AR)
+- INVALID_DURATION → 422 (Fix: durationSec must be 8)
+- MISSING_FIRST_FRAME → 400 (Fix: upload first-frame or product image, then recompile)
+- PROVIDER_QUOTA_EXCEEDED → 429 (Fix: honor Retry-After; downscale batch)
+- RATE_LIMITED → 429 (Fix: backoff per headers)
+- PROVIDER_POLICY_BLOCKED → 403 (Fix: remove flagged params and resubmit)
+- EMBED_DENIED → 403 (Fix: use official embeds only; link out)
+- QA_RULE_VIOLATION → 422 (Fix: Hook ≤3s, safezones, fps/bitrate; re-run QA)
+
+## OpenAPI + Schema
+- OpenAPI 3.1: declare `application/problem+json` schema under components.
+- JSON Schema (2020-12): include base Problem Details + `code`, `fix`, and per-route constraints.
+
+## Example
+HTTP/1.1 422 Unprocessable Content
+Content-Type: application/problem+json
+{
+  "type": "https://docs.example.com/problems/UNSUPPORTED_AR_FOR_PREVIEW",
+  "title": "Preview aspect ratio not supported",
+  "status": 422,
+  "code": "UNSUPPORTED_AR_FOR_PREVIEW",
+  "detail": "Requested 9:16. Preview only supports 16:9.",
+  "fix": "Render 16:9; return crop-proxy metadata or switch AR.",
+  "instance": "/api/compile/veo3",
+  "violations": [{ "path": "/aspectRatio", "expected": "16:9" }]
+}
+
+## Gate
+- Tests must fail if non-compliant (wrong media type, missing fields, unknown `code`).

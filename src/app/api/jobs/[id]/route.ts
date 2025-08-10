@@ -1,41 +1,83 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getJobQueue, getJobTracker } from '@/lib/jobs/worker';
+import { withErrorHandling } from '@/middleware/error-handler';
+import { Problems } from '@/lib/errors/problem';
+import { JobStatus } from '@/lib/jobs/types';
 
-export async function GET(
+export const GET = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
-) {
-  try {
-    const { id } = params;
-    
-    // TODO: Implement job status checking
-    // Mock job status for now
-    const jobStatus = {
-      id,
-      status: 'completed', // 'pending' | 'processing' | 'completed' | 'failed'
-      progress: 100,
-      result: {
-        previewUrl: 'https://example.com/preview.mp4',
-        duration: 8,
-        aspectRatio: '16:9',
-        quality: '720p',
-      },
-      createdAt: new Date().toISOString(),
-      completedAt: new Date().toISOString(),
-    };
-    
-    return NextResponse.json(jobStatus);
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Job not found' },
-      { status: 404 }
-    );
+) => {
+  const { id } = params;
+  
+  // Get job from queue
+  const queue = getJobQueue();
+  const tracker = getJobTracker();
+  const job = queue.getJob(id);
+  
+  if (!job) {
+    return Problems.notFound(`Job ${id}`, request.url);
   }
-}
+  
+  // Build response based on job status
+  const response: Record<string, any> = {
+    id: job.id,
+    type: job.type,
+    status: job.status,
+    progress: job.progress,
+    createdAt: new Date(job.createdAt).toISOString(),
+    updatedAt: new Date(job.updatedAt).toISOString(),
+  };
+  
+  // Add status-specific fields
+  if (job.startedAt) {
+    response.startedAt = new Date(job.startedAt).toISOString();
+  }
+  
+  if (job.completedAt) {
+    response.completedAt = new Date(job.completedAt).toISOString();
+  }
+  
+  if (job.status === JobStatus.COMPLETED && job.result) {
+    response.result = job.result;
+  }
+  
+  if (job.status === JobStatus.FAILED && job.error) {
+    response.error = job.error;
+  }
+  
+  // Add job history if available
+  const history = tracker.getJobHistory(id);
+  if (history.length > 0) {
+    response.history = history.map(h => ({
+      from: h.from,
+      to: h.to,
+      timestamp: new Date(h.timestamp).toISOString(),
+    }));
+  }
+  
+  // Add retry information for failed jobs
+  if (job.status === JobStatus.FAILED && job.error?.retryAfter) {
+    const retryAt = job.updatedAt + (job.error.retryAfter * 1000);
+    response.retryAt = new Date(retryAt).toISOString();
+  }
+  
+  // Add ETA for processing jobs
+  if (job.status === JobStatus.PROCESSING) {
+    const stats = queue.getStats();
+    if (stats.avgProcessingTime) {
+      const eta = job.startedAt! + stats.avgProcessingTime;
+      response.estimatedCompletionAt = new Date(eta).toISOString();
+    }
+  }
+  
+  return NextResponse.json(response);
+});
 
 export async function POST() {
-  return NextResponse.json(
-    { error: 'Method not allowed' },
-    { status: 405 }
-  );
+  return Problems.notFound('Endpoint', '/api/jobs/[id]');
 }
+
+
+
 

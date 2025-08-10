@@ -1,0 +1,15 @@
+{
+  "defaultMode": "plan",
+  "projectSettings": {
+    "preferPlanMode": true,
+    "autoEnterPlanMode": true
+  },
+  "description": "Snap3 project - Plan Mode by default",
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)"
+    ]
+  }
+}

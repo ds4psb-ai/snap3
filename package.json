@@ -10,7 +10,10 @@
     "test": "jest",
     "type-check": "tsc --noEmit",
     "validate-schemas": "node scripts/validate-schemas.js",
-    "qa": "npm run lint && npm run type-check"
+    "qa": "npm run lint && npm run type-check",
+    "schemas:check": "tsx scripts/validate-schemas.ts",
+    "schemas:test": "jest src/__tests__/contracts --coverage",
+    "test:contracts": "npm run schemas:check && npm run schemas:test"
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^1.0.72",
@@ -54,6 +57,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@modelcontextprotocol/server-filesystem": "^2025.7.29",
     "@tailwindcss/typography": "^0.5.10",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
@@ -66,10 +70,13 @@
     "eslint-config-next": "15.1.0",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
+    "js-yaml": "^4.1.0",
     "postcss": "^8",
     "tailwind-merge": "^2.5.2",
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
+    "ts-jest": "^29.1.2",
+    "tsx": "^4.7.0",
     "typescript": "^5"
   }
 }

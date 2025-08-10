@@ -60,9 +60,9 @@ paths:
         '400':
           description: Invalid ingest data
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/Problem'
         '405':
           description: Method not allowed
 
@@ -109,6 +109,10 @@ paths:
                     $ref: '#/components/schemas/EvidencePack'
         '400':
           description: Invalid turbo request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         '405':
           description: Method not allowed
 
@@ -148,20 +152,71 @@ paths:
                     type: string
                     enum: [compiled]
         '400':
-          description: Invalid Veo3 prompt
+          description: Bad Request
           content:
-            application/json:
+            application/problem+json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/InvalidDurationError'
-                  - $ref: '#/components/schemas/UnsupportedAspectRatioError'
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Unprocessable Content
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                invalidDuration:
+                  value:
+                    type: 'https://api.snap3.com/problems/invalid-duration'
+                    title: 'Preview duration must be 8 seconds'
+                    status: 422
+                    code: 'INVALID_DURATION'
+                    detail: 'Duration must be exactly 8 seconds, got 10'
+                    fix: 'Set duration to exactly 8.0 seconds and re-validate.'
+                unsupportedAspectRatio:
+                  value:
+                    type: 'https://api.snap3.com/problems/unsupported-ar'
+                    title: 'Preview aspect ratio not supported'
+                    status: 422
+                    code: 'UNSUPPORTED_AR_FOR_PREVIEW'
+                    detail: 'Requested 9:16 aspect ratio, but preview only supports 16:9'
+                    fix: 'Render 16:9; return crop-proxy metadata or switch AR.'
+        '429':
+          description: Too Many Requests
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         '405':
           description: Method not allowed
 
   /preview/veo:
     post:
       summary: Create preview job
-      description: Create async preview job, returns 202 Accepted
+      description: Create async preview job, returns 202 Accepted with Location header
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Unique key for idempotent requests
+          schema:
+            type: string
+        - name: X-Request-Id
+          in: header
+          required: false
+          description: Request ID for tracking and rate limiting
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -178,38 +233,82 @@ paths:
                 veo3Id:
                   type: string
                   format: uuid
+                  description: ID of the Veo3 compilation
                 prompt:
                   type: string
+                  minLength: 1
+                  maxLength: 1000
+                  description: Preview generation prompt
                 duration:
                   type: number
                   const: 8
+                  description: Preview duration (must be 8 seconds)
                 aspectRatio:
                   type: string
                   const: '16:9'
+                  description: Aspect ratio (must be 16:9)
                 quality:
                   type: string
                   enum: [720p, 1080p]
+                  description: Video quality
       responses:
         '202':
           description: Preview job accepted
+          headers:
+            Location:
+              description: URL to poll for job status
+              schema:
+                type: string
+                format: uri
           content:
             application/json:
               schema:
                 type: object
+                required:
+                  - id
+                  - status
+                  - progress
+                  - createdAt
                 properties:
-                  jobId:
+                  id:
                     type: string
-                    format: uuid
+                    description: Job ID
                   status:
                     type: string
-                    enum: [accepted]
-                  message:
+                    enum: [queued, processing, completed, failed, cancelled]
+                    description: Job status
+                  progress:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+                    description: Job progress percentage
+                  createdAt:
                     type: string
-                  pollUrl:
-                    type: string
-                    format: uri
+                    format: date-time
+                    description: Job creation timestamp
         '400':
           description: Invalid preview request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: Too Many Requests
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         '405':
           description: Method not allowed
 
@@ -230,9 +329,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Veo3Job'
+                $ref: '#/components/schemas/JobStatus'
         '404':
           description: Job not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         '405':
           description: Method not allowed
 
@@ -252,23 +355,35 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    enum: [passed]
-                  message:
-                    type: string
-                  score:
-                    type: number
-                    minimum: 0
-                    maximum: 100
+                $ref: '#/components/schemas/QAReport'
         '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
           description: QA validation failed
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/QARuleViolationError'
+                $ref: '#/components/schemas/Problem'
+              examples:
+                qaViolation:
+                  value:
+                    type: 'https://api.snap3.com/problems/qa-violation'
+                    title: 'QA validation failed'
+                    status: 422
+                    code: 'QA_RULE_VIOLATION'
+                    detail: 'QA validation failed with 2 violation(s)'
+                    fix: 'Fix Hook≤3s, safezones, fps/bitrate; re-run QA.'
+                    violations:
+                      - field: 'hook'
+                        message: 'Hook must be ≤3 seconds'
+                        code: 'HOOK_TOO_LONG'
+                      - field: 'fps'
+                        message: 'FPS must be ≥30'
+                        code: 'FPS_TOO_LOW'
         '405':
           description: Method not allowed
 
@@ -292,6 +407,10 @@ paths:
                 $ref: '#/components/schemas/BriefExport'
         '404':
           description: Brief not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         '405':
           description: Method not allowed
 
@@ -315,6 +434,10 @@ paths:
                 $ref: '#/components/schemas/JSONExport'
         '404':
           description: Export not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         '405':
           description: Method not allowed
 
@@ -529,124 +652,201 @@ components:
               maximum: 1000
               default: 500
 
-    Veo3Job:
+    JobStatus:
       type: object
       required:
         - id
+        - type
         - status
         - progress
-        - prompt
         - createdAt
         - updatedAt
       properties:
         id:
           type: string
-          format: uuid
+          description: Job ID
+        type:
+          type: string
+          description: Job type
         status:
           type: string
-          enum: [pending, processing, completed, failed]
+          enum: [queued, processing, completed, failed, cancelled]
+          description: Current job status
         progress:
           type: number
           minimum: 0
           maximum: 100
-        prompt:
-          $ref: '#/components/schemas/Veo3Prompt'
+          description: Job progress percentage
+        createdAt:
+          type: string
+          format: date-time
+          description: Job creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+        startedAt:
+          type: string
+          format: date-time
+          description: Processing start timestamp
+        completedAt:
+          type: string
+          format: date-time
+          description: Completion timestamp
         result:
           type: object
+          description: Job result (for completed jobs)
           properties:
             videoUrl:
               type: string
               format: uri
+              description: Generated preview URL
             duration:
               type: number
               const: 8
+              description: Video duration
             aspectRatio:
               type: string
               const: '16:9'
+              description: Video aspect ratio
             quality:
               type: string
               enum: [720p, 1080p]
+              description: Video quality
             fps:
               type: number
               minimum: 24
               maximum: 60
+              description: Frames per second
             bitrate:
               type: number
               minimum: 1000000
+              description: Video bitrate
+            synthIdDetected:
+              type: boolean
+              description: Whether SynthID was detected
         error:
           type: object
+          description: Error details (for failed jobs)
           properties:
             code:
               type: string
+              description: Error code
             message:
               type: string
+              description: Error message
             fix:
               type: string
-        createdAt:
+              description: Suggested fix
+            retryAfter:
+              type: number
+              description: Seconds to wait before retry
+        history:
+          type: array
+          description: Job state transition history
+          items:
+            type: object
+            properties:
+              from:
+                type: string
+                enum: [queued, processing, completed, failed, cancelled]
+              to:
+                type: string
+                enum: [queued, processing, completed, failed, cancelled]
+              timestamp:
+                type: string
+                format: date-time
+        retryAt:
           type: string
           format: date-time
-        updatedAt:
+          description: When job can be retried (for failed jobs)
+        estimatedCompletionAt:
           type: string
           format: date-time
-        completedAt:
-          type: string
-          format: date-time
+          description: Estimated completion time (for processing jobs)
 
     QAValidationRequest:
       type: object
       required:
-        - previewUrl
-        - duration
-        - aspectRatio
-        - quality
-        - hooks
-        - safezones
         - fps
         - bitrate
+        - duration
+        - aspectRatio
+        - resolution
+        - target
       properties:
-        previewUrl:
-          type: string
-          format: uri
-        duration:
-          type: number
-        aspectRatio:
-          type: string
-        quality:
-          type: string
-        hooks:
-          type: array
-          items:
-            type: object
-            required:
-              - name
-              - duration
-            properties:
-              name:
-                type: string
-              duration:
-                type: number
-        safezones:
-          type: array
-          items:
-            type: object
-            required:
-              - x
-              - y
-              - width
-              - height
-            properties:
-              x:
-                type: number
-              y:
-                type: number
-              width:
-                type: number
-              height:
-                type: number
         fps:
           type: number
+          minimum: 1
+          maximum: 120
         bitrate:
           type: number
+          minimum: 1000
+        duration:
+          type: number
+          const: 8
+        aspectRatio:
+          type: string
+          const: '16:9'
+        resolution:
+          type: string
+          enum: ['720p', '1080p']
+        target:
+          type: string
+          enum: ['reels', 'tiktok', 'shorts']
+        hookSec:
+          type: number
+          minimum: 0
+          maximum: 10
+        subtitles:
+          type: array
+          items:
+            type: object
+            properties:
+              text:
+                type: string
+              fg:
+                type: string
+                pattern: '^#[0-9A-Fa-f]{6}$'
+              bg:
+                type: string
+                pattern: '^#[0-9A-Fa-f]{6}$'
+              bbox:
+                type: array
+                items:
+                  type: number
+                minItems: 4
+                maxItems: 4
+    
+    QAReport:
+      type: object
+      required:
+        - pass
+        - score
+        - issues
+      properties:
+        pass:
+          type: boolean
+        score:
+          type: number
+          minimum: 0
+          maximum: 100
+        issues:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              severity:
+                type: string
+                enum: ['MAJOR', 'WARN']
+              message:
+                type: string
+              field:
+                type: string
+              code:
+                type: string
 
     BriefExport:
       type: object
@@ -781,6 +981,81 @@ components:
           type: string
           const: failed
 
+    Problem:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - code
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference that identifies the problem type
+        title:
+          type: string
+          description: Short human-readable summary
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence
+        instance:
+          type: string
+          description: URI reference that identifies the specific occurrence
+        code:
+          type: string
+          enum:
+            - UNSUPPORTED_AR_FOR_PREVIEW
+            - INVALID_DURATION
+            - MISSING_FIRST_FRAME
+            - PROVIDER_QUOTA_EXCEEDED
+            - RATE_LIMITED
+            - PROVIDER_POLICY_BLOCKED
+            - EMBED_DENIED
+            - QA_RULE_VIOLATION
+            - VALIDATION_ERROR
+            - RESOURCE_NOT_FOUND
+            - UNAUTHORIZED
+            - FORBIDDEN
+            - INTERNAL_SERVER_ERROR
+          description: Application-specific error code
+        fix:
+          type: string
+          description: Suggested fix for the problem
+        retryAfter:
+          type: integer
+          minimum: 1
+          description: Seconds to wait before retrying
+        violations:
+          type: array
+          description: Validation violations
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                description: Field path that failed validation
+              message:
+                type: string
+                description: Description of the validation failure
+              code:
+                type: string
+                description: Validation error code
+        timestamp:
+          type: string
+          format: date-time
+          description: When the problem occurred
+        traceId:
+          type: string
+          description: Unique identifier for tracing this error
+
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
@@ -789,4 +1064,7 @@ components:
 
 security:
   - ApiKeyAuth: []
+
+
+
 

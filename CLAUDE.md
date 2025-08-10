@@ -1,5 +1,9 @@
 # CLAUDE.md — Control Tower (Plan Mode 전용)
 
+## 작업 디렉토리 설정
+Claude Code 실행 시 자동으로 이 디렉토리에서 시작:
+- Working Directory: `/Users/ted/snap3`
+
 ## 역할 / 루프
 - **역할**
   - **Claude Code**: 플래너/오케스트레이터 (Plan → Apply → Test → Review). *기본은 Plan Mode*.

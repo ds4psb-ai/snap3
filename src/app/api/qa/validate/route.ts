@@ -1,109 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-
-const QAValidationSchema = z.object({
-  previewUrl: z.string().url(),
-  duration: z.number(),
-  aspectRatio: z.string(),
-  quality: z.string(),
-  hooks: z.array(z.object({
-    name: z.string(),
-    duration: z.number(),
-  })),
-  safezones: z.array(z.object({
-    x: z.number(),
-    y: z.number(),
-    width: z.number(),
-    height: z.number(),
-  })),
-  fps: z.number(),
-  bitrate: z.number(),
-});
+import { evaluateQA } from '@/lib/qa/validator';
+import { QAInputSchema } from '@/lib/schemas/qa.zod';
+import { Problems } from '@/lib/errors/problem';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const validatedData = QAValidationSchema.parse(body);
     
-    // QA Lint Rules
-    const violations = [];
+    // Validate input with Zod
+    const validation = QAInputSchema.safeParse(body);
     
-    // Hook ≤3s validation
-    const slowHooks = validatedData.hooks.filter(hook => hook.duration > 3);
-    if (slowHooks.length > 0) {
-      violations.push({
-        rule: 'HOOK_DURATION',
-        message: 'Hook >3s detected',
-        details: slowHooks.map(h => `${h.name}: ${h.duration}s`),
-      });
+    if (!validation.success) {
+      // Map Zod errors to Problem+JSON violations
+      const violations = validation.error.issues.map(issue => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+        code: issue.code,
+      }));
+      
+      return Problems.qaViolation(violations, request.url);
     }
     
-    // Duration = 8s validation
-    if (validatedData.duration !== 8) {
-      violations.push({
-        rule: 'DURATION',
-        message: 'Duration must be exactly 8 seconds',
-        details: `Current: ${validatedData.duration}s`,
-      });
+    // Evaluate QA rules
+    const report = evaluateQA(validation.data);
+    
+    // If there are issues, return 422 with Problem+JSON
+    if (!report.pass) {
+      const violations = report.issues.map(issue => ({
+        field: issue.field || '',
+        message: issue.message,
+        code: issue.code || issue.id,
+      }));
+      
+      return Problems.qaViolation(violations, request.url);
     }
     
-    // Aspect ratio = 16:9 validation
-    if (validatedData.aspectRatio !== '16:9') {
-      violations.push({
-        rule: 'ASPECT_RATIO',
-        message: 'Aspect ratio must be 16:9',
-        details: `Current: ${validatedData.aspectRatio}`,
-      });
-    }
+    // Success - return QA report
+    return NextResponse.json(report, { status: 200 });
     
-    // Quality validation
-    if (!['720p', '1080p'].includes(validatedData.quality)) {
-      violations.push({
-        rule: 'QUALITY',
-        message: 'Quality must be 720p or 1080p',
-        details: `Current: ${validatedData.quality}`,
-      });
-    }
-    
-    // FPS validation
-    if (validatedData.fps < 24 || validatedData.fps > 60) {
-      violations.push({
-        rule: 'FPS',
-        message: 'FPS must be between 24-60',
-        details: `Current: ${validatedData.fps}fps`,
-      });
-    }
-    
-    // Bitrate validation
-    if (validatedData.bitrate < 1000000) { // 1Mbps minimum
-      violations.push({
-        rule: 'BITRATE',
-        message: 'Bitrate too low',
-        details: `Current: ${validatedData.bitrate}bps`,
-      });
-    }
-    
-    if (violations.length > 0) {
-      return NextResponse.json(
-        {
-          error: 'QA_RULE_VIOLATION',
-          message: 'QA 규칙 위반. Hook >3s 또는 Safezones 위반.',
-          violations,
-          status: 'failed',
-        },
-        { status: 400 }
-      );
-    }
-    
-    return NextResponse.json({
-      status: 'passed',
-      message: 'QA validation passed',
-      score: 100,
-    });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid QA validation data' },
-      { status: 400 }
+    // Generic error handling
+    return Problems.validation(
+      [{ field: 'request', message: 'Invalid request format' }],
+      request.url
     );
   }
 }
@@ -114,4 +53,7 @@ export async function GET() {
     { status: 405 }
   );
 }
+
+
+
 
