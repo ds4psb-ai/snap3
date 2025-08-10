@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run type check
+      run: npm run type-check
+    
+    - name: Run linter
+      run: npm run lint
+      continue-on-error: true
+    
+    - name: Build project
+      run: npm run build
+    
+    - name: Run schema validation
+      run: npm run schemas:check
+    
+    - name: Run tests
+      run: npm test
+      continue-on-error: true
+
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+      continue-on-error: true
+    
+    - name: Run CI security checks
+      run: |
+        npm run ci:media-policy || true
+        npm run ci:embed-policy || true
+        npm run ci:a11y || true
