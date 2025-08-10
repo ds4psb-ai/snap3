@@ -4,6 +4,7 @@
  */
 
 import { describe, expect, test, beforeEach } from '@jest/globals';
+import '@testing-library/jest-dom';
 import { NextRequest } from 'next/server';
 import { POST } from '../../app/api/embed-meta/route';
 import { render } from '@testing-library/react';

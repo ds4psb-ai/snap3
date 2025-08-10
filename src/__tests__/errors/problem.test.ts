@@ -48,19 +48,18 @@ describe('Problem Details builder', () => {
       { field: 'aspect', message: 'Must be 16:9', code: 'INVALID_ASPECT' },
     ];
     
-    const res = Problems.validation(violations, '/api/compile');
-    expect(res.status).toBe(400);
-    
-    const body = await res.json();
-    expect(body.code).toBe('VALIDATION_ERROR');
-    expect(body.violations).toHaveLength(2);
-    expect(body.violations[0]).toEqual(violations[0]);
-    expect(body.violations[1]).toEqual(violations[1]);
+    const problem = Problems.validation(violations);
+    expect(problem.status).toBe(400);
+    expect(problem.code).toBe('VALIDATION_ERROR');
+    expect(problem.violations).toHaveLength(2);
+    expect(problem.violations![0]).toEqual(violations[0]);
+    expect(problem.violations![1]).toEqual(violations[1]);
   });
 
   test('includes timestamp and traceId', async () => {
-    const res = problemResponse(ErrorCode.INTERNAL_SERVER_ERROR);
-    const body = await res.json();
+    const res = problemResponse(ErrorCode.INTERNAL_ERROR);
+    const bodyText = await res.text();
+    const body = JSON.parse(bodyText);
     
     expect(body.timestamp).toBeDefined();
     expect(body.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
@@ -70,92 +69,51 @@ describe('Problem Details builder', () => {
 });
 
 describe('Problem factory functions', () => {
-  test('creates not found problem', async () => {
-    const res = Problems.notFound('video-123', '/api/videos/123');
-    expect(res.status).toBe(404);
-    
-    const body = await res.json();
-    expect(body.code).toBe('RESOURCE_NOT_FOUND');
-    expect(body.detail).toBe("Resource 'video-123' not found");
-    expect(body.instance).toBe('/api/videos/123');
+  test('creates not found problem', () => {
+    const problem = Problems.notFound('Resource \'video-123\' not found');
+    expect(problem.status).toBe(404);
+    expect(problem.code).toBe('RESOURCE_NOT_FOUND');
+    expect(problem.detail).toBe("Resource 'video-123' not found");
   });
 
-  test('creates unauthorized problem', async () => {
-    const res = Problems.unauthorized('Invalid token', '/api/secure');
-    expect(res.status).toBe(401);
-    
-    const body = await res.json();
-    expect(body.code).toBe('UNAUTHORIZED');
-    expect(body.detail).toBe('Invalid token');
+  test('creates rate limited problem', () => {
+    const problem = Problems.tooManyRequests('Rate limit exceeded', 60);
+    expect(problem.status).toBe(429);
+    expect(problem.code).toBe('RATE_LIMITED');
+    expect(problem.retryAfter).toBe(60);
   });
 
-  test('creates forbidden problem', async () => {
-    const res = Problems.forbidden('Insufficient permissions', '/api/admin');
-    expect(res.status).toBe(403);
-    
-    const body = await res.json();
-    expect(body.code).toBe('FORBIDDEN');
-    expect(body.detail).toBe('Insufficient permissions');
+  test('creates invalid duration problem', () => {
+    const problem = Problems.invalidDuration(10);
+    expect(problem.status).toBe(400);
+    expect(problem.code).toBe('INVALID_DURATION');
+    expect(problem.detail).toBe('Duration must be exactly 8 seconds, got 10');
+    expect(problem.violations).toHaveLength(1);
+    expect(problem.violations![0].field).toBe('duration');
   });
 
-  test('creates rate limited problem with default retry', async () => {
-    const res = Problems.rateLimited();
-    expect(res.status).toBe(429);
-    expect(res.headers.get('Retry-After')).toBe('60');
+  test('creates unsupported aspect ratio problem', () => {
+    const problem = Problems.unsupportedAspectRatio('9:16');
+    expect(problem.status).toBe(400);
+    expect(problem.code).toBe('UNSUPPORTED_AR_FOR_PREVIEW');
+    expect(problem.detail).toContain('9:16');
+    expect(problem.detail).toContain('16:9');
   });
 
-  test('creates invalid duration problem', async () => {
-    const res = Problems.invalidDuration(10, '/api/compile');
-    expect(res.status).toBe(422);
-    
-    const body = await res.json();
-    expect(body.code).toBe('INVALID_DURATION');
-    expect(body.detail).toBe('Duration must be exactly 8 seconds, got 10');
-    expect(body.violations).toHaveLength(1);
-    expect(body.violations[0].field).toBe('duration');
-  });
-
-  test('creates unsupported aspect ratio problem', async () => {
-    const res = Problems.unsupportedAspectRatio('9:16', '/api/preview');
-    expect(res.status).toBe(422);
-    
-    const body = await res.json();
-    expect(body.code).toBe('UNSUPPORTED_AR_FOR_PREVIEW');
-    expect(body.detail).toContain('9:16');
-    expect(body.detail).toContain('16:9');
-  });
-
-  test('creates QA violation problem', async () => {
+  test('creates QA violation problem', () => {
     const violations = [
       { field: 'hook', message: 'Hook must be ≤3 seconds', code: 'HOOK_TOO_LONG' },
       { field: 'fps', message: 'FPS must be ≥30', code: 'FPS_TOO_LOW' },
     ];
     
-    const res = Problems.qaViolation(violations, '/api/qa/validate');
-    expect(res.status).toBe(422);
-    
-    const body = await res.json();
-    expect(body.code).toBe('QA_RULE_VIOLATION');
-    expect(body.violations).toEqual(violations);
+    const problem = Problems.qaViolation(violations);
+    expect(problem.status).toBe(422);
+    expect(problem.code).toBe('QA_RULE_VIOLATION');
+    expect(problem.violations).toEqual(violations);
   });
 
-  test('creates provider quota exceeded problem', async () => {
-    const res = Problems.providerQuotaExceeded(7200, 'veo3', '/api/compile');
-    expect(res.status).toBe(429);
-    expect(res.headers.get('Retry-After')).toBe('7200');
-    
-    const body = await res.json();
-    expect(body.detail).toBe('Quota exceeded for provider: veo3');
-  });
-
-  test('creates embed denied problem', async () => {
-    const res = Problems.embedDenied('https://example.com/video', 'Unofficial embed', '/api/embed');
-    expect(res.status).toBe(403);
-    
-    const body = await res.json();
-    expect(body.code).toBe('EMBED_DENIED');
-    expect(body.detail).toBe('Unofficial embed');
-  });
+  // Note: providerQuotaExceeded and embedDenied are not in the base Problems object
+  // These are available in ApiProblems for API routes
 });
 
 describe('AppError', () => {

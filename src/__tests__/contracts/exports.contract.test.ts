@@ -6,15 +6,14 @@ import { load } from 'js-yaml';
 import path from 'path';
 
 describe('Export Contract Tests', () => {
-  let ajv: Ajv;
+  let ajv: any;
   let openApiSpec: any;
 
   beforeAll(() => {
     ajv = new Ajv({ 
-      strict: false, 
       allErrors: true,
       validateFormats: false
-    });
+    } as any);
     
     const specPath = path.join(process.cwd(), 'openapi', 'openapi.yaml');
     const specContent = readFileSync(specPath, 'utf-8');

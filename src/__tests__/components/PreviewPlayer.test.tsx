@@ -147,7 +147,7 @@ describe('PreviewPlayer', () => {
 
   describe('Quality Selector', () => {
     it('shows quality selector when multiple qualities provided', () => {
-      const qualities = ['720p', '1080p'];
+      const qualities: ('720p' | '1080p')[] = ['720p', '1080p'];
       render(<PreviewPlayer {...defaultProps} qualities={qualities} defaultQuality="1080p" />);
       
       // Should show both quality buttons
@@ -170,7 +170,7 @@ describe('PreviewPlayer', () => {
     });
 
     it('updates quality selection on button click', () => {
-      const qualities = ['720p', '1080p'];
+      const qualities: ('720p' | '1080p')[] = ['720p', '1080p'];
       render(<PreviewPlayer {...defaultProps} qualities={qualities} defaultQuality="720p" />);
       
       const button1080p = screen.getByRole('button', { name: '1080p' });
@@ -229,7 +229,7 @@ describe('PreviewPlayer', () => {
     });
 
     it('has proper aria-pressed states for quality buttons', () => {
-      const qualities = ['720p', '1080p'];
+      const qualities: ('720p' | '1080p')[] = ['720p', '1080p'];
       render(<PreviewPlayer {...defaultProps} qualities={qualities} defaultQuality="720p" />);
       
       const button720p = screen.getByRole('button', { name: '720p' });
@@ -254,8 +254,8 @@ describe('PreviewPlayer', () => {
       const video = screen.getByLabelText('Preview video player');
       const container = video.closest('.relative')?.parentElement;
       
-      expect(container).toHaveStyle('width: 800px');
-      expect(container).toHaveStyle('max-width: 100%');
+      expect(container).toHaveStyle({ width: '800px' });
+      expect(container).toHaveStyle({ maxWidth: '100%' });
     });
 
     it('uses 100% width when width not specified', () => {
@@ -265,8 +265,8 @@ describe('PreviewPlayer', () => {
       const video = screen.getByLabelText('Preview video player');
       const container = video.closest('.relative')?.parentElement;
       
-      expect(container).toHaveStyle('width: 100%');
-      expect(container).toHaveStyle('max-width: 100%');
+      expect(container).toHaveStyle({ width: '100%' });
+      expect(container).toHaveStyle({ maxWidth: '100%' });
     });
   });
 });

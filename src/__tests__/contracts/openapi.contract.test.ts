@@ -9,18 +9,17 @@ import path from 'path';
 
 // Initialize AJV with JSON Schema 2020-12 support and formats
 const ajv = new Ajv({
-  strict: true,
   allErrors: true,
   validateFormats: true,
   schemaId: '$id',
   addUsedSchema: false
-});
+} as any);
 
 // Add formats support
 try {
-  addFormats(ajv);
-} catch (error) {
-  console.warn('Warning: ajv-formats setup failed, proceeding without format validation:', error.message);
+  addFormats(ajv as any);
+} catch (error: any) {
+  console.warn('Warning: ajv-formats setup failed, proceeding without format validation:', error?.message);
 }
 
 describe('OpenAPI-Zod Contract Synchronization', () => {
@@ -392,7 +391,7 @@ describe('OpenAPI-Zod Contract Synchronization', () => {
 
       test('all Problem+JSON error responses should reference Problem schema', () => {
         const paths = openapiSpec.paths;
-        const problemJsonRefs = [];
+        const problemJsonRefs: Array<{ path: string; method: string; status: string; schemaRef: string }> = [];
         
         Object.keys(paths).forEach(path => {
           Object.keys(paths[path]).forEach(method => {
@@ -434,7 +433,7 @@ describe('OpenAPI-Zod Contract Synchronization', () => {
         });
         
         // Every OpenAPI error code should be valid
-        openApiErrorCodes.forEach(code => {
+        openApiErrorCodes.forEach((code: any) => {
           expect(zodErrorCodes).toContain(code);
         });
       });

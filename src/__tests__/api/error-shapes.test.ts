@@ -3,7 +3,7 @@ import { ErrorCode } from '@/lib/errors/codes';
 
 describe('Error Shapes Tests', () => {
   describe('Common error response shapes', () => {
-    it('403 Forbidden includes all required Problem+JSON fields', () => {
+    it('403 Forbidden includes all required Problem+JSON fields', async () => {
       const response = problemResponse(ErrorCode.FORBIDDEN, {
         detail: 'Access denied to resource',
         instance: '/api/test/123',
@@ -12,7 +12,8 @@ describe('Error Shapes Tests', () => {
       expect(response.status).toBe(403);
       expect(response.headers.get('Content-Type')).toBe('application/problem+json');
 
-      const body = JSON.parse(response.body as string);
+      const bodyText = await response.text();
+      const body = JSON.parse(bodyText);
       
       // RFC 9457 required fields
       expect(body.type).toBe('https://api.snap3.com/problems/forbidden');
@@ -34,7 +35,7 @@ describe('Error Shapes Tests', () => {
       expect(body.traceId).toMatch(/^\d+-[a-z0-9]{7}$/);
     });
 
-    it('404 Not Found includes all required Problem+JSON fields', () => {
+    it('404 Not Found includes all required Problem+JSON fields', async () => {
       const response = problemResponse(ErrorCode.RESOURCE_NOT_FOUND, {
         detail: 'Brief with ID xyz not found',
         instance: '/api/export/brief/xyz',
@@ -43,7 +44,8 @@ describe('Error Shapes Tests', () => {
       expect(response.status).toBe(404);
       expect(response.headers.get('Content-Type')).toBe('application/problem+json');
 
-      const body = JSON.parse(response.body as string);
+      const bodyText = await response.text();
+      const body = JSON.parse(bodyText);
       
       expect(body.type).toBe('https://api.snap3.com/problems/not-found');
       expect(body.title).toBe('Resource not found');
@@ -56,7 +58,7 @@ describe('Error Shapes Tests', () => {
       expect(body.fix).toBe('Check resource ID and try again.');
     });
 
-    it('429 Rate Limited includes Retry-After header and field', () => {
+    it('429 Rate Limited includes Retry-After header and field', async () => {
       const retryAfter = 120;
       const response = problemResponse(ErrorCode.RATE_LIMITED, {
         retryAfter,
@@ -67,7 +69,8 @@ describe('Error Shapes Tests', () => {
       expect(response.headers.get('Content-Type')).toBe('application/problem+json');
       expect(response.headers.get('Retry-After')).toBe('120');
 
-      const body = JSON.parse(response.body as string);
+      const bodyText = await response.text();
+      const body = JSON.parse(bodyText);
       
       expect(body.type).toBe('https://api.snap3.com/problems/rate-limited');
       expect(body.title).toBe('Too many requests');
@@ -80,7 +83,7 @@ describe('Error Shapes Tests', () => {
       expect(body.fix).toBe('Backoff per headers.');
     });
 
-    it('429 Provider Quota includes default Retry-After when not specified', () => {
+    it('429 Provider Quota includes default Retry-After when not specified', async () => {
       const response = problemResponse(ErrorCode.PROVIDER_QUOTA_EXCEEDED, {
         detail: 'Veo3 API quota exceeded',
         instance: '/api/preview/veo',
@@ -90,7 +93,8 @@ describe('Error Shapes Tests', () => {
       expect(response.headers.get('Content-Type')).toBe('application/problem+json');
       expect(response.headers.get('Retry-After')).toBe('3600'); // Default from ERROR_META
 
-      const body = JSON.parse(response.body as string);
+      const bodyText = await response.text();
+      const body = JSON.parse(bodyText);
       
       expect(body.type).toBe('https://api.snap3.com/problems/provider-quota');
       expect(body.title).toBe('Provider quota exceeded');
@@ -108,24 +112,22 @@ describe('Error Shapes Tests', () => {
         { field: 'fps', message: 'Must be at least 30', code: 'LOW_FPS' },
       ];
 
-      const response = Problems.validation(violations, '/api/ingest');
+      const problem = Problems.validation(violations);
 
-      expect(response.status).toBe(400);
-      expect(response.headers.get('Content-Type')).toBe('application/problem+json');
-
-      const body = JSON.parse(response.body as string);
+      expect(problem.status).toBe(400);
+      expect(problem.code).toBe('VALIDATION_ERROR');
       
-      expect(body.type).toBe('https://api.snap3.com/problems/validation-error');
-      expect(body.title).toBe('Validation error');
-      expect(body.status).toBe(400);
-      expect(body.code).toBe('VALIDATION_ERROR');
-      expect(body.violations).toEqual(violations);
-      expect(body.detail).toBe('Validation failed for 2 field(s)');
-      expect(body.timestamp).toBeDefined();
-      expect(body.traceId).toBeDefined();
+      expect(problem.type).toBe('https://api.snap3.com/problems/validation-error');
+      expect(problem.title).toBe('Validation error');
+      expect(problem.status).toBe(400);
+      expect(problem.code).toBe('VALIDATION_ERROR');
+      expect(problem.violations).toEqual(violations);
+      expect(problem.detail).toBe('Validation failed for 2 field(s)');
+      expect(problem.timestamp).toBeDefined();
+      expect(problem.traceId).toBeDefined();
     });
 
-    it('422 QA Violation includes violations and custom detail', () => {
+    it('422 QA Violation includes violations and custom detail', async () => {
       const violations = [
         { field: 'hook', message: 'Hook must be ≤3s', code: 'HOOK_TOO_LONG' },
         { field: 'safezones', message: 'Content outside safe zones', code: 'SAFEZONE_VIOLATION' },
@@ -140,7 +142,8 @@ describe('Error Shapes Tests', () => {
       expect(response.status).toBe(422);
       expect(response.headers.get('Content-Type')).toBe('application/problem+json');
 
-      const body = JSON.parse(response.body as string);
+      const bodyText = await response.text();
+      const body = JSON.parse(bodyText);
       
       expect(body.type).toBe('https://api.snap3.com/problems/qa-violation');
       expect(body.title).toBe('QA validation failed');
@@ -155,7 +158,7 @@ describe('Error Shapes Tests', () => {
   });
 
   describe('Problem response consistency', () => {
-    it('all Problem responses have timestamp in ISO 8601 format', () => {
+    it('all Problem responses have timestamp in ISO 8601 format', async () => {
       const errorCodes = [
         ErrorCode.VALIDATION_ERROR,
         ErrorCode.UNAUTHORIZED,
@@ -164,22 +167,24 @@ describe('Error Shapes Tests', () => {
         ErrorCode.RATE_LIMITED,
       ];
 
-      errorCodes.forEach(code => {
+      for (const code of errorCodes) {
         const response = problemResponse(code);
-        const body = JSON.parse(response.body as string);
+        const bodyText = await response.text();
+        const body = JSON.parse(bodyText);
         
         expect(body.timestamp).toBeDefined();
         expect(() => new Date(body.timestamp)).not.toThrow();
         expect(new Date(body.timestamp).toISOString()).toBe(body.timestamp);
-      });
+      }
     });
 
-    it('all Problem responses have unique traceId', () => {
+    it('all Problem responses have unique traceId', async () => {
       const traceIds = new Set<string>();
       
       for (let i = 0; i < 10; i++) {
         const response = problemResponse(ErrorCode.VALIDATION_ERROR);
-        const body = JSON.parse(response.body as string);
+        const bodyText = await response.text();
+        const body = JSON.parse(bodyText);
         
         expect(body.traceId).toBeDefined();
         expect(traceIds.has(body.traceId)).toBe(false);
