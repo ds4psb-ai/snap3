@@ -140,7 +140,8 @@ function extractAwsError(error: any) {
       code === 'Throttling' ||
       code === 'ThrottlingException' ||
       code === 'TooManyRequests' ||
-      code === 'RequestThrottled',
+      code === 'RequestThrottled' ||
+      statusCode === 429,
     isNotFoundError:
       code === 'NoSuchKey' ||
       code === 'NoSuchBucket' ||
@@ -162,7 +163,7 @@ function extractAwsError(error: any) {
  */
 function extractGcpError(error: any) {
   const code = error?.code || error?.errors?.[0]?.reason;
-  const statusCode = error?.code || error?.response?.status;
+  const statusCode = error?.statusCode || error?.response?.status;
   const message = error?.message || '';
 
   return {
@@ -213,9 +214,8 @@ function extractAzureError(error: any) {
       code === 'AuthorizationPermissionMismatch' ||
       code === 'Forbidden',
     isRateLimitError:
-      code === 'ServerBusy' ||
       code === 'TooManyRequests' ||
-      statusCode === 429,
+      (statusCode === 429 && code !== 'ServerBusy'),
     isNotFoundError:
       code === 'BlobNotFound' ||
       code === 'ContainerNotFound' ||
