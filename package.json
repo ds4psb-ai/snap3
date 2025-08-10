@@ -13,7 +13,10 @@
     "qa": "npm run lint && npm run type-check",
     "schemas:check": "tsx scripts/validate-schemas.ts",
     "schemas:test": "jest src/__tests__/contracts --coverage",
-    "test:contracts": "npm run schemas:check && npm run schemas:test"
+    "test:contracts": "npm run schemas:check && npm run schemas:test",
+    "guard:vdp": "node scripts/check-vdp-exposure.js",
+    "guard:problem-json": "node scripts/validate-problem-details.js",
+    "guards": "npm run guard:vdp && npm run guard:problem-json"
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^1.0.72",

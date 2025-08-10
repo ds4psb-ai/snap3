@@ -1,66 +1,90 @@
-name: CI
+name: CI Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
-# 동일 브랜치/PR에서 새 푸시가 오면 기존 실행을 취소 (러너 절약)
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  tests:
+  test:
+    name: Unit Tests
     runs-on: ubuntu-latest
-    name: Tests
     steps:
       - uses: actions/checkout@v4
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
           
       - name: Install dependencies
         run: npm ci
         
       - name: Run tests
-        run: npm test
+        run: npm test -- --reporters=default
         
-      - name: Run type check
-        run: npm run type-check || npx tsc --noEmit
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
 
   schemas:
-    runs-on: ubuntu-latest
     name: Schema Validation
+    runs-on: ubuntu-latest
+    needs: test
     steps:
       - uses: actions/checkout@v4
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
           
       - name: Install dependencies
         run: npm ci
         
       - name: Validate schemas
-        run: npm run validate-schemas || echo "Schema validation passed"
+        run: npm run schemas:check
 
-  qa:
+  contracts:
+    name: Contract Tests
     runs-on: ubuntu-latest
-    name: QA Checks
+    needs: schemas
     steps:
       - uses: actions/checkout@v4
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run contract tests
+        run: npm run test:contracts
+
+  qa:
+    name: QA & Security Guards
+    runs-on: ubuntu-latest
+    needs: contracts
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
           cache: 'npm'
           
       - name: Install dependencies
@@ -69,8 +93,11 @@ jobs:
       - name: Run linting
         run: npm run lint
         
-      - name: Run QA checks
-        run: npm run qa || echo "QA checks passed"
+      - name: Run type check
+        run: npm run type-check
         
-      - name: Check build
-        run: npm run build
+      - name: Check VDP exposure
+        run: node scripts/check-vdp-exposure.js
+        
+      - name: Validate Problem+JSON
+        run: node scripts/validate-problem-details.js
