@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --port 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -84,6 +84,7 @@
     "tailwindcss-animate": "^1.0.7",
     "ts-jest": "^29.1.2",
     "tsx": "^4.7.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "web-streams-polyfill": "^4.1.0"
   }
 }

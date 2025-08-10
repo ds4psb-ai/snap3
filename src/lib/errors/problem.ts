@@ -94,8 +94,61 @@ function generateTraceId(): string {
 
 /**
  * Factory functions for common problems
+ * These return plain objects for use with NextResponse.json()
  */
 export const Problems = {
+  // Generic error helpers returning plain objects
+  badRequest(detail?: string, opts: { code?: string; violations?: any[] } = {}) {
+    return {
+      type: 'about:blank',
+      title: 'Bad Request',
+      status: 400,
+      code: opts.code || 'BAD_REQUEST',
+      detail,
+      ...opts,
+    };
+  },
+
+  notFound(detail?: string) {
+    return {
+      type: 'about:blank',
+      title: 'Not Found',
+      status: 404,
+      code: 'NOT_FOUND',
+      detail,
+    };
+  },
+
+  internalServerError(detail?: string) {
+    return {
+      type: 'about:blank',
+      title: 'Internal Server Error',
+      status: 500,
+      detail,
+    };
+  },
+
+  tooManyRequests(detail?: string, retryAfter?: number) {
+    return {
+      type: 'about:blank',
+      title: 'Too Many Requests',
+      status: 429,
+      detail,
+      ...(retryAfter && { retryAfter }),
+    };
+  },
+
+  fromAppError(error: any) {
+    return {
+      type: 'about:blank',
+      title: error.message || 'Application Error',
+      status: error.statusCode || 500,
+      detail: error.detail || error.message,
+      code: error.code,
+    };
+  },
+
+  // Response-based helpers (existing code)
   validation(violations: Array<{ field: string; message: string; code?: string }>, instance?: string) {
     return problemResponse(ErrorCode.VALIDATION_ERROR, {
       detail: `Validation failed for ${violations.length} field(s)`,
@@ -104,7 +157,7 @@ export const Problems = {
     });
   },
 
-  notFound(resource?: string, instance?: string) {
+  notFoundResponse(resource?: string, instance?: string) {
     return problemResponse(ErrorCode.RESOURCE_NOT_FOUND, {
       detail: resource ? `Resource '${resource}' not found` : undefined,
       instance,

@@ -1,5 +1,17 @@
 import '@testing-library/jest-dom'
 
+// Add Web Streams API polyfill for streaming tests
+if (!globalThis.ReadableStream) {
+  require('web-streams-polyfill/polyfill');
+}
+
+// Add TextEncoder/TextDecoder polyfill for streaming tests
+if (!globalThis.TextEncoder || !globalThis.TextDecoder) {
+  const { TextEncoder, TextDecoder } = require('util');
+  globalThis.TextEncoder = TextEncoder;
+  globalThis.TextDecoder = TextDecoder;
+}
+
 // Polyfill for Response and Headers in Node environment
 if (typeof global.Response === 'undefined') {
   global.Response = class Response {
@@ -51,6 +63,15 @@ if (typeof global.Headers === 'undefined') {
       Object.entries(this._headers).forEach(([key, value]) => {
         callback(value, key, this);
       });
+    }
+    
+    append(name, value) {
+      const existing = this._headers[name.toLowerCase()];
+      if (existing) {
+        this._headers[name.toLowerCase()] = existing + ', ' + value;
+      } else {
+        this._headers[name.toLowerCase()] = value;
+      }
     }
   };
 }
@@ -109,29 +130,66 @@ process.env.SUPABASE_URL = 'https://test.supabase.co'
 process.env.SUPABASE_ANON_KEY = 'test-anon-key'
 
 // Mock Next.js server components
-jest.mock('next/server', () => ({
-  NextRequest: class {
-    constructor(url, init = {}) {
-      this._url = url;
-      this.method = init.method || 'GET';
-      this.headers = new Headers(init.headers);
-      this.body = init.body;
+jest.mock('next/server', () => {
+  class MockNextResponse extends Response {
+    constructor(body, init = {}) {
+      super(body, init);
+      
+      // Add headers.set method that returns this
+      const originalSet = this.headers.set.bind(this.headers);
+      this.headers.set = (name, value) => {
+        originalSet(name, value);
+        return this;
+      };
     }
     
-    get url() {
-      return this._url;
-    }
-    
-    async json() {
-      return JSON.parse(this.body);
-    }
-  },
-  NextResponse: {
-    json: (body, init) => {
-      return new Response(JSON.stringify(body), {
+    static json(body, init) {
+      // Let init.headers override default content-type  
+      const headers = {};
+      
+      // Set default content-type first
+      headers['content-type'] = 'application/json';
+      
+      // Override with init headers if provided
+      if (init?.headers) {
+        Object.entries(init.headers).forEach(([key, value]) => {
+          headers[key.toLowerCase()] = value;
+        });
+      }
+      
+      const response = new Response(JSON.stringify(body), {
         status: init?.status || 200,
-        headers: { 'content-type': 'application/json' }
+        headers
       });
+      
+      // Add headers.set method for our tests
+      const originalSet = response.headers.set.bind(response.headers);
+      response.headers.set = (name, value) => {
+        originalSet(name, value);
+        return response;
+      };
+      
+      return response;
+    }
+  }
+
+  return {
+    NextRequest: class {
+      constructor(url, init = {}) {
+        this._url = url;
+        this.method = init.method || 'GET';
+        this.headers = new Headers(init.headers);
+        this.body = init.body;
+      }
+      
+      get url() {
+        return this._url;
+      }
+      
+      async json() {
+        return JSON.parse(this.body);
+      }
     },
-  },
-}))
+    NextResponse: MockNextResponse,
+  };
+})
