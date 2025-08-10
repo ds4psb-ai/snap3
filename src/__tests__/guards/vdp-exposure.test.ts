@@ -175,7 +175,7 @@ describe('VDP Exposure Guards', () => {
 
 // Helper functions
 function checkVDPExposure(code: string, filePath: string): Array<any> {
-  const violations = [];
+  const violations: any[] = [];
   
   // Skip test files and mocks
   if (filePath.includes('.test.') || filePath.includes('/mock')) {
@@ -239,7 +239,7 @@ function checkVDPExposure(code: string, filePath: string): Array<any> {
 }
 
 function checkInternalRoutes(routePaths: string[]): string[] {
-  const warnings = [];
+  const warnings: string[] = [];
   
   routePaths.forEach(path => {
     if (path.includes('/internal/')) {

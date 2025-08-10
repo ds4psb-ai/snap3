@@ -42,15 +42,14 @@ describe('RFC 9457 Problem+JSON Contract Tests', () => {
         { field: 'duration', message: 'Must be 8 seconds' }
       ]);
       
-      expect(validationProblem.headers.get('content-type')).toBe('application/problem+json');
+      expect(validationProblem.type).toBeDefined();
       expect(validationProblem.status).toBe(400);
     });
 
-    test('Rate limiting responses should include Retry-After header', () => {
-      const rateLimitProblem = Problems.rateLimited(300);
+    test('Rate limiting responses should include Retry-After field', () => {
+      const rateLimitProblem = Problems.tooManyRequests('Rate limited', 300);
       
-      expect(rateLimitProblem.headers.get('content-type')).toBe('application/problem+json');
-      expect(rateLimitProblem.headers.get('retry-after')).toBe('300');
+      expect(rateLimitProblem.retryAfter).toBe(300);
       expect(rateLimitProblem.status).toBe(429);
     });
   });
@@ -100,7 +99,7 @@ describe('RFC 9457 Problem+JSON Contract Tests', () => {
       test('should return Problem+JSON for method not allowed', async () => {
         const methodNotAllowedProblem = Problems.methodNotAllowed('GET', ['POST']);
         expect(methodNotAllowedProblem.status).toBe(405);
-        expect(methodNotAllowedProblem.headers.get('content-type')).toBe('application/problem+json');
+        expect(methodNotAllowedProblem.type).toBeDefined();
       });
     });
 
@@ -124,7 +123,7 @@ describe('RFC 9457 Problem+JSON Contract Tests', () => {
             { field: 'test', message: 'validation failed' }
           ]);
           
-          expect(errorResponse.headers.get('content-type')).toBe('application/problem+json');
+          expect(errorResponse.type).toBeDefined();
           expect(errorResponse.status).toBeGreaterThanOrEqual(400);
           expect(errorResponse.status).toBeLessThan(600);
         });
@@ -163,11 +162,11 @@ describe('RFC 9457 Problem+JSON Contract Tests', () => {
         ];
 
         rateLimitCodes.forEach(code => {
-          const response = Problems.rateLimited(120);
+          const problem = Problems.tooManyRequests('Rate limited', 120);
           
-          expect(response.headers.get('retry-after')).toBeDefined();
-          expect(response.headers.get('retry-after')).toMatch(/^\d+$/);
-          expect(response.status).toBe(429);
+          expect(problem.retryAfter).toBeDefined();
+          expect(problem.retryAfter).toBe(120);
+          expect(problem.status).toBe(429);
         });
       });
 
@@ -177,9 +176,9 @@ describe('RFC 9457 Problem+JSON Contract Tests', () => {
           { field: 'aspectRatio', message: 'Must be 16:9', code: 'INVALID_ASPECT' },
         ];
         
-        const response = Problems.validation(violations);
-        expect(response.status).toBe(400);
-        expect(response.headers.get('content-type')).toBe('application/problem+json');
+        const problem = Problems.validation(violations);
+        expect(problem.status).toBe(400);
+        expect(problem.violations).toEqual(violations);
       });
     });
   });

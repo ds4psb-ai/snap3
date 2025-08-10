@@ -102,7 +102,7 @@ describe('Evidence Pack Extraction', () => {
     
     // Should have virality chip for 5M views
     const viralityChip = evidencePack.evidenceChips.find(
-      chip => chip.type === 'virality'
+      (chip: any) => chip.type === 'virality'
     );
     expect(viralityChip).toBeDefined();
     expect(viralityChip?.value).toBe('High');
@@ -118,7 +118,7 @@ describe('Evidence Pack Extraction', () => {
     
     const lowEngagementPack = extractEvidencePack(lowEngagementVDP);
     const noViralityChip = lowEngagementPack.evidenceChips.find(
-      chip => chip.type === 'virality'
+      (chip: any) => chip.type === 'virality'
     );
     expect(noViralityChip).toBeUndefined();
   });

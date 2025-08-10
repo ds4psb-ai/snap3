@@ -83,7 +83,7 @@ describe('QA Rules', () => {
       const input = {
         ...baseInput,
         subtitles: [
-          { text: 'Low contrast', fg: '#777777', bg: '#999999', bbox: [0, 0, 100, 30] }
+          { text: 'Low contrast', fg: '#777777', bg: '#999999', bbox: [0, 0, 100, 30] as [number, number, number, number] }
         ]
       };
       const issues = contrastAA(input);
@@ -97,7 +97,7 @@ describe('QA Rules', () => {
       const input = {
         ...baseInput,
         subtitles: [
-          { text: 'Good contrast', fg: '#000000', bg: '#ffffff', bbox: [0, 0, 100, 30] }
+          { text: 'Good contrast', fg: '#000000', bg: '#ffffff', bbox: [0, 0, 100, 30] as [number, number, number, number] }
         ]
       };
       const issues = contrastAA(input);
@@ -108,7 +108,7 @@ describe('QA Rules', () => {
       const input = {
         ...baseInput,
         subtitles: [
-          { text: 'Edge case', fg: '#767676', bg: '#ffffff', bbox: [0, 0, 100, 30] }
+          { text: 'Edge case', fg: '#767676', bg: '#ffffff', bbox: [0, 0, 100, 30] as [number, number, number, number] }
           // This should be exactly 4.54:1, just above threshold
         ]
       };

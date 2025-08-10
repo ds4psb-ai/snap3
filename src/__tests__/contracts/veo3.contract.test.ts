@@ -104,14 +104,18 @@ describe('Veo3 Contract Tests', () => {
       const fixture = { ...VEO3_VALID_FIXTURES.minimal, prompt: '' };
       const result = VEO3_PROMPT_SCHEMA.safeParse(fixture);
       expect(result.success).toBe(false);
-      expect(result.error.errors[0].message).toContain('Prompt is required');
+      if (!result.success) {
+        expect(result.error.errors[0].message).toContain('Prompt is required');
+      }
     });
 
     test('should reject prompt over 1000 characters', () => {
       const fixture = { ...VEO3_VALID_FIXTURES.minimal, prompt: 'a'.repeat(1001) };
       const result = VEO3_PROMPT_SCHEMA.safeParse(fixture);
       expect(result.success).toBe(false);
-      expect(result.error.errors[0].message).toContain('Prompt must not exceed 1000 characters');
+      if (!result.success) {
+        expect(result.error.errors[0].message).toContain('Prompt must not exceed 1000 characters');
+      }
     });
 
     test('should accept valid prompt', () => {
@@ -125,7 +129,9 @@ describe('Veo3 Contract Tests', () => {
     test('should reject extra fields', () => {
       const result = VEO3_PROMPT_SCHEMA.safeParse(VEO3_INVALID_FIXTURES.extraFields);
       expect(result.success).toBe(false);
-      expect(result.error.errors[0].message).toContain('Unrecognized key');
+      if (!result.success) {
+        expect(result.error.errors[0].message).toContain('Unrecognized key');
+      }
     });
 
     test('should reject missing required fields', () => {
