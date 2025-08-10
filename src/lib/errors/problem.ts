@@ -3,6 +3,7 @@
  * Lightweight functional approach
  */
 
+import { NextResponse } from 'next/server';
 import { ErrorCode, ERROR_META } from './codes';
 
 export interface Problem {
@@ -57,12 +58,12 @@ export function buildProblemJSON(
 }
 
 /**
- * Create a Response with Problem Details
+ * Create a NextResponse with Problem Details
  */
 export function problemResponse(
   code: ErrorCode,
   opts: Parameters<typeof buildProblemJSON>[1] = {}
-): Response {
+): NextResponse {
   // For rate limiting codes, ensure retryAfter is set
   if ((code === ErrorCode.RATE_LIMITED || code === ErrorCode.PROVIDER_QUOTA_EXCEEDED) && !opts.retryAfter) {
     opts.retryAfter = ERROR_META[code].retryAfter ?? 60;
@@ -79,9 +80,9 @@ export function problemResponse(
     headers.set('Retry-After', String(retryAfter));
   }
   
-  return new Response(JSON.stringify(problem), { 
+  return NextResponse.json(problem, { 
     status: problem.status, 
-    headers,
+    headers: Object.fromEntries(headers.entries()),
   });
 }
 
@@ -243,5 +244,21 @@ export const ApiProblems = {
       instance: instance,
       code: ErrorCode.EMBED_DENIED,
     }, 403);
+  },
+
+  // Provider-specific errors for storage operations
+  providerQuotaExceeded(retryAfter = 3600, provider?: string, instance?: string) {
+    return wrapProblem(buildProblemJSON(ErrorCode.PROVIDER_QUOTA_EXCEEDED, {
+      detail: provider ? `Quota exceeded for provider: ${provider}` : 'Storage quota exceeded',
+      retryAfter,
+      instance,
+    }), 429);
+  },
+
+  providerPolicyBlocked(detail?: string, instance?: string) {
+    return wrapProblem(buildProblemJSON(ErrorCode.PROVIDER_POLICY_BLOCKED, {
+      detail: detail || 'Access denied by storage policy',
+      instance,
+    }), 403);
   },
 };

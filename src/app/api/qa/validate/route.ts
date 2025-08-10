@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { evaluateQA } from '@/lib/qa/validator';
 import { QAInputSchema } from '@/lib/schemas/qa.zod';
-import { ApiProblems as Problems } from '@/lib/errors/problem';
+import { Problems } from '@/lib/errors/problem';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,8 +21,8 @@ export async function POST(request: NextRequest) {
       return Problems.qaViolation(violations, request.url);
     }
     
-    // Evaluate QA rules - assert type safety after Zod validation
-    const report = evaluateQA(validation.data as any);
+    // Evaluate QA rules (validation.data has all required fields from schema)
+    const report = evaluateQA(validation.data as Parameters<typeof evaluateQA>[0]);
     
     // Check if there are any MAJOR issues that should fail the QA
     const hasMajorIssues = report.issues.some(issue => issue.severity === 'MAJOR');

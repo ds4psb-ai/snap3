@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ApiProblems as Problems } from './problem';
 import { ZodError } from 'zod';
 import { AppError } from './app-error';
+import { buildProblemJSON } from './problem';
+import { ErrorCode } from './codes';
+import { zodErrorToViolations } from './zod-to-violations';
 
 type RouteHandler = (
   req: NextRequest,
@@ -13,24 +15,44 @@ export function withErrorHandling(handler: RouteHandler): RouteHandler {
     try {
       return await handler(req, context);
     } catch (error) {
-      console.error('API route error:', error);
-
+      console.error('[withErrorHandling]', error);
+      
+      // Handle Zod validation errors
       if (error instanceof ZodError) {
-        const violations = error.errors.map(err => ({
-          field: err.path.join('.'),
-          message: err.message,
-        }));
-        return Problems.validation(violations);
+        const violations = zodErrorToViolations(error);
+        const problem = buildProblemJSON(ErrorCode.VALIDATION_ERROR, {
+          detail: `Request validation failed: ${violations.length} error(s)`,
+          violations,
+        });
+        
+        return NextResponse.json(problem, { 
+          status: 400,
+          headers: { 'Content-Type': 'application/problem+json' }
+        });
       }
-
+      
+      // Handle application errors  
       if (error instanceof AppError) {
-        return NextResponse.json(
-          error.toProblemDetails(),
-          { status: error.status }
-        );
+        const problem = buildProblemJSON(error.code, {
+          detail: error.message,
+          context: error.context,
+        });
+        
+        return NextResponse.json(problem, { 
+          status: problem.status,
+          headers: { 'Content-Type': 'application/problem+json' }
+        });
       }
+      
+      // Generic error fallback
+      const problem = buildProblemJSON(ErrorCode.INTERNAL_SERVER_ERROR, {
+        detail: 'An unexpected server error occurred',
+      });
 
-      return Problems.internalServerError('An unexpected error occurred');
+      return NextResponse.json(problem, { 
+        status: 500,
+        headers: { 'Content-Type': 'application/problem+json' }
+      });
     }
   };
 }

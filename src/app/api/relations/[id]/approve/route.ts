@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ApiProblems as Problems } from '@/lib/errors/problem';
+import { Problems } from '@/lib/errors/problem';
 
 const ApprovalSchema = z.object({
   approved: z.boolean({ required_error: 'Approved field is required', invalid_type_error: 'Approved must be a boolean value' }),
@@ -10,10 +10,10 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const instance = `/api/relations/${id}/approve`;
+  const instance = `/api/relations/${params.id}/approve`;
   
   try {
+    const { id } = await params;
     const body = await request.json();
     const validatedData = ApprovalSchema.parse(body);
     
