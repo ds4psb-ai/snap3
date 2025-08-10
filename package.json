@@ -20,7 +20,8 @@
     "ci:media-policy": "tsx scripts/lint-media-policy.ts",
     "ci:a11y": "tsx scripts/lint-a11y-contrast.ts",
     "ci:vdp-guard": "tsx scripts/check-vdp-exposure.ts",
-    "ci:all": "npm run ci:media-policy && npm run ci:a11y && npm run ci:vdp-guard"
+    "ci:all": "npm run ci:media-policy && npm run ci:a11y && npm run ci:vdp-guard",
+    "worker": "tsx src/worker/index.ts"
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^1.0.72",
@@ -42,6 +43,7 @@
     "@supabase/supabase-js": "^2.54.0",
     "@tanstack/react-query": "^5.84.2",
     "@tanstack/react-query-devtools": "^5.84.2",
+    "@types/ioredis": "^4.28.10",
     "autoprefixer": "10.4.20",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.0",
@@ -49,6 +51,7 @@
     "date-fns": "^4",
     "es-toolkit": "^1",
     "framer-motion": "^11",
+    "ioredis": "^5.7.0",
     "lucide-react": "^0.469.0",
     "next": "15.1.0",
     "next-themes": "^0.4.3",

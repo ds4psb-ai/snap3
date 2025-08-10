@@ -68,6 +68,7 @@ export interface Job {
   requestId?: string;
   idempotencyKey?: string;
   metadata?: Record<string, unknown>;
+  nextAttemptAt?: number;
 }
 
 export interface QueueConfig {
