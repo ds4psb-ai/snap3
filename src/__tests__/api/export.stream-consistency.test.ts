@@ -17,12 +17,12 @@ describe('Export Stream Consistency', () => {
     it('should apply identical redaction in stream and non-stream modes', async () => {
       // Non-stream request
       const normalReq = new NextRequest(`${baseUrl}/api/export/brief/${validId}`);
-      const normalRes = await getBriefExport(normalReq, { params: { id: validId } });
+      const normalRes = await getBriefExport(normalReq, { params: Promise.resolve({ id: validId }) });
       const normalData = await normalRes.json();
 
       // Stream request
       const streamReq = new NextRequest(`${baseUrl}/api/export/brief/${validId}?format=stream`);
-      const streamRes = await getBriefExport(streamReq, { params: { id: validId } });
+      const streamRes = await getBriefExport(streamReq, { params: Promise.resolve({ id: validId }) });
       
       // Verify headers differ appropriately
       expect(normalRes.headers.get('Cache-Control')).toBe('private, max-age=3600');
@@ -43,11 +43,11 @@ describe('Export Stream Consistency', () => {
       
       // Non-stream request
       const normalReq = new NextRequest(`${baseUrl}/api/export/brief/${validId}`);
-      await getBriefExport(normalReq, { params: { id: validId } });
+      await getBriefExport(normalReq, { params: Promise.resolve({ id: validId }) });
       
       // Stream request
       const streamReq = new NextRequest(`${baseUrl}/api/export/brief/${validId}?format=stream`);
-      await getBriefExport(streamReq, { params: { id: validId } });
+      await getBriefExport(streamReq, { params: Promise.resolve({ id: validId }) });
       
       // Check audit logs
       const auditLogs = consoleSpy.mock.calls.filter(call => call[0] === '[AUDIT]');
@@ -69,7 +69,7 @@ describe('Export Stream Consistency', () => {
     it('should return 304 Not Modified when ETag matches', async () => {
       // First request to get ETag
       const req1 = new NextRequest(`${baseUrl}/api/export/json/${validId}`);
-      const res1 = await getJsonExport(req1, { params: { id: validId } });
+      const res1 = await getJsonExport(req1, { params: Promise.resolve({ id: validId }) });
       const etag = res1.headers.get('ETag');
       
       expect(etag).toMatch(/^W\/"C0008888-[a-f0-9]{16}"$/);
@@ -80,7 +80,7 @@ describe('Export Stream Consistency', () => {
           'If-None-Match': etag!,
         },
       });
-      const res2 = await getJsonExport(req2, { params: { id: validId } });
+      const res2 = await getJsonExport(req2, { params: Promise.resolve({ id: validId }) });
       
       expect(res2.status).toBe(304);
       expect(res2.headers.get('ETag')).toBe(etag);
@@ -99,7 +99,7 @@ describe('Export Stream Consistency', () => {
           'If-None-Match': wrongEtag,
         },
       });
-      const res = await getJsonExport(req, { params: { id: validId } });
+      const res = await getJsonExport(req, { params: Promise.resolve({ id: validId }) });
       
       expect(res.status).toBe(200);
       const data = await res.json();
@@ -110,7 +110,7 @@ describe('Export Stream Consistency', () => {
     it('should not return 304 for streaming requests even with matching ETag', async () => {
       // First request to get ETag
       const req1 = new NextRequest(`${baseUrl}/api/export/brief/${validId}`);
-      const res1 = await getBriefExport(req1, { params: { id: validId } });
+      const res1 = await getBriefExport(req1, { params: Promise.resolve({ id: validId }) });
       const etag = res1.headers.get('ETag');
       
       // Stream request with If-None-Match (should ignore)
@@ -119,7 +119,7 @@ describe('Export Stream Consistency', () => {
           'If-None-Match': etag!,
         },
       });
-      const res2 = await getBriefExport(req2, { params: { id: validId } });
+      const res2 = await getBriefExport(req2, { params: Promise.resolve({ id: validId }) });
       
       expect(res2.status).toBe(200);
       expect(res2.headers.get('Cache-Control')).toBe('no-cache');
@@ -128,7 +128,7 @@ describe('Export Stream Consistency', () => {
 
     it('should use weak ETag format W/"<id>-<digest>"', async () => {
       const req = new NextRequest(`${baseUrl}/api/export/json/${validId}`);
-      const res = await getJsonExport(req, { params: { id: validId } });
+      const res = await getJsonExport(req, { params: Promise.resolve({ id: validId }) });
       const etag = res.headers.get('ETag');
       
       // Validate weak ETag format
@@ -140,7 +140,7 @@ describe('Export Stream Consistency', () => {
   describe('Header Setting Pattern Compliance', () => {
     it('should use proper NextResponse.headers.set() pattern', async () => {
       const req = new NextRequest(`${baseUrl}/api/export/json/${validId}`);
-      const res = await getJsonExport(req, { params: { id: validId } });
+      const res = await getJsonExport(req, { params: Promise.resolve({ id: validId }) });
       
       // Check that all expected headers are set
       expect(res.headers.get('X-Export-SHA256')).toBeTruthy();
@@ -154,14 +154,13 @@ describe('Export Stream Consistency', () => {
     it('should properly set Problem+JSON headers on errors', async () => {
       const invalidId = 'INVALID';
       const req = new NextRequest(`${baseUrl}/api/export/json/${invalidId}`);
-      const res = await getJsonExport(req, { params: { id: invalidId } });
+      const res = await getJsonExport(req, { params: Promise.resolve({ id: invalidId }) });
       
       expect(res.status).toBe(400);
       expect(res.headers.get('Content-Type')).toBe('application/problem+json');
       
-      // The response is already a NextResponse object, get the body properly
-      const bodyText = await res.text();
-      const problem = JSON.parse(bodyText);
+      // The response body should be a Problem+JSON object
+      const problem = await res.json();
       
       // Check for Problem Details fields
       expect(problem.type).toBeDefined();
@@ -177,7 +176,7 @@ describe('Export Stream Consistency', () => {
           'X-Rate-Limit-Test': 'true',
         },
       });
-      const res = await getBriefExport(req, { params: { id: validId } });
+      const res = await getBriefExport(req, { params: Promise.resolve({ id: validId }) });
       
       expect(res.status).toBe(429);
       expect(res.headers.get('Retry-After')).toBe('60');
@@ -188,7 +187,7 @@ describe('Export Stream Consistency', () => {
   describe('Redaction Consistency', () => {
     it('should consistently redact sensitive fields', async () => {
       const req = new NextRequest(`${baseUrl}/api/export/json/${validId}`);
-      const res = await getJsonExport(req, { params: { id: validId } });
+      const res = await getJsonExport(req, { params: Promise.resolve({ id: validId }) });
       const data = await res.json();
       
       // Verify evidence pack does not contain redacted fields
@@ -209,11 +208,11 @@ describe('Export Stream Consistency', () => {
       
       // Brief export
       const briefReq = new NextRequest(`${baseUrl}/api/export/brief/${validId}`);
-      await getBriefExport(briefReq, { params: { id: validId } });
+      await getBriefExport(briefReq, { params: Promise.resolve({ id: validId }) });
       
       // JSON export
       const jsonReq = new NextRequest(`${baseUrl}/api/export/json/${validId}`);
-      await getJsonExport(jsonReq, { params: { id: validId } });
+      await getJsonExport(jsonReq, { params: Promise.resolve({ id: validId }) });
       
       const auditLogs = consoleSpy.mock.calls.filter(call => call[0] === '[AUDIT]');
       const briefAudit = JSON.parse(auditLogs[0][1]);
