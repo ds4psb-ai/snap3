@@ -1,8 +1,34 @@
 openapi: 3.1.0
 info:
   title: Snap3 Turbo API
-  description: Snap3 Turbo briefs → Veo3 preview → QA Gate → exports E2E API
-  version: 1.0.0
+  description: |
+    Snap3 Turbo briefs → Veo3 preview → QA Gate → exports E2E API
+    
+    ## Evidence Pack v2 + Audit System
+    
+    All export endpoints now include comprehensive audit trails and data redaction:
+    
+    ### Audit Headers
+    - `X-Export-SHA256`: SHA256 hash of exported data for integrity verification
+    - `X-Export-Size`: Size of payload in bytes
+    - `X-Export-Timestamp`: Export timestamp (ISO 8601)
+    - `ETag`: Weak ETag for caching based on content hash
+    
+    ### Data Redaction
+    VDP_FULL sensitive data is automatically redacted before export:
+    - Removes: overall_analysis, asr_transcript, ocr_text, product_mentions
+    - Masks: view_count, like_count, comment_count  
+    - Strips: internal/*, debug/*, temp/*, raw/* paths
+    
+    ### Caching & ETags
+    All exports support conditional requests using ETags for bandwidth optimization.
+    
+    ### Security
+    - All exports are logged with audit trail
+    - IP addresses are masked for privacy
+    - User agents are sanitized 
+    - No VDP_FULL data ever exposed in public APIs
+  version: 2.0.0
   contact:
     name: Snap3 Team
     email: support@snap3.com
@@ -516,21 +542,73 @@ paths:
   /export/brief/{id}:
     get:
       summary: Export brief
-      description: Export brief with VDP_MIN + Evidence (VDP_FULL excluded)
+      description: Export brief with VDP_MIN + Evidence (VDP_FULL excluded) with audit trail
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: string
-            format: uuid
+            pattern: '^[A-Z0-9]{8}$'
+          description: Digest ID (8 alphanumeric characters)
+        - name: format
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [json, stream]
+            default: json
+          description: Response format (json or stream)
+        - name: If-None-Match
+          in: header
+          required: false
+          schema:
+            type: string
+          description: ETag for conditional requests
       responses:
         '200':
-          description: Brief exported
+          description: Brief exported with audit information
+          headers:
+            ETag:
+              description: Evidence digest ETag for caching
+              schema:
+                type: string
+                pattern: '^W?"[a-f0-9]{16}"$'
+            X-Export-SHA256:
+              description: SHA256 hash of the exported data
+              schema:
+                type: string
+                pattern: '^[a-f0-9]{64}$'
+            X-Export-Size:
+              description: Size of exported data in bytes
+              schema:
+                type: integer
+                minimum: 1
+            X-Export-Timestamp:
+              description: Export timestamp (ISO 8601)
+              schema:
+                type: string
+                format: date-time
+            Cache-Control:
+              description: Cache control directive
+              schema:
+                type: string
+                enum: ['private, max-age=3600', 'no-cache']
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BriefExport'
+        '304':
+          description: Not Modified (ETag match)
+          headers:
+            ETag:
+              description: Evidence digest ETag
+              schema:
+                type: string
+            Cache-Control:
+              description: Cache control directive
+              schema:
+                type: string
         '404':
           description: Brief not found
           content:
@@ -547,21 +625,75 @@ paths:
   /export/json/{id}:
     get:
       summary: Export JSON
-      description: Export JSON with VDP_MIN + Evidence (VDP_FULL excluded)
+      description: Export JSON with VDP_MIN + Evidence (VDP_FULL excluded) with audit trail
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: string
-            format: uuid
+            pattern: '^[A-Z0-9]{8}$'
+          description: Digest ID (8 alphanumeric characters)
+        - name: If-None-Match
+          in: header
+          required: false
+          schema:
+            type: string
+          description: ETag for conditional requests
       responses:
         '200':
-          description: JSON exported
+          description: JSON exported with audit information
+          headers:
+            ETag:
+              description: Evidence digest ETag for caching
+              schema:
+                type: string
+                pattern: '^W?"[a-f0-9]{16}"$'
+            X-Export-SHA256:
+              description: SHA256 hash of the exported data
+              schema:
+                type: string
+                pattern: '^[a-f0-9]{64}$'
+            X-Export-Size:
+              description: Size of exported data in bytes
+              schema:
+                type: integer
+                minimum: 1
+            X-Export-Timestamp:
+              description: Export timestamp (ISO 8601)
+              schema:
+                type: string
+                format: date-time
+            Cache-Control:
+              description: Cache control directive
+              schema:
+                type: string
+                default: 'private, max-age=3600'
+            Content-Disposition:
+              description: Attachment download hint (when artifact exists)
+              schema:
+                type: string
+                pattern: '^attachment; filename="export-[A-Z0-9]{8}.json"$'
+            X-Export-Artifact-URL:
+              description: Signed URL for export artifact (when exists)
+              schema:
+                type: string
+                format: uri
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/JSONExport'
+        '304':
+          description: Not Modified (ETag match)
+          headers:
+            ETag:
+              description: Evidence digest ETag
+              schema:
+                type: string
+            Cache-Control:
+              description: Cache control directive
+              schema:
+                type: string
         '404':
           description: Export not found
           content:
@@ -653,23 +785,21 @@ components:
         trustScore:
           type: number
           minimum: 0
-          maximum: 100
+          maximum: 1
+          description: Trust score from 0.0 to 1.0
         evidenceChips:
           type: array
           minItems: 3
           maxItems: 5
           items:
-            $ref: '#/components/schemas/EvidenceChip'
+            type: string
+          description: Key evidence points (e.g., "5.2M views", "Viral", "Verified on Instagram")
         synthIdDetected:
           type: boolean
         provenance:
-          type: object
-          properties:
-            source:
-              type: string
-            timestamp:
-              type: string
-              format: date-time
+          type: string
+          format: uri
+          description: Original source URL
     
     EvidenceChip:
       type: object
@@ -1059,7 +1189,6 @@ components:
         - scenes
         - evidence
         - evidencePack
-        - exportedAt
       properties:
         digestId:
           type: string
@@ -1076,9 +1205,6 @@ components:
             $ref: '#/components/schemas/Evidence'
         evidencePack:
           $ref: '#/components/schemas/EvidencePack'
-        exportedAt:
-          type: string
-          format: date-time
 
     TextboardScene:
       type: object
@@ -1108,22 +1234,12 @@ components:
         digestId:
           type: string
           pattern: '^[A-Z0-9]{8}$'
-        data:
-          type: object
-          required:
-            - vdp_min
-            - evidence
-          properties:
-            vdp_min:
-              $ref: '#/components/schemas/VDP_MIN'
-            evidence:
-              type: array
-              items:
-                $ref: '#/components/schemas/Evidence'
-            videoGenIR:
-              $ref: '#/components/schemas/VideoGenIR'
-            veo3Prompt:
-              $ref: '#/components/schemas/Veo3Prompt'
+        videoGenIR:
+          $ref: '#/components/schemas/VideoGenIR'
+        veo3Prompt:
+          $ref: '#/components/schemas/Veo3Prompt'
+        evidencePack:
+          $ref: '#/components/schemas/EvidencePack'
         exportedAt:
           type: string
           format: date-time

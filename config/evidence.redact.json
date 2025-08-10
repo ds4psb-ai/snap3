@@ -1,0 +1,137 @@
+[
+  {
+    "path": "/overall_analysis",
+    "strategy": "remove",
+    "description": "Remove complete overall analysis section (VDP_FULL)"
+  },
+  {
+    "path": "/overall_analysis/*",
+    "strategy": "remove", 
+    "description": "Remove any nested overall analysis fields"
+  },
+  {
+    "path": "/metadata/view_count",
+    "strategy": "mask",
+    "description": "Mask raw view count data"
+  },
+  {
+    "path": "/metadata/like_count",
+    "strategy": "mask", 
+    "description": "Mask raw like count data"
+  },
+  {
+    "path": "/metadata/comment_count",
+    "strategy": "mask",
+    "description": "Mask raw comment count data"
+  },
+  {
+    "path": "/asr_transcript",
+    "strategy": "remove",
+    "description": "Remove complete ASR transcript (VDP_FULL)"
+  },
+  {
+    "path": "/ocr_text",
+    "strategy": "remove",
+    "description": "Remove OCR extracted text (VDP_FULL)"
+  },
+  {
+    "path": "/product_mentions",
+    "strategy": "remove",
+    "description": "Remove product mention analysis (VDP_FULL)"
+  },
+  {
+    "path": "/audience_reaction",
+    "strategy": "remove",
+    "description": "Remove detailed audience reaction data (VDP_FULL)"
+  },
+  {
+    "path": "/scenes/*/shots",
+    "strategy": "remove",
+    "description": "Remove detailed shot-level analysis (VDP_FULL)"
+  },
+  {
+    "path": "/confidence/overall",
+    "strategy": "mask",
+    "description": "Mask raw confidence scores"
+  },
+  {
+    "path": "/notable_comments",
+    "strategy": "remove",
+    "description": "Remove notable comments analysis (VDP_FULL)"
+  },
+  {
+    "path": "/platform_specific",
+    "strategy": "remove",
+    "description": "Remove platform-specific internal data (VDP_FULL)"
+  },
+  {
+    "path": "/internal/*",
+    "strategy": "remove",
+    "description": "Remove any internal processing data"
+  },
+  {
+    "path": "/debug/*",
+    "strategy": "remove",
+    "description": "Remove debug information"
+  },
+  {
+    "path": "/temp/*",
+    "strategy": "remove",
+    "description": "Remove temporary processing data"
+  },
+  {
+    "path": "/raw/*",
+    "strategy": "remove",
+    "description": "Remove any raw unprocessed data"
+  },
+  {
+    "path": "/metrics/raw",
+    "strategy": "remove",
+    "description": "Remove raw metrics data"
+  },
+  {
+    "path": "/analysis/internal_notes",
+    "strategy": "remove",
+    "description": "Remove internal analysis notes"
+  },
+  {
+    "path": "*/api_key",
+    "strategy": "mask",
+    "description": "Mask any API keys in nested objects"
+  },
+  {
+    "path": "*/token",
+    "strategy": "mask", 
+    "description": "Mask any tokens in nested objects"
+  },
+  {
+    "path": "*/secret",
+    "strategy": "mask",
+    "description": "Mask any secrets in nested objects"
+  },
+  {
+    "path": "*/password",
+    "strategy": "mask",
+    "description": "Mask any passwords in nested objects"
+  },
+  {
+    "path": "/scenes/*/narrative_unit/shots/*",
+    "strategy": "remove",
+    "description": "Remove detailed shot breakdowns within narrative units"
+  },
+  {
+    "path": "/scenes/*/edit_grammar/cut_speed",
+    "strategy": "mask",
+    "description": "Mask technical editing parameters"
+  },
+  {
+    "path": "/processing_metadata",
+    "strategy": "remove",
+    "description": "Remove internal processing metadata"
+  },
+  {
+    "path": "/system_info",
+    "strategy": "remove", 
+    "description": "Remove system processing information"
+  }
+]
