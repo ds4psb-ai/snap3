@@ -25,13 +25,12 @@ export const GET = withErrorHandling(async (
   const resolvedParams = await params;
   const validation = paramsSchema.safeParse(resolvedParams);
   if (!validation.success) {
-    return NextResponse.json(
+    const res = NextResponse.json(
       Problems.badRequest('Invalid digest ID format'),
-      { 
-        status: 400,
-        headers: { 'Content-Type': 'application/problem+json' },
-      }
+      { status: 400 }
     );
+    res.headers.set('Content-Type', 'application/problem+json');
+    return res;
   }
   
   const { id } = validation.data;
@@ -39,28 +38,24 @@ export const GET = withErrorHandling(async (
   // Mock data retrieval (replace with actual DB/storage call)
   const vdpData = await fetchVDPData(id);
   if (!vdpData) {
-    return NextResponse.json(
+    const res = NextResponse.json(
       Problems.notFound(`Export not found for ID: ${id}`),
-      { 
-        status: 404,
-        headers: { 'Content-Type': 'application/problem+json' },
-      }
+      { status: 404 }
     );
+    res.headers.set('Content-Type', 'application/problem+json');
+    return res;
   }
   
   // Check rate limits (test mode)
   const rateLimitExceeded = request.headers.get('X-Rate-Limit-Test') === 'true';
   if (rateLimitExceeded) {
-    return NextResponse.json(
+    const res = NextResponse.json(
       Problems.tooManyRequests('Export rate limit exceeded', 60),
-      { 
-        status: 429,
-        headers: {
-          'Retry-After': '60',
-          'Content-Type': 'application/problem+json',
-        },
-      }
+      { status: 429 }
     );
+    res.headers.set('Retry-After', '60');
+    res.headers.set('Content-Type', 'application/problem+json');
+    return res;
   }
   
   
@@ -127,29 +122,33 @@ export const GET = withErrorHandling(async (
     
     const briefExport = generateBriefExport(vdpMin, scenes, evidencePack);
     
-    // Add title if not present
-    const exportData = {
+    // Add title if not present (exclude timestamp for consistent ETag)
+    const exportDataBase = {
       ...briefExport,
       title: `Export ${id}`,
     };
     
-    // Generate audit digest and headers
-    const digest = evidenceDigest(exportData);
+    // Generate audit digest WITHOUT timestamp for consistent ETag
+    const digest = evidenceDigest(exportDataBase);
+    
+    // Add timestamp to final export
+    const exportData = {
+      ...exportDataBase,
+      exportedAt: new Date().toISOString(),
+    };
     const headers = createExportHeaders(digest, { 
       streaming: isStreaming,
-      maxAge: isStreaming ? undefined : 3600 
+      maxAge: isStreaming ? undefined : 3600,
+      id: id // Pass ID for ETag generation
     });
     
     // Check ETag validation for non-streaming requests
     const clientETag = request.headers.get('If-None-Match');
-    if (!isStreaming && clientETag && validateETag(clientETag, digest)) {
-      return new NextResponse(null, { 
-        status: 304,
-        headers: {
-          'ETag': headers['ETag'],
-          'Cache-Control': headers['Cache-Control'],
-        },
-      });
+    if (!isStreaming && clientETag && validateETag(clientETag, digest, id)) {
+      const notModifiedRes = new NextResponse(null, { status: 304 });
+      notModifiedRes.headers.set('ETag', headers['ETag']);
+      notModifiedRes.headers.set('Cache-Control', headers['Cache-Control']);
+      return notModifiedRes;
     }
     
     // Create audit record
@@ -201,15 +200,19 @@ export const GET = withErrorHandling(async (
         },
       });
       
-      return new NextResponse(stream, {
-        headers: headers,
+      const streamRes = new NextResponse(stream);
+      Object.entries(headers).forEach(([key, value]) => {
+        streamRes.headers.set(key, value);
       });
+      return streamRes;
     }
     
     // Normal JSON response
-    return NextResponse.json(exportData, {
-      headers: headers,
+    const res = NextResponse.json(exportData);
+    Object.entries(headers).forEach(([key, value]) => {
+      res.headers.set(key, value);
     });
+    return res;
   } catch (error) {
     console.error('Brief export error:', error);
     return NextResponse.json(

@@ -21,13 +21,12 @@ export const GET = withErrorHandling(async (
   const resolvedParams = await params;
   const validation = paramsSchema.safeParse(resolvedParams);
   if (!validation.success) {
-    return NextResponse.json(
+    const res = NextResponse.json(
       Problems.badRequest('Invalid digest ID format'),
-      { 
-        status: 400,
-        headers: { 'Content-Type': 'application/problem+json' },
-      }
+      { status: 400 }
     );
+    res.headers.set('Content-Type', 'application/problem+json');
+    return res;
   }
   
   const { id } = validation.data;
@@ -36,7 +35,7 @@ export const GET = withErrorHandling(async (
   const aspectRatio = request.headers.get('X-Aspect-Ratio');
   if (aspectRatio === '9:16') {
     // Return crop-proxy metadata only
-    return NextResponse.json(
+    const res = NextResponse.json(
       {
         ...Problems.badRequest('Preview must be 16:9. Use crop-proxy for 9:16'),
         code: 'UNSUPPORTED_AR_FOR_PREVIEW',
@@ -51,35 +50,34 @@ export const GET = withErrorHandling(async (
           },
         },
       },
-      { 
-        status: 400,
-        headers: { 'Content-Type': 'application/problem+json' },
-      }
+      { status: 400 }
     );
+    res.headers.set('Content-Type', 'application/problem+json');
+    return res;
   }
   
   // Validate embed eligibility
   const embedUrl = request.headers.get('X-Embed-URL');
   if (embedUrl && !isOfficialEmbed(embedUrl)) {
-    const problemData = Problems.badRequest('Only YouTube and Vimeo embeds are allowed', {
-      code: 'EMBED_DENIED'
-    });
-    
-    const response = NextResponse.json(problemData, { status: 400 });
-    response.headers.set('Content-Type', 'application/problem+json');
-    return response;
+    const res = NextResponse.json(
+      Problems.badRequest('Only YouTube and Vimeo embeds are allowed', {
+        code: 'EMBED_DENIED'
+      }),
+      { status: 400 }
+    );
+    res.headers.set('Content-Type', 'application/problem+json');
+    return res;
   }
   
   // Fetch VDP data
   const vdpData = await fetchVDPData(id);
   if (!vdpData) {
-    return NextResponse.json(
+    const res = NextResponse.json(
       Problems.notFound(`Export not found for ID: ${id}`),
-      { 
-        status: 404,
-        headers: { 'Content-Type': 'application/problem+json' },
-      }
+      { status: 404 }
     );
+    res.headers.set('Content-Type', 'application/problem+json');
+    return res;
   }
   
   try {
@@ -111,7 +109,7 @@ export const GET = withErrorHandling(async (
     const evidencePack = generateEvidencePack(redactedVDP);
     
     // Create JSON export with VideoGenIR and Veo3Prompt
-    const jsonExport = {
+    const jsonExportBase = {
       digestId: id,
       videoGenIR: {
         durationSec: 8,
@@ -154,26 +152,29 @@ export const GET = withErrorHandling(async (
         ],
       },
       evidencePack,
-      exportedAt: new Date().toISOString(),
     };
     
-    // Generate audit digest and headers
-    const digest = evidenceDigest(jsonExport);
+    // Generate audit digest WITHOUT timestamp for consistent ETag
+    const digest = evidenceDigest(jsonExportBase);
+    
+    // Add timestamp to final export
+    const jsonExport = {
+      ...jsonExportBase,
+      exportedAt: new Date().toISOString(),
+    };
     const headers = createExportHeaders(digest, { 
       streaming: false,
-      maxAge: 3600 
+      maxAge: 3600,
+      id: id // Pass ID for ETag generation
     });
     
     // Check ETag validation for caching
     const clientETag = request.headers.get('If-None-Match');
-    if (clientETag && validateETag(clientETag, digest)) {
-      return new NextResponse(null, { 
-        status: 304,
-        headers: {
-          'ETag': headers['ETag'],
-          'Cache-Control': headers['Cache-Control'],
-        },
-      });
+    if (clientETag && validateETag(clientETag, digest, id)) {
+      const notModifiedRes = new NextResponse(null, { status: 304 });
+      notModifiedRes.headers.set('ETag', headers['ETag']);
+      notModifiedRes.headers.set('Cache-Control', headers['Cache-Control']);
+      return notModifiedRes;
     }
     
     // Create audit record
@@ -199,16 +200,19 @@ export const GET = withErrorHandling(async (
     // Generate signed URL for export artifact if exists
     const exportArtifactUrl = await getExportArtifactUrl(id);
     
-    const response = NextResponse.json(jsonExport, {
-      headers: headers,
+    const res = NextResponse.json(jsonExport);
+    
+    // Set headers using the proper pattern
+    Object.entries(headers).forEach(([key, value]) => {
+      res.headers.set(key, value);
     });
     
     // Add download hint if artifact exists
     if (exportArtifactUrl) {
-      response.headers.set('Content-Disposition', `attachment; filename="export-${id}.json"`);
-      response.headers.set('X-Export-Artifact-URL', exportArtifactUrl);
+      res.headers.set('Content-Disposition', `attachment; filename="export-${id}.json"`);
+      res.headers.set('X-Export-Artifact-URL', exportArtifactUrl);
     }
-    return response;
+    return res;
   } catch (error) {
     console.error('JSON export error:', error);
     return NextResponse.json(

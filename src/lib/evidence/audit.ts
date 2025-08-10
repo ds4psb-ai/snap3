@@ -198,24 +198,35 @@ function sanitizeUserAgent(userAgent: string): string {
 
 /**
  * Create ETag from evidence digest
+ * Format: W/"<id>-<digest>" for weak ETags
  */
-export function createETag(digest: EvidenceDigest, weak = true): string {
+export function createETag(digest: EvidenceDigest, weak = true, id?: string): string {
   const prefix = weak ? 'W/' : '';
-  const etag = digest.sha256.slice(0, 16); // Use first 16 chars of SHA256
-  return `${prefix}"${etag}"`;
+  const hashPart = digest.sha256.slice(0, 16); // Use first 16 chars of SHA256
+  const etagValue = id ? `${id}-${hashPart}` : hashPart;
+  return `${prefix}"${etagValue}"`;
 }
 
 /**
  * Validate ETag against current digest
+ * Supports both W/"<id>-<digest>" and W/"<digest>" formats
  */
-export function validateETag(etag: string, digest: EvidenceDigest): boolean {
+export function validateETag(etag: string, digest: EvidenceDigest, id?: string): boolean {
   if (!etag || !digest) return false;
   
   // Extract hash from ETag (handle both weak and strong)
   const cleanEtag = etag.replace(/^W\//, '').replace(/"/g, '');
-  const expectedEtag = digest.sha256.slice(0, 16);
+  const hashPart = digest.sha256.slice(0, 16);
   
-  return cleanEtag === expectedEtag;
+  // Support both formats: "<id>-<digest>" and "<digest>"
+  if (id && cleanEtag.includes('-')) {
+    const expectedEtag = `${id}-${hashPart}`;
+    return cleanEtag === expectedEtag;
+  }
+  
+  // For backward compatibility or when no ID
+  const etagHash = cleanEtag.split('-').pop() || cleanEtag;
+  return etagHash === hashPart;
 }
 
 /**
@@ -227,6 +238,7 @@ export function createExportHeaders(
     cacheControl?: string;
     maxAge?: number;
     streaming?: boolean;
+    id?: string; // Add ID for ETag generation
   } = {}
 ): Record<string, string> {
   const headers: Record<string, string> = {
@@ -242,7 +254,7 @@ export function createExportHeaders(
   
   // ETag for caching (not for streaming responses)
   if (!options.streaming) {
-    headers['ETag'] = createETag(digest, true);
+    headers['ETag'] = createETag(digest, true, options.id);
     
     // Cache control
     if (options.cacheControl) {
