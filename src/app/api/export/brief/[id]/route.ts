@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandling } from '@/lib/errors/withErrorHandling';
 import { ApiProblems as Problems } from '@/lib/errors/problem';
-import { generateBriefExport, extractEvidencePack } from '@/lib/exports/brief';
+import { generateEvidencePack, type EvidencePack } from '@/lib/schemas/evidence_pack.zod';
 import { redactEvidence, loadRedactionRules } from '@/lib/evidence/redact';
 import { evidenceDigest, auditRecord, createExportHeaders, logAuditEntry, validateETag } from '@/lib/evidence/audit';
 import { z } from 'zod';
@@ -11,6 +11,17 @@ import path from 'path';
 const paramsSchema = z.object({
   id: z.string().regex(/^[A-Z0-9]{8}$/),
 });
+
+// Simple brief export function compatible with zod EvidencePack
+function generateSimpleBriefExport(vdpMin: any, scenes: any[], evidencePack: EvidencePack) {
+  return {
+    digestId: vdpMin.digestId,
+    title: `Snap3 Brief - ${vdpMin.category}`,
+    scenes,
+    evidencePack,
+    exportedAt: new Date().toISOString(),
+  };
+}
 
 export const GET = withErrorHandling(async (
   request: NextRequest,
@@ -68,7 +79,7 @@ export const GET = withErrorHandling(async (
     const redactedVDP = redactionResult.data;
     
     // Generate evidence pack from redacted data
-    const evidencePack = extractEvidencePack(redactedVDP);
+    const evidencePack = generateEvidencePack(redactedVDP);
     
     // Generate VDP_MIN
     const vdpMin = {
@@ -104,7 +115,7 @@ export const GET = withErrorHandling(async (
       },
     ];
     
-    const briefExport = generateBriefExport(vdpMin, scenes, evidencePack);
+    const briefExport = generateSimpleBriefExport(vdpMin, scenes, evidencePack);
     
     // Add title if not present (exclude timestamp for consistent ETag)
     const exportDataBase = {

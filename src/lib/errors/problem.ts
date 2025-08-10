@@ -275,8 +275,16 @@ export const Problems = {
 export function wrapProblem(problem: Problem, status: number = 400) {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { NextResponse } = require('next/server');
-  return NextResponse.json(problem, { status })
-// TODO: Set headers using res.headers.set() pattern;
+  
+  const headers: Record<string, string> = {
+    'content-type': 'application/problem+json',
+  };
+  
+  if (problem.retryAfter) {
+    headers['Retry-After'] = String(problem.retryAfter);
+  }
+  
+  return NextResponse.json(problem, { status, headers });
 }
 
 // Extended Problems object with NextResponse methods for API routes
@@ -309,8 +317,13 @@ export const ApiProblems = {
       detail,
       retryAfter: retryAfter || 60,
     });
-    const response = NextResponse.json(problem, { status: problem.status })
-// TODO: Set headers using res.headers.set() pattern;
+    const response = NextResponse.json(problem, { 
+      status: problem.status,
+      headers: {
+        'content-type': 'application/problem+json',
+        'Retry-After': String(problem.retryAfter || 60),
+      }
+    });
     return response;
   },
   
