@@ -86,8 +86,7 @@ export function problemResponse(
     headers.set('Retry-After', String(retryAfter));
   }
   
-  return NextResponse.json(problem, { status: problem.status })
-// TODO: Set headers using res.headers.set() pattern;
+  return NextResponse.json(problem, { status: problem.status, headers });
 }
 
 /**
@@ -273,11 +272,8 @@ export const Problems = {
 
 // Utility to wrap Problems in NextResponse for API routes  
 export function wrapProblem(problem: Problem, status: number = 400) {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { NextResponse } = require('next/server');
-  
   const headers: Record<string, string> = {
-    'content-type': 'application/problem+json',
+    'Content-Type': 'application/problem+json',
   };
   
   if (problem.retryAfter) {
@@ -320,7 +316,7 @@ export const ApiProblems = {
     const response = NextResponse.json(problem, { 
       status: problem.status,
       headers: {
-        'content-type': 'application/problem+json',
+        'Content-Type': 'application/problem+json',
         'Retry-After': String(problem.retryAfter || 60),
       }
     });
@@ -342,8 +338,7 @@ export const ApiProblems = {
       cropProxy,
       instance,
     });
-    return NextResponse.json(problem, { status: problem.status })
-// TODO: Set headers using res.headers.set() pattern;
+    return wrapProblem(problem, problem.status);
   },
   
   // Methods that don't exist in base Problems - create them

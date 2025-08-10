@@ -197,17 +197,27 @@ jest.mock('next/server', () => {
     }
     
     static json(body, init) {
-      // Let init.headers override default content-type  
-      const headers = {};
-      
-      // Set default content-type first
-      headers['content-type'] = 'application/json';
+      // Create Headers instance to properly handle header names
+      const headers = new Headers();
       
       // Override with init headers if provided
       if (init?.headers) {
-        Object.entries(init.headers).forEach(([key, value]) => {
-          headers[key.toLowerCase()] = value;
-        });
+        // If headers is already a Headers instance, copy it
+        if (init.headers instanceof Headers) {
+          for (const [key, value] of init.headers.entries()) {
+            headers.set(key, value);
+          }
+        } else {
+          // Otherwise treat as object
+          Object.entries(init.headers).forEach(([key, value]) => {
+            headers.set(key, value);
+          });
+        }
+      }
+      
+      // Only set default content-type if not already provided
+      if (!headers.has('content-type')) {
+        headers.set('content-type', 'application/json');
       }
       
       const response = new Response(JSON.stringify(body), {
