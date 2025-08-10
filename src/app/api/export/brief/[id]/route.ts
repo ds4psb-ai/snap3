@@ -54,7 +54,7 @@ export const GET = withErrorHandling(async (
   
   
   try {
-    // Load redaction rules
+    // Load redaction rules - reuse for consistency
     const redactConfigPath = path.join(process.cwd(), 'config', 'evidence.redact.json');
     let redactionRules: any[] = [];
     
@@ -63,7 +63,7 @@ export const GET = withErrorHandling(async (
       redactionRules = loadRedactionRules(JSON.parse(configData));
     } catch (error) {
       console.warn('Could not load redaction config, using default rules:', error);
-      // Fallback to basic redaction rules
+      // Fallback to basic redaction rules - ensure consistent pipeline
       redactionRules = loadRedactionRules([
         '/overall_analysis',
         '/asr_transcript', 
@@ -117,29 +117,37 @@ export const GET = withErrorHandling(async (
     
     const briefExport = generateSimpleBriefExport(vdpMin, scenes, evidencePack);
     
-    // Add title if not present (exclude timestamp for consistent ETag)
+    // Add title if not present
     const exportDataBase = {
       ...briefExport,
       title: `Export ${id}`,
     };
-    
-    // Generate audit digest WITHOUT timestamp for consistent ETag
-    const digest = evidenceDigest(exportDataBase);
     
     // Add timestamp to final export
     const exportData = {
       ...exportDataBase,
       exportedAt: new Date().toISOString(),
     };
-    const headers = createExportHeaders(digest, { 
+    
+    // For ETag: Calculate digest WITHOUT timestamp for deterministic caching
+    const etagDigest = evidenceDigest(exportDataBase);
+    
+    // For X-Export-SHA256: Calculate digest on actual response content
+    const contentDigest = isStreaming 
+      ? evidenceDigest({ evidencePack })
+      : evidenceDigest(exportData);
+    
+    // Use content digest for SHA256 header, etag digest for ETag header
+    const headers = createExportHeaders(contentDigest, { 
       streaming: isStreaming,
       maxAge: isStreaming ? undefined : 3600,
-      id: id // Pass ID for ETag generation
+      id: id, // Pass ID for ETag generation
+      etagDigest: etagDigest // Deterministic digest for ETag
     });
     
     // Check ETag validation for non-streaming requests
     const clientETag = request.headers.get('If-None-Match');
-    if (!isStreaming && clientETag && validateETag(clientETag, digest, id)) {
+    if (!isStreaming && clientETag && validateETag(clientETag, etagDigest, id)) {
       const notModifiedRes = new NextResponse(null, { status: 304 });
       notModifiedRes.headers.set('ETag', headers['ETag']);
       notModifiedRes.headers.set('Cache-Control', headers['Cache-Control']);
@@ -163,22 +171,25 @@ export const GET = withErrorHandling(async (
       },
     };
     
-    const auditEntry = auditRecord(exportData, auditContext);
+    // Use the actual data being sent for the audit record
+    const auditData = isStreaming ? { evidencePack } : exportData;
+    const auditEntry = auditRecord(auditData, auditContext);
     logAuditEntry(auditEntry);
     
     // Handle streaming mode
     if (isStreaming) {
       const encoder = new TextEncoder();
+      const decoder = new TextDecoder();
       const stream = new ReadableStream({
         async start(controller) {
-          // Send chunks of evidence pack data
+          // Send chunks of evidence pack data - matching digest calculation structure
           controller.enqueue(encoder.encode('{"evidencePack":{'));
           
           // Chunk 1: Basic info
           controller.enqueue(encoder.encode(`"digestId":${JSON.stringify(evidencePack.digestId)}`));
           controller.enqueue(encoder.encode(`,"trustScore":${JSON.stringify(evidencePack.trustScore)}`));
           
-          // Simulate async processing
+          // Simulate async processing with flush
           await new Promise(resolve => setTimeout(resolve, 100));
           
           // Chunk 2: Evidence chips
@@ -188,6 +199,12 @@ export const GET = withErrorHandling(async (
           // Chunk 3: Detection flags
           controller.enqueue(encoder.encode(',"synthIdDetected":'));
           controller.enqueue(encoder.encode(JSON.stringify(evidencePack.synthIdDetected)));
+          
+          // Add provenance if present
+          if (evidencePack.provenance) {
+            controller.enqueue(encoder.encode(',"provenance":'));
+            controller.enqueue(encoder.encode(JSON.stringify(evidencePack.provenance)));
+          }
           
           // Close the JSON properly
           controller.enqueue(encoder.encode('}}'));

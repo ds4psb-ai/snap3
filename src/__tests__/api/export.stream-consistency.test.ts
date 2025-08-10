@@ -8,6 +8,7 @@
 import { NextRequest } from 'next/server';
 import { GET as getBriefExport } from '@/app/api/export/brief/[id]/route';
 import { GET as getJsonExport } from '@/app/api/export/json/[id]/route';
+import crypto from 'crypto';
 
 describe('Export Stream Consistency', () => {
   const validId = 'C0008888';
@@ -86,10 +87,15 @@ describe('Export Stream Consistency', () => {
       expect(res2.headers.get('ETag')).toBe(etag);
       expect(res2.headers.get('Cache-Control')).toBe('private, max-age=3600');
       
-      // Body should be empty for 304
-      // Note: NextResponse returns null body for 304, which gets converted to empty response
+      // Body should be empty for 304 - verify no content
       const body = res2.body;
       expect(body).toBeNull();
+      
+      // Also verify content-length is 0 or not set
+      const contentLength = res2.headers.get('Content-Length');
+      if (contentLength) {
+        expect(parseInt(contentLength)).toBe(0);
+      }
     });
 
     it('should return full response when ETag does not match', async () => {
@@ -181,6 +187,151 @@ describe('Export Stream Consistency', () => {
       expect(res.status).toBe(429);
       expect(res.headers.get('Retry-After')).toBe('60');
       expect(res.headers.get('Content-Type')).toBe('application/problem+json');
+    });
+  });
+
+  describe('Timing Tolerance Tests', () => {
+    it('should handle streaming with timing variations (±50-100ms)', async () => {
+      const startTime = Date.now();
+      const req = new NextRequest(`${baseUrl}/api/export/brief/${validId}?format=stream`);
+      const res = await getBriefExport(req, { params: Promise.resolve({ id: validId }) });
+      
+      // Consume the stream
+      const reader = res.body?.getReader();
+      if (reader) {
+        let done = false;
+        while (!done) {
+          const { done: isDone } = await reader.read();
+          done = isDone;
+        }
+      }
+      
+      const elapsed = Date.now() - startTime;
+      
+      // Should complete within reasonable time (100ms base + 50-100ms tolerance)
+      expect(elapsed).toBeGreaterThan(10); // At least some async processing  
+      expect(elapsed).toBeLessThan(250); // But not too slow
+    });
+
+    it('should produce consistent ETags regardless of processing time', async () => {
+      const etags: string[] = [];
+      
+      // Make multiple requests with slight delays
+      for (let i = 0; i < 3; i++) {
+        const req = new NextRequest(`${baseUrl}/api/export/json/${validId}`);
+        const res = await getJsonExport(req, { params: Promise.resolve({ id: validId }) });
+        const etag = res.headers.get('ETag');
+        
+        if (etag) etags.push(etag);
+        
+        // Add small delay between requests
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+      
+      // All ETags should be identical (deterministic)
+      expect(etags).toHaveLength(3);
+      expect(etags[0]).toBe(etags[1]);
+      expect(etags[1]).toBe(etags[2]);
+    });
+  });
+
+  describe('SHA256 Integrity Verification', () => {
+    it('should have matching SHA256 for response content in non-streaming mode', async () => {
+      const req = new NextRequest(`${baseUrl}/api/export/json/${validId}`);
+      const res = await getJsonExport(req, { params: Promise.resolve({ id: validId }) });
+      
+      const responseBody = await res.text();
+      const actualHash = crypto.createHash('sha256')
+        .update(responseBody)
+        .digest('hex');
+      
+      const headerHash = res.headers.get('X-Export-SHA256');
+      expect(headerHash).toBeTruthy();
+      expect(headerHash).toBe(actualHash);
+    });
+
+    it('should have matching SHA256 for streamed content', async () => {
+      const req = new NextRequest(`${baseUrl}/api/export/brief/${validId}?format=stream`);
+      const res = await getBriefExport(req, { params: Promise.resolve({ id: validId }) });
+      
+      // Collect all chunks
+      const reader = res.body?.getReader();
+      const chunks: Uint8Array[] = [];
+      
+      if (reader) {
+        let done = false;
+        while (!done) {
+          const { value, done: isDone } = await reader.read();
+          done = isDone;
+          if (value) chunks.push(value);
+        }
+      }
+      
+      // Combine chunks and calculate hash
+      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+      const combined = new Uint8Array(totalLength);
+      let offset = 0;
+      for (const chunk of chunks) {
+        combined.set(chunk, offset);
+        offset += chunk.length;
+      }
+      
+      const decoder = new TextDecoder();
+      const responseBody = decoder.decode(combined);
+      const actualHash = crypto.createHash('sha256')
+        .update(responseBody)
+        .digest('hex');
+      
+      const headerHash = res.headers.get('X-Export-SHA256');
+      expect(headerHash).toBeTruthy();
+      expect(headerHash).toBe(actualHash);
+    });
+
+    it('should maintain integrity across streaming and non-streaming digest calculation', async () => {
+      // Non-streaming request
+      const normalReq = new NextRequest(`${baseUrl}/api/export/brief/${validId}`);
+      const normalRes = await getBriefExport(normalReq, { params: Promise.resolve({ id: validId }) });
+      const normalData = await normalRes.json();
+      
+      // Stream request
+      const streamReq = new NextRequest(`${baseUrl}/api/export/brief/${validId}?format=stream`);
+      const streamRes = await getBriefExport(streamReq, { params: Promise.resolve({ id: validId }) });
+      
+      // Collect streamed data
+      const reader = streamRes.body?.getReader();
+      const chunks: Uint8Array[] = [];
+      
+      if (reader) {
+        let done = false;
+        while (!done) {
+          const { value, done: isDone } = await reader.read();
+          done = isDone;
+          if (value) chunks.push(value);
+        }
+      }
+      
+      // Combine chunks properly
+      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+      const combined = new Uint8Array(totalLength);
+      let offset = 0;
+      for (const chunk of chunks) {
+        combined.set(chunk, offset);
+        offset += chunk.length;
+      }
+      
+      const decoder = new TextDecoder();
+      const streamedText = decoder.decode(combined);
+      const streamedData = JSON.parse(streamedText);
+      
+      // Verify structure difference is intentional
+      expect(normalData).toHaveProperty('title');
+      expect(normalData).toHaveProperty('scenes');
+      expect(normalData).toHaveProperty('evidencePack');
+      expect(streamedData).toHaveProperty('evidencePack');
+      expect(streamedData).not.toHaveProperty('title');
+      
+      // Verify evidence pack content is identical
+      expect(streamedData.evidencePack).toEqual(normalData.evidencePack);
     });
   });
 

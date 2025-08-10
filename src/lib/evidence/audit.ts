@@ -239,6 +239,7 @@ export function createExportHeaders(
     maxAge?: number;
     streaming?: boolean;
     id?: string; // Add ID for ETag generation
+    etagDigest?: EvidenceDigest; // Separate digest for ETag (without timestamp)
   } = {}
 ): Record<string, string> {
   const headers: Record<string, string> = {
@@ -254,7 +255,9 @@ export function createExportHeaders(
   
   // ETag for caching (not for streaming responses)
   if (!options.streaming) {
-    headers['ETag'] = createETag(digest, true, options.id);
+    // Use separate etagDigest if provided (for deterministic ETags)
+    const etagSource = options.etagDigest || digest;
+    headers['ETag'] = createETag(etagSource, true, options.id);
     
     // Cache control
     if (options.cacheControl) {

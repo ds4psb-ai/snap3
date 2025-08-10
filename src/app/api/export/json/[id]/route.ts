@@ -129,23 +129,28 @@ export const GET = withErrorHandling(async (
       evidencePack,
     };
     
-    // Generate audit digest WITHOUT timestamp for consistent ETag
-    const digest = evidenceDigest(jsonExportBase);
-    
     // Add timestamp to final export
     const jsonExport = {
       ...jsonExportBase,
       exportedAt: new Date().toISOString(),
     };
-    const headers = createExportHeaders(digest, { 
+    
+    // For ETag: Calculate digest WITHOUT timestamp for deterministic caching
+    const etagDigest = evidenceDigest(jsonExportBase);
+    
+    // For X-Export-SHA256: Calculate digest on actual response content
+    const contentDigest = evidenceDigest(jsonExport);
+    
+    const headers = createExportHeaders(contentDigest, { 
       streaming: false,
       maxAge: 3600,
-      id: id // Pass ID for ETag generation
+      id: id, // Pass ID for ETag generation
+      etagDigest: etagDigest // Deterministic digest for ETag
     });
     
     // Check ETag validation for caching
     const clientETag = request.headers.get('If-None-Match');
-    if (clientETag && validateETag(clientETag, digest, id)) {
+    if (clientETag && validateETag(clientETag, etagDigest, id)) {
       const notModifiedRes = new NextResponse(null, { status: 304 });
       notModifiedRes.headers.set('ETag', headers['ETag']);
       notModifiedRes.headers.set('Cache-Control', headers['Cache-Control']);
