@@ -12,8 +12,8 @@ describe('GET /api/export/json/[id]', () => {
       
       // RFC 9457 Problem+JSON structure
       expect(body).toMatchObject({
-        type: 'about:blank',
-        title: 'Not Found',
+        type: 'https://api.snap3.com/problems/not-found',
+        title: 'Resource not found',
         status: 404,
         detail: expect.stringContaining('Export not found'),
       });
@@ -88,13 +88,13 @@ describe('GET /api/export/json/[id]', () => {
       
       const response = await GET(request, { params: { id: 'C0008888' } });
       
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       const body = await response.json();
       
       expect(body).toMatchObject({
-        type: 'about:blank',
-        title: 'Bad Request',
-        status: 400,
+        type: 'https://api.snap3.com/problems/embed-denied',
+        title: 'Embed denied',
+        status: 403,
         detail: 'Only YouTube and Vimeo embeds are allowed',
         code: 'EMBED_DENIED',
       });
@@ -108,13 +108,13 @@ describe('GET /api/export/json/[id]', () => {
       
       const response = await GET(request, { params: { id: 'C0008888' } });
       
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(422);
       const body = await response.json();
       
       expect(body).toMatchObject({
-        type: 'about:blank',
-        title: 'Bad Request',
-        status: 400,
+        type: 'https://api.snap3.com/problems/unsupported-ar',
+        title: 'Preview aspect ratio not supported',
+        status: 422,
         code: 'UNSUPPORTED_AR_FOR_PREVIEW',
         detail: expect.stringContaining('16:9'),
         cropProxy: {

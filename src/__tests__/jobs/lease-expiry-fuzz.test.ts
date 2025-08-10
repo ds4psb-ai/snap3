@@ -23,8 +23,8 @@ describe('Lease Expiry Fuzz Testing - 30s Visibility Timeout', () => {
     { 
       name: 'FakeDurable', 
       createProvider: () => new FakeDurableQueueProvider({ 
-        simulateLatency: true,
-        latencyMs: { min: 10, max: 50 },
+        simulatedLatencyMs: 25, // Average of min/max
+        simulateFailures: true,
         failureRate: 0.1 // 10% failure rate for realistic testing
       }) 
     },
@@ -91,7 +91,7 @@ describe('Lease Expiry Fuzz Testing - 30s Visibility Timeout', () => {
       jest.advanceTimersByTime(LEASE_DURATION_MS - 1000);
       
       // Job should still be processing
-      let currentJob = await provider.getJob(job.id);
+      const currentJob = await provider.getJob(job.id);
       expect(currentJob?.status).toBe(JobStatus.PROCESSING);
 
       // Advance past lease expiry

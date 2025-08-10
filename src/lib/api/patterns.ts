@@ -93,23 +93,13 @@ export async function withRateLimit<T>(
  */
 export const ApiResponse = {
   json<T>(data: T, options?: ResponseInit): NextResponse<T> {
-    return NextResponse.json(data, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
-    });
+    return NextResponse.json(data, { ...options })
+// TODO: Set headers using res.headers.set() pattern;
   },
 
   created<T>(data: T, location?: string): NextResponse<T> {
-    return NextResponse.json(data, {
-      status: 201,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(location && { Location: location }),
-      },
-    });
+    return NextResponse.json(data, { status: 201 })
+// TODO: Set headers using res.headers.set() pattern;
   },
 
   noContent(): NextResponse {

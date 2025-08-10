@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandling } from '@/lib/errors/withErrorHandling';
 import { ApiProblems as Problems } from '@/lib/errors/problem';
-import { generateBriefExport } from '@/lib/exports/brief';
-import { generateEvidencePack } from '@/lib/schemas/evidence_pack.zod';
+import { generateEvidencePack, type EvidencePack } from '@/lib/schemas/evidence_pack.zod';
 import { redactEvidence, loadRedactionRules } from '@/lib/evidence/redact';
 import { evidenceDigest, auditRecord, createExportHeaders, logAuditEntry, validateETag } from '@/lib/evidence/audit';
 import { z } from 'zod';
@@ -12,6 +11,17 @@ import path from 'path';
 const paramsSchema = z.object({
   id: z.string().regex(/^[A-Z0-9]{8}$/),
 });
+
+// Simple brief export function compatible with zod EvidencePack
+function generateSimpleBriefExport(vdpMin: any, scenes: any[], evidencePack: EvidencePack) {
+  return {
+    digestId: vdpMin.digestId,
+    title: `Snap3 Brief - ${vdpMin.category}`,
+    scenes,
+    evidencePack,
+    exportedAt: new Date().toISOString(),
+  };
+}
 
 export const GET = withErrorHandling(async (
   request: NextRequest,
@@ -25,13 +35,7 @@ export const GET = withErrorHandling(async (
   const resolvedParams = await params;
   const validation = paramsSchema.safeParse(resolvedParams);
   if (!validation.success) {
-    return NextResponse.json(
-      Problems.badRequest('Invalid digest ID format'),
-      { 
-        status: 400,
-        headers: { 'Content-Type': 'application/problem+json' },
-      }
-    );
+    return Problems.badRequest('Invalid digest ID format');
   }
   
   const { id } = validation.data;
@@ -39,33 +43,18 @@ export const GET = withErrorHandling(async (
   // Mock data retrieval (replace with actual DB/storage call)
   const vdpData = await fetchVDPData(id);
   if (!vdpData) {
-    return NextResponse.json(
-      Problems.notFound(`Export not found for ID: ${id}`),
-      { 
-        status: 404,
-        headers: { 'Content-Type': 'application/problem+json' },
-      }
-    );
+    return Problems.notFound(`Export not found for ID: ${id}`);
   }
   
   // Check rate limits (test mode)
   const rateLimitExceeded = request.headers.get('X-Rate-Limit-Test') === 'true';
   if (rateLimitExceeded) {
-    return NextResponse.json(
-      Problems.tooManyRequests('Export rate limit exceeded', 60),
-      { 
-        status: 429,
-        headers: {
-          'Retry-After': '60',
-          'Content-Type': 'application/problem+json',
-        },
-      }
-    );
+    return Problems.tooManyRequests('Export rate limit exceeded', 60);
   }
   
   
   try {
-    // Load redaction rules
+    // Load redaction rules - reuse for consistency
     const redactConfigPath = path.join(process.cwd(), 'config', 'evidence.redact.json');
     let redactionRules: any[] = [];
     
@@ -74,7 +63,7 @@ export const GET = withErrorHandling(async (
       redactionRules = loadRedactionRules(JSON.parse(configData));
     } catch (error) {
       console.warn('Could not load redaction config, using default rules:', error);
-      // Fallback to basic redaction rules
+      // Fallback to basic redaction rules - ensure consistent pipeline
       redactionRules = loadRedactionRules([
         '/overall_analysis',
         '/asr_transcript', 
@@ -100,6 +89,7 @@ export const GET = withErrorHandling(async (
       tempoBucket: 'medium',
       source: {
         embedEligible: true,
+        platform: redactedVDP.platform_metadata?.platform || 'unknown',
       },
     };
     
@@ -125,31 +115,43 @@ export const GET = withErrorHandling(async (
       },
     ];
     
-    const briefExport = generateBriefExport(vdpMin, scenes, evidencePack);
+    const briefExport = generateSimpleBriefExport(vdpMin, scenes, evidencePack);
     
     // Add title if not present
-    const exportData = {
+    const exportDataBase = {
       ...briefExport,
       title: `Export ${id}`,
     };
     
-    // Generate audit digest and headers
-    const digest = evidenceDigest(exportData);
-    const headers = createExportHeaders(digest, { 
+    // Add timestamp to final export
+    const exportData = {
+      ...exportDataBase,
+      exportedAt: new Date().toISOString(),
+    };
+    
+    // For ETag: Calculate digest WITHOUT timestamp for deterministic caching
+    const etagDigest = evidenceDigest(exportDataBase);
+    
+    // For X-Export-SHA256: Calculate digest on actual response content
+    const contentDigest = isStreaming 
+      ? evidenceDigest({ evidencePack })
+      : evidenceDigest(exportData);
+    
+    // Use content digest for SHA256 header, etag digest for ETag header
+    const headers = createExportHeaders(contentDigest, { 
       streaming: isStreaming,
-      maxAge: isStreaming ? undefined : 3600 
+      maxAge: isStreaming ? undefined : 3600,
+      id: id, // Pass ID for ETag generation
+      etagDigest: etagDigest // Deterministic digest for ETag
     });
     
     // Check ETag validation for non-streaming requests
     const clientETag = request.headers.get('If-None-Match');
-    if (!isStreaming && clientETag && validateETag(clientETag, digest)) {
-      return new NextResponse(null, { 
-        status: 304,
-        headers: {
-          'ETag': headers['ETag'],
-          'Cache-Control': headers['Cache-Control'],
-        },
-      });
+    if (!isStreaming && clientETag && validateETag(clientETag, etagDigest, id)) {
+      const notModifiedRes = new NextResponse(null, { status: 304 });
+      notModifiedRes.headers.set('ETag', headers['ETag']);
+      notModifiedRes.headers.set('Cache-Control', headers['Cache-Control']);
+      return notModifiedRes;
     }
     
     // Create audit record
@@ -169,22 +171,25 @@ export const GET = withErrorHandling(async (
       },
     };
     
-    const auditEntry = auditRecord(exportData, auditContext);
+    // Use the actual data being sent for the audit record
+    const auditData = isStreaming ? { evidencePack } : exportData;
+    const auditEntry = auditRecord(auditData, auditContext);
     logAuditEntry(auditEntry);
     
     // Handle streaming mode
     if (isStreaming) {
       const encoder = new TextEncoder();
+      const decoder = new TextDecoder();
       const stream = new ReadableStream({
         async start(controller) {
-          // Send chunks of evidence pack data
+          // Send chunks of evidence pack data - matching digest calculation structure
           controller.enqueue(encoder.encode('{"evidencePack":{'));
           
           // Chunk 1: Basic info
           controller.enqueue(encoder.encode(`"digestId":${JSON.stringify(evidencePack.digestId)}`));
           controller.enqueue(encoder.encode(`,"trustScore":${JSON.stringify(evidencePack.trustScore)}`));
           
-          // Simulate async processing
+          // Simulate async processing with flush
           await new Promise(resolve => setTimeout(resolve, 100));
           
           // Chunk 2: Evidence chips
@@ -195,27 +200,34 @@ export const GET = withErrorHandling(async (
           controller.enqueue(encoder.encode(',"synthIdDetected":'));
           controller.enqueue(encoder.encode(JSON.stringify(evidencePack.synthIdDetected)));
           
+          // Add provenance if present
+          if (evidencePack.provenance) {
+            controller.enqueue(encoder.encode(',"provenance":'));
+            controller.enqueue(encoder.encode(JSON.stringify(evidencePack.provenance)));
+          }
+          
           // Close the JSON properly
           controller.enqueue(encoder.encode('}}'));
           controller.close();
         },
       });
       
-      return new NextResponse(stream, {
-        headers: headers,
+      const streamRes = new NextResponse(stream);
+      Object.entries(headers).forEach(([key, value]) => {
+        streamRes.headers.set(key, value);
       });
+      return streamRes;
     }
     
     // Normal JSON response
-    return NextResponse.json(exportData, {
-      headers: headers,
+    const res = NextResponse.json(exportData);
+    Object.entries(headers).forEach(([key, value]) => {
+      res.headers.set(key, value);
     });
+    return res;
   } catch (error) {
     console.error('Brief export error:', error);
-    return NextResponse.json(
-      Problems.internalServerError('Failed to generate brief export'),
-      { status: 500 }
-    );
+    return Problems.internalServerError('Failed to generate brief export');
   }
 });
 

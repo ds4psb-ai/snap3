@@ -5,7 +5,7 @@
  * for Evidence Pack v2 implementation.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { readFileSync } from 'fs';
 import path from 'path';
 
@@ -106,15 +106,15 @@ describe('Evidence Redaction System', () => {
       const obj = { foo: {} };
       const result = JSONPointer.set(obj, '/foo/bar', 'new value');
       
-      expect(result.foo.bar).toBe('new value');
-      expect(obj.foo.bar).toBeUndefined(); // Original should be unchanged (immutable)
+      expect((result.foo as any).bar).toBe('new value');
+      expect((obj.foo as any).bar).toBeUndefined(); // Original should be unchanged (immutable)
     });
 
     it('should remove values from objects using JSON Pointer', () => {
       const obj = { foo: { bar: 'value', keep: 'this' } };
       const result = JSONPointer.remove(obj, '/foo/bar');
       
-      expect(result.foo.bar).toBeUndefined();
+      expect((result.foo as any).bar).toBeUndefined();
       expect(result.foo.keep).toBe('this');
       expect(obj.foo.bar).toBe('value'); // Original should be unchanged
     });
@@ -164,7 +164,7 @@ describe('Evidence Redaction System', () => {
     it('should validate rule objects', () => {
       const invalidConfig = [
         { strategy: 'mask' } // Missing path
-      ];
+      ] as any;
       
       expect(() => loadRedactionRules(invalidConfig)).toThrow('missing required \'path\' property');
     });
@@ -188,8 +188,8 @@ describe('Evidence Redaction System', () => {
         { path: '/metadata/view_count', strategy: 'mask', description: 'Mask view count' },
         { path: '/metadata/like_count', strategy: 'mask', description: 'Mask like count' },
         { path: '/asr_transcript', strategy: 'remove', description: 'Remove transcript' },
-        { path: '/internal/*', strategy: 'remove', description: 'Remove internal data' },
-        { path: '/debug/*', strategy: 'remove', description: 'Remove debug data' },
+        { path: '/internal', strategy: 'remove', description: 'Remove internal data' },
+        { path: '/debug', strategy: 'remove', description: 'Remove debug data' },
         { path: '/scenes/*/narrative_unit/shots', strategy: 'remove', description: 'Remove shots' },
         { path: '/product_mentions', strategy: 'remove', description: 'Remove product mentions' },
       ];
@@ -321,7 +321,7 @@ describe('Evidence Audit System', () => {
       const etag = createETag(digest, false);
       
       expect(etag).toMatch(/^"[a-f0-9]{16}"$/);
-      expect(etag).not.toStartWith('W/');
+      expect(etag).not.toMatch(/^W\//);
     });
 
     it('should validate ETags correctly', () => {

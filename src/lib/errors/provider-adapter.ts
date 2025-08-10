@@ -24,6 +24,9 @@ export enum ProviderErrorType {
   INTERNAL_ERROR = 'INTERNAL_ERROR',
   SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
   POLICY_VIOLATION = 'POLICY_VIOLATION',
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  FORBIDDEN = 'FORBIDDEN',
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
 }
 
 /**
@@ -43,6 +46,9 @@ function mapProviderErrorToCode(error: ProviderErrorType): ErrorCode {
     [ProviderErrorType.INTERNAL_ERROR]: ErrorCode.INTERNAL_ERROR,
     [ProviderErrorType.SERVICE_UNAVAILABLE]: ErrorCode.SERVICE_UNAVAILABLE,
     [ProviderErrorType.POLICY_VIOLATION]: ErrorCode.PROVIDER_POLICY_BLOCKED,
+    [ProviderErrorType.UNAUTHORIZED]: ErrorCode.UNAUTHORIZED,
+    [ProviderErrorType.FORBIDDEN]: ErrorCode.FORBIDDEN,
+    [ProviderErrorType.VALIDATION_ERROR]: ErrorCode.VALIDATION_ERROR,
   };
   
   return mapping[error] || ErrorCode.INTERNAL_ERROR;
@@ -52,6 +58,9 @@ function mapProviderErrorToCode(error: ProviderErrorType): ErrorCode {
  * Extract retry-after value from various provider error formats
  */
 function extractRetryAfter(error: any): number | undefined {
+  // Handle undefined or null error
+  if (!error) return undefined;
+  
   // Check various common formats
   if (typeof error.retryAfter === 'number') return error.retryAfter;
   if (typeof error.retry_after === 'number') return error.retry_after;
@@ -101,7 +110,16 @@ export class ProviderErrorAdapter {
     instance?: string
   ): Problem {
     const code = mapProviderErrorToCode(errorType);
-    const retryAfter = extractRetryAfter(details.originalError);
+    let retryAfter = extractRetryAfter(details.originalError);
+    
+    // Set default retry-after values if not provided
+    if (retryAfter === undefined) {
+      if (errorType === ProviderErrorType.RATE_LIMITED) {
+        retryAfter = 60;
+      } else if (errorType === ProviderErrorType.QUOTA_EXCEEDED) {
+        retryAfter = 3600;
+      }
+    }
     
     // Build detail message with provider context
     let detail = `Provider error from ${details.provider}`;
@@ -156,12 +174,11 @@ export class ProviderErrorAdapter {
    * Convert AppError to Problem Response with provider context
    */
   fromAppError(error: AppError, provider?: string): Response {
-    // Ensure rate limit errors have retry-after
-    if (error.code === ErrorCode.RATE_LIMITED || 
-        error.code === ErrorCode.PROVIDER_QUOTA_EXCEEDED) {
-      if (!error.retryAfter) {
-        error.retryAfter = error.code === ErrorCode.RATE_LIMITED ? 60 : 3600;
-      }
+    // Determine retry-after value for rate limit errors
+    let retryAfter = error.retryAfter;
+    if (!retryAfter && (error.code === ErrorCode.RATE_LIMITED || 
+        error.code === ErrorCode.PROVIDER_QUOTA_EXCEEDED)) {
+      retryAfter = error.code === ErrorCode.RATE_LIMITED ? 60 : 3600;
     }
     
     const detail = provider 
@@ -171,7 +188,7 @@ export class ProviderErrorAdapter {
     return problemResponse(error.code, {
       detail,
       instance: error.instance,
-      retryAfter: error.retryAfter,
+      retryAfter,
       traceId: this.traceId,
     });
   }
@@ -353,6 +370,16 @@ export async function withProviderErrorHandling<T>(
       } else if (err.code === 'QUOTA_EXCEEDED' || err.code === 'OverLimit') {
         errorType = ProviderErrorType.QUOTA_EXCEEDED;
         retryAfter = extractRetryAfter(err) || 3600;
+      } else if (err.status === 403 || err.statusCode === 403) {
+        errorType = ProviderErrorType.FORBIDDEN;
+      } else if (err.status === 401 || err.statusCode === 401) {
+        errorType = ProviderErrorType.UNAUTHORIZED;
+      } else if (err.status === 404 || err.statusCode === 404) {
+        errorType = ProviderErrorType.RESOURCE_NOT_FOUND;
+      } else if (err.status === 400 || err.statusCode === 400) {
+        errorType = ProviderErrorType.VALIDATION_ERROR;
+      } else if (err.status === 503 || err.statusCode === 503) {
+        errorType = ProviderErrorType.SERVICE_UNAVAILABLE;
       }
     }
     

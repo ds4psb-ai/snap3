@@ -12,17 +12,11 @@ export async function POST(request: NextRequest) {
     
     // Validate constraints
     if (validatedData.duration !== 8) {
-      return NextResponse.json(
-        Problems.invalidDuration(validatedData.duration),
-        { status: 400, headers: { 'Content-Type': 'application/problem+json' } }
-      );
+      return Problems.badRequest(`Invalid duration: ${validatedData.duration}. Expected: 8`);
     }
     
     if (validatedData.aspect !== '16:9') {
-      return NextResponse.json(
-        Problems.unsupportedAspectRatio(validatedData.aspect),
-        { status: 400, headers: { 'Content-Type': 'application/problem+json' } }
-      );
+      return Problems.badRequest(`Unsupported aspect ratio: ${validatedData.aspect}. Expected: 16:9`);
     }
     
     // TODO: Implement Veo3 prompt compilation
@@ -41,28 +35,19 @@ export async function POST(request: NextRequest) {
         message: err.message,
         code: 'VALIDATION_ERROR',
       }));
-      return NextResponse.json(
-        Problems.validation(violations),
-        { status: 400, headers: { 'Content-Type': 'application/problem+json' } }
-      );
+      return Problems.validation(violations);
     }
     
-    return NextResponse.json(
-      Problems.validation([{
+    return Problems.validation([{
         field: 'request',
         message: 'Invalid Veo3 prompt format',
         code: 'INVALID_REQUEST',
-      }]),
-      { status: 400, headers: { 'Content-Type': 'application/problem+json' } }
-    );
+      }]);
   }
 }
 
 export async function GET() {
-  return NextResponse.json(
-    Problems.methodNotAllowed('GET', ['POST']),
-    { status: 405, headers: { 'Content-Type': 'application/problem+json' } }
-  );
+  return Problems.methodNotAllowed('GET', ['POST']);
 }
 
 

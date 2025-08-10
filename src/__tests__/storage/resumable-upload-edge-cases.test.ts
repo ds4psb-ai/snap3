@@ -120,14 +120,14 @@ class EdgeCaseResumableProvider implements ResumableStorageProvider {
     const expectedParts = sessionData.session.parts.map(p => p.partNumber).sort();
     const providedParts = parts.map(p => p.partNumber).sort();
     
-    if (expectedParts.length !== providedParts.length) {
-      throw new Error(`Expected ${expectedParts.length} parts, got ${providedParts.length}`);
-    }
-
-    // Check for duplicate part numbers
+    // Check for duplicate part numbers first
     const uniqueParts = new Set(providedParts);
     if (uniqueParts.size !== providedParts.length) {
       throw new Error('Duplicate part numbers detected');
+    }
+
+    if (expectedParts.length !== providedParts.length) {
+      throw new Error(`Expected ${expectedParts.length} parts, got ${providedParts.length}`);
     }
 
     // Verify all expected parts are present

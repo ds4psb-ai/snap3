@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getJobQueue, getJobTracker } from '@/lib/jobs/worker';
 import { withErrorHandling } from '@/lib/errors/withErrorHandling';
-import { Problems } from '@/lib/errors/problem';
+import { ApiProblems } from '@/lib/errors/problem';
 import { JobStatus } from '@/lib/jobs/types';
 
 export const GET = withErrorHandling(async (
@@ -16,7 +16,7 @@ export const GET = withErrorHandling(async (
   const job = queue.getJob(id);
   
   if (!job) {
-    return Problems.notFound(`Job ${id}`, request.url);
+    return ApiProblems.notFound(`Job ${id} not found`);
   }
   
   // Build response based on job status
@@ -75,7 +75,7 @@ export const GET = withErrorHandling(async (
 });
 
 export async function POST() {
-  return Problems.notFound('Endpoint', '/api/jobs/[id]');
+  return ApiProblems.notFound('POST method not supported for /api/jobs/[id]');
 }
 
 

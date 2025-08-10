@@ -65,9 +65,19 @@
     "description": "Remove platform-specific internal data (VDP_FULL)"
   },
   {
+    "path": "/internal",
+    "strategy": "remove",
+    "description": "Remove complete internal processing data"
+  },
+  {
     "path": "/internal/*",
     "strategy": "remove",
     "description": "Remove any internal processing data"
+  },
+  {
+    "path": "/debug",
+    "strategy": "remove",
+    "description": "Remove complete debug information"
   },
   {
     "path": "/debug/*",

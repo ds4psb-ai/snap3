@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { PreviewPlayer } from '@/components/PreviewPlayer';
+import { ErrorCode } from '@/lib/errors/codes';
 
 describe('PreviewPlayer', () => {
   const defaultProps = {
@@ -54,7 +55,7 @@ describe('PreviewPlayer', () => {
       type: 'https://api.example.com/problem',
       title: 'Video not available',
       status: 404,
-      code: 'NOT_FOUND',
+      code: ErrorCode.RESOURCE_NOT_FOUND,
       detail: 'The requested video could not be found',
       fix: 'Check the video ID',
     };

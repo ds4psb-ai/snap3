@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Problems } from '@/lib/errors/problem';
+import { ApiProblems } from '@/lib/errors/problem';
 
 const ApprovalSchema = z.object({
   approved: z.boolean({ required_error: 'Approved field is required', invalid_type_error: 'Approved must be a boolean value' }),
@@ -10,10 +10,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const instance = `/api/relations/${params.id}/approve`;
-  
   try {
     const { id } = await params;
+    const instance = `/api/relations/${id}/approve`;
     const body = await request.json();
     const validatedData = ApprovalSchema.parse(body);
     
@@ -30,14 +29,14 @@ export async function POST(
         message: err.message,
         code: 'VALIDATION_ERROR',
       }));
-      return Problems.validation(violations, instance);
+      return ApiProblems.validation(violations);
     }
     
-    return Problems.validation([{
+    return ApiProblems.validation([{
       field: 'request',
       message: 'Failed to update relation approval',
       code: 'APPROVAL_ERROR',
-    }], instance);
+    }]);
   }
 }
 

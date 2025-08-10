@@ -3,7 +3,7 @@
  */
 
 import { ErrorCode } from '@/lib/errors/codes';
-import { buildProblemJSON, problemResponse, Problems } from '@/lib/errors/problem';
+import { buildProblemJSON, problemResponse, Problems, ProblemDetails } from '@/lib/errors/problem';
 import { AppError } from '@/lib/errors/app-error';
 import { ZodError, z } from 'zod';
 import { zodErrorToViolations } from '@/lib/errors/zod-to-violations';
@@ -48,7 +48,7 @@ describe('Problem Details builder', () => {
       { field: 'aspect', message: 'Must be 16:9', code: 'INVALID_ASPECT' },
     ];
     
-    const problem = Problems.validation(violations);
+    const problem = ProblemDetails.validation(violations);
     expect(problem.status).toBe(400);
     expect(problem.code).toBe('VALIDATION_ERROR');
     expect(problem.violations).toHaveLength(2);
@@ -70,22 +70,22 @@ describe('Problem Details builder', () => {
 
 describe('Problem factory functions', () => {
   test('creates not found problem', () => {
-    const problem = Problems.notFound('Resource \'video-123\' not found');
+    const problem = ProblemDetails.notFound('Resource \'video-123\' not found');
     expect(problem.status).toBe(404);
     expect(problem.code).toBe('RESOURCE_NOT_FOUND');
     expect(problem.detail).toBe("Resource 'video-123' not found");
   });
 
   test('creates rate limited problem', () => {
-    const problem = Problems.tooManyRequests('Rate limit exceeded', 60);
+    const problem = ProblemDetails.tooManyRequests('Rate limit exceeded', 60);
     expect(problem.status).toBe(429);
     expect(problem.code).toBe('RATE_LIMITED');
     expect(problem.retryAfter).toBe(60);
   });
 
   test('creates invalid duration problem', () => {
-    const problem = Problems.invalidDuration(10);
-    expect(problem.status).toBe(400);
+    const problem = ProblemDetails.invalidDuration(10);
+    expect(problem.status).toBe(422);
     expect(problem.code).toBe('INVALID_DURATION');
     expect(problem.detail).toBe('Duration must be exactly 8 seconds, got 10');
     expect(problem.violations).toHaveLength(1);
@@ -93,8 +93,8 @@ describe('Problem factory functions', () => {
   });
 
   test('creates unsupported aspect ratio problem', () => {
-    const problem = Problems.unsupportedAspectRatio('9:16');
-    expect(problem.status).toBe(400);
+    const problem = ProblemDetails.unsupportedAspectRatio('9:16');
+    expect(problem.status).toBe(422);
     expect(problem.code).toBe('UNSUPPORTED_AR_FOR_PREVIEW');
     expect(problem.detail).toContain('9:16');
     expect(problem.detail).toContain('16:9');
@@ -106,7 +106,7 @@ describe('Problem factory functions', () => {
       { field: 'fps', message: 'FPS must be ≥30', code: 'FPS_TOO_LOW' },
     ];
     
-    const problem = Problems.qaViolation(violations);
+    const problem = ProblemDetails.qaViolation(violations);
     expect(problem.status).toBe(422);
     expect(problem.code).toBe('QA_RULE_VIOLATION');
     expect(problem.violations).toEqual(violations);

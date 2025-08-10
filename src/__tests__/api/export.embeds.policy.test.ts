@@ -52,13 +52,13 @@ describe('Embed Policy Enforcement', () => {
       
       const response = await GET(request, { params: { id: 'C0008888' } });
       
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       const problem = await response.json();
       
       expect(problem).toMatchObject({
-        type: 'about:blank',
-        title: 'Bad Request',
-        status: 400,
+        type: 'https://api.snap3.com/problems/embed-denied',
+        title: 'Embed denied',
+        status: 403,
         detail: 'Only YouTube and Vimeo embeds are allowed',
         code: 'EMBED_DENIED',
       });
@@ -70,7 +70,7 @@ describe('Embed Policy Enforcement', () => {
       
       const response = await GET(request, { params: { id: 'C0008888' } });
       
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       const problem = await response.json();
       expect(problem.code).toBe('EMBED_DENIED');
     });
@@ -81,7 +81,7 @@ describe('Embed Policy Enforcement', () => {
       
       const response = await GET(request, { params: { id: 'C0008888' } });
       
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       expect(response.headers.get('content-type')).toBe('application/problem+json');
     });
     
@@ -91,7 +91,7 @@ describe('Embed Policy Enforcement', () => {
       
       const response = await GET(request, { params: { id: 'C0008888' } });
       
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       const problem = await response.json();
       expect(problem.code).toBe('EMBED_DENIED');
     });
@@ -102,7 +102,7 @@ describe('Embed Policy Enforcement', () => {
       
       const response = await GET(request, { params: { id: 'C0008888' } });
       
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       const problem = await response.json();
       expect(problem.code).toBe('EMBED_DENIED');
     });
@@ -115,7 +115,7 @@ describe('Embed Policy Enforcement', () => {
       
       const response = await GET(request, { params: { id: 'C0008888' } });
       
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(403);
       expect(response.headers.get('content-type')).toBe('application/problem+json');
       
       const problem = await response.json();
@@ -130,8 +130,8 @@ describe('Embed Policy Enforcement', () => {
       expect(problem).toHaveProperty('code');
       
       // Specific values
-      expect(problem.type).toBe('about:blank');
-      expect(problem.status).toBe(400);
+      expect(problem.type).toBe('https://api.snap3.com/problems/embed-denied');
+      expect(problem.status).toBe(403);
       expect(problem.code).toBe('EMBED_DENIED');
     });
   });

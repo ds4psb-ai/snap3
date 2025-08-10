@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandling } from '@/lib/errors/withErrorHandling';
-import { ApiProblems as Problems } from '@/lib/errors/problem';
+import { ApiProblems as Problems, buildProblemJSON } from '@/lib/errors/problem';
+import { ErrorCode } from '@/lib/errors/codes';
 import { generateEvidencePack } from '@/lib/schemas/evidence_pack.zod';
 import { redactEvidence, loadRedactionRules } from '@/lib/evidence/redact';
 import { evidenceDigest, auditRecord, createExportHeaders, logAuditEntry, validateETag } from '@/lib/evidence/audit';
@@ -21,13 +22,7 @@ export const GET = withErrorHandling(async (
   const resolvedParams = await params;
   const validation = paramsSchema.safeParse(resolvedParams);
   if (!validation.success) {
-    return NextResponse.json(
-      Problems.badRequest('Invalid digest ID format'),
-      { 
-        status: 400,
-        headers: { 'Content-Type': 'application/problem+json' },
-      }
-    );
+    return Problems.badRequest('Invalid digest ID format');
   }
   
   const { id } = validation.data;
@@ -36,50 +31,28 @@ export const GET = withErrorHandling(async (
   const aspectRatio = request.headers.get('X-Aspect-Ratio');
   if (aspectRatio === '9:16') {
     // Return crop-proxy metadata only
-    return NextResponse.json(
-      {
-        ...Problems.badRequest('Preview must be 16:9. Use crop-proxy for 9:16'),
-        code: 'UNSUPPORTED_AR_FOR_PREVIEW',
-        cropProxy: {
-          sourceAspect: '16:9',
-          targetAspect: '9:16',
-          cropRegion: { 
-            x: 0.34375,  // Center crop: (1 - 0.3125) / 2
-            y: 0,
-            width: 0.3125,  // 9:16 width in 16:9 frame
-            height: 1,
-          },
-        },
+    return Problems.unsupportedAspectRatio('9:16', {
+      sourceAspect: '16:9',
+      targetAspect: '9:16',
+      cropRegion: { 
+        x: 0.34375,  // Center crop: (1 - 0.3125) / 2
+        y: 0,
+        width: 0.3125,  // 9:16 width in 16:9 frame
+        height: 1,
       },
-      { 
-        status: 400,
-        headers: { 'Content-Type': 'application/problem+json' },
-      }
-    );
+    });
   }
   
   // Validate embed eligibility
   const embedUrl = request.headers.get('X-Embed-URL');
   if (embedUrl && !isOfficialEmbed(embedUrl)) {
-    const problemData = Problems.badRequest('Only YouTube and Vimeo embeds are allowed', {
-      code: 'EMBED_DENIED'
-    });
-    
-    const response = NextResponse.json(problemData, { status: 400 });
-    response.headers.set('Content-Type', 'application/problem+json');
-    return response;
+    return Problems.embedDenied(embedUrl, 'Only YouTube and Vimeo embeds are allowed');
   }
   
   // Fetch VDP data
   const vdpData = await fetchVDPData(id);
   if (!vdpData) {
-    return NextResponse.json(
-      Problems.notFound(`Export not found for ID: ${id}`),
-      { 
-        status: 404,
-        headers: { 'Content-Type': 'application/problem+json' },
-      }
-    );
+    return Problems.notFound(`Export not found for ID: ${id}`);
   }
   
   try {
@@ -111,7 +84,7 @@ export const GET = withErrorHandling(async (
     const evidencePack = generateEvidencePack(redactedVDP);
     
     // Create JSON export with VideoGenIR and Veo3Prompt
-    const jsonExport = {
+    const jsonExportBase = {
       digestId: id,
       videoGenIR: {
         durationSec: 8,
@@ -154,26 +127,34 @@ export const GET = withErrorHandling(async (
         ],
       },
       evidencePack,
+    };
+    
+    // Add timestamp to final export
+    const jsonExport = {
+      ...jsonExportBase,
       exportedAt: new Date().toISOString(),
     };
     
-    // Generate audit digest and headers
-    const digest = evidenceDigest(jsonExport);
-    const headers = createExportHeaders(digest, { 
+    // For ETag: Calculate digest WITHOUT timestamp for deterministic caching
+    const etagDigest = evidenceDigest(jsonExportBase);
+    
+    // For X-Export-SHA256: Calculate digest on actual response content
+    const contentDigest = evidenceDigest(jsonExport);
+    
+    const headers = createExportHeaders(contentDigest, { 
       streaming: false,
-      maxAge: 3600 
+      maxAge: 3600,
+      id: id, // Pass ID for ETag generation
+      etagDigest: etagDigest // Deterministic digest for ETag
     });
     
     // Check ETag validation for caching
     const clientETag = request.headers.get('If-None-Match');
-    if (clientETag && validateETag(clientETag, digest)) {
-      return new NextResponse(null, { 
-        status: 304,
-        headers: {
-          'ETag': headers['ETag'],
-          'Cache-Control': headers['Cache-Control'],
-        },
-      });
+    if (clientETag && validateETag(clientETag, etagDigest, id)) {
+      const notModifiedRes = new NextResponse(null, { status: 304 });
+      notModifiedRes.headers.set('ETag', headers['ETag']);
+      notModifiedRes.headers.set('Cache-Control', headers['Cache-Control']);
+      return notModifiedRes;
     }
     
     // Create audit record
@@ -199,22 +180,22 @@ export const GET = withErrorHandling(async (
     // Generate signed URL for export artifact if exists
     const exportArtifactUrl = await getExportArtifactUrl(id);
     
-    const response = NextResponse.json(jsonExport, {
-      headers: headers,
+    const res = NextResponse.json(jsonExport);
+    
+    // Set headers using the proper pattern
+    Object.entries(headers).forEach(([key, value]) => {
+      res.headers.set(key, value);
     });
     
     // Add download hint if artifact exists
     if (exportArtifactUrl) {
-      response.headers.set('Content-Disposition', `attachment; filename="export-${id}.json"`);
-      response.headers.set('X-Export-Artifact-URL', exportArtifactUrl);
+      res.headers.set('Content-Disposition', `attachment; filename="export-${id}.json"`);
+      res.headers.set('X-Export-Artifact-URL', exportArtifactUrl);
     }
-    return response;
+    return res;
   } catch (error) {
     console.error('JSON export error:', error);
-    return NextResponse.json(
-      Problems.internalServerError('Failed to generate JSON export'),
-      { status: 500 }
-    );
+    return Problems.internalServerError('Failed to generate JSON export');
   }
 });
 

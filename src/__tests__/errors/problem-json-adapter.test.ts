@@ -364,7 +364,8 @@ describe('Problem+JSON Adapter - RFC 9457 Compliance', () => {
 
     it('should handle FakeDurableQueueProvider failures correctly', async () => {
       const provider = new FakeDurableQueueProvider({
-        simulateLatency: false,
+        simulatedLatencyMs: 0,
+        simulateFailures: true,
         failureRate: 1.0, // Always fail for testing
       });
 

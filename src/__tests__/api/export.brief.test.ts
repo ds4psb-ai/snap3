@@ -5,15 +5,15 @@ describe('GET /api/export/brief/[id]', () => {
   describe('404 Not Found', () => {
     it('returns Problem+JSON when export not found', async () => {
       const request = new NextRequest('http://localhost:3001/api/export/brief/NOTFOUND');
-      const response = await GET(request, { params: { id: 'NOTFOUND' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'NOTFOUND' }) });
       
       expect(response.status).toBe(404);
       const body = await response.json();
       
       // RFC 9457 Problem+JSON structure
       expect(body).toMatchObject({
-        type: 'about:blank',
-        title: 'Not Found',
+        type: 'https://api.snap3.com/problems/not-found',
+        title: 'Resource not found',
         status: 404,
         detail: expect.stringContaining('Export not found'),
       });
@@ -24,14 +24,14 @@ describe('GET /api/export/brief/[id]', () => {
     
     it('returns 404 for invalid digest ID format', async () => {
       const request = new NextRequest('http://localhost:3001/api/export/brief/invalid');
-      const response = await GET(request, { params: { id: 'invalid' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'invalid' }) });
       
       expect(response.status).toBe(400);
       const body = await response.json();
       
       expect(body).toMatchObject({
-        type: 'about:blank',
-        title: 'Bad Request',
+        type: 'https://api.snap3.com/problems/bad-request',
+        title: 'Bad request',
         status: 400,
         detail: 'Invalid digest ID format',
       });
@@ -41,7 +41,7 @@ describe('GET /api/export/brief/[id]', () => {
   describe('Happy Path', () => {
     it('returns BriefExport with assembled fields', async () => {
       const request = new NextRequest('http://localhost:3001/api/export/brief/C0008888');
-      const response = await GET(request, { params: { id: 'C0008888' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'C0008888' }) });
       
       expect(response.status).toBe(200);
       const body = await response.json();
@@ -77,7 +77,7 @@ describe('GET /api/export/brief/[id]', () => {
     
     it('masks VDP_FULL data and only exposes Evidence Pack', async () => {
       const request = new NextRequest('http://localhost:3001/api/export/brief/C0008889');
-      const response = await GET(request, { params: { id: 'C0008889' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'C0008889' }) });
       
       expect(response.status).toBe(200);
       const body = await response.json();
@@ -102,14 +102,14 @@ describe('GET /api/export/brief/[id]', () => {
       const request = new NextRequest('http://localhost:3001/api/export/brief/C0008888');
       request.headers.set('X-Rate-Limit-Test', 'true');
       
-      const response = await GET(request, { params: { id: 'C0008888' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'C0008888' }) });
       
       if (response.status === 429) {
         const body = await response.json();
         
         expect(body).toMatchObject({
-          type: 'about:blank',
-          title: 'Too Many Requests',
+          type: 'https://api.snap3.com/problems/rate-limited',
+          title: 'Too many requests',
           status: 429,
           detail: expect.stringContaining('rate limit'),
         });
