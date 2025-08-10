@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { VDP } from "./schema";
+import { VDP } from "./schemas/vdp.zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
