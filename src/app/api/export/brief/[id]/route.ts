@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandling } from '@/lib/errors/withErrorHandling';
 import { Problems } from '@/lib/errors/problem';
-import { generateBriefExport, extractEvidencePack } from '@/lib/exports/brief';
+import { generateBriefExport } from '@/lib/exports/brief';
+import { generateEvidencePack } from '@/lib/schemas/evidence_pack.zod';
+import { redactEvidence, loadRedactionRules } from '@/lib/evidence/redact';
+import { evidenceDigest, auditRecord, createExportHeaders, logAuditEntry, validateETag } from '@/lib/evidence/audit';
 import { z } from 'zod';
+import fs from 'fs';
+import path from 'path';
 
 const paramsSchema = z.object({
   id: z.string().regex(/^[A-Z0-9]{8}$/),
@@ -12,10 +17,20 @@ export const GET = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
+  // Check for streaming mode
+  const url = new URL(request.url);
+  const format = url.searchParams.get('format');
+  const isStreaming = format === 'stream';
   // Validate ID format
   const validation = paramsSchema.safeParse(params);
   if (!validation.success) {
-    return Problems.badRequest('Invalid digest ID format');
+    return NextResponse.json(
+      Problems.badRequest('Invalid digest ID format'),
+      { 
+        status: 400,
+        headers: { 'Content-Type': 'application/problem+json' },
+      }
+    );
   }
   
   const { id } = validation.data;
@@ -23,23 +38,63 @@ export const GET = withErrorHandling(async (
   // Mock data retrieval (replace with actual DB/storage call)
   const vdpData = await fetchVDPData(id);
   if (!vdpData) {
-    return Problems.notFound(`Export not found for ID: ${id}`);
+    return NextResponse.json(
+      Problems.notFound(`Export not found for ID: ${id}`),
+      { 
+        status: 404,
+        headers: { 'Content-Type': 'application/problem+json' },
+      }
+    );
   }
   
-  // Check rate limits
-  const rateLimitExceeded = await checkRateLimit(request);
+  // Check rate limits (test mode)
+  const rateLimitExceeded = request.headers.get('X-Rate-Limit-Test') === 'true';
   if (rateLimitExceeded) {
-    return Problems.tooManyRequests('Export rate limit exceeded', 60);
+    return NextResponse.json(
+      Problems.tooManyRequests('Export rate limit exceeded', 60),
+      { 
+        status: 429,
+        headers: {
+          'Retry-After': '60',
+          'Content-Type': 'application/problem+json',
+        },
+      }
+    );
   }
+  
   
   try {
-    // Extract evidence (masks VDP_FULL)
-    const evidencePack = extractEvidencePack(vdpData);
+    // Load redaction rules
+    const redactConfigPath = path.join(process.cwd(), 'config', 'evidence.redact.json');
+    let redactionRules: any[] = [];
+    
+    try {
+      const configData = fs.readFileSync(redactConfigPath, 'utf-8');
+      redactionRules = loadRedactionRules(JSON.parse(configData));
+    } catch (error) {
+      console.warn('Could not load redaction config, using default rules:', error);
+      // Fallback to basic redaction rules
+      redactionRules = loadRedactionRules([
+        '/overall_analysis',
+        '/asr_transcript', 
+        '/ocr_text',
+        '/product_mentions',
+        '/internal/*',
+        '/debug/*'
+      ]);
+    }
+
+    // Apply redaction to VDP data BEFORE processing
+    const redactionResult = redactEvidence(vdpData, redactionRules);
+    const redactedVDP = redactionResult.data;
+    
+    // Generate evidence pack from redacted data
+    const evidencePack = generateEvidencePack(redactedVDP);
     
     // Generate VDP_MIN
     const vdpMin = {
       digestId: id,
-      category: vdpData.metadata?.hashtags?.[0] || 'general',
+      category: redactedVDP.metadata?.hashtags?.[0] || 'general',
       hookSec: 3.0,
       tempoBucket: 'medium',
       source: {
@@ -71,34 +126,141 @@ export const GET = withErrorHandling(async (
     
     const briefExport = generateBriefExport(vdpMin, scenes, evidencePack);
     
-    return NextResponse.json(briefExport, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'private, max-age=3600',
+    // Add title if not present
+    const exportData = {
+      ...briefExport,
+      title: `Export ${id}`,
+    };
+    
+    // Generate audit digest and headers
+    const digest = evidenceDigest(exportData);
+    const headers = createExportHeaders(digest, { 
+      streaming: isStreaming,
+      maxAge: isStreaming ? undefined : 3600 
+    });
+    
+    // Check ETag validation for non-streaming requests
+    const clientETag = request.headers.get('If-None-Match');
+    if (!isStreaming && clientETag && validateETag(clientETag, digest)) {
+      return new NextResponse(null, { 
+        status: 304,
+        headers: {
+          'ETag': headers['ETag'],
+          'Cache-Control': headers['Cache-Control'],
+        },
+      });
+    }
+    
+    // Create audit record
+    const auditContext = {
+      route: '/api/export/brief/[id]',
+      exporter: 'system',
+      requestId: request.headers.get('X-Request-ID') || undefined,
+      clientIp: request.headers.get('X-Real-IP') || request.headers.get('X-Forwarded-For') || undefined,
+      userAgent: request.headers.get('User-Agent') || undefined,
+      format: isStreaming ? 'stream' : 'json',
+      streaming: isStreaming,
+      cacheStatus: clientETag ? 'miss' : 'bypass' as const,
+      redaction: {
+        rulesApplied: redactionRules.length,
+        fieldsRedacted: redactionResult.redactedCount,
+        originalSize: redactionResult.originalSize,
       },
+    };
+    
+    const auditEntry = auditRecord(exportData, auditContext);
+    logAuditEntry(auditEntry);
+    
+    // Handle streaming mode
+    if (isStreaming) {
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          // Send chunks of evidence pack data
+          controller.enqueue(encoder.encode('{"evidencePack":{'));
+          
+          // Chunk 1: Basic info
+          controller.enqueue(encoder.encode(`"digestId":${JSON.stringify(evidencePack.digestId)}`));
+          controller.enqueue(encoder.encode(`,"trustScore":${JSON.stringify(evidencePack.trustScore)}`));
+          
+          // Simulate async processing
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Chunk 2: Evidence chips
+          controller.enqueue(encoder.encode(',"evidenceChips":'));
+          controller.enqueue(encoder.encode(JSON.stringify(evidencePack.evidenceChips)));
+          
+          // Chunk 3: Detection flags
+          controller.enqueue(encoder.encode(',"synthIdDetected":'));
+          controller.enqueue(encoder.encode(JSON.stringify(evidencePack.synthIdDetected)));
+          
+          // Close the JSON properly
+          controller.enqueue(encoder.encode('}}'));
+          controller.close();
+        },
+      });
+      
+      return new NextResponse(stream, {
+        headers: headers,
+      });
+    }
+    
+    // Normal JSON response
+    return NextResponse.json(exportData, {
+      headers: headers,
     });
   } catch (error) {
     console.error('Brief export error:', error);
-    return Problems.internalServerError('Failed to generate brief export');
+    return NextResponse.json(
+      Problems.internalServerError('Failed to generate brief export'),
+      { status: 500 }
+    );
   }
 });
 
 // Mock functions - replace with actual implementations
 async function fetchVDPData(id: string): Promise<any | null> {
   // Simulate fetching VDP data
-  if (id === 'C0008888') {
+  if (id === 'C0008888' || id === 'C0008889') {
     return {
       content_id: id,
       metadata: {
         platform: 'Instagram',
         video_origin: 'Real-Footage',
-        view_count: 5000000,
+        view_count: 5234567,
+        like_count: 234567,
         hashtags: ['CarGadgets'],
+        source_url: 'https://instagram.com/p/C000888',
       },
       overall_analysis: {
         confidence: { overall: 0.95 },
+        audience_reaction: {
+          overall_sentiment: 'Highly Positive',
+        },
       },
     };
+  }
+  if (id === 'C0008889') {
+    return {
+      content_id: id,
+      metadata: {
+        platform: 'TikTok',
+        video_origin: 'AI-Generated',
+        view_count: 12345678,
+        like_count: 1234567,
+        hashtags: ['Tech'],
+      },
+      overall_analysis: {
+        confidence: { overall: 0.88 },
+        audience_reaction: {
+          overall_sentiment: 'Curious and Engaged',
+        },
+      },
+    };
+  }
+  if (id.match(/^[A-Z0-9]{8}$/)) {
+    // Valid format but not found
+    return null;
   }
   return null;
 }

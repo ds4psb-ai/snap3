@@ -94,8 +94,52 @@ function generateTraceId(): string {
 
 /**
  * Factory functions for common problems
+ * These return plain objects for use with NextResponse.json()
  */
 export const Problems = {
+  // Generic error helpers returning plain objects
+  badRequest(detail?: string, opts: { code?: string; violations?: any[] } = {}) {
+    // Map string codes to ErrorCode enum values
+    const errorCode = opts.code === 'EMBED_DENIED' ? ErrorCode.EMBED_DENIED :
+                     opts.code === 'VALIDATION_ERROR' ? ErrorCode.VALIDATION_ERROR :
+                     ErrorCode.BAD_REQUEST;
+    
+    return buildProblemJSON(errorCode, {
+      detail,
+      violations: opts.violations,
+    });
+  },
+
+  notFound(detail?: string) {
+    return buildProblemJSON(ErrorCode.RESOURCE_NOT_FOUND, {
+      detail,
+    });
+  },
+
+  internalServerError(detail?: string) {
+    return buildProblemJSON(ErrorCode.INTERNAL_ERROR, {
+      detail,
+    });
+  },
+
+  tooManyRequests(detail?: string, retryAfter?: number) {
+    return buildProblemJSON(ErrorCode.RATE_LIMITED, {
+      detail,
+      retryAfter,
+    });
+  },
+
+  fromAppError(error: any) {
+    return {
+      type: 'about:blank',
+      title: error.message || 'Application Error',
+      status: error.statusCode || 500,
+      detail: error.detail || error.message,
+      code: error.code,
+    };
+  },
+
+  // Response-based helpers (existing code)
   validation(violations: Array<{ field: string; message: string; code?: string }>, instance?: string) {
     return problemResponse(ErrorCode.VALIDATION_ERROR, {
       detail: `Validation failed for ${violations.length} field(s)`,

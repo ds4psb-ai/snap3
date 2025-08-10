@@ -7,8 +7,10 @@ on:
     branches: [main]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # 브랜치별로 그룹핑 (PR도 target 브랜치로 그룹핑)
+  group: ci-${{ github.ref }}
+  # 이전 실행 자동 취소 (main 브랜치는 제외)
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   test:

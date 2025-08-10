@@ -1,88 +1,46 @@
-/**
- * Higher-order function to wrap API route handlers with error handling
- * Provides consistent error responses following RFC 9457 Problem Details
- */
-
 import { NextRequest, NextResponse } from 'next/server';
-import { ErrorCode } from './codes';
-import { problemResponse } from './problem';
+import { Problems } from './problem';
 import { ZodError } from 'zod';
+import { AppError } from './app-error';
 
-type ApiHandler = (
-  request: NextRequest,
-  context?: { params?: Record<string, string> }
-) => Promise<NextResponse> | NextResponse;
+type RouteHandler = (
+  req: NextRequest,
+  context?: any
+) => Promise<NextResponse>;
 
-/**
- * Wraps an API route handler with error handling
- */
-export function withErrorHandling(handler: ApiHandler): ApiHandler {
-  return async (request: NextRequest, context?: { params?: Record<string, string> }) => {
+export function withErrorHandling(handler: RouteHandler): RouteHandler {
+  return async (req: NextRequest, context?: any) => {
     try {
-      const response = await handler(request, context);
-      // Preserve headers by returning the response directly
-      return response;
+      return await handler(req, context);
     } catch (error) {
-      console.error('API Error:', error);
-      
-      // Handle Zod validation errors
+      console.error('API route error:', error);
+
       if (error instanceof ZodError) {
-        const violations = error.errors.map(err => ({
-          field: err.path.join('.'),
-          message: err.message,
-          code: err.code?.toUpperCase(),
-        }));
-        
-        return problemResponse(ErrorCode.VALIDATION_ERROR, {
-          detail: `Validation failed for ${violations.length} field(s)`,
-          violations,
-          instance: request.url,
-        });
+        return NextResponse.json(
+          Problems.badRequest({
+            detail: 'Validation failed',
+            violations: error.errors.map(err => ({
+              field: err.path.join('.'),
+              message: err.message,
+            })),
+          }),
+          { status: 400 }
+        );
       }
-      
-      // Handle known application errors
-      if (error instanceof Error) {
-        // Check if it's a known error pattern
-        if (error.message.includes('not found')) {
-          return problemResponse(ErrorCode.RESOURCE_NOT_FOUND, {
-            detail: error.message,
-            instance: request.url,
-          });
-        }
-        
-        if (error.message.includes('unauthorized') || error.message.includes('forbidden')) {
-          return problemResponse(ErrorCode.UNAUTHORIZED, {
-            detail: error.message,
-            instance: request.url,
-          });
-        }
+
+      if (error instanceof AppError) {
+        return NextResponse.json(
+          Problems[error.type](error.message),
+          { status: error.statusCode }
+        );
       }
-      
-      // Default to internal server error
-      return problemResponse(ErrorCode.INTERNAL_ERROR, {
-        detail: 'An unexpected error occurred',
-        instance: request.url,
-      });
+
+      return NextResponse.json(
+        Problems.internalServerError({
+          detail: 'An unexpected error occurred',
+        }),
+        { status: 500 }
+      );
     }
   };
-}
-
-/**
- * Convenience function for adding additional error context
- */
-export function withErrorContext(
-  handler: ApiHandler,
-  context: { operation: string; resource?: string }
-): ApiHandler {
-  return withErrorHandling(async (request, routeContext) => {
-    try {
-      return await handler(request, routeContext);
-    } catch (error) {
-      // Add operation context to the error
-      if (error instanceof Error) {
-        error.message = `${context.operation}: ${error.message}`;
-      }
-      throw error;
-    }
-  });
 }
