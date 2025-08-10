@@ -1,0 +1,792 @@
+openapi: 3.1.0
+info:
+  title: Snap3 Turbo API
+  description: Snap3 Turbo briefs → Veo3 preview → QA Gate → exports E2E API
+  version: 1.0.0
+  contact:
+    name: Snap3 Team
+    email: support@snap3.com
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://api.snap3.com
+    description: Production server
+
+paths:
+  /ingest:
+    post:
+      summary: Ingest content for processing
+      description: Normalize URL/text/upload content and record embed compatibility
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+                - content
+              properties:
+                type:
+                  type: string
+                  enum: [url, text, upload]
+                  description: Type of content to ingest
+                content:
+                  type: string
+                  description: Content to process
+                metadata:
+                  type: object
+                  additionalProperties: true
+                  description: Optional metadata
+      responses:
+        '200':
+          description: Content ingested successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  type:
+                    type: string
+                  status:
+                    type: string
+                    enum: [normalized]
+                  embedCompatibility:
+                    type: boolean
+        '400':
+          description: Invalid ingest data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '405':
+          description: Method not allowed
+
+  /snap3/turbo:
+    post:
+      summary: Generate turbo briefs
+      description: Create 2-4 textboards with evidence pack
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ingestId
+                - evidencePack
+              properties:
+                ingestId:
+                  type: string
+                  format: uuid
+                evidencePack:
+                  $ref: '#/components/schemas/EvidencePack'
+      responses:
+        '200':
+          description: Turbo briefs generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  textboards:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Textboard'
+                    minItems: 2
+                    maxItems: 4
+                  totalDuration:
+                    type: number
+                    maximum: 8
+                  evidencePack:
+                    $ref: '#/components/schemas/EvidencePack'
+        '400':
+          description: Invalid turbo request
+        '405':
+          description: Method not allowed
+
+  /compile/veo3:
+    post:
+      summary: Compile Veo3 prompt
+      description: Validate and compile Veo3 prompt with 8s/16:9 constraints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Veo3Prompt'
+      responses:
+        '200':
+          description: Veo3 prompt compiled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  prompt:
+                    type: string
+                  duration:
+                    type: number
+                    const: 8
+                  aspectRatio:
+                    type: string
+                    const: '16:9'
+                  quality:
+                    type: string
+                    enum: [720p, 1080p]
+                  status:
+                    type: string
+                    enum: [compiled]
+        '400':
+          description: Invalid Veo3 prompt
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/InvalidDurationError'
+                  - $ref: '#/components/schemas/UnsupportedAspectRatioError'
+        '405':
+          description: Method not allowed
+
+  /preview/veo:
+    post:
+      summary: Create preview job
+      description: Create async preview job, returns 202 Accepted
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - veo3Id
+                - prompt
+                - duration
+                - aspectRatio
+                - quality
+              properties:
+                veo3Id:
+                  type: string
+                  format: uuid
+                prompt:
+                  type: string
+                duration:
+                  type: number
+                  const: 8
+                aspectRatio:
+                  type: string
+                  const: '16:9'
+                quality:
+                  type: string
+                  enum: [720p, 1080p]
+      responses:
+        '202':
+          description: Preview job accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [accepted]
+                  message:
+                    type: string
+                  pollUrl:
+                    type: string
+                    format: uri
+        '400':
+          description: Invalid preview request
+        '405':
+          description: Method not allowed
+
+  /jobs/{id}:
+    get:
+      summary: Get job status
+      description: Poll job status for completion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Job status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Veo3Job'
+        '404':
+          description: Job not found
+        '405':
+          description: Method not allowed
+
+  /qa/validate:
+    post:
+      summary: Validate QA rules
+      description: Run QA lint rules (Hook≤3s, Safezones, fps/bitrate)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QAValidationRequest'
+      responses:
+        '200':
+          description: QA validation passed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [passed]
+                  message:
+                    type: string
+                  score:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+        '400':
+          description: QA validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QARuleViolationError'
+        '405':
+          description: Method not allowed
+
+  /export/brief/{id}:
+    get:
+      summary: Export brief
+      description: Export brief with VDP_MIN + Evidence (VDP_FULL excluded)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Brief exported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefExport'
+        '404':
+          description: Brief not found
+        '405':
+          description: Method not allowed
+
+  /export/json/{id}:
+    get:
+      summary: Export JSON
+      description: Export JSON with VDP_MIN + Evidence (VDP_FULL excluded)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: JSON exported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONExport'
+        '404':
+          description: Export not found
+        '405':
+          description: Method not allowed
+
+components:
+  schemas:
+    VDP_MIN:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - category
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          minLength: 1
+          maxLength: 500
+        category:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Evidence:
+      type: object
+      required:
+        - id
+        - type
+        - content
+        - confidence
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [text, url, image, video]
+        content:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        metadata:
+          type: object
+          properties:
+            source:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+            tags:
+              type: array
+              items:
+                type: string
+
+    EvidencePack:
+      type: object
+      required:
+        - id
+        - vdpId
+        - evidence
+        - metadata
+      properties:
+        id:
+          type: string
+          format: uuid
+        vdpId:
+          type: string
+          format: uuid
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/Evidence'
+        metadata:
+          type: object
+          required:
+            - source
+            - confidence
+            - timestamp
+          properties:
+            source:
+              type: string
+            confidence:
+              type: number
+              minimum: 0
+              maximum: 1
+            timestamp:
+              type: string
+              format: date-time
+            version:
+              type: string
+              default: '1.0'
+
+    Textboard:
+      type: object
+      required:
+        - id
+        - content
+        - duration
+        - position
+        - style
+        - startTime
+      properties:
+        id:
+          type: string
+          format: uuid
+        content:
+          type: string
+          minLength: 1
+          maxLength: 200
+        duration:
+          type: number
+          minimum: 0.5
+          maximum: 8
+        position:
+          type: object
+          required:
+            - x
+            - y
+          properties:
+            x:
+              type: number
+              minimum: 0
+              maximum: 1
+            y:
+              type: number
+              minimum: 0
+              maximum: 1
+        style:
+          type: object
+          required:
+            - fontSize
+            - fontWeight
+            - color
+          properties:
+            fontSize:
+              type: number
+              minimum: 12
+              maximum: 72
+            fontWeight:
+              type: string
+              enum: [normal, bold, light]
+            color:
+              type: string
+              pattern: '^#[0-9A-F]{6}$'
+            backgroundColor:
+              type: string
+              pattern: '^#[0-9A-F]{6}$'
+            opacity:
+              type: number
+              minimum: 0
+              maximum: 1
+              default: 1
+        startTime:
+          type: number
+          minimum: 0
+          maximum: 8
+
+    Veo3Prompt:
+      type: object
+      required:
+        - prompt
+        - duration
+        - aspectRatio
+        - quality
+      properties:
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        duration:
+          type: number
+          const: 8
+        aspectRatio:
+          type: string
+          const: '16:9'
+        quality:
+          type: string
+          enum: [720p, 1080p]
+        model:
+          type: string
+          default: 'veo-3'
+        parameters:
+          type: object
+          properties:
+            temperature:
+              type: number
+              minimum: 0
+              maximum: 1
+              default: 0.7
+            topP:
+              type: number
+              minimum: 0
+              maximum: 1
+              default: 0.9
+            maxTokens:
+              type: number
+              minimum: 1
+              maximum: 1000
+              default: 500
+
+    Veo3Job:
+      type: object
+      required:
+        - id
+        - status
+        - progress
+        - prompt
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+        prompt:
+          $ref: '#/components/schemas/Veo3Prompt'
+        result:
+          type: object
+          properties:
+            videoUrl:
+              type: string
+              format: uri
+            duration:
+              type: number
+              const: 8
+            aspectRatio:
+              type: string
+              const: '16:9'
+            quality:
+              type: string
+              enum: [720p, 1080p]
+            fps:
+              type: number
+              minimum: 24
+              maximum: 60
+            bitrate:
+              type: number
+              minimum: 1000000
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            fix:
+              type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    QAValidationRequest:
+      type: object
+      required:
+        - previewUrl
+        - duration
+        - aspectRatio
+        - quality
+        - hooks
+        - safezones
+        - fps
+        - bitrate
+      properties:
+        previewUrl:
+          type: string
+          format: uri
+        duration:
+          type: number
+        aspectRatio:
+          type: string
+        quality:
+          type: string
+        hooks:
+          type: array
+          items:
+            type: object
+            required:
+              - name
+              - duration
+            properties:
+              name:
+                type: string
+              duration:
+                type: number
+        safezones:
+          type: array
+          items:
+            type: object
+            required:
+              - x
+              - y
+              - width
+              - height
+            properties:
+              x:
+                type: number
+              y:
+                type: number
+              width:
+                type: number
+              height:
+                type: number
+        fps:
+          type: number
+        bitrate:
+          type: number
+
+    BriefExport:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - category
+        - createdAt
+        - updatedAt
+        - evidence
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/Evidence'
+
+    JSONExport:
+      type: object
+      required:
+        - id
+        - type
+        - version
+        - timestamp
+        - data
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          const: json
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          required:
+            - vdp_min
+            - evidence
+          properties:
+            vdp_min:
+              $ref: '#/components/schemas/VDP_MIN'
+            evidence:
+              type: array
+              items:
+                $ref: '#/components/schemas/Evidence'
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+
+    InvalidDurationError:
+      type: object
+      required:
+        - error
+        - message
+        - fix
+      properties:
+        error:
+          type: string
+          const: INVALID_DURATION
+        message:
+          type: string
+        fix:
+          type: string
+
+    UnsupportedAspectRatioError:
+      type: object
+      required:
+        - error
+        - message
+        - fix
+      properties:
+        error:
+          type: string
+          const: UNSUPPORTED_AR_FOR_PREVIEW
+        message:
+          type: string
+        fix:
+          type: string
+
+    QARuleViolationError:
+      type: object
+      required:
+        - error
+        - message
+        - violations
+        - status
+      properties:
+        error:
+          type: string
+          const: QA_RULE_VIOLATION
+        message:
+          type: string
+        violations:
+          type: array
+          items:
+            type: object
+            required:
+              - rule
+              - message
+            properties:
+              rule:
+                type: string
+              message:
+                type: string
+              details:
+                type: string
+        status:
+          type: string
+          const: failed
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+security:
+  - ApiKeyAuth: []
+

@@ -90,3 +90,25 @@ easynext sentry
 # Google Adsense
 easynext adsense
 ```
+
+## Google Analytics 사용법
+
+이 프로젝트는 Google Analytics(GA4)가 설정되어 있습니다. 측정 ID: `G-123456`
+
+### 페이지 추적
+페이지 추적은 자동으로 설정되어 있습니다.
+
+### 이벤트 추적
+이벤트를 추적하려면 다음과 같이 사용하세요:
+
+```javascript
+import { event } from './app/gtag';
+
+// 이벤트 추적
+event({
+  action: '버튼_클릭',
+  category: '사용자_상호작용',
+  label: '로그인_버튼',
+  value: 1
+});
+```

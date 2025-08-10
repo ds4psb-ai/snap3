@@ -1,0 +1,28 @@
+[
+  {
+    "id": "1",
+    "title": "AI Content Analysis",
+    "description": "Growing trend in automated content analysis and insights generation",
+    "category": "Technology",
+    "popularity": 85,
+    "createdAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": "2",
+    "title": "Real-time Collaboration",
+    "description": "Increased demand for real-time collaborative content creation tools",
+    "category": "Productivity",
+    "popularity": 72,
+    "createdAt": "2024-01-14T15:30:00Z"
+  },
+  {
+    "id": "3",
+    "title": "Data Visualization",
+    "description": "Rising interest in interactive data visualization and analytics",
+    "category": "Analytics",
+    "popularity": 68,
+    "createdAt": "2024-01-13T09:15:00Z"
+  }
+]
+
+
