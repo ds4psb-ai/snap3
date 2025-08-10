@@ -7,67 +7,68 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    name: Build and Test
+  tests:
+    name: Tests
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [20.x]
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Run type check
-      run: npm run type-check
-    
-    - name: Run linter
-      run: npm run lint
-      continue-on-error: true
-    
-    - name: Build project
-      run: npm run build
-    
-    - name: Run schema validation
-      run: npm run schemas:check
-    
-    - name: Run tests
-      run: npm test
-      continue-on-error: true
-
-  security:
-    name: Security Checks
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
       with:
         node-version: '20.x'
         cache: 'npm'
+    - run: npm ci
+    - run: npm run type-check
+    - run: npm run lint
+    - run: npm test
     
-    - name: Install dependencies
-      run: npm ci
+  schemas:
+    name: Schema Validation
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run schemas:check
+    - run: npm run schemas:test
     
-    - name: Run security audit
-      run: npm audit --audit-level=moderate
-      continue-on-error: true
+  contracts:
+    name: Contract Tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run test:contracts
     
-    - name: Run CI security checks
-      run: |
-        npm run ci:media-policy || true
-        npm run ci:embed-policy || true
-        npm run ci:a11y || true
+  qa-guards:
+    name: QA Guards
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run guards
+    - run: npm run ci:all
+    - run: npm run guard:problem-json
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [tests, schemas, contracts, qa-guards]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build
