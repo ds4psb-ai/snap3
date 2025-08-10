@@ -6,6 +6,10 @@ import { Job, JobStatus, JobResult, JobError } from './types';
 import { JobQueue } from './queue';
 import { JobTracker } from './tracker';
 import { ErrorCode } from '@/lib/errors/codes';
+import { AppError } from '@/lib/errors/app-error';
+import { JobQueueProvider, createQueueProvider } from './providers';
+import { InMemoryQueueProvider } from './providers/inmemory';
+import { FakeDurableQueueProvider } from './providers/fake-durable';
 
 export interface WorkerConfig {
   processInterval?: number; // ms
@@ -174,11 +178,58 @@ export class JobWorker {
 
 // Singleton instances for the application
 let queueInstance: JobQueue | null = null;
+let providerInstance: JobQueueProvider | null = null;
 let trackerInstance: JobTracker | null = null;
 let workerInstance: JobWorker | null = null;
 
+/**
+ * Get the queue provider instance
+ * Uses environment variable to select provider type
+ */
+export async function getQueueProvider(): Promise<JobQueueProvider> {
+  if (!providerInstance) {
+    const providerType = (process.env.QUEUE_PROVIDER || 'inmemory') as 'inmemory' | 'redis' | 'fake-durable';
+    const config = {
+      maxConcurrent: 2,
+      maxQueueSize: 100,
+      rateLimit: {
+        perMinute: parseInt(process.env.RATE_LIMIT_PER_MINUTE || '60'),
+        perRequest: parseInt(process.env.RATE_LIMIT_PER_REQUEST || '2'),
+      },
+    };
+    
+    try {
+      providerInstance = await createQueueProvider(providerType, config);
+      console.log(`Job queue provider initialized: ${providerType}`);
+    } catch (error) {
+      console.error(`Failed to initialize ${providerType} provider, falling back to in-memory:`, error);
+      
+      // Fallback to in-memory
+      providerInstance = new InMemoryQueueProvider(config);
+      
+      // Map provider errors to AppError
+      if (error instanceof Error) {
+        if (error.message.includes('quota') || error.message.includes('limit')) {
+          throw new AppError(ErrorCode.PROVIDER_QUOTA_EXCEEDED, {
+            detail: 'Queue provider quota exceeded',
+            retryAfter: 60,
+            instance: '/api/preview/veo',
+          });
+        }
+      }
+    }
+  }
+  return providerInstance;
+}
+
+/**
+ * Get the job queue instance
+ * For backward compatibility, wraps the provider
+ */
 export function getJobQueue(): JobQueue {
   if (!queueInstance) {
+    // For now, create a regular JobQueue
+    // In future, this could be a facade over the provider
     queueInstance = new JobQueue({
       maxConcurrent: 2,
       maxQueueSize: 100,
