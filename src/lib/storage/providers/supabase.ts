@@ -8,6 +8,7 @@ import { StorageProvider, ResumableStorageProvider, ResumableUploadSession } fro
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { AppError } from '@/lib/errors/app-error';
 import { ErrorCode } from '@/lib/errors/codes';
+import { mapProviderError } from './error-mapper';
 
 export class SupabaseStorageProvider implements ResumableStorageProvider {
   private client: SupabaseClient;
@@ -69,23 +70,21 @@ export class SupabaseStorageProvider implements ResumableStorageProvider {
         .createSignedUploadUrl(key);
 
       if (error) {
-        throw new AppError(
-          ErrorCode.PROVIDER_POLICY_BLOCKED,
-          { 
-            detail: 'Storage provider error: Upload denied',
-            metadata: { provider: 'supabase', operation: 'createSignedUploadUrl' }
-          }
-        );
+        throw mapProviderError({
+          provider: 'supabase',
+          operation: 'createSignedUploadUrl',
+          error,
+          key,
+        });
       }
 
       if (!data?.signedUrl) {
-        throw new AppError(
-          ErrorCode.PROVIDER_POLICY_BLOCKED,
-          { 
-            detail: 'Failed to create upload URL',
-            metadata: { provider: 'supabase' }
-          }
-        );
+        throw mapProviderError({
+          provider: 'supabase',
+          operation: 'createSignedUploadUrl',
+          error: new Error('No signed URL returned'),
+          key,
+        });
       }
 
       return {
@@ -102,13 +101,12 @@ export class SupabaseStorageProvider implements ResumableStorageProvider {
         throw error;
       }
       
-      throw new AppError(
-        ErrorCode.PROVIDER_QUOTA_EXCEEDED,
-        { 
-          detail: 'Failed to create upload URL',
-          retryAfter: 60 
-        }
-      );
+      throw mapProviderError({
+        provider: 'supabase',
+        operation: 'createSignedUploadUrl',
+        error,
+        key,
+      });
     }
   }
 
@@ -146,23 +144,21 @@ export class SupabaseStorageProvider implements ResumableStorageProvider {
         });
 
       if (error) {
-        throw new AppError(
-          ErrorCode.RESOURCE_NOT_FOUND,
-          { 
-            detail: 'Resource not found',
-            metadata: { operation: 'getSignedReadUrl' }
-          }
-        );
+        throw mapProviderError({
+          provider: 'supabase',
+          operation: 'getSignedReadUrl',
+          error,
+          key,
+        });
       }
 
       if (!data?.signedUrl) {
-        throw new AppError(
-          ErrorCode.RESOURCE_NOT_FOUND,
-          { 
-            detail: 'Resource not found',
-            metadata: { operation: 'getSignedReadUrl' }
-          }
-        );
+        throw mapProviderError({
+          provider: 'supabase',
+          operation: 'getSignedReadUrl',
+          error: new Error('No signed URL returned'),
+          key,
+        });
       }
 
       return {
@@ -174,13 +170,12 @@ export class SupabaseStorageProvider implements ResumableStorageProvider {
         throw error;
       }
       
-      throw new AppError(
-        ErrorCode.PROVIDER_POLICY_BLOCKED,
-        { 
-          detail: 'Failed to create read URL',
-          retryAfter: 60 
-        }
-      );
+      throw mapProviderError({
+        provider: 'supabase',
+        operation: 'getSignedReadUrl',
+        error,
+        key,
+      });
     }
   }
 
