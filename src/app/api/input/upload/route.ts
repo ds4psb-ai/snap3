@@ -1,25 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { createVDP } from '@/lib/db';
 import { analyzeContent } from '@/lib/llm';
+import { Problems } from '@/lib/errors/problem';
+
+const UploadSchema = z.object({
+  fileName: z.string().min(1, 'File name is required'),
+  fileUrl: z.string().url('Valid file URL is required'),
+  fileType: z.string().min(1, 'File type is required'),
+  fileSize: z.number().optional(),
+  metadata: z.record(z.any()).optional(),
+});
 
 export async function POST(request: NextRequest) {
+  const instance = '/api/input/upload';
+  
   try {
     const body = await request.json();
+    const validatedData = UploadSchema.parse(body);
+    
     const { 
       fileName, 
       fileUrl, 
       fileType, 
       fileSize,
       metadata 
-    } = body;
-
-    // Validate required fields
-    if (!fileName || !fileUrl) {
-      return NextResponse.json(
-        { error: 'fileName and fileUrl are required' },
-        { status: 400 }
-      );
-    }
+    } = validatedData;
 
     // TODO: Extract content from uploaded file
     // This would involve:
@@ -71,10 +77,21 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Upload processing error:', error);
-    return NextResponse.json(
-      { error: 'Failed to process uploaded file' },
-      { status: 500 }
-    );
+    
+    if (error instanceof z.ZodError) {
+      const violations = error.errors.map(err => ({
+        field: err.path.join('.'),
+        message: err.message,
+        code: 'VALIDATION_ERROR',
+      }));
+      return Problems.validation(violations, instance);
+    }
+    
+    return Problems.validation([{
+      field: 'request',
+      message: 'Failed to process uploaded file',
+      code: 'UPLOAD_ERROR',
+    }], instance);
   }
 }
 

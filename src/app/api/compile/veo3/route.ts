@@ -1,39 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-
-const Veo3PromptSchema = z.object({
-  prompt: z.string().min(1),
-  duration: z.literal(8),
-  aspectRatio: z.literal('16:9'),
-  quality: z.enum(['720p', '1080p']),
-});
+import { Problems } from '@/lib/errors/problem';
+import { VEO3_PROMPT_SCHEMA } from '@/lib/schemas/veo3.zod';
 
 export async function POST(request: NextRequest) {
+  const instance = '/api/compile/veo3';
+  
   try {
     const body = await request.json();
-    const validatedData = Veo3PromptSchema.parse(body);
+    const validatedData = VEO3_PROMPT_SCHEMA.parse(body);
     
     // Validate constraints
     if (validatedData.duration !== 8) {
-      return NextResponse.json(
-        { 
-          error: 'INVALID_DURATION',
-          message: '지속시간이 8초가 아닙니다. 8초로 조정됩니다.',
-          fix: 'duration을 8로 설정하세요.'
-        },
-        { status: 400 }
-      );
+      return Problems.invalidDuration(validatedData.duration, instance);
     }
     
-    if (validatedData.aspectRatio !== '16:9') {
-      return NextResponse.json(
-        { 
-          error: 'UNSUPPORTED_AR_FOR_PREVIEW',
-          message: '세로 비율은 지원되지 않습니다. 16:9로 변환 후 crop-proxy를 사용하세요.',
-          fix: 'aspectRatio를 16:9로 설정하세요.'
-        },
-        { status: 400 }
-      );
+    if (validatedData.aspect !== '16:9') {
+      return Problems.unsupportedAspectRatio(validatedData.aspect, instance);
     }
     
     // TODO: Implement Veo3 prompt compilation
@@ -41,23 +24,30 @@ export async function POST(request: NextRequest) {
       id: 'veo3-' + Date.now(),
       prompt: validatedData.prompt,
       duration: validatedData.duration,
-      aspectRatio: validatedData.aspectRatio,
-      quality: validatedData.quality,
+      aspect: validatedData.aspect,
+      resolution: validatedData.resolution,
       status: 'compiled',
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Invalid Veo3 prompt' },
-      { status: 400 }
-    );
+    if (error instanceof z.ZodError) {
+      const violations = error.errors.map(err => ({
+        field: err.path.join('.'),
+        message: err.message,
+        code: 'VALIDATION_ERROR',
+      }));
+      return Problems.validation(violations, instance);
+    }
+    
+    return Problems.validation([{
+      field: 'request',
+      message: 'Invalid Veo3 prompt format',
+      code: 'INVALID_REQUEST',
+    }], instance);
   }
 }
 
 export async function GET() {
-  return NextResponse.json(
-    { error: 'Method not allowed' },
-    { status: 405 }
-  );
+  return Problems.methodNotAllowed('GET', ['POST'], '/api/compile/veo3');
 }
 
 

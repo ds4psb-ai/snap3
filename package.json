@@ -18,9 +18,10 @@
     "guard:problem-json": "node scripts/validate-problem-details.js",
     "guards": "npm run guard:vdp && npm run guard:problem-json",
     "ci:media-policy": "tsx scripts/lint-media-policy.ts",
+    "ci:embed-policy": "tsx scripts/check-media-embeds.ts",
     "ci:a11y": "tsx scripts/lint-a11y-contrast.ts",
     "ci:vdp-guard": "tsx scripts/check-vdp-exposure.ts",
-    "ci:all": "npm run ci:media-policy && npm run ci:a11y && npm run ci:vdp-guard"
+    "ci:all": "npm run ci:media-policy && npm run ci:embed-policy && npm run ci:a11y && npm run ci:vdp-guard"
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^1.0.72",
@@ -73,6 +74,7 @@
     "@types/node": "^20.19.9",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "ajv-formats": "^3.0.1",
     "eslint": "^9",
     "eslint-config-next": "15.1.0",
     "jest": "^30.0.5",

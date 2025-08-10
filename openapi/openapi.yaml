@@ -160,11 +160,16 @@ paths:
                     type: string
                     enum: [compiled]
         '400':
-          description: Bad Request
+          description: Invalid Veo3 prompt
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/InvalidDurationError'
+                  - $ref: '#/components/schemas/UnsupportedAspectRatioError'
         '403':
           description: Forbidden
           content:
@@ -207,6 +212,120 @@ paths:
                 $ref: '#/components/schemas/Problem'
         '405':
           description: Method not allowed
+
+  /embed-meta:
+    post:
+      summary: Extract embed metadata
+      description: Validate and extract metadata from official YouTube and Vimeo embed URLs only
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: URL to extract embed metadata from
+            examples:
+              youtube:
+                value:
+                  url: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+              vimeo:
+                value:
+                  url: "https://player.vimeo.com/video/123456789"
+              youtubeWatch:
+                value:
+                  url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      responses:
+        '200':
+          description: Embed metadata extracted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - embedUrl
+                  - originalUrl
+                  - provider
+                  - videoId
+                  - title
+                  - thumbnail
+                properties:
+                  embedUrl:
+                    type: string
+                    format: uri
+                    description: Normalized official embed URL
+                  originalUrl:
+                    type: string
+                    format: uri
+                    description: Original URL provided
+                  provider:
+                    type: string
+                    enum: [youtube, vimeo]
+                    description: Video provider
+                  videoId:
+                    type: string
+                    description: Provider-specific video ID
+                  title:
+                    type: string
+                    description: Generated video title
+                  thumbnail:
+                    type: string
+                    format: uri
+                    description: Video thumbnail URL
+              examples:
+                youtube:
+                  value:
+                    embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+                    originalUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                    provider: "youtube"
+                    videoId: "dQw4w9WgXcQ"
+                    title: "YouTube Video (dQw4w9WgXcQ)"
+                    thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                invalidUrl:
+                  value:
+                    type: 'https://api.snap3.com/problems/validation-error'
+                    title: 'Validation error'
+                    status: 400
+                    code: 'VALIDATION_ERROR'
+                    detail: 'Validation failed for 1 field(s)'
+                    fix: 'Check request format and required fields.'
+                    violations:
+                      - field: 'url'
+                        message: 'Invalid URL format'
+                        code: 'VALIDATION_ERROR'
+        '403':
+          description: Embed Denied
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              examples:
+                embedDenied:
+                  value:
+                    type: 'https://api.snap3.com/problems/embed-denied'
+                    title: 'Embed denied'
+                    status: 403
+                    code: 'EMBED_DENIED'
+                    detail: 'Only official YouTube and Vimeo embeds are allowed'
+                    fix: 'Use official embeds only; link out if needed.'
+        '405':
+          description: Method not allowed
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
 
   /preview/veo:
     post:
@@ -273,27 +392,22 @@ paths:
               schema:
                 type: object
                 required:
-                  - id
+                  - jobId
                   - status
-                  - progress
-                  - createdAt
+                  - pollUrl
                 properties:
-                  id:
+                  jobId:
                     type: string
+                    format: uuid
                     description: Job ID
                   status:
                     type: string
-                    enum: [queued, processing, completed, failed, cancelled]
+                    enum: [accepted]
                     description: Job status
-                  progress:
-                    type: number
-                    minimum: 0
-                    maximum: 100
-                    description: Job progress percentage
-                  createdAt:
+                  pollUrl:
                     type: string
-                    format: date-time
-                    description: Job creation timestamp
+                    format: uri
+                    description: URL to poll for job status
         '400':
           description: Invalid preview request
           content:
@@ -337,7 +451,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JobStatus'
+                $ref: '#/components/schemas/Veo3Job'
         '404':
           description: Job not found
           content:
@@ -647,22 +761,56 @@ components:
     Veo3Prompt:
       type: object
       required:
+        - prompt
         - duration
         - aspect
         - resolution
-        - shots
       properties:
+        prompt:
+          type: string
+          minLength: 1
+          description: Text prompt for Veo3 generation
         duration:
           type: number
           const: 8
+          description: Fixed duration of 8 seconds
         aspect:
           type: string
           const: '16:9'
+          description: Fixed aspect ratio of 16:9
         resolution:
           type: string
           enum: ['720p', '1080p']
+          description: Video resolution quality
+        model:
+          type: string
+          default: 'veo-3'
+          description: Model identifier
+        parameters:
+          type: object
+          description: Optional model parameters
+          properties:
+            temperature:
+              type: number
+              minimum: 0
+              maximum: 1
+              default: 0.7
+              description: Model temperature
+            topP:
+              type: number
+              minimum: 0
+              maximum: 1
+              default: 0.9
+              description: Top-p sampling parameter
+            maxTokens:
+              type: number
+              minimum: 1
+              maximum: 1000
+              default: 500
+              description: Maximum tokens
         shots:
           type: array
+          description: Optional shot descriptions
           items:
             type: object
             properties:
@@ -673,31 +821,31 @@ components:
               camera:
                 type: string
 
-    JobStatus:
+    Veo3Job:
       type: object
       required:
         - id
-        - type
         - status
         - progress
+        - prompt
         - createdAt
         - updatedAt
       properties:
         id:
           type: string
           description: Job ID
-        type:
-          type: string
-          description: Job type
         status:
           type: string
-          enum: [queued, processing, completed, failed, cancelled]
+          enum: [pending, processing, completed, failed]
           description: Current job status
         progress:
           type: number
           minimum: 0
           maximum: 100
           description: Job progress percentage
+        prompt:
+          type: string
+          description: Original prompt
         createdAt:
           type: string
           format: date-time
@@ -770,10 +918,10 @@ components:
             properties:
               from:
                 type: string
-                enum: [queued, processing, completed, failed, cancelled]
+                enum: [pending, processing, completed, failed]
               to:
                 type: string
-                enum: [queued, processing, completed, failed, cancelled]
+                enum: [pending, processing, completed, failed]
               timestamp:
                 type: string
                 format: date-time
@@ -789,13 +937,20 @@ components:
     QAValidationRequest:
       type: object
       required:
+        - previewUrl
         - fps
         - bitrate
         - duration
         - aspectRatio
-        - resolution
+        - quality
         - target
+        - hooks
+        - safezones
       properties:
+        previewUrl:
+          type: string
+          format: uri
+          description: URL of the preview to validate
         fps:
           type: number
           minimum: 1
@@ -809,12 +964,39 @@ components:
         aspectRatio:
           type: string
           const: '16:9'
-        resolution:
+        quality:
           type: string
           enum: ['720p', '1080p']
         target:
           type: string
           enum: ['reels', 'tiktok', 'shorts']
+        hooks:
+          type: array
+          items:
+            type: object
+            required:
+              - name
+              - duration
+            properties:
+              name:
+                type: string
+              duration:
+                type: number
+                minimum: 0
+                maximum: 3
+        safezones:
+          type: array
+          items:
+            type: object
+            properties:
+              x:
+                type: number
+              y:
+                type: number
+              width:
+                type: number
+              height:
+                type: number
         hookSec:
           type: number
           minimum: 0
@@ -875,6 +1057,7 @@ components:
         - digestId
         - title
         - scenes
+        - evidence
         - evidencePack
         - exportedAt
       properties:
@@ -887,6 +1070,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TextboardScene'
+        evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/Evidence'
         evidencePack:
           $ref: '#/components/schemas/EvidencePack'
         exportedAt:
@@ -915,20 +1102,28 @@ components:
       type: object
       required:
         - digestId
-        - videoGenIR
-        - veo3Prompt
-        - evidencePack
+        - data
         - exportedAt
       properties:
         digestId:
           type: string
           pattern: '^[A-Z0-9]{8}$'
-        videoGenIR:
-          $ref: '#/components/schemas/VideoGenIR'
-        veo3Prompt:
-          $ref: '#/components/schemas/Veo3Prompt'
-        evidencePack:
-          $ref: '#/components/schemas/EvidencePack'
+        data:
+          type: object
+          required:
+            - vdp_min
+            - evidence
+          properties:
+            vdp_min:
+              $ref: '#/components/schemas/VDP_MIN'
+            evidence:
+              type: array
+              items:
+                $ref: '#/components/schemas/Evidence'
+            videoGenIR:
+              $ref: '#/components/schemas/VideoGenIR'
+            veo3Prompt:
+              $ref: '#/components/schemas/Veo3Prompt'
         exportedAt:
           type: string
           format: date-time
@@ -1046,7 +1241,6 @@ components:
           description: Short human-readable summary
         status:
           type: integer
-          format: int32
           description: HTTP status code
         detail:
           type: string

@@ -1,7 +1,27 @@
 import { readFileSync } from 'fs';
 import { load } from 'js-yaml';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 import { VEO3_PROMPT_SCHEMA } from '../../lib/schemas/veo3.zod';
+import { buildProblemJSON } from '../../lib/errors/problem';
+import { ErrorCode } from '../../lib/errors/codes';
 import path from 'path';
+
+// Initialize AJV with JSON Schema 2020-12 support and formats
+const ajv = new Ajv({
+  strict: true,
+  allErrors: true,
+  validateFormats: true,
+  schemaId: '$id',
+  addUsedSchema: false
+});
+
+// Add formats support
+try {
+  addFormats(ajv);
+} catch (error) {
+  console.warn('Warning: ajv-formats setup failed, proceeding without format validation:', error.message);
+}
 
 describe('OpenAPI-Zod Contract Synchronization', () => {
   let openapiSpec: any;
@@ -22,8 +42,8 @@ describe('OpenAPI-Zod Contract Synchronization', () => {
       const openapiRequired = veo3PromptSpec().required;
       expect(openapiRequired).toContain('prompt');
       expect(openapiRequired).toContain('duration');
-      expect(openapiRequired).toContain('aspectRatio');
-      expect(openapiRequired).toContain('quality');
+      expect(openapiRequired).toContain('aspect');
+      expect(openapiRequired).toContain('resolution');
       expect(openapiRequired).toHaveLength(4);
     });
 
@@ -36,8 +56,8 @@ describe('OpenAPI-Zod Contract Synchronization', () => {
       const validData = {
         prompt: 'test',
         duration: 8,
-        aspectRatio: '16:9',
-        quality: '720p',
+        aspect: '16:9',
+        resolution: '720p',
       };
       const invalidData = { ...validData, duration: 7 };
       
@@ -45,38 +65,38 @@ describe('OpenAPI-Zod Contract Synchronization', () => {
       expect(VEO3_PROMPT_SCHEMA.safeParse(invalidData).success).toBe(false);
     });
 
-    test('aspectRatio should be const: "16:9" in both schemas', () => {
-      const aspectRatioSpec = veo3PromptSpec().properties.aspectRatio;
-      expect(aspectRatioSpec.const).toBe('16:9');
-      expect(aspectRatioSpec.type).toBe('string');
+    test('aspect should be const: "16:9" in both schemas', () => {
+      const aspectSpec = veo3PromptSpec().properties.aspect;
+      expect(aspectSpec.const).toBe('16:9');
+      expect(aspectSpec.type).toBe('string');
       
       // Validate Zod schema matches
       const validData = {
         prompt: 'test',
         duration: 8,
-        aspectRatio: '16:9',
-        quality: '720p',
+        aspect: '16:9',
+        resolution: '720p',
       };
-      const invalidData = { ...validData, aspectRatio: '9:16' };
+      const invalidData = { ...validData, aspect: '9:16' };
       
       expect(VEO3_PROMPT_SCHEMA.safeParse(validData).success).toBe(true);
       expect(VEO3_PROMPT_SCHEMA.safeParse(invalidData).success).toBe(false);
     });
 
-    test('quality should have enum [720p, 1080p] in both schemas', () => {
-      const qualitySpec = veo3PromptSpec().properties.quality;
-      expect(qualitySpec.enum).toEqual(['720p', '1080p']);
-      expect(qualitySpec.type).toBe('string');
+    test('resolution should have enum [720p, 1080p] in both schemas', () => {
+      const resolutionSpec = veo3PromptSpec().properties.resolution;
+      expect(resolutionSpec.enum).toEqual(['720p', '1080p']);
+      expect(resolutionSpec.type).toBe('string');
       
       // Validate Zod schema matches
       const valid720p = {
         prompt: 'test',
         duration: 8,
-        aspectRatio: '16:9',
-        quality: '720p',
+        aspect: '16:9',
+        resolution: '720p',
       };
-      const valid1080p = { ...valid720p, quality: '1080p' };
-      const invalid480p = { ...valid720p, quality: '480p' };
+      const valid1080p = { ...valid720p, resolution: '1080p' };
+      const invalid480p = { ...valid720p, resolution: '480p' };
       
       expect(VEO3_PROMPT_SCHEMA.safeParse(valid720p).success).toBe(true);
       expect(VEO3_PROMPT_SCHEMA.safeParse(valid1080p).success).toBe(true);
@@ -278,6 +298,146 @@ describe('OpenAPI-Zod Contract Synchronization', () => {
       expect(jsonExport.properties.data.required).toContain('vdp_min');
       expect(jsonExport.properties.data.required).toContain('evidence');
       expect(jsonExport.properties.data.required).not.toContain('vdp_full');
+    });
+  });
+
+  describe('Comprehensive Schema Validation', () => {
+    describe('AJV Format Validation', () => {
+      test('Problem schema should compile and validate correctly', () => {
+        const problemSchema = openapiSpec.components.schemas.Problem;
+        expect(problemSchema).toBeDefined();
+        
+        // Compile schema
+        const validate = ajv.compile(problemSchema);
+        
+        // Test valid problem data
+        const validProblem = buildProblemJSON(ErrorCode.INVALID_DURATION, {
+          detail: 'Duration must be exactly 8 seconds',
+          instance: '/api/compile/veo3'
+        });
+        
+        expect(validate(validProblem)).toBe(true);
+        
+        // Test invalid problem data (missing required field)
+        const invalidProblem = { 
+          type: 'not-a-valid-uri', 
+          title: 'Test problem' 
+          // missing status and code
+        };
+        
+        expect(validate(invalidProblem)).toBe(false);
+        expect(validate.errors).toBeDefined();
+      });
+
+      test('Veo3Prompt schema should validate with proper formats', () => {
+        const veo3Schema = openapiSpec.components.schemas.Veo3Prompt;
+        expect(veo3Schema).toBeDefined();
+        
+        const validate = ajv.compile(veo3Schema);
+        
+        // Valid data
+        const validData = {
+          prompt: 'A beautiful sunset over mountains',
+          duration: 8,
+          aspect: '16:9',
+          resolution: '720p'
+        };
+        
+        expect(validate(validData)).toBe(true);
+        
+        // Invalid data - wrong duration
+        const invalidData = { ...validData, duration: 10 };
+        expect(validate(invalidData)).toBe(false);
+      });
+
+      test('URI format validation should work correctly', () => {
+        const problemSchema = openapiSpec.components.schemas.Problem;
+        const validate = ajv.compile(problemSchema);
+        
+        const problemWithValidURI = {
+          type: 'https://api.snap3.com/problems/test',
+          title: 'Test Problem',
+          status: 400,
+          code: 'VALIDATION_ERROR'
+        };
+        
+        expect(validate(problemWithValidURI)).toBe(true);
+        
+        const problemWithInvalidURI = {
+          type: 'not-a-uri',
+          title: 'Test Problem', 
+          status: 400,
+          code: 'VALIDATION_ERROR'
+        };
+        
+        expect(validate(problemWithInvalidURI)).toBe(false);
+      });
+    });
+
+    describe('Schema Completeness', () => {
+      test('all critical schemas should exist', () => {
+        const criticalSchemas = [
+          'Problem',
+          'Veo3Prompt', 
+          'Veo3Job',
+          'QAValidationRequest',
+          'BriefExport',
+          'JSONExport'
+        ];
+        
+        criticalSchemas.forEach(schemaName => {
+          expect(openapiSpec.components.schemas[schemaName]).toBeDefined();
+        });
+      });
+
+      test('all Problem+JSON error responses should reference Problem schema', () => {
+        const paths = openapiSpec.paths;
+        const problemJsonRefs = [];
+        
+        Object.keys(paths).forEach(path => {
+          Object.keys(paths[path]).forEach(method => {
+            const responses = paths[path][method].responses;
+            if (responses) {
+              Object.keys(responses).forEach(status => {
+                if (parseInt(status) >= 400) {
+                  const content = responses[status].content;
+                  if (content && content['application/problem+json']) {
+                    const schemaRef = content['application/problem+json'].schema.$ref;
+                    problemJsonRefs.push({ path, method, status, schemaRef });
+                  }
+                }
+              });
+            }
+          });
+        });
+        
+        // All error responses should reference Problem schema
+        problemJsonRefs.forEach(ref => {
+          expect(ref.schemaRef).toBe('#/components/schemas/Problem');
+        });
+        
+        // Should have at least some problem+json responses
+        expect(problemJsonRefs.length).toBeGreaterThan(0);
+      });
+    });
+
+    describe('Error Code Alignment', () => {
+      test('Problem schema error codes should match ErrorCode enum', () => {
+        const problemSchema = openapiSpec.components.schemas.Problem;
+        const openApiErrorCodes = problemSchema.properties.code.enum;
+        
+        const zodErrorCodes = Object.values(ErrorCode);
+        
+        // Every Zod error code should be in OpenAPI
+        zodErrorCodes.forEach(code => {
+          expect(openApiErrorCodes).toContain(code);
+        });
+        
+        // Every OpenAPI error code should be valid
+        openApiErrorCodes.forEach(code => {
+          expect(zodErrorCodes).toContain(code);
+        });
+      });
     });
   });
 });

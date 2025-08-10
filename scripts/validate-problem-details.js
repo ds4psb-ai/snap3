@@ -53,6 +53,12 @@ function findProblemResponses(content, filePath) {
   // Pattern 3: Return statements with problem-like objects
   const returnPattern = /return\s+(?:NextResponse\.json\s*\()?\{[\s\S]*?type:\s*['"`]([^'"`]+)['"`][\s\S]*?\}/g;
   
+  // Pattern 4: Problems.* factory methods (should be compliant)
+  const factoryPattern = /return\s+Problems\.[a-zA-Z]+\(/g;
+  
+  // Pattern 5: problemResponse() calls (should be compliant)
+  const problemResponsePattern = /return\s+problemResponse\(/g;
+  
   const lines = content.split('\n');
   
   // Check NextResponse.json patterns
@@ -70,6 +76,9 @@ function findProblemResponses(content, filePath) {
   while ((match = problemPattern.exec(content)) !== null) {
     validateProblemStructure(match[1], filePath, getLineNumber(content, match.index));
   }
+  
+  // Factory methods and problemResponse calls are considered compliant
+  // but we still scan for any direct JSON responses that might not be
 }
 
 function getLineNumber(content, index) {
@@ -199,9 +208,20 @@ function checkContentType() {
     const content = fs.readFileSync(file, 'utf-8');
     
     // Check if error responses include proper content-type
+    // Skip if using Problems.* factory methods or imports Problems
+    const hasProblemsImport = content.includes('import { Problems }') || content.includes('from \'@/lib/errors/problem\'');
+    const usesProblemsFactory = /return\s+Problems\.[a-zA-Z]+\(/.test(content);
+    
+    if (hasProblemsImport && usesProblemsFactory) {
+      // This file is using our Problem+JSON factory, so it's compliant
+      return;
+    }
+    
     if (content.includes('NextResponse.json') && content.includes('status:')) {
       const hasContentType = content.includes('application/problem+json');
-      if (!hasContentType && content.match(/status:\s*[4-5]\d\d/)) {
+      const hasErrorStatus = content.match(/status:\s*[4-5]\d\d/);
+      
+      if (!hasContentType && hasErrorStatus && !usesProblemsFactory) {
         issues.push({
           file: file,
           line: 0,

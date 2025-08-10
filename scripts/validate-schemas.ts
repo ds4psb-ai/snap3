@@ -3,7 +3,25 @@ import { readFileSync } from 'fs';
 import { load } from 'js-yaml';
 import { z } from 'zod';
 import path from 'path';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 import { VEO3_PROMPT_SCHEMA, VEO3_RESPONSE_SCHEMA, VEO3_JOB_SCHEMA } from '../src/lib/schemas/veo3.zod';
+
+// Initialize AJV with JSON Schema 2020-12 support and formats
+const ajv = new Ajv({
+  strict: true,
+  allErrors: true,
+  validateFormats: true,
+  schemaId: '$id',
+  addUsedSchema: false
+});
+
+// Add formats support
+try {
+  addFormats(ajv);
+} catch (error) {
+  console.warn('Warning: ajv-formats setup failed, proceeding without format validation:', error.message);
+}
 
 interface ValidationResult {
   schema: string;
@@ -29,6 +47,69 @@ const colors = {
   cyan: '\x1b[36m',
   bold: '\x1b[1m',
 };
+
+// Validate OpenAPI schema using AJV with format validation
+function validateOpenAPISchema(schemaName: string, testData: any): ValidationResult {
+  const errors: string[] = [];
+  const tests: { name: string; passed: boolean; error?: string }[] = [];
+  
+  const schema = openapiSpec.components?.schemas?.[schemaName];
+  if (!schema) {
+    return {
+      schema: schemaName,
+      valid: false,
+      errors: [`Schema ${schemaName} not found in OpenAPI spec`],
+      tests: []
+    };
+  }
+
+  // Test 1: Schema compilation
+  const compileTest = {
+    name: `${schemaName} schema compiles successfully`,
+    passed: false,
+    error: undefined
+  };
+  
+  try {
+    const validate = ajv.compile(schema);
+    compileTest.passed = true;
+    
+    // Test 2: Schema validation with test data
+    const validationTest = {
+      name: `${schemaName} validates test data correctly`,
+      passed: false,
+      error: undefined
+    };
+    
+    try {
+      const isValid = validate(testData);
+      if (isValid) {
+        validationTest.passed = true;
+      } else {
+        validationTest.error = `Validation failed: ${ajv.errorsText(validate.errors)}`;
+        errors.push(validationTest.error);
+      }
+    } catch (e) {
+      validationTest.error = `Validation error: ${e}`;
+      errors.push(validationTest.error);
+    }
+    
+    tests.push(validationTest);
+    
+  } catch (e) {
+    compileTest.error = `Schema compilation failed: ${e}`;
+    errors.push(compileTest.error);
+  }
+  
+  tests.push(compileTest);
+  
+  return {
+    schema: schemaName,
+    valid: errors.length === 0,
+    errors,
+    tests,
+  };
+}
 
 // Validate Veo3 constraints
 function validateVeo3Constraints(): ValidationResult {
@@ -72,7 +153,7 @@ function validateVeo3Constraints(): ValidationResult {
   if (!resolutionTest.passed && resolutionTest.error) errors.push(resolutionTest.error);
 
   // Test 4: Required fields
-  const requiredFields = ['duration', 'aspect', 'resolution', 'shots'];
+  const requiredFields = ['prompt', 'duration', 'aspect', 'resolution'];
   const actualRequired = veo3Spec.required || [];
   const requiredTest = {
     name: 'Required fields check',
@@ -92,6 +173,7 @@ function validateVeo3Constraints(): ValidationResult {
   };
   try {
     const testData = {
+      prompt: 'Test prompt for validation',
       duration: 8,
       aspect: '16:9',
       resolution: '720p',
@@ -115,8 +197,8 @@ function validateVeo3Constraints(): ValidationResult {
     const testData = {
       prompt: 'test',
       duration: 10, // Invalid
-      aspectRatio: '16:9',
-      quality: '720p',
+      aspect: '16:9',
+      resolution: '720p',
     };
     VEO3_PROMPT_SCHEMA.parse(testData);
     zodInvalidDurationTest.error = 'Schema should have rejected duration: 10';
@@ -136,11 +218,11 @@ function validateVeo3Constraints(): ValidationResult {
     const testData = {
       prompt: 'test',
       duration: 8,
-      aspectRatio: '9:16', // Invalid
-      quality: '720p',
+      aspect: '9:16', // Invalid
+      resolution: '720p',
     };
     VEO3_PROMPT_SCHEMA.parse(testData);
-    zodInvalidARTest.error = 'Schema should have rejected aspectRatio: 9:16';
+    zodInvalidARTest.error = 'Schema should have rejected aspect: 9:16';
     errors.push(zodInvalidARTest.error);
   } catch (e) {
     zodInvalidARTest.passed = true;
@@ -157,11 +239,11 @@ function validateVeo3Constraints(): ValidationResult {
     const testData = {
       prompt: 'test',
       duration: 8,
-      aspectRatio: '16:9',
-      quality: '480p', // Invalid
+      aspect: '16:9',
+      resolution: '480p', // Invalid
     };
     VEO3_PROMPT_SCHEMA.parse(testData);
-    zodInvalidQualityTest.error = 'Schema should have rejected quality: 480p';
+    zodInvalidQualityTest.error = 'Schema should have rejected resolution: 480p';
     errors.push(zodInvalidQualityTest.error);
   } catch (e) {
     zodInvalidQualityTest.passed = true;

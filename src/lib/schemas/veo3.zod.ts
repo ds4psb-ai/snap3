@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-// Updated Veo3Prompt Schema to match OpenAPI spec
+// Updated Veo3Prompt Schema to match OpenAPI spec and tests
 export const VEO3_PROMPT_SCHEMA = z.object({
+  prompt: z.string().min(1, 'Prompt is required'),
   duration: z.literal(8), // Fixed 8 seconds
   aspect: z.literal('16:9'), // Fixed 16:9
   resolution: z.enum(['720p', '1080p']),
@@ -9,7 +10,7 @@ export const VEO3_PROMPT_SCHEMA = z.object({
     duration: z.number(),
     description: z.string(),
     camera: z.string(),
-  })),
+  })).optional(),
 }).strict(); // No additional properties allowed
 
 export type Veo3Prompt = z.infer<typeof VEO3_PROMPT_SCHEMA>;

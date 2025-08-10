@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Embed Security Policy 📊 Component Snapshots iframe properties snapshot for YouTube 1`] = `
+{
+  "allow": "autoplay; fullscreen; picture-in-picture",
+  "allowFullScreen": true,
+  "credentialless": "true",
+  "frameBorder": "0",
+  "height": "315",
+  "referrerPolicy": "no-referrer",
+  "sandbox": "allow-scripts allow-same-origin allow-presentation allow-popups",
+  "src": "https://www.youtube.com/embed/test123",
+  "width": "560",
+}
+`;
