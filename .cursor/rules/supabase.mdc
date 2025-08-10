@@ -1,0 +1,165 @@
+
+# Supabase Migration SQL Guideline
+
+## Must
+- Each migration file must have a unique name with number prefix (e.g., `0001_create_users_table.sql`)
+- Each migration must be idempotent (can be run multiple times without error)
+- Use `CREATE TABLE IF NOT EXISTS` instead of just `CREATE TABLE`
+- Include proper error handling with `BEGIN` and `EXCEPTION` blocks
+- Add comments for complex operations
+- Always specify column types explicitly
+- Include proper constraints (NOT NULL, UNIQUE, etc.) where appropriate
+- Add updated_at column to all tables, and use trigger to update it
+- always check other migrations to avoid conflicts
+
+## Should
+- Keep migrations small 
+- Use consistent naming conventions for tables and columns
+- Use snake_case for all identifiers
+- Document breaking changes
+
+## Recommended Patterns
+- Use RLS (Row Level Security) for access control
+- Set up proper indexes for frequently queried columns
+- Use foreign key constraints to maintain referential integrity
+- Leverage Postgres extensions when appropriate
+- Use enums for fields with a fixed set of values
+- Consider using views for complex queries
+
+## Schema Organization
+- Group related tables together
+- Use schemas to organize tables by domain
+- Consider using Postgres schemas for multi-tenant applications
+- Keep authentication tables in the auth schema
+
+## Performance Considerations
+- Avoid adding/removing columns from large tables in production
+- Use appropriate data types to minimize storage
+- Add indexes strategically (not excessively)
+
+## Security Best Practices
+- Never store plaintext passwords
+- Use RLS policies to restrict data access
+- Sanitize all user inputs
+
+---
+
+## ✅ 환경 변수 설정 완료!
+
+### 📊 현재 작업 리스크 레벨: **Level 3 (Moderate Risk)**
+**기준:** 보안 정보 설정, 환경 구성
+**PM 결정:** **Silent Mode** with security validation
+
+---
+
+## 🔧 **환경 변수 설정 실행**
+
+### **터미널에서 실행:**
+```bash
+cat > .env.local << 'EOF'
+# Supabase Configuration
+DATABASE_URL=postgresql://postgres:Rlaxodms77&@db.scmqkwewpnwyseabganm.supabase.co:5432/postgres
+SUPABASE_URL=https://scmqkwewpnwyseabganm.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjbXFrd2V3cG53eXNlYWJnYW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjI5NTEsImV4cCI6MjA3MDIzODk1MX0.fLsA-dhRKh_ir0F-LcHqTf_qRpcnG53AHTvPPOgmcMU
+SUPABASE_SERVICE_ROLE=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjbXFrd2V3cG53eXNlYWJnYW5tIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDY2Mjk1MSwiZXhwIjoyMDcwMjM4OTUxfQ.FEpPZ97XNGOoJUi_JNcaClQtP2XgqK3KD28W-oyeldI
+EOF
+```
+
+---
+
+##  **설정 확인**
+
+### **파일 생성 확인:**
+```bash
+# 파일 존재 확인
+ls -la .env.local
+
+# 파일 내용 확인
+cat .env.local
+```
+
+### **예상 출력:**
+```bash
+# ls -la .env.local
+-rw-r--r--  1 user  staff  1234 Dec 20 10:30 .env.local
+
+# cat .env.local
+# Supabase Configuration
+DATABASE_URL=postgresql://postgres:Rlaxodms77&@db.scmqkwewpnwyseabganm.supabase.co:5432/postgres
+SUPABASE_URL=https://scmqkwewpnwyseabganm.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+---
+
+## ⚠️ **보안 설정**
+
+### **Git에서 제외 확인:**
+```bash
+# .gitignore 확인
+cat .gitignore | grep env
+
+# .gitignore에 추가 (필요시)
+echo ".env.local" >> .gitignore
+echo ".env.*.local" >> .gitignore
+```
+
+### **Git 상태 확인:**
+```bash
+# .env.local이 추적되지 않는지 확인
+git status
+```
+
+---
+
+##  **연결 테스트**
+
+### **Supabase 클라이언트 설정:**
+```typescript
+// src/lib/supabase.ts
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+```
+
+### **환경 변수 접두사 수정:**
+```bash
+# .env.local 수정 (클라이언트 접근용)
+NEXT_PUBLIC_SUPABASE_URL=https://scmqkwewpnwyseabganm.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjbXFrd2V3cG53eXNlYWJnYW5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2NjI5NTEsImV4cCI6MjA3MDIzODk1MX0.fLsA-dhRKh_ir0F-LcHqTf_qRpcnG53AHTvPPOgmcMU
+```
+
+---
+
+## 🚀 **개발 서버 시작**
+
+### **환경 변수 로드 확인:**
+```bash
+# 개발 서버 재시작
+npm run dev
+```
+
+### **브라우저에서 확인:**
+- `http://localhost:3000` 접속
+- 개발자 도구에서 에러 확인
+
+---
+
+##  **설정 완료 체크리스트**
+
+- [x] Supabase 프로젝트 생성
+- [x] 환경 변수 값 획득
+- [x] .env.local 파일 생성
+- [x] 환경 변수 입력
+- [x] .gitignore 설정
+- [x] 개발 서버 재시작
+
+**[Note]** → **환경 변수 설정이 완료되었습니다!** 이제 Supabase를 사용하여 데이터베이스 작업을 시작할 수 있습니다.
+
+- Never store plaintext passwords
+- Use RLS policies to restrict data access
+- Sanitize all user inputs

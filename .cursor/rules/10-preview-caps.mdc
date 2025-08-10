@@ -1,0 +1,25 @@
+---
+description: Enforce Veo3 Preview caps + Player behavior; auto-attach when touching API/Player/Schemas.
+globs:
+  - "src/app/api/compile/veo3/**"
+  - "src/app/api/preview/veo/**"
+  - "src/app/api/jobs/**"
+  - "src/app/(routes)/v/**"
+  - "schemas/**"
+  - "openapi/**"
+alwaysApply: false
+---
+**Hard constraints**
+- `durationSec=8` → else throw `INVALID_DURATION`.
+- `aspectRatio="16:9"` → else throw `UNSUPPORTED_AR_FOR_PREVIEW` (tell UI to use crop‑proxy).
+- `resolution ∈ {"720p","1080p"}` only.
+
+**Player**
+- Default **muted autoplay + playsinline** for preview pages.
+- When vertical is requested, show **9:16 crop‑proxy overlay** over the 16:9 source.
+
+**Job API**
+- `POST /api/preview/veo` returns **202** with `Location: /api/jobs/{id}` and `{ status:"queued", id }`.
+- `GET /api/jobs/{id}` resolves to `{ status, mediaUrl?, synthId? }`.
+
+**Refs**: @schemas/veo3_prompt.zod.ts @schemas/video_gen_ir.zod.ts @src/app/(routes)/v/[id]/page.tsx @openapi/openapi.yaml

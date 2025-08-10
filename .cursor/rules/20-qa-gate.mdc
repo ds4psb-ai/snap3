@@ -1,0 +1,17 @@
+---
+description: QA Gate baseline (Hook ≤3s, safezones, subtitle legibility, basic channel hints).
+globs:
+  - "src/app/api/qa/**"
+  - "schemas/**"
+  - "openapi/**"
+alwaysApply: false
+---
+**Rules**
+- **Hook ≤ 3s** (MAJOR fail if violated).
+- Sum of scene durations must equal **8.0s** (Textboard/VideoGen IR).
+- Subtitles: min size/contrast; **no safezone overlap**; check basic bitrate/fps hints per platform.
+
+**Return shape**
+- `{ pass, trustScore, issues[{code,severity,fix}], evidenceChips[] }`
+
+**Refs**: @schemas/textboard.zod.ts @schemas/video_gen_ir.zod.ts

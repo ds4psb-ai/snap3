@@ -1,0 +1,14 @@
+---
+description: Global guardrails for our platform (Preview caps, Evidence-only, async jobs, error format, merge gate).
+globs:
+alwaysApply: true
+---
+- Keep **VDP_FULL private**. External surfaces show **VDP_MIN + Evidence** only.
+- **Preview caps (Veo3)** are hard constraints: `durationSec=8`, `aspectRatio="16:9"`, `resolution ∈ {"720p","1080p"}`.
+- Vertical request (9:16) → **render 16:9** and return **UI crop‑proxy metadata** only.
+- Use **official embeds only** (no re-host/download).
+- **Async preview pattern**: `POST /preview/veo` → **202 + Location:/jobs/{id}**; poll `GET /jobs/{id}`; support `Retry-After`.
+- Errors: **application/problem+json** (RFC 9457-like) with `code` from taxonomy.
+- **Tests-first & merge gate**: unit + JSON Schema + OpenAPI contract + QA lint must be green before merge.
+- Branch protection: require CI checks (`tests`,`schemas`,`qa`) to pass.
+- Reference: @openapi/openapi.yaml @schemas/veo3_prompt.zod.ts @schemas/video_gen_ir.zod.ts
