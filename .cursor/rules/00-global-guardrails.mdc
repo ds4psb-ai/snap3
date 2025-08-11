@@ -4,21 +4,27 @@ globs:
 alwaysApply: true
 ---
 ## Core Platform Principles
+- **Two-Door UX**: Main (Browse & Create) → Storyboard Detail (single destination)
 - **Storyboard-first UX**: Textboard(2-4 scenes) + Evidence Pack 중심 아키텍처
 - **VDP privacy by design**: VDP_FULL 내부 전용, 외부에는 VDP_MIN + Evidence Pack만 노출
 - **Provider-aligned prompts**: Veo3 제약사항 엄격 준수
 - **Explainability defaults**: 모든 생성물에 Evidence Pack 첨부
+- **Creation Studio**: Multi-modal input (text/image/video/URL) → Storyboard Detail
 
 ## Hard Constraints
 - **Veo3 Preview caps**: `durationSec=8`, `aspectRatio="16:9"`, `resolution ∈ {"720p","1080p"}`
+- **Jump-cuts**: 2-3 cuts within 8s unit (e.g., 3s + 5s, or 2.5s + 2.7s + 2.8s)
+- **Sequence-60**: up to 8 scenes (60s total) with external crop guidance
 - **Vertical request (9:16)**: 16:9로 렌더하고 **UI crop-proxy metadata**만 반환
 - **Official embeds only**: YouTube Player 등 공식 임베드만 사용 (다운로드/리호스팅 금지)
 - **Autoplay**: muted + playsinline 기본 설정
+- **No in-app crop**: External editing guidance only
 
 ## Async Pattern & Error Handling
 - **Async preview pattern**: `POST /preview/veo` → **202 + Location:/jobs/{id}**; poll `GET /jobs/{id}`; support `Retry-After`
 - **Error format**: **application/problem+json** (RFC 9457) with typed error codes
-- **Idempotency & quotas**: 중복 요청 처리 및 할당량 관리
+- **Idempotency & quotas**: 중복 요청 처리 및 할당량 관리 (~10 RPM, ≤2 videos/request)
+- **Creation Studio latency**: P95 ≤6s (text/URL), ≤10s (upload)
 
 ## Quality Gates
 - **Tests-first & merge gate**: unit + JSON Schema + OpenAPI contract + QA lint must be green before merge
