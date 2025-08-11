@@ -1,14 +1,34 @@
 ---
-description: Global guardrails for our platform (Preview caps, Evidence-only, async jobs, error format, merge gate).
+description: Global guardrails for our platform (Storyboard-first UX, VDP privacy, Veo3 constraints, async jobs, error format, merge gate).
 globs:
 alwaysApply: true
 ---
-- Keep **VDP_FULL private**. External surfaces show **VDP_MIN + Evidence** only.
-- **Preview caps (Veo3)** are hard constraints: `durationSec=8`, `aspectRatio="16:9"`, `resolution ∈ {"720p","1080p"}`.
-- Vertical request (9:16) → **render 16:9** and return **UI crop‑proxy metadata** only.
-- Use **official embeds only** (no re-host/download).
-- **Async preview pattern**: `POST /preview/veo` → **202 + Location:/jobs/{id}**; poll `GET /jobs/{id}`; support `Retry-After`.
-- Errors: **application/problem+json** (RFC 9457-like) with `code` from taxonomy.
-- **Tests-first & merge gate**: unit + JSON Schema + OpenAPI contract + QA lint must be green before merge.
-- Branch protection: require CI checks (`tests`,`schemas`,`qa`) to pass.
-- Reference: @openapi/openapi.yaml @schemas/veo3_prompt.zod.ts @schemas/video_gen_ir.zod.ts
+## Core Platform Principles
+- **Storyboard-first UX**: Textboard(2-4 scenes) + Evidence Pack 중심 아키텍처
+- **VDP privacy by design**: VDP_FULL 내부 전용, 외부에는 VDP_MIN + Evidence Pack만 노출
+- **Provider-aligned prompts**: Veo3 제약사항 엄격 준수
+- **Explainability defaults**: 모든 생성물에 Evidence Pack 첨부
+
+## Hard Constraints
+- **Veo3 Preview caps**: `durationSec=8`, `aspectRatio="16:9"`, `resolution ∈ {"720p","1080p"}`
+- **Vertical request (9:16)**: 16:9로 렌더하고 **UI crop-proxy metadata**만 반환
+- **Official embeds only**: YouTube Player 등 공식 임베드만 사용 (다운로드/리호스팅 금지)
+- **Autoplay**: muted + playsinline 기본 설정
+
+## Async Pattern & Error Handling
+- **Async preview pattern**: `POST /preview/veo` → **202 + Location:/jobs/{id}**; poll `GET /jobs/{id}`; support `Retry-After`
+- **Error format**: **application/problem+json** (RFC 9457) with typed error codes
+- **Idempotency & quotas**: 중복 요청 처리 및 할당량 관리
+
+## Quality Gates
+- **Tests-first & merge gate**: unit + JSON Schema + OpenAPI contract + QA lint must be green before merge
+- **QA Gate**: Hook ≤3s, safezones, subtitle legibility, channel hints
+- **Branch protection**: require CI checks (`tests`,`schemas`,`qa`) to pass
+
+## Channel-aware Features
+- **Reels**: ≥720p, ≥30fps
+- **TikTok**: bitrate ≥ 516 kbps
+- **Shorts**: 16:9 source with crop-proxy metadata
+
+## Reference Files
+- @openapi/openapi.yaml @schemas/veo3_prompt.zod.ts @schemas/video_gen_ir.zod.ts

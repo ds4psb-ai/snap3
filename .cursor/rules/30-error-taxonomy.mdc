@@ -30,6 +30,10 @@ All API errors MUST follow Problem Details (RFC 9457). Base fields:
 - PROVIDER_POLICY_BLOCKED → 403 (Fix: remove flagged params and resubmit)
 - EMBED_DENIED → 403 (Fix: use official embeds only; link out)
 - QA_RULE_VIOLATION → 422 (Fix: Hook ≤3s, safezones, fps/bitrate; re-run QA)
+- VDP_PRIVACY_VIOLATION → 403 (Fix: VDP_FULL internal only; use VDP_MIN + Evidence)
+- STORYBOARD_INVALID → 422 (Fix: 2-4 scenes, total 8.0s, narrative flow)
+- EVIDENCE_PACK_MISSING → 400 (Fix: include Evidence Pack with trust score)
+- CHANNEL_QUALITY_FAIL → 422 (Fix: meet channel-specific requirements)
 
 ## OpenAPI + Schema
 - OpenAPI 3.1: declare `application/problem+json` schema under components.
