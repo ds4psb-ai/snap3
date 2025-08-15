@@ -1,0 +1,99 @@
+{
+  "content_id": "sample_instagram_reel_001",
+  "metadata": {
+    "platform": "Instagram",
+    "language": "ko",
+    "source_url": "https://www.instagram.com/reel/C8xYz1A2BcD/",
+    "upload_date": "2025-08-15T10:30:00Z",
+    "video_origin": "instagram_reels",
+    "hashtags": ["#테스트", "#리얼스", "#인스타그램"],
+    "original_sound": {
+      "id": "original_audio_123",
+      "title": "Original Audio by @user123"
+    },
+    "engagement_snapshot": {
+      "view_count": 15420,
+      "like_count": 892,
+      "comment_count": 43,
+      "share_count": 28
+    }
+  },
+  "overall_analysis": {
+    "duration_sec": 15.2,
+    "aspect_ratio": "9:16",
+    "story_telling": {
+      "has_story": true,
+      "plot": {
+        "conflict": "Product demonstration challenge",
+        "action_taken": "Step-by-step tutorial shown",
+        "resolution": "Successful outcome achieved"
+      }
+    },
+    "hookGenome": {
+      "start_sec": 0.0,
+      "end_sec": 2.8,
+      "strength_score": 0.85,
+      "pattern_code": ["visual_surprise", "question"],
+      "delivery": "Direct eye contact with unexpected reveal",
+      "trigger_modalities": ["visual", "audio", "text"],
+      "microbeats_sec": [0.5, 1.2, 2.1, 2.8]
+    }
+  },
+  "scenes": [
+    {
+      "start_sec": 0.0,
+      "end_sec": 3.0,
+      "narrative_role": "Hook",
+      "transcript": "이 방법을 모르면 큰일나는데...",
+      "on_screen_text": ["🚨 놓치면 후회"],
+      "visual_summary": "Close-up of hands with mysterious object",
+      "camera": {
+        "shot_type": "close_up",
+        "movement": "static"
+      },
+      "audio": {
+        "music": "suspenseful_intro",
+        "sfx": "attention_sound"
+      },
+      "tags": ["hook", "curiosity", "urgency"]
+    },
+    {
+      "start_sec": 3.0,
+      "end_sec": 12.0,
+      "narrative_role": "Demonstration",
+      "transcript": "자, 이렇게 하면 됩니다. 첫 번째는...",
+      "on_screen_text": ["1단계", "2단계", "3단계"],
+      "visual_summary": "Step-by-step tutorial demonstration",
+      "camera": {
+        "shot_type": "medium_shot",
+        "movement": "slow_zoom"
+      },
+      "audio": {
+        "music": "upbeat_tutorial",
+        "sfx": "step_completion"
+      },
+      "tags": ["tutorial", "step_by_step", "educational"]
+    },
+    {
+      "start_sec": 12.0,
+      "end_sec": 15.2,
+      "narrative_role": "Call_to_Action",
+      "transcript": "댓글로 결과 공유해주세요!",
+      "on_screen_text": ["💬 댓글 남기기", "❤️ 좋아요"],
+      "visual_summary": "Successful result showcase with engagement prompt",
+      "camera": {
+        "shot_type": "wide_shot",
+        "movement": "pull_back"
+      },
+      "audio": {
+        "music": "positive_conclusion",
+        "sfx": "success_chime"
+      },
+      "tags": ["cta", "engagement", "community"]
+    }
+  ],
+  "technical": {
+    "fps": 30,
+    "resolution": "1080x1920"
+  }
+}
