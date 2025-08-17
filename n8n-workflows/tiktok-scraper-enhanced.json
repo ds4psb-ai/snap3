@@ -1,0 +1,193 @@
+{
+  "name": "TikTok oEmbed + Comments Microservice Collector",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST", 
+        "path": "tiktok-metadata",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "TikTok Metadata Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "tiktok-metadata"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract TikTok URL and validate\n// Handle different input sources: body, query params, or headers\nconst input = items[0].json;\nlet url;\n\n// Try to get URL from different sources\nif (input.body && input.body.content) {\n  url = input.body.content;\n} else if (input.body && input.body.url) {\n  url = input.body.url;\n} else if (input.query && input.query.url) {\n  url = input.query.url;\n} else if (input.url) {\n  url = input.url;\n} else if (input.content) {\n  url = input.content;\n} else {\n  throw new Error('No URL found in request. Expected URL in body.content, body.url, query.url, or content field');\n}\n\n// Support both formats: tiktok.com/@user/video/id and vm.tiktok.com/shortcode\nif (!url.match(/(tiktok\\.com\\/@[^/]+\\/video\\/\\d+|vm\\.tiktok\\.com\\/[a-zA-Z0-9]+|vt\\.tiktok\\.com\\/[a-zA-Z0-9]+)/)) {\n  throw new Error(`Invalid TikTok URL: ${url}. Supported formats: tiktok.com/@user/video/ID, vm.tiktok.com/ID, vt.tiktok.com/ID`);\n}\n\n// Extract video ID if possible\nconst videoIdMatch = url.match(/tiktok\\.com\\/@[^/]+\\/video\\/(\\d+)/);\nconst videoId = videoIdMatch ? videoIdMatch[1] : null;\n\nreturn [{\n  json: {\n    url,\n    videoId,\n    cleanUrl: url.split('?')[0] // Remove query parameters\n  }\n}];"
+      },
+      "id": "validate-tiktok-url",
+      "name": "Validate TikTok URL",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.tiktok.com/oembed?url={{ $json.cleanUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "tiktok-oembed",
+      "name": "TikTok oEmbed Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.TIKTOK_COMMENTS_SERVICE_URL || 'http://localhost:3001' }}/api/comments",
+        "requestMethod": "POST",
+        "jsonParameters": true,
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.cleanUrl }}"
+            },
+            {
+              "name": "videoId", 
+              "value": "={{ $json.videoId }}"
+            },
+            {
+              "name": "limit",
+              "value": 5
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "tiktok-comments-service",
+      "name": "TikTok Comments Microservice",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Process TikTok comments from microservice\nconst commentsResponse = items[0].json;\n\nlet topComments = [];\n\ntry {\n  if (commentsResponse && commentsResponse.success && commentsResponse.comments) {\n    topComments = commentsResponse.comments\n      .slice(0, 5) // Ensure max 5 comments\n      .map(comment => ({\n        id: comment.id || comment.cid,\n        text: comment.text || comment.comment,\n        author: comment.author || comment.username,\n        likeCount: comment.likeCount || comment.likes || 0,\n        timestamp: comment.timestamp || comment.createTime,\n        replyCount: comment.replyCount || comment.replies || 0\n      }));\n  }\n} catch (error) {\n  console.error('Error processing TikTok comments:', error);\n  topComments = [];\n}\n\nreturn [{\n  json: {\n    topComments,\n    commentsCount: topComments.length,\n    serviceAvailable: !commentsResponse.error,\n    success: true\n  }\n}];"
+      },
+      "id": "process-tiktok-comments",
+      "name": "Process TikTok Comments",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Combine oEmbed and comments data\nconst oEmbedData = items[0].json;\nconst commentsData = items[1].json;\n\nif (oEmbedData.error) {\n  return [{\n    json: {\n      error: 'TikTok post not accessible via oEmbed',\n      success: false,\n      metadata: {\n        platform: 'tiktok',\n        top_comments: commentsData.topComments || [], // Include comments even if oEmbed fails\n        vdp: {\n          extractedAt: new Date().toISOString(),\n          source: 'tiktok_oembed_failed',\n          confidence: 0.3,\n          embedEligible: false,\n          hasTopComments: (commentsData.topComments || []).length > 0\n        }\n      }\n    }\n  }];\n}\n\nconst metadata = {\n  platform: 'tiktok',\n  title: oEmbedData.title || 'TikTok Video',\n  authorName: oEmbedData.author_name,\n  authorUrl: oEmbedData.author_url,\n  thumbnailUrl: oEmbedData.thumbnail_url,\n  width: oEmbedData.width,\n  height: oEmbedData.height,\n  html: oEmbedData.html,\n  version: oEmbedData.version,\n  type: oEmbedData.type,\n  // Add top comments from microservice\n  top_comments: commentsData.topComments || [],\n  // VDP metadata extensions\n  vdp: {\n    extractedAt: new Date().toISOString(),\n    source: 'tiktok_oembed_plus_comments_service',\n    confidence: commentsData.serviceAvailable ? 0.85 : 0.6,\n    embedEligible: true,\n    hasTopComments: (commentsData.topComments || []).length > 0,\n    commentsServiceStatus: commentsData.serviceAvailable ? 'available' : 'unavailable'\n  }\n};\n\nreturn [{\n  json: {\n    success: true,\n    metadata,\n    // Ready for T4 consumption\n    'x-goog-meta-vdp-platform': 'tiktok',\n    'x-goog-meta-vdp-author': oEmbedData.author_name,\n    'x-goog-meta-vdp-type': oEmbedData.type,\n    'x-goog-meta-vdp-top-comments-count': (commentsData.topComments || []).length.toString(),\n    'x-goog-meta-vdp-comments-service': commentsData.serviceAvailable ? 'available' : 'unavailable'\n  }\n}];"
+      },
+      "id": "combine-data",
+      "name": "Combine oEmbed + Comments Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-with-metadata",
+      "name": "Respond with Metadata",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1340, 300]
+    }
+  ],
+  "connections": {
+    "TikTok Metadata Request": {
+      "main": [
+        [
+          {
+            "node": "Validate TikTok URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate TikTok URL": {
+      "main": [
+        [
+          {
+            "node": "TikTok oEmbed Call",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TikTok Comments Microservice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TikTok oEmbed Call": {
+      "main": [
+        [
+          {
+            "node": "Combine oEmbed + Comments Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TikTok Comments Microservice": {
+      "main": [
+        [
+          {
+            "node": "Process TikTok Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process TikTok Comments": {
+      "main": [
+        [
+          {
+            "node": "Combine oEmbed + Comments Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combine oEmbed + Comments Data": {
+      "main": [
+        [
+          {
+            "node": "Respond with Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "versionId": "1"
+}

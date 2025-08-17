@@ -1,3 +1,6 @@
+/* logger fallback */
+if(!globalThis.logger){globalThis.logger=console;}
+
 import express from "express";
 import fs from "fs";
 import path from "path";
@@ -5,6 +8,7 @@ import { fileURLToPath } from "url";
 import { VertexAI } from "@google-cloud/vertexai";
 import { VDPStreamingGenerator } from "./vdp-streaming-generator.js";
 import { saveJsonToGcs } from "./utils/gcs.js";
+import { enforceVdpStandards } from "./utils/vdp-standards.js";
 import { normalizeSocialUrl } from "./utils/url-normalizer.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -997,8 +1001,12 @@ Return a complete VDP 2.0 JSON structure.`;
     // 7) Save to GCS if outGcsUri provided (항상 저장 보장)
     if (outGcsUri && finalVdp) {
       try {
-        const savedPath = await saveJsonToGcs(outGcsUri, finalVdp);
+        // VDP Standards 보강 - 필수 필드 강제 채우기
+        const standardizedVdp = enforceVdpStandards(finalVdp, req.body);
+        const savedPath = await saveJsonToGcs(outGcsUri, standardizedVdp);
         console.log(`[VDP_UPLOAD] ✅ Saved VDP to: ${savedPath}`);
+        // 표준화된 VDP를 최종 응답에 사용
+        finalVdp = standardizedVdp;
         finalVdp.processing_metadata = finalVdp.processing_metadata || {};
         finalVdp.processing_metadata.gcs_saved = true;
         finalVdp.processing_metadata.gcs_path = savedPath;

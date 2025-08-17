@@ -1,0 +1,15 @@
+# Sample YouTube Shorts URLs for VDP Pipeline Testing
+# Use with: ./scripts/vdp-parallel-batch.sh -f sample-urls.txt
+
+# Korean content examples
+https://www.youtube.com/shorts/6_I2FmT1mbY
+https://www.youtube.com/shorts/WrnM0FRLnqA
+
+# Add more URLs here for batch processing
+# Lines starting with # are ignored
+# Empty lines are also ignored
+
+# Example format:
+# https://www.youtube.com/shorts/VIDEO_ID_1
+# https://www.youtube.com/shorts/VIDEO_ID_2
+# https://www.youtube.com/shorts/VIDEO_ID_3

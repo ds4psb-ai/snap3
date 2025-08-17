@@ -1,0 +1,16 @@
+{
+  "content_key": "youtube:Kec1NiP8uDc",
+  "content_id": "Kec1NiP8uDc",
+  "metadata": {
+    "platform": "Youtube",
+    "language": "ko",
+    "video_origin": "ai_generated"
+  },
+  "load_timestamp": "2025-08-17T09:58:24.546Z",
+  "load_date": "2025-08-17",
+  "source_url": "https://www.youtube.com/shorts/Kec1NiP8uDc",
+  "canonical_url": "https://www.youtube.com/watch?v=Kec1NiP8uDc",
+  "outGcsUri": "gs://tough-variety-raw/raw/vdp/youtube/Kec1NiP8uDc.NEW.universal.json",
+  "ingest_type": "link",
+  "created_at": "2025-08-17T09:58:24.546Z"
+}

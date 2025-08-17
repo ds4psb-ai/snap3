@@ -1,0 +1,37 @@
+{
+  "name": "snap3-jobs-url-normalizer",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Enhanced URL normalizer for social media platforms (YouTube, Instagram, TikTok)",
+  "main": "url-normalizer.js",
+  "scripts": {
+    "test": "node test-url-normalizer.js",
+    "normalize": "node normalize-cli.mjs",
+    "collect": "./universal-collector.sh",
+    "collect:youtube": "./enhanced-youtube-collector.sh",
+    "collect:instagram": "./platform-collectors/instagram-collector.sh",
+    "collect:tiktok": "./platform-collectors/tiktok-collector.sh",
+    "evidence:audio": "./evidence-generator/audio-fingerprint-enhanced.sh",
+    "evidence:brands": "cd evidence-generator && node product-evidence.mjs",
+    "evidence:pack": "./evidence-generator/evidence-pack-generator.sh",
+    "evidence:upload": "./evidence-generator/evidence-uploader.sh",
+    "worker:start": "./worker-ingest-v2.sh",
+    "worker:once": "./worker-ingest-v2.sh --once",
+    "worker:status": "ps aux | grep worker-ingest | grep -v grep || echo 'Worker not running'",
+    "setup": "source ./setup-environment.sh",
+    "env:check": "./setup-environment.sh"
+  },
+  "keywords": [
+    "url-normalizer",
+    "youtube",
+    "instagram", 
+    "tiktok",
+    "social-media",
+    "redirect-handling"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -1,0 +1,144 @@
+{
+  "name": "TikTok oEmbed + Playwright Scraper",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET", 
+        "path": "tiktok-metadata",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "TikTok Metadata Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "tiktok-metadata"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract TikTok URL and validate\nconst url = items[0].json.url;\n\n// Support both formats: tiktok.com/@user/video/id and vm.tiktok.com/shortcode\nif (!url.match(/(tiktok\\.com\\/@[^/]+\\/video\\/\\d+|vm\\.tiktok\\.com\\/[a-zA-Z0-9]+|vt\\.tiktok\\.com\\/[a-zA-Z0-9]+)/)) {\n  throw new Error('Invalid TikTok URL');\n}\n\nreturn [{\n  json: {\n    url,\n    cleanUrl: url.split('?')[0] // Remove query parameters\n  }\n}];"
+      },
+      "id": "validate-tiktok-url",
+      "name": "Validate TikTok URL",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.tiktok.com/oembed?url={{ $json.cleanUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "tiktok-oembed",
+      "name": "TikTok oEmbed Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Playwright scraping logic (conceptual)\n// Note: This would require actual Playwright node or custom implementation\nconst url = items[0].json.url;\n\n// Placeholder for Playwright scraping\n// In real implementation, this would:\n// 1. Launch headless browser\n// 2. Navigate to TikTok URL\n// 3. Wait for metrics to load\n// 4. Extract view count, like count, comment count\n// 5. Handle anti-bot measures\n\nconst scrapedData = {\n  viewCount: null, // Would be extracted via Playwright\n  likeCount: null,\n  commentCount: null,\n  shareCount: null,\n  note: 'Playwright scraping requires actual browser automation',\n  implemented: false\n};\n\nreturn [{\n  json: {\n    url,\n    scrapedData,\n    requiresPlaywright: true,\n    warning: 'TikTok statistics require headless browser scraping - respect ToS and rate limits'\n  }\n}];"
+      },
+      "id": "playwright-scraper",
+      "name": "Playwright Scraper (Concept)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Combine oEmbed and scraped data\nconst oEmbedData = items[0].json;\nconst scrapedData = items[1]?.json?.scrapedData || {};\n\nif (oEmbedData.error) {\n  return [{\n    json: {\n      error: 'TikTok post not accessible via oEmbed',\n      success: false\n    }\n  }];\n}\n\nconst metadata = {\n  platform: 'tiktok',\n  title: oEmbedData.title || 'TikTok Video',\n  authorName: oEmbedData.author_name,\n  authorUrl: oEmbedData.author_url,\n  thumbnailUrl: oEmbedData.thumbnail_url,\n  width: oEmbedData.width,\n  height: oEmbedData.height,\n  html: oEmbedData.html,\n  version: oEmbedData.version,\n  type: oEmbedData.type,\n  // Enhanced with scraped statistics\n  statistics: {\n    viewCount: scrapedData.viewCount,\n    likeCount: scrapedData.likeCount,\n    commentCount: scrapedData.commentCount,\n    shareCount: scrapedData.shareCount\n  },\n  // VDP metadata extensions\n  vdp: {\n    extractedAt: new Date().toISOString(),\n    source: 'tiktok_oembed_plus_scraping',\n    confidence: scrapedData.implemented ? 0.8 : 0.6,\n    embedEligible: true,\n    limitations: scrapedData.implemented ? null : 'Statistics require Playwright implementation'\n  }\n};\n\nreturn [{\n  json: {\n    success: true,\n    metadata,\n    // Ready for T4 consumption\n    'x-goog-meta-vdp-platform': 'tiktok',\n    'x-goog-meta-vdp-author': oEmbedData.author_name,\n    'x-goog-meta-vdp-type': oEmbedData.type,\n    'x-goog-meta-vdp-views': scrapedData.viewCount?.toString() || 'unknown'\n  }\n}];"
+      },
+      "id": "combine-data",
+      "name": "Combine oEmbed + Scraped Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-with-metadata",
+      "name": "Respond with Metadata",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "TikTok Metadata Request": {
+      "main": [
+        [
+          {
+            "node": "Validate TikTok URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate TikTok URL": {
+      "main": [
+        [
+          {
+            "node": "TikTok oEmbed Call",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Playwright Scraper (Concept)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TikTok oEmbed Call": {
+      "main": [
+        [
+          {
+            "node": "Combine oEmbed + Scraped Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Playwright Scraper (Concept)": {
+      "main": [
+        [
+          {
+            "node": "Combine oEmbed + Scraped Data", 
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combine oEmbed + Scraped Data": {
+      "main": [
+        [
+          {
+            "node": "Respond with Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "versionId": "1"
+}

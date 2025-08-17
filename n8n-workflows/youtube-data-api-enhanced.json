@@ -1,0 +1,202 @@
+{
+  "name": "YouTube Data API Metadata Collector with Top Comments",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "youtube-metadata",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "YouTube Metadata Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "youtube-metadata"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract YouTube Video ID from URL\n// Handle different input sources: body, query params, or headers\nconst input = items[0].json;\nlet url;\n\n// Try to get URL from different sources\nif (input.body && input.body.content) {\n  url = input.body.content;\n} else if (input.body && input.body.url) {\n  url = input.body.url;\n} else if (input.query && input.query.url) {\n  url = input.query.url;\n} else if (input.url) {\n  url = input.url;\n} else if (input.content) {\n  url = input.content;\n} else {\n  throw new Error('No URL found in request. Expected URL in body.content, body.url, query.url, or content field');\n}\n\n// Extract video ID from various YouTube URL formats\nconst videoId = url.match(/(?:youtube\\.com\\/(?:watch\\?v=|shorts\\/)|youtu\\.be\\/)([a-zA-Z0-9_-]+)/)?.[1];\n\nif (!videoId) {\n  throw new Error(`Invalid YouTube URL: ${url}. Supported formats: youtube.com/watch?v=ID, youtube.com/shorts/ID, youtu.be/ID`);\n}\n\nreturn [{\n  json: {\n    videoId,\n    originalUrl: url,\n    apiKey: $node[\"Set API Key\"].json.apiKey\n  }\n}];"
+      },
+      "id": "extract-video-id",
+      "name": "Extract Video ID",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "apiKey",
+              "value": "={{ $env.YOUTUBE_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-api-key",
+      "name": "Set API Key",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [320, 200]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id={{ $json.videoId }}&key={{ $json.apiKey }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "youtube-api-call",
+      "name": "YouTube Data API Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId={{ $json.videoId }}&maxResults=5&order=relevance&key={{ $json.apiKey }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "youtube-comments-call",
+      "name": "YouTube Comments API Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 480]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract and format top comments from YouTube API response\nconst apiResponse = items?.[0]?.json || {};\n\nlet topComments = [];\n\ntry {\n  if (apiResponse && apiResponse.items && apiResponse.items.length > 0) {\n    topComments = apiResponse.items.map(item => {\n      const snippet = item.snippet.topLevelComment.snippet;\n      return {\n        id: item.id,\n        text: snippet.textDisplay,\n        author: snippet.authorDisplayName,\n        authorChannelUrl: snippet.authorChannelUrl,\n        likeCount: snippet.likeCount || 0,\n        publishedAt: snippet.publishedAt,\n        updatedAt: snippet.updatedAt\n      };\n    }).slice(0, 5); // Ensure max 5 comments\n  }\n} catch (error) {\n  console.error('Error processing comments:', error);\n  topComments = [];\n}\n\nreturn [{\n  json: {\n    topComments,\n    commentsCount: topComments.length,\n    success: true\n  }\n}];"
+      },
+      "id": "process-comments",
+      "name": "Process Top Comments",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 480]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Transform YouTube API response to VDP metadata format with top comments\nconst videoResponse = items[0]?.json || {};\nconst commentsResponse = items[1]?.json || {};\nconst video = videoResponse.items?.[0];\n\nif (!video) {\n  return [{\n    json: {\n      error: 'Video not found or private',\n      success: false\n    }\n  }];\n}\n\nconst snippet = video.snippet;\nconst statistics = video.statistics;\nconst contentDetails = video.contentDetails;\n\n// Parse duration (PT1M30S -> 90 seconds)\nconst duration = contentDetails.duration;\nconst match = duration.match(/PT(?:(\\d+)M)?(?:(\\d+)S)?/);\nconst minutes = parseInt(match?.[1] || '0');\nconst seconds = parseInt(match?.[2] || '0');\nconst durationSeconds = minutes * 60 + seconds;\n\nconst metadata = {\n  platform: 'youtube',\n  videoId: video.id,\n  title: snippet.title,\n  description: snippet.description,\n  channelTitle: snippet.channelTitle,\n  publishedAt: snippet.publishedAt,\n  thumbnails: snippet.thumbnails,\n  duration: {\n    iso8601: duration,\n    seconds: durationSeconds\n  },\n  statistics: {\n    viewCount: parseInt(statistics.viewCount || '0'),\n    likeCount: parseInt(statistics.likeCount || '0'),\n    commentCount: parseInt(statistics.commentCount || '0')\n  },\n  tags: snippet.tags || [],\n  categoryId: snippet.categoryId,\n  defaultLanguage: snippet.defaultLanguage,\n  // Add top comments to metadata\n  top_comments: commentsResponse.topComments || [],\n  // VDP metadata extensions\n  vdp: {\n    extractedAt: new Date().toISOString(),\n    source: 'youtube_data_api',\n    confidence: 0.95,\n    embedEligible: true,\n    hasTopComments: (commentsResponse.topComments || []).length > 0\n  }\n};\n\nreturn [{\n  json: {\n    success: true,\n    metadata,\n    // Ready for T4 consumption\n    'x-goog-meta-vdp-platform': 'youtube',\n    'x-goog-meta-vdp-duration': durationSeconds.toString(),\n    'x-goog-meta-vdp-views': statistics.viewCount,\n    'x-goog-meta-vdp-engagement': (parseInt(statistics.likeCount || '0') + parseInt(statistics.commentCount || '0')).toString(),\n    'x-goog-meta-vdp-top-comments-count': (commentsResponse.topComments || []).length.toString()\n  }\n}];"
+      },
+      "id": "transform-response",
+      "name": "Transform to VDP Format with Comments",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-with-metadata",
+      "name": "Respond with Metadata",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1340, 300]
+    }
+  ],
+  "connections": {
+    "YouTube Metadata Request": {
+      "main": [
+        [
+          {
+            "node": "Set API Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set API Key": {
+      "main": [
+        [
+          {
+            "node": "Extract Video ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Video ID": {
+      "main": [
+        [
+          {
+            "node": "YouTube Data API Call",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "YouTube Comments API Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Data API Call": {
+      "main": [
+        [
+          {
+            "node": "Transform to VDP Format with Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Comments API Call": {
+      "main": [
+        [
+          {
+            "node": "Process Top Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Top Comments": {
+      "main": [
+        [
+          {
+            "node": "Transform to VDP Format with Comments",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Transform to VDP Format with Comments": {
+      "main": [
+        [
+          {
+            "node": "Respond with Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "versionId": "1"
+}

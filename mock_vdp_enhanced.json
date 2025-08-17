@@ -1,0 +1,189 @@
+{
+  "ok": true,
+  "vdp": {
+    "content_id": "C00001",
+    "metadata": {
+      "platform": "youtube",
+      "language": "ko",
+      "source_url": "https://www.youtube.com/shorts/6_I2FmT1mbY"
+    },
+    "scenes": [
+      {
+        "scene_id": "S01_Hook",
+        "duration_sec": 2.8,
+        "time_start": 0,
+        "time_end": 2.8,
+        "narrative_role": "Hook",
+        "importance": "critical",
+        "shots": [
+          {
+            "shot_id": "S01_SH01",
+            "start": 0,
+            "end": 1.4,
+            "camera": {
+              "shot": "CU",
+              "angle": "eye",
+              "movement": "static"
+            },
+            "keyframes": [
+              {
+                "t_rel_shot": 0.1,
+                "role": "start",
+                "desc": "햄스터가 잠에서 깨어나는 모습"
+              },
+              {
+                "t_rel_shot": 0.8,
+                "role": "peak",
+                "desc": "시계를 보고 놀라는 표정"
+              },
+              {
+                "t_rel_shot": 1.3,
+                "role": "end",
+                "desc": "급히 일어나는 동작"
+              }
+            ],
+            "composition": {
+              "grid": "center",
+              "notes": [
+                "햄스터 캐릭터가 화면 중앙에 배치되어 감정 변화가 명확히 보임",
+                "시계 확인 순간의 충격적인 표정이 강조됨"
+              ]
+            }
+          },
+          {
+            "shot_id": "S01_SH02",
+            "start": 1.4,
+            "end": 2.8,
+            "camera": {
+              "shot": "ECU",
+              "angle": "low",
+              "movement": "static"
+            },
+            "keyframes": [
+              {
+                "t_rel_shot": 0.2,
+                "role": "start",
+                "desc": "핸드폰 화면에 8:02 시간 표시"
+              },
+              {
+                "t_rel_shot": 0.9,
+                "role": "peak",
+                "desc": "'SSAP 지각' 텍스트가 선명히 보임"
+              },
+              {
+                "t_rel_shot": 1.3,
+                "role": "end",
+                "desc": "화면이 밝게 빛나며 긴급함 강조"
+              }
+            ],
+            "composition": {
+              "grid": "center",
+              "notes": [
+                "핸드폰 화면이 전체 프레임을 채우며 텍스트 가독성 최대화",
+                "시간 정보가 중앙 배치되어 즉각적인 인식 유도"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "scene_id": "S02_RushMontage",
+        "duration_sec": 3.2,
+        "time_start": 2.8,
+        "time_end": 6.0,
+        "narrative_role": "Rising Action",
+        "shots": [
+          {
+            "shot_id": "S02_SH01",
+            "start": 2.8,
+            "end": 4.5,
+            "camera": {
+              "shot": "MS",
+              "angle": "eye",
+              "movement": "handheld"
+            },
+            "keyframes": [
+              {
+                "t_rel_shot": 0.1,
+                "role": "start",
+                "desc": "복도를 뛰어가는 햄스터"
+              },
+              {
+                "t_rel_shot": 0.6,
+                "role": "mid",
+                "desc": "화장실로 급히 들어가는 모습"
+              },
+              {
+                "t_rel_shot": 1.0,
+                "role": "peak",
+                "desc": "세면대 앞에서 앞머리만 빠르게 감는 장면"
+              },
+              {
+                "t_rel_shot": 1.6,
+                "role": "end",
+                "desc": "양치질을 급하게 하는 모습"
+              }
+            ],
+            "composition": {
+              "grid": "left_third",
+              "notes": [
+                "몽타주 컷으로 시간의 촉박함을 표현",
+                "카메라 움직임이 캐릭터의 급한 마음을 반영"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "overall_analysis": {
+      "hookGenome": {
+        "pattern_code": "problem_solution",
+        "strength_score": 0.9,
+        "start_sec": 0,
+        "end_sec": 2.8,
+        "trigger_modalities": ["visual", "audio", "text"],
+        "microbeats_sec": [0.5, 1.2, 2.1],
+        "hook_quality_factors": {
+          "pattern_break": 0.95,
+          "clarity": 0.88,
+          "curiosity": 0.92
+        }
+      },
+      "story_telling": {
+        "plot_structure": "Setup → Conflict → Rising Action",
+        "emotional_arc": "Content → Panic → Frantic Action",
+        "narrative_devices": ["montage", "time_pressure", "relatable_situation"]
+      },
+      "engagement_snapshot": {
+        "view_retention": 0.92,
+        "comment_sentiment": "positive_humor",
+        "share_triggers": ["relatability", "cute_character", "humor"]
+      }
+    }
+  },
+  "schema_version": "2.0-enhanced",
+  "google_vdp_quality": {
+    "scenes_count": 7,
+    "shots_count": 9,
+    "keyframes_count": 24,
+    "composition_notes": 18
+  },
+  "hook_genome": {
+    "pattern_code": "problem_solution",
+    "strength_score": 0.9,
+    "start_sec": 0,
+    "end_sec": 2.8,
+    "trigger_modalities": ["visual", "audio", "text"],
+    "microbeats_sec": [0.5, 1.2, 2.1]
+  },
+  "quality_gates": {
+    "hook_timing": true,
+    "hook_strength": true,
+    "pattern_code": true
+  },
+  "processing_metadata": {
+    "platform": "youtube",
+    "timestamp": "2025-08-15T17:00:07.123Z",
+    "model": "gemini-2.5-pro"
+  }
+}

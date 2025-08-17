@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VDP Content Processor | 영상 분석 도구</title>
+    <meta name="description" content="YouTube, Instagram, TikTok 콘텐츠의 VDP(Video Detail Processing) 분석을 한 번에 처리">
+    
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="container">
+                <h1 class="header__title">
+                    🎬 VDP Content Processor
+                </h1>
+                <p class="header__subtitle">
+                    YouTube, Instagram, TikTok 콘텐츠 분석을 한 번에
+                </p>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="container">
+                <!-- Fixed Top Metrics Display -->
+                <div id="metrics-display" class="metrics-display" style="display: none;">
+                    <div class="metrics-header">
+                        <h3 class="metrics-title">📊 품질 메트릭</h3>
+                        <div class="hook-gate-status" id="hook-gate-status">
+                            <span class="gate-badge gate-badge--pending" id="gate-badge">
+                                <span class="badge-icon">⏳</span>
+                                <span class="badge-text">Hook Gate 대기</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-card" id="scenes-metric">
+                            <div class="metric-icon">🎬</div>
+                            <div class="metric-content">
+                                <div class="metric-value">
+                                    <span id="scenes-current">-</span>/<span id="scenes-target">4</span>
+                                </div>
+                                <div class="metric-label">Scenes</div>
+                                <div class="metric-status" id="scenes-status">-</div>
+                            </div>
+                        </div>
+                        <div class="metric-card" id="shots-metric">
+                            <div class="metric-icon">📸</div>
+                            <div class="metric-content">
+                                <div class="metric-value">
+                                    <span id="shots-current">-</span>/<span id="shots-target">8</span>
+                                </div>
+                                <div class="metric-label">Shots</div>
+                                <div class="metric-status" id="shots-status">-</div>
+                            </div>
+                        </div>
+                        <div class="metric-card" id="keyframes-metric">
+                            <div class="metric-icon">🔑</div>
+                            <div class="metric-content">
+                                <div class="metric-value">
+                                    <span id="keyframes-current">-</span>/<span id="keyframes-target">20</span>
+                                </div>
+                                <div class="metric-label">Keyframes</div>
+                                <div class="metric-status" id="keyframes-status">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metrics-actions">
+                        <button type="button" id="auto-retry-btn" class="retry-density-btn" style="display: none;">
+                            <span class="btn-icon">🔄</span>
+                            <span class="btn-text">정보 밀도 부족 시 재확장 호출 (2패스)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <form id="vdp-form" class="vdp-form" novalidate>
+                    
+                    <!-- Platform Selection -->
+                    <fieldset class="platform-selector" role="radiogroup" aria-labelledby="platform-legend">
+                        <legend id="platform-legend" class="platform-selector__legend">
+                            콘텐츠 플랫폼 선택
+                        </legend>
+                        
+                        <div class="platform-options">
+                            <input type="radio" id="youtube" name="platform" value="youtube" checked>
+                            <label for="youtube" class="platform-option">
+                                <span class="platform-option__icon">🎬</span>
+                                <span class="platform-option__name">YouTube</span>
+                                <span class="platform-option__desc">Shorts URL 입력</span>
+                            </label>
+                            
+                            <input type="radio" id="instagram" name="platform" value="instagram">
+                            <label for="instagram" class="platform-option">
+                                <span class="platform-option__icon">📷</span>
+                                <span class="platform-option__name">Instagram</span>
+                                <span class="platform-option__desc">MP4 + 메타데이터</span>
+                            </label>
+                            
+                            <input type="radio" id="tiktok" name="platform" value="tiktok">
+                            <label for="tiktok" class="platform-option">
+                                <span class="platform-option__icon">🎵</span>
+                                <span class="platform-option__name">TikTok</span>
+                                <span class="platform-option__desc">MP4 + 메타데이터</span>
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <!-- Content Input Forms -->
+                    <div class="content-input">
+                        
+                        <!-- YouTube Form -->
+                        <div id="youtube-form" class="platform-form platform-form--active">
+                            <div class="form-group">
+                                <label for="youtube-url" class="form-label">
+                                    YouTube Shorts URL
+                                    <span class="form-label__required" aria-label="필수">*</span>
+                                </label>
+                                <input 
+                                    type="url" 
+                                    id="youtube-url" 
+                                    name="source_url"
+                                    class="form-input form-input--url"
+                                    placeholder="https://www.youtube.com/shorts/VIDEO_ID"
+                                    pattern=".*youtube\.com/shorts/.*"
+                                    required
+                                    aria-describedby="youtube-url-help"
+                                >
+                                <div id="youtube-url-help" class="form-help">
+                                    모든 YouTube 링크 형태를 붙여넣어도 됩니다. 시스템이 자동으로 영상 ID와 표준 URL을 채웁니다.
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="form-group">
+                                <label for="language" class="form-label">언어 (선택사항)</label>
+                                <select id="language" name="language" class="form-select">
+                                    <option value="ko">한국어</option>
+                                    <option value="en">English</option>
+                                    <option value="ja">日본語</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="youtube-video-origin" class="form-label">
+                                    원본 유형
+                                    <span class="form-label__required" aria-label="필수">*</span>
+                                </label>
+                                <select id="youtube-video-origin" name="video_origin" class="form-select" required>
+                                    <option value="unknown" selected>Unknown</option>
+                                    <option value="real_footage">Real footage</option>
+                                    <option value="ai_generated">AI generated</option>
+                                </select>
+                                <div class="form-help">영상이 실제 촬영인지, AI 생성인지 선택하세요</div>
+                            </div>
+                        </div>
+
+                        <!-- Instagram Form -->
+                        <div id="instagram-form" class="platform-form">
+                            <div class="form-group">
+                                <label for="instagram-video" class="form-label">
+                                    동영상 파일 (.mp4)
+                                    <span class="form-label__required" aria-label="필수">*</span>
+                                </label>
+                                <div class="file-upload-zone" ondrop="handleDrop(event, 'video')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                                    <input 
+                                        type="file" 
+                                        id="instagram-video" 
+                                        name="video_file"
+                                        accept="video/mp4,video/*"
+                                        class="file-input"
+                                        aria-describedby="video-help"
+                                    >
+                                    <label for="instagram-video" class="file-upload-label">
+                                        <span class="file-upload-icon">🎬</span>
+                                        <span class="file-upload-text">클릭하여 동영상 파일 선택 또는 드래그하여 업로드</span>
+                                        <span class="file-upload-limit">(MP4, MOV, AVI 등 | 최대 100MB)</span>
+                                    </label>
+                                </div>
+                                <div id="video-help" class="form-help">
+                                    Instagram Reels 동영상 파일을 업로드하세요
+                                </div>
+                            </div>
+                            
+                            <!-- Instagram 메타데이터 입력 폼 -->
+                            <div class="metadata-form-section">
+                                <h3 class="section-title">📷 Instagram 메타데이터</h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="instagram-source-url" class="form-label">
+                                            원본 URL
+                                            <span class="form-label__required" aria-label="필수">*</span>
+                                        </label>
+                                        <input 
+                                            type="url" 
+                                            id="instagram-source-url" 
+                                            name="source_url"
+                                            class="form-input"
+                                            placeholder="https://instagram.com/p/EXAMPLE_ID"
+                                            required
+                                        >
+                                        <div class="form-help">모든 Instagram 링크 형태를 붙여넣어도 됩니다. 시스템이 자동으로 콘텐츠 ID와 표준 URL을 채웁니다.</div>
+                                    </div>
+                                    
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="instagram-language" class="form-label">언어</label>
+                                    <select id="instagram-language" name="language" class="form-select">
+                                        <option value="ko" selected>한국어</option>
+                                        <option value="en">English</option>
+                                        <option value="ja">日본語</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="instagram-title" class="form-label">제목</label>
+                                    <textarea 
+                                        id="instagram-title" 
+                                        name="title"
+                                        class="form-textarea"
+                                        rows="3"
+                                        placeholder="게시물 제목을 입력하세요..."
+                                    ></textarea>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="instagram-view-count" class="form-label">조회수</label>
+                                        <input 
+                                            type="number" 
+                                            id="instagram-view-count" 
+                                            name="view_count"
+                                            class="form-input"
+                                            placeholder="12500"
+                                            min="0"
+                                        >
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="instagram-like-count" class="form-label">좋아요</label>
+                                        <input 
+                                            type="number" 
+                                            id="instagram-like-count" 
+                                            name="like_count"
+                                            class="form-input"
+                                            placeholder="850"
+                                            min="0"
+                                        >
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="instagram-comment-count" class="form-label">댓글</label>
+                                        <input 
+                                            type="number" 
+                                            id="instagram-comment-count" 
+                                            name="comment_count"
+                                            class="form-input"
+                                            placeholder="42"
+                                            min="0"
+                                        >
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="instagram-share-count" class="form-label">공유</label>
+                                        <input 
+                                            type="number" 
+                                            id="instagram-share-count" 
+                                            name="share_count"
+                                            class="form-input"
+                                            placeholder="156"
+                                            min="0"
+                                        >
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="instagram-hashtags" class="form-label">해시태그</label>
+                                    <input 
+                                        type="text" 
+                                        id="instagram-hashtags" 
+                                        name="hashtags"
+                                        class="form-input"
+                                        placeholder="viral, trending, fashion (쉼표로 구분)"
+                                    >
+                                    <div class="form-help">해시태그를 쉼표로 구분해서 입력하세요</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="instagram-upload-date" class="form-label">업로드 날짜</label>
+                                    <input 
+                                        type="datetime-local" 
+                                        id="instagram-upload-date" 
+                                        name="upload_date"
+                                        class="form-input"
+                                    >
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="instagram-top-comments" class="form-label">인기 댓글 (선택사항)</label>
+                                    <div class="top-comments-container" id="instagram-top-comments">
+                                        <div class="comment-input-group">
+                                            <input 
+                                                type="text" 
+                                                name="top_comment_1_text"
+                                                class="form-input comment-text"
+                                                placeholder="댓글 내용 1"
+                                            >
+                                        </div>
+                                        <div class="comment-input-group">
+                                            <input 
+                                                type="text" 
+                                                name="top_comment_2_text"
+                                                class="form-input comment-text"
+                                                placeholder="댓글 내용 2"
+                                            >
+                                        </div>
+                                        <div class="comment-input-group">
+                                            <input 
+                                                type="text" 
+                                                name="top_comment_3_text"
+                                                class="form-input comment-text"
+                                                placeholder="댓글 내용 3"
+                                            >
+                                        </div>
+                                    </div>
+                                    <div class="form-help">인기 댓글을 최대 3개까지 입력하세요 (선택사항)</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="instagram-video-origin" class="form-label">
+                                        원본 유형
+                                        <span class="form-label__required" aria-label="필수">*</span>
+                                    </label>
+                                    <select id="instagram-video-origin" name="video_origin" class="form-select" required>
+                                        <option value="unknown" selected>Unknown</option>
+                                        <option value="real_footage">Real footage</option>
+                                        <option value="ai_generated">AI generated</option>
+                                    </select>
+                                    <div class="form-help">영상이 실제 촬영인지, AI 생성인지 선택하세요</div>
+                                </div>
+                            </div>
+                            
+                        </div>
+
+                        <!-- TikTok Form -->
+                        <div id="tiktok-form" class="platform-form">
+                            <div class="form-group">
+                                <label for="tiktok-video" class="form-label">
+                                    동영상 파일 (.mp4)
+                                    <span class="form-label__required" aria-label="필수">*</span>
+                                </label>
+                                <div class="file-upload-zone" ondrop="handleDrop(event, 'video')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                                    <input 
+                                        type="file" 
+                                        id="tiktok-video" 
+                                        name="video_file"
+                                        accept="video/mp4,video/*"
+                                        class="file-input"
+                                        aria-describedby="tiktok-video-help"
+                                    >
+                                    <label for="tiktok-video" class="file-upload-label">
+                                        <span class="file-upload-icon">🎬</span>
+                                        <span class="file-upload-text">클릭하여 동영상 파일 선택 또는 드래그하여 업로드</span>
+                                        <span class="file-upload-limit">(MP4, MOV, AVI 등 | 최대 100MB)</span>
+                                    </label>
+                                </div>
+                                <div id="tiktok-video-help" class="form-help">
+                                    TikTok 동영상 파일을 업로드하세요
+                                </div>
+                            </div>
+                            
+                            <!-- TikTok 메타데이터 입력 폼 -->
+                            <div class="metadata-form-section">
+                                <h3 class="section-title">🎵 TikTok 메타데이터</h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="tiktok-source-url" class="form-label">
+                                            원본 URL
+                                            <span class="form-label__required" aria-label="필수">*</span>
+                                        </label>
+                                        <input 
+                                            type="url" 
+                                            id="tiktok-source-url" 
+                                            name="source_url"
+                                            class="form-input"
+                                            placeholder="https://tiktok.com/@user/video/EXAMPLE_ID"
+                                            required
+                                        >
+                                        <div class="form-help">모든 TikTok 링크 형태를 붙여넣어도 됩니다. 시스템이 자동으로 영상 ID와 표준 URL을 채웁니다.</div>
+                                    </div>
+                                    
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="tiktok-language" class="form-label">언어</label>
+                                    <select id="tiktok-language" name="language" class="form-select">
+                                        <option value="ko" selected>한국어</option>
+                                        <option value="en">English</option>
+                                        <option value="ja">日본語</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="tiktok-title" class="form-label">제목</label>
+                                    <textarea 
+                                        id="tiktok-title" 
+                                        name="title"
+                                        class="form-textarea"
+                                        rows="3"
+                                        placeholder="TikTok 제목을 입력하세요..."
+                                    ></textarea>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="tiktok-view-count" class="form-label">조회수</label>
+                                        <input 
+                                            type="number" 
+                                            id="tiktok-view-count" 
+                                            name="view_count"
+                                            class="form-input"
+                                            placeholder="25000"
+                                            min="0"
+                                        >
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="tiktok-like-count" class="form-label">좋아요</label>
+                                        <input 
+                                            type="number" 
+                                            id="tiktok-like-count" 
+                                            name="like_count"
+                                            class="form-input"
+                                            placeholder="1200"
+                                            min="0"
+                                        >
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="tiktok-comment-count" class="form-label">댓글</label>
+                                        <input 
+                                            type="number" 
+                                            id="tiktok-comment-count" 
+                                            name="comment_count"
+                                            class="form-input"
+                                            placeholder="89"
+                                            min="0"
+                                        >
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="tiktok-share-count" class="form-label">공유</label>
+                                        <input 
+                                            type="number" 
+                                            id="tiktok-share-count" 
+                                            name="share_count"
+                                            class="form-input"
+                                            placeholder="156"
+                                            min="0"
+                                        >
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="tiktok-hashtags" class="form-label">해시태그</label>
+                                    <input 
+                                        type="text" 
+                                        id="tiktok-hashtags" 
+                                        name="hashtags"
+                                        class="form-input"
+                                        placeholder="fyp, viral, trending, 트렌드 (쉼표로 구분)"
+                                    >
+                                    <div class="form-help">해시태그를 쉼표로 구분해서 입력하세요</div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="tiktok-upload-date" class="form-label">업로드 날짜</label>
+                                        <input 
+                                            type="datetime-local" 
+                                            id="tiktok-upload-date" 
+                                            name="upload_date"
+                                            class="form-input"
+                                        >
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="tiktok-duration" class="form-label">영상 길이 (초)</label>
+                                        <input 
+                                            type="number" 
+                                            id="tiktok-duration" 
+                                            name="duration"
+                                            class="form-input"
+                                            placeholder="15"
+                                            min="1"
+                                            max="180"
+                                        >
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="tiktok-top-comments" class="form-label">인기 댓글 (선택사항)</label>
+                                    <div class="top-comments-container" id="tiktok-top-comments">
+                                        <div class="comment-input-group">
+                                            <input 
+                                                type="text" 
+                                                name="top_comment_1_text"
+                                                class="form-input comment-text"
+                                                placeholder="댓글 내용 1"
+                                            >
+                                        </div>
+                                        <div class="comment-input-group">
+                                            <input 
+                                                type="text" 
+                                                name="top_comment_2_text"
+                                                class="form-input comment-text"
+                                                placeholder="댓글 내용 2"
+                                            >
+                                        </div>
+                                        <div class="comment-input-group">
+                                            <input 
+                                                type="text" 
+                                                name="top_comment_3_text"
+                                                class="form-input comment-text"
+                                                placeholder="댓글 내용 3"
+                                            >
+                                        </div>
+                                    </div>
+                                    <div class="form-help">인기 댓글을 최대 3개까지 입력하세요 (선택사항)</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="tiktok-video-origin" class="form-label">
+                                        원본 유형
+                                        <span class="form-label__required" aria-label="필수">*</span>
+                                    </label>
+                                    <select id="tiktok-video-origin" name="video_origin" class="form-select" required>
+                                        <option value="unknown" selected>Unknown</option>
+                                        <option value="real_footage">Real footage</option>
+                                        <option value="ai_generated">AI generated</option>
+                                    </select>
+                                    <div class="form-help">영상이 실제 촬영인지, AI 생성인지 선택하세요</div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="form-actions">
+                        <button type="submit" id="submit-btn" class="submit-btn" disabled>
+                            <span class="submit-btn__icon">🚀</span>
+                            <span class="submit-btn__text">콘텐츠 분석 시작</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Progress Section -->
+                <div id="progress-section" class="progress-section" style="display: none;">
+                    <div class="progress-header">
+                        <h2 class="progress-title">처리 중...</h2>
+                        <div class="progress-meta">
+                            <span id="progress-platform" class="progress-platform"></span>
+                            <span id="progress-job-id" class="progress-job-id"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                        <div id="progress-fill" class="progress-bar__fill" style="width: 0%"></div>
+                        <div class="progress-bar__text">
+                            <span id="progress-percentage">0%</span>
+                            <span id="progress-step">처리를 준비하고 있습니다...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="progress-steps" class="progress-steps">
+                        <div class="progress-step progress-step--pending">
+                            <span class="progress-step__icon">⏳</span>
+                            <span class="progress-step__text">제출 내용 검증 중...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="results-section" class="results-section" style="display: none;">
+                    <!-- Success or Error content will be inserted here -->
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                <p class="footer__text">
+                    VDP Content Processor v1.0 | 
+                    <a href="/api/docs" class="footer__link">API 문서</a> | 
+                    <a href="/health" class="footer__link">서비스 상태</a>
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="scripts/logger.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/url-auto-fill.js"></script>
+</body>
+</html>

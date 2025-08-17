@@ -1,0 +1,58 @@
+{
+  "contents": [{
+    "role": "user",
+    "parts": [
+      {
+        "file_data": {
+          "file_uri": "gs://tough-variety-raw/raw/ingest/6_I2FmT1mbY.mp4",
+          "mime_type": "video/mp4"
+        }
+      },
+      {
+        "text": "당신은 숏폼 비디오의 Hook Genome을 분석하는 전문 분석가입니다.\n\n작업: 제공된 동영상의 첫 3초 훅을 정밀 분석하여 JSON 스키마에 맞는 hookGenome 데이터를 생성하세요.\n\n핵심 요구사항:\n1. Hook은 시청자의 관심을 끌기 위한 첫 3초 이내의 핵심 요소입니다\n2. pattern_break (패턴 파괴), curiosity_gap (호기심 자극), pattern_completion (기대 충족) 중 하나로 분류\n3. strength_score는 0.0-1.0 범위에서 Hook의 효과성 평가 (0.7 이상 목표)\n4. microbeats_sec는 Hook 내 주요 임팩트 시점들을 초 단위로 기록\n5. trigger_modalities는 시각, 청각, 텍스트 중 Hook에 사용된 모달리티들\n\n출력은 반드시 제공된 JSON 스키마 형식을 준수해야 합니다."
+      }
+    ]
+  }],
+  "generationConfig": {
+    "response_mime_type": "application/json",
+    "response_schema": {
+      "type": "object",
+      "properties": {
+        "overall_analysis": {
+          "type": "object",
+          "properties": {
+            "hookGenome": {
+              "type": "object",
+              "properties": {
+                "delivery": {"type": "string"},
+                "microbeats_sec": {
+                  "type": "array", 
+                  "items": {"type": "number"}
+                },
+                "pattern_code": {
+                  "type": "string",
+                  "enum": ["pattern_break", "curiosity_gap", "pattern_completion"]
+                },
+                "start_sec": {"type": "number"},
+                "strength_score": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "trigger_modalities": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": ["visual", "audio", "text"]
+                  }
+                }
+              },
+              "required": ["delivery", "microbeats_sec", "pattern_code", "start_sec", "strength_score", "trigger_modalities"]
+            }
+          }
+        }
+      }
+    },
+    "temperature": 0.2
+  }
+}

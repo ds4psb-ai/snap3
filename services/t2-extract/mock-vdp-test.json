@@ -1,0 +1,18 @@
+{
+  "vdp": {
+    "content_id": "PLATFORM_SEGMENT_TEST_001",
+    "metadata": {
+      "platform": "YouTube Shorts",
+      "language": "ko",
+      "canonical_url": "https://www.youtube.com/shorts/PLATFORM_SEGMENT_TEST_001"
+    },
+    "overall_analysis": {
+      "hookGenome": {
+        "pattern_code": "curiosity_gap",
+        "delivery": "question_hook",
+        "start_sec": 0.0,
+        "strength_score": 0.85
+      }
+    }
+  }
+}

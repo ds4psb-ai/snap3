@@ -1,0 +1,16 @@
+{
+  "content_id": "TEST_WORKER_001",
+  "platform": "YouTube Shorts",
+  "source_url": "https://www.youtube.com/shorts/dQw4w9WgXcQ",
+  "outGcsUri": "gs://tough-variety-raw/raw/vdp/TEST_WORKER_001.vdp.json",
+  "metadata": {
+    "requested_at": "2025-08-17T12:00:00.000Z",
+    "request_source": "worker_test",
+    "priority": "normal"
+  },
+  "processing_options": {
+    "generate_evidence": true,
+    "audio_fingerprint": true,
+    "brand_detection": true
+  }
+}
