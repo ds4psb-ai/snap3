@@ -1,0 +1,19 @@
+{
+  "platform": "instagram",
+  "content_id": "UNIQUE_CONTENT_ID",
+  "source_url": "https://instagram.com/p/POST_ID/",
+  "creator": "username",
+  "hashtags": ["#reels", "#viral", "#instagram"],
+  "view_count": 0,
+  "like_count": 0,
+  "comment_count": 0,
+  "share_count": 0,
+  "upload_date": "2024-01-01",
+  "video_origin": "Unknown",
+  "cta_types": [],
+  "original_sound": {
+    "id": null,
+    "title": null
+  },
+  "language": "ko"
+}

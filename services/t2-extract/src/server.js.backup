@@ -1,0 +1,242 @@
+import express from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { VertexAI } from "@google-cloud/vertexai";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
+
+const app = express();
+app.use(express.json({ limit: "2mb" }));
+
+const PROJECT_ID = process.env.PROJECT_ID || "tough-variety-466003-c5";
+const LOCATION   = process.env.REGION     || "us-west1";
+const SCHEMA_PATH  = process.env.VDP_SCHEMA_PATH  || path.join(__dirname, "../schemas/vdp-2.0-enhanced.schema.json");
+const PROMPT_PATH  = process.env.HOOK_PROMPT_PATH || path.join(__dirname, "../prompts/hook_genome_enhanced.ko.txt");
+const HOOK_MIN   = parseFloat(process.env.HOOK_MIN_STRENGTH || "0.70");
+const HOOK_MAX_S = parseFloat(process.env.HOOK_MAX_START_SEC || "3.0");
+
+// 1) Vertex 모델 초기화 (ADC 사용)
+const vertex = new VertexAI({ project: PROJECT_ID, location: LOCATION });
+const model  = vertex.getGenerativeModel({
+  model: "gemini-2.5-pro",
+  generationConfig: {
+    responseMimeType: "application/json",
+    // Schema enforcement enabled - forces structured JSON output from Gemini
+    // Remove $schema field as Vertex AI doesn't accept it
+    responseSchema: (() => {
+      const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, "utf8"));
+      delete schema.$schema;
+      return schema;
+    })()
+  }
+});
+
+const hookPrompt = fs.readFileSync(PROMPT_PATH, "utf8");
+
+app.post("/api/vdp/extract-vertex", async (req, res) => {
+  try {
+    const { gcsUri, meta = {} } = req.body || {};
+    if (!gcsUri) return res.status(400).json({ error: "gcsUri required" });
+
+    console.log(`[VDP 2.0 Enhanced] Processing: ${gcsUri} with Google VDP quality standards`);
+
+    // 2) Enhanced prompt with Google VDP quality standards
+    const vdp20EnhancedPrompt = `${hookPrompt}
+
+PLATFORM CONTEXT:
+- Platform: ${meta.platform || 'unknown'}
+- Language: ${meta.language || 'ko'}
+
+GOOGLE VDP QUALITY ENFORCEMENT:
+- MANDATORY: Every scene MUST include shots[] array (1-6 shots per scene)
+- MANDATORY: Every shot MUST include keyframes[] array (2-4 keyframes per shot)
+- MANDATORY: Every shot MUST include composition object with notes[] array
+- PRIORITY: Hook scenes (narrative_role=Hook) require importance:"critical"
+- VERBOSITY_FLOOR: Minimum detail requirements by scene duration
+- MICRO_SCENE_DETAIL: Critical scenes require ≥3 keyframes + ≥2 composition notes
+- Source URL: ${meta.source_url || 'N/A'}
+
+ENHANCED VDP 2.0 REQUIREMENTS:
+- Include engagement_snapshot if available
+- Provide story_telling analysis with plot structure 
+- Extract microbeats_sec for precise hook timing
+- Identify trigger_modalities (visual, audio, text)
+- Add scene-level camera and audio metadata
+- Support flexible pattern_code (string or array)`;
+
+    // 3) Vertex AI 호출 (VDP 2.0 Schema + Enhanced Prompt)
+    const result = await model.generateContent({
+      contents: [{
+        role: "user",
+        parts: [
+          { fileData: { fileUri: gcsUri, mimeType: "video/mp4" } },
+          { text: vdp20EnhancedPrompt }
+        ]
+      }]
+    });
+
+    // 4) 출력 파싱 (Structured Output ensures JSON compliance)
+    const text = result.response?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const vdp  = JSON.parse(text);
+
+    // 5) VDP 2.0 metadata enrichment
+    if (meta.platform) {
+      vdp.metadata = vdp.metadata || {};
+      vdp.metadata.platform = meta.platform;
+      vdp.metadata.language = meta.language || 'ko';
+      if (meta.source_url) vdp.metadata.source_url = meta.source_url;
+    }
+
+    // 6) VDP 2.0 Hook Quality Gates (enhanced validation)
+    const hg = vdp?.overall_analysis?.hookGenome;
+    if (!hg) {
+      return res.status(422).json({ 
+        type: "https://api.outlier.example/problems/missing-hook-genome",
+        title: "Hook Genome Missing",
+        status: 422,
+        detail: "VDP 2.0 requires hookGenome in overall_analysis structure",
+        instance: `/api/vdp/extract-vertex`,
+        vdp 
+      });
+    }
+
+    // VDP 2.0 enhanced quality gates
+    const startOK = typeof hg.start_sec === "number" && hg.start_sec <= HOOK_MAX_S;
+    const strengthOK = typeof hg.strength_score === "number" && hg.strength_score >= HOOK_MIN;
+    const patternOK = hg.pattern_code && (typeof hg.pattern_code === "string" || Array.isArray(hg.pattern_code));
+    
+    const qualityIssues = [];
+    if (!startOK) qualityIssues.push(`start_sec ${hg.start_sec} exceeds ${HOOK_MAX_S}s limit`);
+    if (!strengthOK) qualityIssues.push(`strength_score ${hg.strength_score} below ${HOOK_MIN} threshold`);
+    if (!patternOK) qualityIssues.push("pattern_code must be string or non-empty array");
+    
+    if (qualityIssues.length > 0) {
+      return res.status(409).json({ 
+        type: "https://api.outlier.example/problems/hook-quality-gate-failed",
+        title: "Hook Quality Gate Failed", 
+        status: 409,
+        detail: `VDP 2.0 quality gates failed: ${qualityIssues.join(', ')}`,
+        instance: `/api/vdp/extract-vertex`,
+        hookGenome: hg,
+        qualityIssues
+      });
+    }
+
+    // 7) VDP 2.0 Success Response with enhanced metadata
+    console.log(`[VDP 2.0 Enhanced] Success: ${vdp.content_id || 'unknown'} - Hook: ${JSON.stringify(hg.pattern_code)} (${hg.strength_score})`);
+    const scenes = vdp.scenes || [];
+    console.log(`[Google VDP Quality] Scenes: ${scenes.length}, Total Shots: ${scenes.reduce((acc, s) => acc + (s.shots?.length || 0), 0)}, Total Keyframes: ${scenes.reduce((acc, s) => acc + (s.shots?.reduce((sa, sh) => sa + (sh.keyframes?.length || 0), 0) || 0), 0)}`);
+    
+    return res.json({ 
+      ok: true, 
+      vdp,
+      schema_version: "2.0-enhanced",
+      google_vdp_quality: {
+        scenes_count: scenes.length,
+        shots_count: scenes.reduce((acc, s) => acc + (s.shots?.length || 0), 0),
+        keyframes_count: scenes.reduce((acc, s) => acc + (s.shots?.reduce((sa, sh) => sa + (sh.keyframes?.length || 0), 0) || 0), 0),
+        composition_notes: scenes.reduce((acc, s) => acc + (s.shots?.reduce((sa, sh) => sa + (sh.composition?.notes?.length || 0), 0) || 0), 0)
+      },
+      hook_genome: {
+        pattern_code: hg.pattern_code,
+        strength_score: hg.strength_score,
+        start_sec: hg.start_sec,
+        end_sec: hg.end_sec,
+        trigger_modalities: hg.trigger_modalities,
+        microbeats_sec: hg.microbeats_sec
+      },
+      quality_gates: {
+        hook_timing: startOK,
+        hook_strength: strengthOK, 
+        pattern_code: patternOK
+      },
+      processing_metadata: {
+        platform: meta.platform || 'unknown',
+        timestamp: new Date().toISOString(),
+        model: "gemini-2.5-pro"
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ error: (err instanceof Error ? err.message : String(err)) });
+  }
+});
+
+app.get("/health", (_, res) => res.json({ ok: true }));
+
+// Test endpoint for VDP 2.0 quality gates (bypasses Vertex AI)
+app.post("/api/vdp/test-quality-gates", (req, res) => {
+  try {
+    const { vdp } = req.body || {};
+    if (!vdp) return res.status(400).json({ error: "vdp data required" });
+
+    console.log(`[VDP 2.0 TEST] Testing quality gates for: ${vdp.content_id || 'unknown'}`);
+
+    // VDP 2.0 Hook Quality Gates (enhanced validation)
+    const hg = vdp?.overall_analysis?.hookGenome;
+    if (!hg) {
+      return res.status(422).json({ 
+        type: "https://api.outlier.example/problems/missing-hook-genome",
+        title: "Hook Genome Missing",
+        status: 422,
+        detail: "VDP 2.0 requires hookGenome in overall_analysis structure",
+        instance: `/api/vdp/test-quality-gates`,
+        vdp 
+      });
+    }
+
+    // VDP 2.0 enhanced quality gates
+    const startOK = typeof hg.start_sec === "number" && hg.start_sec <= HOOK_MAX_S;
+    const strengthOK = typeof hg.strength_score === "number" && hg.strength_score >= HOOK_MIN;
+    const patternOK = hg.pattern_code && (typeof hg.pattern_code === "string" || Array.isArray(hg.pattern_code));
+    
+    const qualityIssues = [];
+    if (!startOK) qualityIssues.push(`start_sec ${hg.start_sec} exceeds ${HOOK_MAX_S}s limit`);
+    if (!strengthOK) qualityIssues.push(`strength_score ${hg.strength_score} below ${HOOK_MIN} threshold`);
+    if (!patternOK) qualityIssues.push("pattern_code must be string or non-empty array");
+    
+    if (qualityIssues.length > 0) {
+      return res.status(409).json({ 
+        type: "https://api.outlier.example/problems/hook-quality-gate-failed",
+        title: "Hook Quality Gate Failed", 
+        status: 409,
+        detail: `VDP 2.0 quality gates failed: ${qualityIssues.join(', ')}`,
+        instance: `/api/vdp/test-quality-gates`,
+        hookGenome: hg,
+        qualityIssues
+      });
+    }
+
+    // Success Response
+    console.log(`[VDP 2.0 TEST] Success: ${vdp.content_id} - Hook: ${hg.pattern_code} (${hg.strength_score})`);
+    
+    return res.json({ 
+      ok: true, 
+      vdp,
+      schema_version: "2.0",
+      quality_gates: {
+        hook_timing: startOK,
+        hook_strength: strengthOK, 
+        pattern_code: patternOK
+      },
+      processing_metadata: {
+        platform: vdp.metadata?.platform || 'unknown',
+        timestamp: new Date().toISOString(),
+        test_mode: true
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ error: (err instanceof Error ? err.message : String(err)) });
+  }
+});
+
+const PORT = process.env.PORT || 8080;
+const server = app.listen(PORT, () => console.log(`[t2-extract] listening on ${PORT}`));
+
+// 긴 작업에서도 소켓 안 끊기도록 타임아웃 해제
+server.requestTimeout = 0;      // 무제한 (Vertex AI 처리 시간 대응)
+server.headersTimeout = 0;      // 헤더 타임아웃 해제
+server.keepAliveTimeout = 0;    // Keep-Alive 타임아웃 해제
+
+console.log(`[t2-extract] 타임아웃 설정: requestTimeout=${server.requestTimeout}, headersTimeout=${server.headersTimeout}, keepAliveTimeout=${server.keepAliveTimeout}`);

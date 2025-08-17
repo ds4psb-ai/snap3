@@ -1,0 +1,586 @@
+{
+  "content_id": "55e6ScXfiZc",
+  "default_lang": "en",
+  "metadata": {
+    "platform": "YouTube Shorts",
+    "source_url": "https://www.youtube.com/shorts/55e6ScXfiZc",
+    "view_count": 0,
+    "like_count": 0,
+    "comment_count": 0,
+    "share_count": 0,
+    "upload_date": "2025-01-01T00:00:00.000Z",
+    "video_origin": "Real-Footage",
+    "hashtags": [],
+    "cta_types": [],
+    "original_sound": {
+      "id": "null",
+      "title": "Upbeat, frantic big band/jazz music"
+    }
+  },
+  "overall_analysis": {
+    "summary": "This is a short, comedic animated video depicting a cute, yellow rabbit's frantic morning rush. After waking up late, the rabbit chaotically gets ready, commutes via bus and subway, and sprints to its destination, only to discover it's closed for a holiday. The video's appeal lies in its highly relatable premise, adorable character design, and the humorous anticlimax.",
+    "emotional_arc": "The video begins with a feeling of peace and contentment as the rabbit sleeps. This is abruptly shattered by panic and high-stress anxiety upon realizing it has overslept. The frantic energy is sustained throughout the preparation and commute, building tension, which then collapses into stunned silence and anticlimactic deflation at the final reveal.",
+    "audience_reaction": {
+      "analysis": "The video leverages the universal experience of oversleeping and being late for work or school, creating instant relatability and empathetic anxiety in the viewer. The cute, anthropomorphic rabbit character softens the stress, making the panic humorous rather than genuinely distressing. The fast-paced editing synchronized with the energetic, jazzy music enhances the comedic chaos. The final punchline provides a satisfying release of tension, making the entire ordeal funny and highly shareable. Viewers are likely to engage by sharing their own similar experiences.",
+      "common_reactions": [
+        "So relatable it hurts",
+        "This has definitely happened to me",
+        "The cutest panic attack ever",
+        "The music is perfect for the chaos",
+        "The ending was hilarious"
+      ],
+      "notable_comments": [],
+      "overall_sentiment": "Positive"
+    },
+    "safety_flags": [],
+    "confidence": {
+      "overall": 0.98,
+      "scene_classification": 0.96,
+      "device_analysis": 0.99
+    },
+    "hookGenome": {
+      "start_sec": 0,
+      "pattern_code": "relatability_trigger",
+      "strength_score": 0.9,
+      "trigger_modalities": [
+        "visual",
+        "auditory",
+        "textual"
+      ],
+      "microbeats_sec": [
+        1.5,
+        2.1
+      ],
+      "connected_scene_id": "S01_Opening",
+      "hook_integration_analysis": "The hook is the jarring transition from peaceful sleep to sudden panic. It's initiated by the rabbit waking up and questioning the time, immediately followed by the visual of the phone screen showing '8:02 (SUPER late)'. This instantly establishes the video's central conflict and high-stakes premise, tapping into a deeply relatable fear that makes the viewer want to see the chaotic resolution."
+    },
+    "asr_transcript": "흐응응 잘잤다. 몇시지? Okay. 앞머리만 감아ㅏㅏㅏㅏ",
+    "asr_lang": "ko",
+    "asr_translation_en": "Heung-eung, I slept well. What time is it? Okay. Just wash my bangs!",
+    "ocr_text": [
+      {
+        "text": "숙면을 취하면 기분이 쎄-해요",
+        "lang": "ko",
+        "translation_en": "When you get a good night's sleep, you feel uneasy"
+      },
+      {
+        "text": "흐응응 잘잤다",
+        "lang": "ko",
+        "translation_en": "Heung-eung, I slept well"
+      },
+      {
+        "text": "몇시지?",
+        "lang": "ko",
+        "translation_en": "What time is it?"
+      },
+      {
+        "text": "7월 15일 화요일",
+        "lang": "ko",
+        "translation_en": "July 15th, Tuesday"
+      },
+      {
+        "text": "8:02",
+        "lang": "en",
+        "translation_en": "8:02"
+      },
+      {
+        "text": "(SSAP 지각)",
+        "lang": "ko",
+        "translation_en": "(SUPER late)"
+      },
+      {
+        "text": "(ㅈ됨을 감지)",
+        "lang": "ko",
+        "translation_en": "(Senses that he's screwed)"
+      },
+      {
+        "text": "앞머리만 감아ㅏㅏㅏㅏ",
+        "lang": "ko",
+        "translation_en": "Just wash my bangs!"
+      },
+      {
+        "text": "KANGOL",
+        "lang": "en",
+        "translation_en": "KANGOL"
+      },
+      {
+        "text": "6411",
+        "lang": "en",
+        "translation_en": "6411"
+      },
+      {
+        "text": "소공구 수정역 노량역 노량역",
+        "lang": "ko",
+        "translation_en": "Sogong-gu, Sujeong Station, Noryang Station, Noryang Station"
+      },
+      {
+        "text": "4 병점역 Byeongjeom Sta",
+        "lang": "ko",
+        "translation_en": "4 Byeongjeom Station"
+      },
+      {
+        "text": "23",
+        "lang": "en",
+        "translation_en": "23"
+      },
+      {
+        "text": "손대지 마시오",
+        "lang": "ko",
+        "translation_en": "Do not touch"
+      },
+      {
+        "text": "기대지 마시오",
+        "lang": "ko",
+        "translation_en": "Do not lean"
+      },
+      {
+        "text": "창립기념일 휴무",
+        "lang": "ko",
+        "translation_en": "Closed for Foundation Day"
+      }
+    ]
+  },
+  "scenes": [
+    {
+      "scene_id": "S01_Opening",
+      "time_start": 0,
+      "time_end": 4.9,
+      "duration_sec": 4.9,
+      "importance": "critical",
+      "hook_connection": {
+        "is_hook_scene": "true",
+        "hook_elements": [
+          "visual_surprise",
+          "audio_cue",
+          "relatable_situation"
+        ],
+        "viral_mechanics": "The scene creates immediate empathetic stress and curiosity by presenting a universally feared situation (oversleeping), making it instantly engaging and shareable."
+      },
+      "narrative_unit": {
+        "narrative_role": "Hook",
+        "summary": "The scene opens with a cute yellow rabbit sleeping peacefully in bed. It wakes up, feeling well-rested, but a sudden jarring sound effect signals something is wrong. It checks its phone, revealing it's 8:02 AM, and the text confirms it's 'SUPER late.' The rabbit's expression shifts to one of pure panic, setting the frantic tone for the rest of the video.",
+        "dialogue": "흐응응 잘잤다. 몇시지?",
+        "dialogue_lang": "ko",
+        "dialogue_translation_en": "Heung-eung, I slept well. What time is it?",
+        "rhetoric": [
+          "pathos",
+          "irony"
+        ],
+        "rhetoric_analysis": "The scene masterfully uses pathos by tapping into the shared anxiety of being late. The initial verbal irony of the rabbit saying 'I slept well' is immediately contrasted with the dreadful reality, heightening the emotional impact. The on-screen text '(Senses that he's screwed)' directly tells the audience the emotional state, leaving no room for ambiguity and ensuring the comedic panic lands effectively.",
+        "comedic_device": [
+          "surprise",
+          "juxtaposition",
+          "characterization"
+        ],
+        "comedic_analysis": "The comedy stems from the sharp juxtaposition of the serene opening with the abrupt panic. The surprise of the late time is a classic comedic trigger. The adorable, fluffy character experiencing such intense, human-like stress is inherently funny and charming, establishing the video's core comedic engine."
+      },
+      "setting": {
+        "location": "bedroom",
+        "visual_style": {
+          "cinematic_properties": "The scene utilizes a soft, warm, and diffused lighting scheme to establish a cozy and peaceful atmosphere during the initial sleeping shot, employing a shallow depth of field to focus on the character. This tranquility is deliberately shattered by a quick, jarring cut to a brightly lit phone screen, which uses high contrast to signify alarm. The animation style is smooth and polished, with a photorealistic texture on the rabbit that enhances its cuteness. The camera remains mostly static, using shot-reverse-shot principles between the rabbit and its phone to clearly convey the cause-and-effect of its panic. The color palette is dominated by warm yellows and soft whites, creating a visually pleasing and inviting environment that contrasts with the character's internal turmoil.",
+          "lighting_analysis": "Soft, warm ambient light creates a cozy mood, which is then contrasted by the harsh, bright light from the phone screen, symbolizing the rude awakening.",
+          "color_psychology": "The dominant yellow of the rabbit evokes cheerfulness and energy, which ironically fuels its frantic panic. The warm tones create a comforting backdrop.",
+          "mood_palette": [
+            "peaceful",
+            "panicked",
+            "comedic"
+          ],
+          "edit_grammar": {
+            "cut_speed": "slow_to_fast",
+            "camera_style": "static",
+            "subtitle_style": "bold_casual"
+          }
+        },
+        "audio_style": {
+          "music": "The scene starts with silence, which is broken by a jarring 'thud' and the start of an upbeat, frantic big band jazz track.",
+          "ambient_sound": "Minimal ambient sound, focusing on the character's voice and the alarm-like sound effect.",
+          "tone": "The audio tone shifts dramatically from serene to alarming and chaotic, mirroring the narrative.",
+          "audio_emotional_impact": "The sudden introduction of the frantic music and the jarring sound effect instantly elevates the viewer's heart rate, mirroring the rabbit's panic and driving the scene's energy.",
+          "audio_events": [
+            {
+              "timestamp": 1.6,
+              "event": "jarring_sound_effect",
+              "description": "A loud, non-diegetic thud/impact sound signals the moment of realization.",
+              "intensity": "High"
+            },
+            {
+              "timestamp": 2.8,
+              "event": "music_start",
+              "description": "Frantic, high-tempo jazz music begins, setting the pace for the rest of the video.",
+              "intensity": "High"
+            }
+          ]
+        }
+      },
+      "shots": [
+        {
+          "shot_id": "S01_Shot01",
+          "start": 0,
+          "end": 1.4,
+          "camera": {
+            "shot": "MCU",
+            "angle": "high",
+            "move": "static"
+          },
+          "composition": {
+            "grid": "center",
+            "notes": [
+              "Character is sleeping peacefully",
+              "Warm, soft lighting"
+            ],
+            "visual_impact": "Establishes a baseline of peace and calm before the chaos."
+          },
+          "keyframes": [
+            {
+              "role": "start",
+              "t_rel_shot": 0.5,
+              "desc": "A medium close-up of the yellow rabbit sleeping soundly in bed."
+            }
+          ],
+          "confidence": "high"
+        },
+        {
+          "shot_id": "S01_Shot02",
+          "start": 1.4,
+          "end": 4.9,
+          "camera": {
+            "shot": "CU",
+            "angle": "eye",
+            "move": "static"
+          },
+          "composition": {
+            "grid": "center",
+            "notes": [
+              "Quick cuts between the rabbit's face and the phone screen",
+              "Expression changes from sleepy to shocked"
+            ],
+            "visual_impact": "Clearly communicates the source of the panic and the character's reaction."
+          },
+          "keyframes": [
+            {
+              "role": "start",
+              "t_rel_shot": 0.7,
+              "desc": "Close-up on the phone screen showing the time is 8:02 and the text 'SSAP 지각' (SUPER late)."
+            },
+            {
+              "role": "end",
+              "t_rel_shot": 1.5,
+              "desc": "A close-up of the rabbit's face, eyes wide with shock and panic."
+            }
+          ],
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "scene_id": "S02_Development",
+      "time_start": 4.9,
+      "time_end": 15.2,
+      "duration_sec": 10.3,
+      "importance": "high",
+      "hook_connection": {
+        "is_hook_scene": "false",
+        "hook_elements": [],
+        "viral_mechanics": ""
+      },
+      "narrative_unit": {
+        "narrative_role": "Rising Action",
+        "summary": "In a frenzy, the rabbit leaps out of bed and dashes down the hall. It performs a hyper-condensed morning routine: quickly washing its face, brushing its teeth, and blow-drying its hair in seconds. The sequence is a rapid-fire montage of chaotic preparation, culminating in the rabbit grabbing its backpack and heading out the door.",
+        "dialogue": "앞머리만 감아ㅏㅏㅏㅏ",
+        "dialogue_lang": "ko",
+        "dialogue_translation_en": "Just wash my bangs!",
+        "rhetoric": [
+          "hyperbole"
+        ],
+        "rhetoric_analysis": "This scene uses hyperbole to exaggerate the speed and chaos of the morning rush. The idea of 'just washing the bangs' is a relatable shortcut people take when late, and the visual execution is comically fast. The montage structure compresses time to emphasize the rabbit's extreme urgency and desperation.",
+        "comedic_device": [
+          "slapstick",
+          "pacing",
+          "exaggeration"
+        ],
+        "comedic_analysis": "The comedy is physical and fast-paced. The rabbit's frantic, exaggerated movements, like splashing water everywhere and its fur puffing up from the hairdryer, are classic slapstick elements. The incredibly fast cutting between actions, perfectly timed to the music, creates a breathless, humorous rhythm that is the core of the scene's appeal."
+      },
+      "setting": {
+        "location": "hallway, bathroom, bedroom",
+        "visual_style": {
+          "cinematic_properties": "This scene is defined by its kinetic editing and dynamic camera work. The camera follows the rabbit with quick pans and tracking shots, immersing the viewer in the chaos. The use of a montage with very short shot durations accelerates the perceived time, enhancing the sense of panic. The lighting remains bright and even, ensuring all the frantic actions are clearly visible. The color palette continues the warm, inviting tones from the first scene, creating a humorous contrast between the cozy environment and the high-stress activity occurring within it. The visual gags, like the perfectly styled hair after a chaotic blow-dry, are timed for maximum comedic effect.",
+          "lighting_analysis": "Bright, functional interior lighting is used throughout to maintain clarity and focus on the character's rapid actions.",
+          "color_psychology": "The consistent warm color scheme maintains a lighthearted and charming feel, preventing the rabbit's panic from feeling genuinely stressful to the viewer.",
+          "mood_palette": [
+            "frantic",
+            "chaotic",
+            "humorous"
+          ],
+          "edit_grammar": {
+            "cut_speed": "very_fast",
+            "camera_style": "handheld_simulation",
+            "subtitle_style": "bold_casual"
+          }
+        },
+        "audio_style": {
+          "music": "The upbeat, chaotic big band jazz music continues at full tempo, driving the pace of the montage.",
+          "ambient_sound": "Exaggerated sound effects like water splashing and a hairdryer whirring are layered over the music.",
+          "tone": "The audio tone is consistently high-energy, breathless, and comedic.",
+          "audio_emotional_impact": "The relentless, fast-paced music and sound effects create a sense of controlled chaos, making the rabbit's stressful situation feel entertaining and funny rather than anxiety-inducing.",
+          "audio_events": []
+        }
+      },
+      "shots": [
+        {
+          "shot_id": "S02_Shot01",
+          "start": 4.9,
+          "end": 15.2,
+          "camera": {
+            "shot": "MS",
+            "angle": "eye",
+            "move": "tracking"
+          },
+          "composition": {
+            "grid": "dynamic",
+            "notes": [
+              "Rapid sequence of shots showing different activities",
+              "Character is always in motion"
+            ],
+            "visual_impact": "Effectively conveys the speed and chaos of the morning rush through a fast-paced montage."
+          },
+          "keyframes": [
+            {
+              "role": "start",
+              "t_rel_shot": 0.5,
+              "desc": "The rabbit runs down a hallway towards the bathroom."
+            },
+            {
+              "role": "mid",
+              "t_rel_shot": 3.2,
+              "desc": "The rabbit frantically washes its face in the sink."
+            },
+            {
+              "role": "end",
+              "t_rel_shot": 9.5,
+              "desc": "The rabbit, wearing a backpack, runs out the front door."
+            }
+          ],
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "scene_id": "S03_Climax",
+      "time_start": 15.2,
+      "time_end": 25,
+      "duration_sec": 9.8,
+      "importance": "high",
+      "hook_connection": {
+        "is_hook_scene": "false",
+        "hook_elements": [],
+        "viral_mechanics": ""
+      },
+      "narrative_unit": {
+        "narrative_role": "Climax",
+        "summary": "The rabbit's frantic journey continues into the outside world. It boards a green city bus, sits bouncing impatiently, then gets off and runs to a subway station. Inside the train, it sits between two commuters, still vibrating with anxious energy. This scene represents the peak of its effort to get to its destination on time.",
+        "dialogue": "",
+        "dialogue_lang": "",
+        "dialogue_translation_en": "",
+        "rhetoric": [
+          "pacing"
+        ],
+        "rhetoric_analysis": "The rhetoric of this scene is conveyed almost entirely through pacing and motion. The constant movement—boarding the bus, the bus moving, running to the subway, the train moving—builds a narrative crescendo. It sustains the tension established in the previous scenes and raises the stakes, as the rabbit is now at the mercy of public transport.",
+        "comedic_device": [
+          "running_gag",
+          "character_animation"
+        ],
+        "comedic_analysis": "The comedy comes from the character's unabated, frantic energy in mundane public settings. The running gag of the hair roller on its head, which it put on in the rush, adds a layer of visual humor. The animation of the rabbit bouncing on the seat, a physical manifestation of its impatience, is a subtle but effective comedic touch."
+      },
+      "setting": {
+        "location": "bus, subway, city street",
+        "visual_style": {
+          "cinematic_properties": "This scene expands the world, transitioning from cozy interiors to realistic urban environments. The animation seamlessly integrates the cartoonish rabbit into photorealistic backdrops of a bus and subway, a common technique in modern commercials. The camera uses a mix of wider shots to establish the location (e.g., the bus arriving) and medium shots to keep the focus on the character's emotional state. The lighting mimics natural daylight, adding to the realism. The color green of the bus and the metallic sheen of the subway provide a cooler, more public-feeling color palette compared to the warm home environment.",
+          "lighting_analysis": "Naturalistic, slightly cool daylight lighting is used for exterior shots, while the bus and subway interiors have standard fluorescent lighting.",
+          "color_psychology": "The introduction of public space colors like green and grey contrasts with the warm home colors, subtly signaling the rabbit is out of its comfort zone.",
+          "mood_palette": [
+            "urgent",
+            "impatient",
+            "public"
+          ],
+          "edit_grammar": {
+            "cut_speed": "fast",
+            "camera_style": "mixed_static_and_tracking",
+            "subtitle_style": "none"
+          }
+        },
+        "audio_style": {
+          "music": "The high-tempo jazz track continues to score the commute, maintaining the sense of urgency and forward momentum.",
+          "ambient_sound": "Sounds of city traffic, bus doors opening, and the rumble of the subway are mixed underneath the music.",
+          "tone": "The audio remains energetic and propulsive, pushing the narrative forward.",
+          "audio_emotional_impact": "The music and ambient sounds work together to create a bustling, high-energy urban atmosphere that reflects the rabbit's desperate rush against time.",
+          "audio_events": []
+        }
+      },
+      "shots": [
+        {
+          "shot_id": "S03_Shot01",
+          "start": 15.2,
+          "end": 18.8,
+          "camera": {
+            "shot": "MS",
+            "angle": "eye",
+            "move": "static"
+          },
+          "composition": {
+            "grid": "center",
+            "notes": [
+              "Rabbit boards a bus",
+              "Sits impatiently on the bus seat"
+            ],
+            "visual_impact": "Shows the first leg of the frantic commute."
+          },
+          "keyframes": [
+            {
+              "role": "start",
+              "t_rel_shot": 0.8,
+              "desc": "The rabbit gets on a green bus, number 6411."
+            }
+          ],
+          "confidence": "high"
+        },
+        {
+          "shot_id": "S03_Shot02",
+          "start": 18.8,
+          "end": 25,
+          "camera": {
+            "shot": "MS",
+            "angle": "eye",
+            "move": "static"
+          },
+          "composition": {
+            "grid": "center",
+            "notes": [
+              "Rabbit gets off the bus and enters a subway station",
+              "Sits on the subway train"
+            ],
+            "visual_impact": "Continues to build tension as the journey nears its end."
+          },
+          "keyframes": [
+            {
+              "role": "start",
+              "t_rel_shot": 0.6,
+              "desc": "The rabbit runs towards the entrance of Byeongjeom Station."
+            },
+            {
+              "role": "end",
+              "t_rel_shot": 4.5,
+              "desc": "The rabbit sits on a subway seat, bouncing anxiously."
+            }
+          ],
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "scene_id": "S04_Resolution",
+      "time_start": 25,
+      "time_end": 29,
+      "duration_sec": 4,
+      "importance": "critical",
+      "hook_connection": {
+        "is_hook_scene": "false",
+        "hook_elements": [],
+        "viral_mechanics": "The scene delivers a highly satisfying and humorous punchline based on situational irony, which is a powerful driver for shares and likes."
+      },
+      "narrative_unit": {
+        "narrative_role": "Resolution",
+        "summary": "The rabbit arrives at a modern office building, takes an elevator up, and runs to the office door, only to be stopped by a sign. It reads the sign, which says 'Closed for Foundation Day.' The rabbit freezes, and the music cuts out abruptly. It slumps in defeat, the entire frantic rush having been for nothing. This is the comedic punchline of the story.",
+        "dialogue": "",
+        "dialogue_lang": "",
+        "dialogue_translation_en": "",
+        "rhetoric": [
+          "irony",
+          "anticlimax"
+        ],
+        "rhetoric_analysis": "The scene's power comes from its masterful use of situational irony and anticlimax. The entire video builds tension and expectation for a dramatic arrival, but the resolution is the exact opposite of what the character (and viewer) anticipated. The abrupt halt of all motion and sound forces the audience to confront the futility of the rabbit's efforts, which is the source of the humor.",
+        "comedic_device": [
+          "punchline",
+          "timing",
+          "situational_irony"
+        ],
+        "comedic_analysis": "This is a classic setup-punchline structure. The entire video is the setup, and the sign on the door is the punchline. The comedic timing is perfect: the music cuts out at the exact moment of realization, creating a moment of stunned silence that emphasizes the absurdity of the situation. The final shot of the dejected rabbit is the visual payoff for the joke."
+      },
+      "setting": {
+        "location": "office building, elevator, hallway",
+        "visual_style": {
+          "cinematic_properties": "The visual style in this scene shifts to underscore the punchline. The camera follows the rabbit's final sprint with tracking shots, maintaining the established pace. However, the final shot is completely static, focusing on the rabbit and the sign. This sudden lack of motion mirrors the narrative's abrupt halt. The lighting is the neutral, slightly sterile lighting of a corporate office, which adds to the feeling of anticlimax. The composition of the final frame, with the small, dejected rabbit in front of the large, impersonal door, visually communicates its defeat and the story's resolution.",
+          "lighting_analysis": "Clean, even, and slightly cool corporate lighting in the hallway and elevator, creating an impersonal atmosphere.",
+          "color_psychology": "The neutral greys and beiges of the office environment create a stark, unemotional backdrop for the rabbit's moment of emotional deflation.",
+          "mood_palette": [
+            "anticlimactic",
+            "ironic",
+            "dejected"
+          ],
+          "edit_grammar": {
+            "cut_speed": "fast_to_stop",
+            "camera_style": "tracking_to_static",
+            "subtitle_style": "none"
+          }
+        },
+        "audio_style": {
+          "music": "The frantic jazz music plays right up until the moment the rabbit reads the sign, at which point it cuts out completely.",
+          "ambient_sound": "All ambient sound ceases with the music, creating a deafening silence.",
+          "tone": "The audio tone shifts from chaotic to absolute silence, amplifying the comedic anticlimax.",
+          "audio_emotional_impact": "The abrupt cut to silence is the most critical audio event in the video. It provides the comedic beat for the punchline to land and allows the viewer to process the irony of the situation.",
+          "audio_events": [
+            {
+              "timestamp": 28.8,
+              "event": "music_cut",
+              "description": "All music and sound effects stop suddenly as the rabbit realizes its mistake.",
+              "intensity": "High"
+            }
+          ]
+        }
+      },
+      "shots": [
+        {
+          "shot_id": "S04_Shot01",
+          "start": 25,
+          "end": 29,
+          "camera": {
+            "shot": "MS",
+            "angle": "eye",
+            "move": "tracking_to_static"
+          },
+          "composition": {
+            "grid": "center",
+            "notes": [
+              "Rabbit runs through an office building and into an elevator",
+              "Final shot is static on the rabbit reading the sign"
+            ],
+            "visual_impact": "Delivers the final punchline and resolves the narrative with comedic irony."
+          },
+          "keyframes": [
+            {
+              "role": "start",
+              "t_rel_shot": 0.5,
+              "desc": "The rabbit exits an elevator, with the number '23' visible above."
+            },
+            {
+              "role": "end",
+              "t_rel_shot": 3.5,
+              "desc": "The rabbit stands frozen in front of a door with a sign that reads 'Closed for Foundation Day'."
+            }
+          ],
+          "confidence": "high"
+        }
+      ]
+    }
+  ],
+  "product_mentions": [
+    {
+      "name": "KANGOL",
+      "type": "brand",
+      "category": "Apparel",
+      "time_start": 14.8,
+      "time_end": 15.5,
+      "confidence": 0.99
+    }
+  ],
+  "service_mentions": []
+}

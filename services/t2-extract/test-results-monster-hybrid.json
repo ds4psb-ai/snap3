@@ -1,0 +1,304 @@
+{
+  "timestamp": "2025-08-16T14:33:41.443Z",
+  "validation": {
+    "timestamp": "2025-08-16T14:33:41.440Z",
+    "overall_score": 105,
+    "is_valid": true,
+    "exceeds_old_vdp": true,
+    "validations": {
+      "schema": {
+        "score": 100,
+        "passed": true,
+        "errors": [],
+        "message": "스키마 검증 통과"
+      },
+      "hook_quality": {
+        "score": 100,
+        "passed": true,
+        "errors": [],
+        "message": "Hook 품질 우수"
+      },
+      "audience_insights": {
+        "score": 100,
+        "passed": true,
+        "errors": [],
+        "message": "관객 인사이트 우수"
+      },
+      "evidence_quality": {
+        "score": 100,
+        "passed": true,
+        "errors": [],
+        "message": "ASR/OCR 증거 우수"
+      },
+      "brand_analysis": {
+        "score": 100,
+        "passed": true,
+        "errors": [],
+        "message": "브랜드 분석 우수"
+      },
+      "scene_analysis": {
+        "score": 100,
+        "passed": true,
+        "errors": [],
+        "message": "씬 분석 상세도 우수"
+      },
+      "old_vdp_comparison": {
+        "score": 105,
+        "passed": true,
+        "improvements": [
+          "Hook Genome 정량 분석 추가 (+30점)",
+          "ASR 분석 압축 효율성 향상"
+        ],
+        "regressions": [
+          "관객 댓글 분석 감소 (3 → 2)",
+          "브랜드 분석 감소 (2 → 1)"
+        ],
+        "message": "OLD VDP 개선"
+      }
+    }
+  },
+  "comparison": {
+    "score": 105,
+    "passed": true,
+    "improvements": [
+      "Hook Genome 정량 분석 추가 (+30점)",
+      "ASR 분석 압축 효율성 향상"
+    ],
+    "regressions": [
+      "관객 댓글 분석 감소 (3 → 2)",
+      "브랜드 분석 감소 (2 → 1)"
+    ],
+    "message": "OLD VDP 개선"
+  },
+  "efficiency": {
+    "estimated_tokens": 864,
+    "max_limit": 16000,
+    "headroom_percent": 94.6,
+    "scenarios": [
+      {
+        "mode": "S",
+        "duration": 8,
+        "min_tokens": 2000,
+        "max_tokens": 6000,
+        "estimated_tokens": 864,
+        "is_within_range": false,
+        "efficiency": 694.4
+      },
+      {
+        "mode": "M",
+        "duration": 15,
+        "min_tokens": 4000,
+        "max_tokens": 10000,
+        "estimated_tokens": 864,
+        "is_within_range": false,
+        "efficiency": 1157.4
+      },
+      {
+        "mode": "L",
+        "duration": 25,
+        "min_tokens": 8000,
+        "max_tokens": 16000,
+        "estimated_tokens": 864,
+        "is_within_range": false,
+        "efficiency": 1851.9
+      }
+    ],
+    "supports_all_modes": false,
+    "is_efficient": true
+  },
+  "mock_vdp": {
+    "content_id": "6_I2FmT1mbY",
+    "default_lang": "en",
+    "metadata": {
+      "platform": "YouTube Shorts",
+      "source_url": "https://www.youtube.com/shorts/6_I2FmT1mbY",
+      "upload_date": "2025-07-13T13:36:00.000Z",
+      "view_count": 6530000,
+      "like_count": 110000,
+      "comment_count": 3354,
+      "share_count": 2000,
+      "hashtags": [
+        "#test",
+        "#monster_hybrid"
+      ],
+      "video_origin": "AI-Generated",
+      "cta_types": [],
+      "original_sound": {
+        "id": null,
+        "title": null
+      }
+    },
+    "overall_analysis": {
+      "summary": "A comprehensive test of the Monster Hybrid VDP v2.1 system showing improved analysis capabilities while maintaining OLD VDP strengths.",
+      "emotional_arc": "Test curiosity → validation process → successful completion → satisfaction with results.",
+      "audience_reaction": {
+        "analysis": "Test audience shows high engagement with the hybrid approach, appreciating both quantitative Hook analysis and qualitative cultural insights.",
+        "common_reactions": [
+          "Impressed with accuracy",
+          "Likes hybrid approach",
+          "Values cultural context"
+        ],
+        "notable_comments": [
+          {
+            "text": "이 분석이 정말 정확해요!",
+            "lang": "ko",
+            "translation_en": "This analysis is really accurate!"
+          },
+          {
+            "text": "Hook 분석이 혁신적이네요",
+            "lang": "ko",
+            "translation_en": "The Hook analysis is innovative"
+          }
+        ],
+        "overall_sentiment": "very_positive"
+      },
+      "safety_flags": [],
+      "confidence": {
+        "overall": 0.95,
+        "scene_classification": 0.93,
+        "device_analysis": 0.97
+      },
+      "graph_refs": {
+        "potential_meme_template": "Success validation meme template for VDP testing",
+        "related_hashtags": [
+          "#VDPTest",
+          "#MonsterHybrid",
+          "#Success"
+        ]
+      },
+      "hookGenome": {
+        "start_sec": 0,
+        "end_sec": 3,
+        "pattern_code": "Validation Success",
+        "strength_score": 0.88,
+        "trigger_modalities": [
+          "visual",
+          "narrative"
+        ],
+        "microbeats_sec": [
+          0.5,
+          1.2,
+          2.1
+        ]
+      },
+      "asr_excerpt": "테스트를 시작합니다. 모든 시스템이 정상 작동 중입니다.",
+      "asr_lang": "ko",
+      "asr_translation_en": "Starting the test. All systems are operating normally.",
+      "ocr_text": [
+        {
+          "text": "MONSTER HYBRID v2.1",
+          "lang": "en"
+        },
+        {
+          "text": "테스트 성공",
+          "lang": "ko",
+          "translation_en": "Test Success"
+        }
+      ]
+    },
+    "scenes": [
+      {
+        "scene_id": "S01_TestInitiation",
+        "time_start": 0,
+        "time_end": 5,
+        "duration_sec": 5,
+        "importance": "critical",
+        "narrative_unit": {
+          "narrative_role": "Hook",
+          "summary": "Test initiation sequence showing system startup and validation beginning.",
+          "dialogue": "시스템 테스트를 시작합니다.",
+          "dialogue_lang": "ko",
+          "dialogue_translation_en": "Starting system test.",
+          "rhetoric": [
+            "announcement"
+          ],
+          "comedic_device": []
+        },
+        "setting": {
+          "location": "Test Environment",
+          "visual_style": {
+            "cinematic_properties": "Clean, technical interface with clear progress indicators",
+            "lighting": "Bright, neutral lighting optimized for clarity",
+            "mood_palette": [
+              "technical",
+              "clean",
+              "professional"
+            ],
+            "edit_grammar": {
+              "cut_speed": "medium",
+              "camera_style": "static",
+              "subtitle_style": "simple_white_text"
+            }
+          },
+          "audio_style": {
+            "music": "None",
+            "ambient_sound": "Quiet technical environment",
+            "tone": "Professional and informative",
+            "audio_events": []
+          }
+        },
+        "shots": [
+          {
+            "shot_id": "S01_01",
+            "start": 0,
+            "end": 5,
+            "camera": {
+              "shot": "MS",
+              "angle": "eye",
+              "move": "static"
+            },
+            "composition": {
+              "grid": "center",
+              "notes": [
+                "Clean interface layout",
+                "Professional presentation"
+              ]
+            },
+            "keyframes": [
+              {
+                "role": "start",
+                "desc": "System test interface appears"
+              },
+              {
+                "role": "peak",
+                "desc": "Validation process begins"
+              },
+              {
+                "role": "end",
+                "desc": "Initial check complete"
+              }
+            ],
+            "confidence": "high"
+          }
+        ]
+      }
+    ],
+    "product_mentions": [],
+    "service_mentions": [
+      {
+        "type": "service",
+        "name": "Monster Hybrid VDP",
+        "category": "analysis_service",
+        "sources": [
+          "visual",
+          "asr"
+        ],
+        "time_ranges": [
+          [
+            0,
+            5
+          ]
+        ],
+        "evidence": [
+          "System interface shows Monster Hybrid branding",
+          "Audio mentions VDP testing"
+        ],
+        "promotion": {
+          "status": "organic",
+          "signals": []
+        },
+        "confidence": "high"
+      }
+    ]
+  }
+}

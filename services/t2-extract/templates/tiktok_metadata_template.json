@@ -1,0 +1,19 @@
+{
+  "platform": "tiktok",
+  "content_id": "UNIQUE_CONTENT_ID", 
+  "source_url": "https://tiktok.com/@user/video/VIDEO_ID",
+  "creator": "username",
+  "hashtags": ["#fyp", "#viral", "#trending", "#tiktok"],
+  "view_count": 0,
+  "like_count": 0,
+  "comment_count": 0,
+  "share_count": 0,
+  "upload_date": "2024-01-01",
+  "video_origin": "Unknown",
+  "cta_types": [],
+  "original_sound": {
+    "id": "original_sound_id",
+    "title": "Original Audio Title"
+  },
+  "language": "ko"
+}

@@ -34,6 +34,8 @@
       "properties": {
         "duration_sec": { "type": "number" },
         "aspect_ratio": { "type": "string" },
+        "summary": { "type": "string", "description": "Comprehensive summary of the video's plot and message" },
+        "emotional_arc": { "type": "string", "description": "Description of the emotional journey from start to finish" },
         "story_telling": {
           "type": "object",
           "properties": {
@@ -46,6 +48,49 @@
                 "resolution": {"type":"string"}
               }
             }
+          }
+        },
+        "audience_reaction": {
+          "type": "object",
+          "properties": {
+            "analysis": {"type": "string"},
+            "common_reactions": {"type": "array", "items": {"type": "string"}},
+            "notable_comments": {
+              "type": "array",
+              "items": {
+                "type": "object", 
+                "properties": {
+                  "text": {"type": "string"},
+                  "lang": {"type": "string", "description": "BCP-47 language code"},
+                  "translation_en": {"type": "string"}
+                },
+                "required": ["text", "lang"]
+              }
+            },
+            "overall_sentiment": {"type": "string"}
+          }
+        },
+        "confidence": {
+          "type": "object",
+          "properties": {
+            "overall": {"type": "number"},
+            "scene_classification": {"type": "number"},
+            "device_analysis": {"type": "number"}
+          }
+        },
+        "asr_transcript": {"type": "string"},
+        "asr_lang": {"type": "string", "description": "BCP-47 language code"},
+        "asr_translation_en": {"type": "string"},
+        "ocr_text": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {"type": "string"},
+              "lang": {"type": "string", "description": "BCP-47 language code"},
+              "translation_en": {"type": "string"}
+            },
+            "required": ["text", "lang"]
           }
         },
         "hookGenome": {
@@ -83,11 +128,34 @@
           "visual_summary": { "type": "string" },
           "camera": {
             "type": "object",
-            "properties": { "shot_type":{"type":"string"}, "movement":{"type":"string"} }
+            "properties": { 
+              "shot_type": {"type":"string", "enum": ["ECU","CU","MCU","MS","MLS","WS","EWS"]},
+              "angle": {"type":"string", "enum": ["eye","high","low","overhead","dutch"]},
+              "movement": {"type":"string", "enum": ["static","pan","tilt","dolly","truck","handheld","crane","zoom"]}
+            },
+            "required": ["shot_type", "angle", "movement"]
           },
           "audio": {
             "type": "object",
-            "properties": { "music":{"type":"string"}, "sfx":{"type":"string"} }
+            "properties": { 
+              "music":{"type":"string"}, 
+              "sfx":{"type":"string"},
+              "tone":{"type":"string"},
+              "audio_events": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "timestamp": {"type": "number"},
+                    "event": {"type": "string", "enum": ["music_starts","music_stops","music_change","critical_sfx","narration_starts","laughter","singing_starts"]},
+                    "description": {"type": "string"},
+                    "intensity": {"type": "string", "enum": ["Low","Medium","High"]}
+                  },
+                  "required": ["timestamp", "event", "description", "intensity"]
+                }
+              }
+            },
+            "required": ["music", "sfx", "tone"]
           },
           "tags": { "type":"array", "items":{"type":"string"} }
         }
