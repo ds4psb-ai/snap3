@@ -23,6 +23,13 @@ export RAW_BUCKET="tough-variety-raw-central1"
 - ✅ **모든 서비스 us-central1 배포 필수**
 - ✅ **배포 전 리전 확인 필수**: `echo $REGION`
 
+### 🚨 CRITICAL: 안전 배포 규칙 (2025-08-17 추가)
+- **환경변수 검증**: 모든 필수 환경변수 누락 시 서버 즉시 종료
+- **필수 환경변수**: PROJECT_ID, LOCATION, RAW_BUCKET, PLATFORM_SEGMENTED_PATH=true
+- **배포 검증**: `/healthz` 엔드포인트로 Dependencies 상태 확인 필수
+- **상태 모니터링**: `/version` 엔드포인트로 환경변수/설정 확인
+- **Correlation ID**: 모든 요청에 추적 ID 자동 생성 (`req_timestamp_random`)
+
 ## 역할 / 루프
 - **역할**
   - **Claude Code**: 플래너/오케스트레이터 (Plan → Apply → Test → Review). *기본은 Plan Mode*.
@@ -53,6 +60,13 @@ export RAW_BUCKET="tough-variety-raw-central1"
 - 비공식/스크래핑 임베드, 써드파티 다운로드 기능, **무단 크롤/스크레이프**.
 - 승인되지 않은 파일 경로 수정, 비인가 네트워크 오퍼레이션(curl/wget/ssh/scp 등).
 
+### 🚨 CRITICAL NEVER (2025-08-17 안전장치)
+- **환경변수 검증 우회**: 필수 환경변수 없이 서버 시작 시도 금지
+- **Correlation ID 누락**: 요청 처리 시 추적 ID 없이 진행 금지  
+- **NaN 값 허용**: 수치 계산에서 `Number.isFinite()` 검증 우회 금지
+- **헬스체크 무시**: 배포 후 `/healthz` 상태 확인 없이 운영 금지
+- **GCS 경로 실수**: `/raw/ingest/` 대신 올바른 `/raw/input/platform/` 사용 필수
+
 ---
 
 ## 엔드포인트(초안)
@@ -64,6 +78,11 @@ export RAW_BUCKET="tough-variety-raw-central1"
 - `POST /qa/validate` — Hook≤3s, safezones, 자막 가독성, fps/bitrate 힌트
 - `GET /export/brief/{id}` — Brief PDF(+Evidence, Digest only)
 - `GET /export/json/{id}` — VideoGen IR + Veo3 Prompt JSON(+Evidence)
+
+### 🩺 운영 모니터링 엔드포인트 (2025-08-17 추가)
+- `GET /healthz` — Dependencies 상태 확인 (Vertex AI, 환경변수, 스키마)
+- `GET /version` — 환경변수, 런타임 정보, 설정값 요약 (디버깅용)
+- `GET /health` — 단순 OK 응답 (기존 호환성)
 
 ### 스키마(요약)
 - **VDP_MIN** — digestId; category; hookSec; tempoBucket; source.embedEligible

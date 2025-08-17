@@ -92,6 +92,17 @@ class URLAutoFillManager {
             const result = await response.json();
             window.logger.urlNormalization(url, result);
 
+            // Enhanced debugging for content_id extraction
+            if (window.logger) {
+                window.logger.debug('URL normalization response received', {
+                    url: url,
+                    platform: result.platform,
+                    content_id: result.content_id,
+                    resultKeys: Object.keys(result),
+                    correlationId: this.correlationId || 'unknown'
+                });
+            }
+
             // Auto-fill the fields
             this.populateFields(result, currentPlatform);
 
@@ -123,6 +134,14 @@ class URLAutoFillManager {
             const contentKey = `${result.platform.toLowerCase()}:${result.content_id}`;
             
             // Store both content_id and content_key for form submission
+            if (window.logger) {
+                window.logger.debug('Storing content_id for YouTube', {
+                    content_id: result.content_id,
+                    contentKey: contentKey,
+                    platform: result.platform,
+                    correlationId: this.correlationId || 'unknown'
+                });
+            }
             this.storeContentId(result.content_id);
             this.storeContentKey(contentKey);
             

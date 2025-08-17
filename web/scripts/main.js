@@ -295,6 +295,11 @@ class VDPProcessor {
                     sourceUrl: formData.get('source_url'),
                     errorCode: 'CONTENT_ID_MISSING',
                     contentKeyEnforcement: 'FAILED',
+                    extractedContentId: content_id,
+                    autoFillManagerState: window.urlAutoFillManager ? 'available' : 'unavailable',
+                    autoFillManagerContentId: window.urlAutoFillManager?.getContentId(),
+                    formDataContentId: formData.get('content_id'),
+                    urlAutoFillManagerExists: !!window.urlAutoFillManager,
                     fix: 'Provide valid platform URL for content_id extraction'
                 });
             }

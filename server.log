@@ -1,0 +1,31 @@
+✅ URL normalizer loaded successfully
+📝 [INFO] Server startup initiated  {
+  "port": 9001,
+  "rawBucket": "tough-variety-raw",
+  "goldBucket": "tough-variety-gold",
+  "projectId": "tough-variety-466003-c5",
+  "region": "unspecified",
+  "nodeEnv": "development"
+}
+⚠️ [WARNING] Using default RAW_BUCKET - consider setting environment variable  {
+  "defaultBucket": "tough-variety-raw",
+  "recommendedAction": "Set RAW_BUCKET environment variable for region alignment",
+  "regionAlignment": "us-central1 recommended for optimal performance"
+}
+✅ [SUCCESS] VDP Enhanced Web Server started successfully  {
+  "serverUrl": "http://localhost:9001",
+  "endpoints": {
+    "normalization": "POST /api/normalize-url",
+    "vdpExtract": "POST /api/vdp/extract-vertex",
+    "health": "GET /api/health"
+  },
+  "features": {
+    "jsonOnlyProcessing": true,
+    "platformSegmentation": true,
+    "contentKeyEnforcement": true,
+    "regionalAlignment": false
+  }
+}
+🚀 Simple web server running on http://localhost:9001
+📝 URL normalization endpoint: POST /api/normalize-url
+🔗 UI available at: http://localhost:9001
