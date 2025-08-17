@@ -47,10 +47,10 @@ generationConfig: {
 
 ### Cloud Run Configuration
 - **Project**: tough-variety-466003-c5
-- **Region**: us-west1
-- **Service URL**: https://t2-extract-355516763169.us-west1.run.app
+- **Region**: us-central1
+- **Service URL**: https://t2-extract-355516763169.us-central1.run.app
 - **Current Revision**: t2-extract-00004-7gp
-- **Image**: us-west1-docker.pkg.dev/tough-variety-466003-c5/t2/t2-extract:hook-v1
+- **Image**: us-central1-docker.pkg.dev/tough-variety-466003-c5/t2/t2-extract:hook-v1
 
 ### Environment Variables
 ```bash
@@ -58,7 +58,7 @@ HOOK_MAX_START_SEC=3.0
 HOOK_MIN_STRENGTH=0.70
 HOOK_PROMPT_PATH=/app/prompts/hook_genome.ko.txt
 PROJECT_ID=tough-variety-466003-c5
-REGION=us-west1
+REGION=us-central1
 VDP_SCHEMA_PATH=/app/schemas/vdp-vertex-hook.schema.json
 ```
 
@@ -69,7 +69,7 @@ VDP_SCHEMA_PATH=/app/schemas/vdp-vertex-hook.schema.json
 ### 1. API Functionality Test
 **Command**:
 ```bash
-curl -X POST "https://t2-extract-355516763169.us-west1.run.app/api/vdp/extract-vertex" \
+curl -X POST "https://t2-extract-355516763169.us-central1.run.app/api/vdp/extract-vertex" \
      -H 'Content-Type: application/json' \
      -d '{"gcsUri": "gs://tough-variety-raw/raw/ingest/6_I2FmT1mbY.mp4", "meta": {"platform": "YouTube", "language": "ko"}}'
 ```
@@ -136,10 +136,10 @@ gcloud logging read \
 ### Service Health
 ```bash
 # Service status
-gcloud run services describe t2-extract --region=us-west1
+gcloud run services describe t2-extract --region=us-central1
 
 # Test API endpoint
-curl -X GET "https://t2-extract-355516763169.us-west1.run.app/health"
+curl -X GET "https://t2-extract-355516763169.us-central1.run.app/health"
 ```
 
 ---

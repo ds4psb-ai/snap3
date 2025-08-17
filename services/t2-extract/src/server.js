@@ -17,18 +17,66 @@ const __dirname  = path.dirname(__filename);
 const app = express();
 app.use(express.json({ limit: "2mb" }));
 
-const PROJECT_ID = process.env.PROJECT_ID || "tough-variety-466003-c5";
-const LOCATION   = process.env.REGION     || "us-central1";  // Fixed to us-central1 for model availability
+// 🚨 CRITICAL: 환경변수 강제 검증 (오배포 방지)
+function validateCriticalEnvVars() {
+  const required = {
+    'PROJECT_ID': process.env.PROJECT_ID,
+    'LOCATION': process.env.LOCATION || process.env.REGION,
+    'RAW_BUCKET': process.env.RAW_BUCKET,
+    'PLATFORM_SEGMENTED_PATH': process.env.PLATFORM_SEGMENTED_PATH
+  };
+  
+  const missing = [];
+  const invalid = [];
+  
+  for (const [key, value] of Object.entries(required)) {
+    if (!value || value === 'undefined' || value === 'null') {
+      missing.push(key);
+    }
+  }
+  
+  // PLATFORM_SEGMENTED_PATH 값 검증
+  if (required.PLATFORM_SEGMENTED_PATH !== 'true') {
+    invalid.push('PLATFORM_SEGMENTED_PATH must be "true"');
+  }
+  
+  if (missing.length > 0 || invalid.length > 0) {
+    console.error('🚨 [CRITICAL ENV ERROR] Missing or invalid environment variables:');
+    if (missing.length > 0) console.error('  Missing:', missing.join(', '));
+    if (invalid.length > 0) console.error('  Invalid:', invalid.join(', '));
+    console.error('🚨 [DEPLOY SAFETY] Process terminating to prevent malfunction');
+    process.exit(1);
+  }
+  
+  console.log('✅ [ENV VALIDATION] All critical environment variables verified');
+  return required;
+}
+
+// 🔢 수치 안전성 가드 (NaN 방지)
+function safeNumber(value, defaultValue = 0) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : defaultValue;
+}
+
+function safeFloat(value, defaultValue = 0.0) {
+  const num = parseFloat(value);
+  return Number.isFinite(num) ? num : defaultValue;
+}
+
+// 환경변수 검증 및 설정
+const envVars = validateCriticalEnvVars();
+const PROJECT_ID = envVars.PROJECT_ID;
+const LOCATION = envVars.LOCATION;
 const SCHEMA_PATH  = process.env.VDP_SCHEMA_PATH  || path.join(__dirname, "../schemas/vdp-hybrid-optimized.schema.json");
 const PROMPT_PATH  = process.env.HOOK_PROMPT_PATH || path.join(__dirname, "../prompts/hook_genome_enhanced_v2.ko.txt");
-// Density thresholds (OLD 수준 이상) – 필요시 숫자 조정 가능
-const DENSITY_SCENES_MIN = parseInt(process.env.DENSITY_SCENES_MIN || "4");
-const DENSITY_MIN_SHOTS_PER_SCENE = parseInt(process.env.DENSITY_MIN_SHOTS_PER_SCENE || "2");
-const DENSITY_MIN_KF_PER_SHOT = parseInt(process.env.DENSITY_MIN_KF_PER_SHOT || "3");
+// Density thresholds (OLD 수준 이상) – 필요시 숫자 조정 가능 (NaN 방지)
+const DENSITY_SCENES_MIN = safeNumber(process.env.DENSITY_SCENES_MIN, 4);
+const DENSITY_MIN_SHOTS_PER_SCENE = safeNumber(process.env.DENSITY_MIN_SHOTS_PER_SCENE, 2);
+const DENSITY_MIN_KF_PER_SHOT = safeNumber(process.env.DENSITY_MIN_KF_PER_SHOT, 3);
 
-// Hook Gate 기준(이미 만족 중이지만 유지)
-const HOOK_MIN   = parseFloat(process.env.HOOK_MIN_STRENGTH || "0.70");
-const HOOK_MAX_S = parseFloat(process.env.HOOK_MAX_START_SEC || "3.0");
+// Hook Gate 기준(이미 만족 중이지만 유지) (NaN 방지)
+const HOOK_MIN   = safeFloat(process.env.HOOK_MIN_STRENGTH, 0.70);
+const HOOK_MAX_S = safeFloat(process.env.HOOK_MAX_START_SEC, 3.0);
 
 // 1) Vertex 초기화 (us-central1 필수 for gemini-2.5-pro)
 const vertex = new VertexAI({ 
@@ -761,6 +809,9 @@ function validateVerbosityFloor(vdp) {
 
 app.post("/api/vdp/extract-vertex", async (req, res) => {
   try {
+    // 🔗 Correlation ID 보장 (요청 추적)
+    const correlationId = req.headers['x-correlation-id'] || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
     const { gcsUri, meta = {}, outGcsUri } = req.body || {};
     if (!gcsUri) return res.status(400).json({ error: "gcsUri required" });
 
@@ -1126,6 +1177,84 @@ Return a complete VDP 2.0 JSON structure.`;
   }
 });
 
+// 🩺 헬스체크 엔드포인트 (Dependencies 검증)
+app.get("/healthz", async (req, res) => {
+  const correlationId = req.headers['x-correlation-id'] || `health_${Date.now()}`;
+  const health = {
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    correlationId,
+    checks: {}
+  };
+
+  try {
+    // Vertex AI 연결 확인
+    try {
+      const model = vertex.getGenerativeModel({ model: "gemini-2.5-pro" });
+      health.checks.vertexAI = { status: "ok", model: "gemini-2.5-pro" };
+    } catch (vertexError) {
+      health.checks.vertexAI = { status: "error", error: vertexError.message };
+      health.status = "degraded";
+    }
+
+    // 환경변수 확인
+    health.checks.environment = {
+      status: "ok",
+      projectId: !!PROJECT_ID,
+      location: !!LOCATION,
+      rawBucket: !!envVars.RAW_BUCKET
+    };
+
+    // 스키마 파일 존재 확인
+    try {
+      fs.accessSync(SCHEMA_PATH, fs.constants.R_OK);
+      health.checks.schema = { status: "ok", path: SCHEMA_PATH };
+    } catch (schemaError) {
+      health.checks.schema = { status: "error", error: "Schema file not accessible" };
+      health.status = "degraded";
+    }
+
+    res.json(health);
+  } catch (error) {
+    res.status(500).json({
+      status: "unhealthy",
+      error: error.message,
+      correlationId
+    });
+  }
+});
+
+// 📋 버전 정보 엔드포인트 (디버깅용)
+app.get("/version", (req, res) => {
+  const correlationId = req.headers['x-correlation-id'] || `version_${Date.now()}`;
+  
+  const version = {
+    service: "t2-vdp-extract",
+    timestamp: new Date().toISOString(),
+    correlationId,
+    environment: {
+      PROJECT_ID: PROJECT_ID || "undefined",
+      LOCATION: LOCATION || "undefined", 
+      RAW_BUCKET: envVars.RAW_BUCKET || "undefined",
+      PLATFORM_SEGMENTED_PATH: envVars.PLATFORM_SEGMENTED_PATH || "undefined",
+      NODE_ENV: process.env.NODE_ENV || "development"
+    },
+    runtime: {
+      node: process.version,
+      platform: process.platform,
+      uptime: `${Math.floor(process.uptime())}s`
+    },
+    config: {
+      hookMinStrength: HOOK_MIN,
+      hookMaxStartSec: HOOK_MAX_S,
+      densityScenes: DENSITY_SCENES_MIN
+    }
+  };
+
+  res.json(version);
+});
+
+// 기존 단순 헬스체크 (호환성)
 app.get("/health", (_, res) => res.json({ ok: true }));
 
 // Test endpoint for VDP 2.0 quality gates (bypasses Vertex AI)

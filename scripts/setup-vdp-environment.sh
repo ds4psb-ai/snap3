@@ -8,7 +8,7 @@ echo "🔧 Setting up VDP Pipeline Environment"
 
 # Default configuration - modify as needed
 DEFAULT_GCP_PROJECT="tough-variety-466003-c5"
-DEFAULT_GCP_REGION="us-west1"
+DEFAULT_GCP_REGION="us-central1"
 DEFAULT_RAW_BUCKET="tough-variety-raw"
 DEFAULT_T2_URL="http://localhost:3001/api/v1/extract"
 

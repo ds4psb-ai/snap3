@@ -3,7 +3,7 @@
 set -euo pipefail
 
 PROJECT_ID="tough-variety-466003-c5"
-LOCATION="us-west1"
+LOCATION="us-central1"
 MODEL_ID="gemini-2.5-pro"
 GCS_URI="${GCS_URI:-gs://tough-variety-raw/raw/ingest/6_I2FmT1mbY.mp4}"
 

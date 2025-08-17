@@ -1,0 +1,8 @@
+{
+  "gcsUri": "gs://tough-variety-raw-central1/raw/ingest/6_I2FmT1mbY.mp4",
+  "meta": {
+    "platform": "YouTube Shorts",
+    "content_id": "TEST_VDP_STANDARDS_123",
+    "source_url": "https://www.youtube.com/shorts/6_I2FmT1mbY"
+  }
+}

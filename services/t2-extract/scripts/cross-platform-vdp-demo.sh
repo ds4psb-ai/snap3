@@ -8,7 +8,7 @@ set -euo pipefail
 # Configuration
 DEMO_DIR="$(dirname "$0")/../demo"
 TEMPLATES_DIR="$(dirname "$0")/../templates"
-T2_EXTRACT_URL="https://t2-vdp-355516763169.us-west1.run.app"
+T2_EXTRACT_URL="https://t2-vdp-355516763169.us-central1.run.app"
 
 echo "🎬 Cross-Platform VDP Analysis Demo"
 echo "=================================="

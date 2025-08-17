@@ -11,7 +11,7 @@ const postData = JSON.stringify({
 });
 
 const options = {
-  hostname: 't2-vdp-355516763169.us-west1.run.app',
+  hostname: 't2-vdp-355516763169.us-central1.run.app',
   port: 443,
   path: '/api/vdp/extract-vertex',
   method: 'POST',

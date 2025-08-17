@@ -172,7 +172,7 @@ gs://tough-variety-raw/raw/ingest/SHA256_HASH.mp4
 
 ### 환경변수
 ```bash
-T2_EXTRACT_URL="https://t2-extract-355516763169.us-west1.run.app"
+T2_EXTRACT_URL="https://t2-extract-355516763169.us-central1.run.app"
 RAW_BUCKET="tough-variety-raw"
 GOLD_BUCKET="tough-variety-gold"
 ```

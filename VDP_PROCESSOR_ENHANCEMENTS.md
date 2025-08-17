@@ -124,7 +124,7 @@ const MAX_SCHEMA_RETRIES = 2;
 
 ### Backend Services
 - **Enhanced API**: Running on `http://localhost:3000`
-- **T2-Extract**: Connected to `https://t2-extract-355516763169.us-west1.run.app`
+- **T2-Extract**: Connected to `https://t2-extract-355516763169.us-central1.run.app`
 - **GCS Integration**: Output bucket configured as `tough-variety-gold`
 
 ### Frontend Interface  

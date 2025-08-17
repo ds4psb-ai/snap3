@@ -21,7 +21,7 @@ echo "🚀 Starting VDP One-Shot Pipeline for: $URL"
 
 # Optional environment variables with defaults
 T2_URL="${T2_URL:-http://localhost:3001/api/v1/extract}"
-GCP_REGION="${GCP_REGION:-us-west1}"
+GCP_REGION="${GCP_REGION:-us-central1}"
 
 echo "🌐 Configuration:"
 echo "  - GCP Project: $GCP_PROJECT"

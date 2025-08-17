@@ -6,7 +6,7 @@
 set -e
 
 # Configuration
-REGION=${1:-"us-west1"}  # Default to us-west1, can be changed to asia-northeast3 for Seoul
+REGION=${1:-"us-central1"}  # CRITICAL: us-central1 required for regional alignment
 PROJECT_ID=${2:-"$GOOGLE_CLOUD_PROJECT"}
 SERVICE_NAME="vdp-extractor"
 

@@ -3,7 +3,7 @@
 # VDP 병렬 생성 스크립트
 # Vertex AI 서비스 에이전트 준비 완료 후 실행
 
-T2_URL="https://t2-extract-355516763169.us-west1.run.app"
+T2_URL="https://t2-extract-355516763169.us-central1.run.app"
 export PAR=6
 
 echo "🚀 VDP 병렬 생성 시작"

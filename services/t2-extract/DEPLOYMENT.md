@@ -9,7 +9,7 @@ This guide covers the complete deployment of the T2-Extract service to Google Cl
 ### Vertex AI Optimization
 - **Region**: `us-central1` (권장 리전 for best model availability)
 - **Model**: `gemini-2.5-pro` (latest stable model)
-- **Location Strategy**: Vertex AI in us-central1, Cloud Run in us-west1
+- **Location Strategy**: Vertex AI in us-central1, Cloud Run in us-central1
 
 ### Cloud Run Configuration
 ```bash
@@ -102,7 +102,7 @@ export HOOK_MIN_STRENGTH=0.70
 ```bash
 gcloud run deploy t2-extract \
   --source . \
-  --region=us-west1 \
+  --region=us-central1 \
   --project=tough-variety-466003-c5 \
   --set-env-vars="REGION=${REGION},MODEL_NAME=${MODEL_NAME},VDP_SCHEMA_PATH=${VDP_SCHEMA_PATH},HOOK_PROMPT_PATH=${HOOK_PROMPT_PATH},DENSITY_SCENES_MIN=${DENSITY_SCENES_MIN},DENSITY_MIN_SHOTS_PER_SCENE=${DENSITY_MIN_SHOTS_PER_SCENE},DENSITY_MIN_KF_PER_SHOT=${DENSITY_MIN_KF_PER_SHOT},HOOK_MAX_START_SEC=${HOOK_MAX_START_SEC},HOOK_MIN_STRENGTH=${HOOK_MIN_STRENGTH},PROJECT_ID=tough-variety-466003-c5,NODE_ENV=production" \
   --timeout=900 \
@@ -118,7 +118,7 @@ gcloud run deploy t2-extract \
 #### 3. Update Existing Service
 ```bash
 gcloud run services update t2-extract \
-  --region=us-west1 \
+  --region=us-central1 \
   --set-env-vars="REGION=${REGION},MODEL_NAME=${MODEL_NAME}..." \
   --timeout=900 \
   --cpu=2 \
@@ -188,7 +188,7 @@ This script validates:
 ```bash
 # Get service URL
 SERVICE_URL=$(gcloud run services describe t2-extract \
-  --region=us-west1 \
+  --region=us-central1 \
   --format="value(status.url)")
 
 # Test health endpoint
@@ -216,10 +216,10 @@ curl -X POST "${SERVICE_URL}/api/vdp/extract-vertex" \
 ### View Logs
 ```bash
 # Tail real-time logs
-gcloud run services logs tail t2-extract --region=us-west1
+gcloud run services logs tail t2-extract --region=us-central1
 
 # View recent logs
-gcloud run services logs read t2-extract --region=us-west1 --limit=50
+gcloud run services logs read t2-extract --region=us-central1 --limit=50
 ```
 
 ### Key Log Markers
@@ -244,7 +244,7 @@ Monitor these key metrics in Cloud Console:
 ### Update Environment Variables
 ```bash
 gcloud run services update t2-extract \
-  --region=us-west1 \
+  --region=us-central1 \
   --set-env-vars="DENSITY_SCENES_MIN=5,HOOK_MIN_STRENGTH=0.75"
 ```
 
@@ -268,11 +268,11 @@ Cloud Run automatically handles rolling updates with zero downtime:
 ### Rollback if Needed
 ```bash
 # List revisions
-gcloud run revisions list --service=t2-extract --region=us-west1
+gcloud run revisions list --service=t2-extract --region=us-central1
 
 # Rollback to previous revision
 gcloud run services update-traffic t2-extract \
-  --region=us-west1 \
+  --region=us-central1 \
   --to-revisions=REVISION-NAME=100
 ```
 
@@ -333,7 +333,7 @@ DENSITY_MIN_KF_PER_SHOT=2
 #### Service Won't Start
 ```bash
 # Check logs for startup errors
-gcloud run services logs read t2-extract --region=us-west1
+gcloud run services logs read t2-extract --region=us-central1
 
 # Common causes:
 # - Missing environment variables
@@ -345,7 +345,7 @@ gcloud run services logs read t2-extract --region=us-west1
 ```bash
 # Increase resources
 gcloud run services update t2-extract \
-  --region=us-west1 \
+  --region=us-central1 \
   --cpu=4 --memory=8Gi
 
 # Check density thresholds
@@ -361,7 +361,7 @@ gcloud run services update t2-extract \
 ```bash
 # Increase memory allocation
 gcloud run services update t2-extract \
-  --region=us-west1 \
+  --region=us-central1 \
   --memory=8Gi
 
 # Or optimize Node.js settings

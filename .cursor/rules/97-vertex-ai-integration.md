@@ -1,9 +1,9 @@
 # Vertex AI Integration Rules
 
 ## Region Requirements
-- **Required Region**: us-central1 (NOT global, NOT us-west1)
+- **Required Region**: us-central1 (NOT global, NOT us-central1)
 - **Model Support**: gemini-2.5-pro 모델 지원 확인된 리전만 사용
-- **Socket Timeout**: us-west1 region 사용 금지 (socket timeout 빈발)
+- **Socket Timeout**: us-central1 region 사용 금지 (socket timeout 빈발)
 
 ## Model Instance Management
 - **Fresh Model Pattern**: 요청별 새 모델 인스턴스 생성 (`createModel()` 패턴)
@@ -35,7 +35,7 @@
 
 ## Anti-Patterns (NEVER)
 - **Global Region**: global region 사용 (gemini 모델 미지원)
-- **West Region**: us-west1 region 사용 (socket timeout 빈발)
+- **West Region**: us-central1 region 사용 (socket timeout 빈발)
 - **Model Reuse**: 모델 인스턴스 재사용 (서버 컨텍스트에서 불안정)
 - **Structured Output**: Structured Output 의존 (텍스트 파싱보다 불안정)
 - **Prompt First**: Socket 오류 시 모델/프롬프트 수정 우선 (region 검증 후순위)

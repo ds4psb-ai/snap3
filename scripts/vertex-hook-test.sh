@@ -6,7 +6,7 @@ set -e
 
 # 환경값
 export PROJECT_ID="tough-variety-466003-c5"
-export LOCATION="us-west1"
+export LOCATION="us-central1"
 export MODEL_ID="gemini-2.5-pro"
 export ACCESS_TOKEN="$(gcloud auth print-access-token)"
 export ENDPOINT="https://$LOCATION-aiplatform.googleapis.com/v1/projects/$PROJECT_ID/locations/$LOCATION/publishers/google/models/$MODEL_ID:generateContent"

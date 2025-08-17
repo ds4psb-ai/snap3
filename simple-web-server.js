@@ -520,7 +520,46 @@ const PORT = process.env.PORT || 9001;
 async function startServer() {
     await loadNormalizer();
     
+    // Enhanced startup logging with environment validation
+    structuredLog('info', 'Server startup initiated', {
+        port: PORT,
+        rawBucket: RAW_BUCKET,
+        goldBucket: GOLD_BUCKET,
+        projectId: storage.projectId,
+        region: process.env.REGION || 'unspecified',
+        nodeEnv: process.env.NODE_ENV || 'development'
+    });
+    
+    // Environment variable validation
+    if (RAW_BUCKET === 'tough-variety-raw') {
+        structuredLog('warning', 'Using default RAW_BUCKET - consider setting environment variable', {
+            defaultBucket: RAW_BUCKET,
+            recommendedAction: 'Set RAW_BUCKET environment variable for region alignment',
+            regionAlignment: 'us-central1 recommended for optimal performance'
+        });
+    } else {
+        structuredLog('success', 'Custom RAW_BUCKET configured for regional alignment', {
+            customBucket: RAW_BUCKET,
+            regionOptimization: 'ENABLED'
+        });
+    }
+    
     app.listen(PORT, () => {
+        structuredLog('success', 'VDP Enhanced Web Server started successfully', {
+            serverUrl: `http://localhost:${PORT}`,
+            endpoints: {
+                normalization: 'POST /api/normalize-url',
+                vdpExtract: 'POST /api/vdp/extract-vertex',
+                health: 'GET /api/health'
+            },
+            features: {
+                jsonOnlyProcessing: true,
+                platformSegmentation: true,
+                contentKeyEnforcement: true,
+                regionalAlignment: RAW_BUCKET !== 'tough-variety-raw'
+            }
+        });
+        
         console.log(`🚀 Simple web server running on http://localhost:${PORT}`);
         console.log(`📝 URL normalization endpoint: POST /api/normalize-url`);
         console.log(`🔗 UI available at: http://localhost:${PORT}`);

@@ -25,7 +25,7 @@ YouTube/Shorts URL → Download → Upload (GCS) → Extract (T2+Vertex) → Gol
 
 # Or manually set required variables:
 export GCP_PROJECT="tough-variety-466003-c5"
-export GCP_REGION="us-west1" 
+export GCP_REGION="us-central1" 
 export RAW_BUCKET="tough-variety-raw"
 export T2_URL="http://localhost:3001/api/v1/extract"
 export YOUTUBE_API_KEY="your-youtube-api-key"
@@ -97,7 +97,7 @@ brew install yt-dlp ffmpeg jq curl
 - `RAW_BUCKET`: GCS bucket for raw video storage
 - `YOUTUBE_API_KEY`: YouTube Data API v3 key
 - `T2_URL`: T2 extraction service endpoint (optional, defaults to localhost:3001)
-- `GCP_REGION`: GCP region (optional, defaults to us-west1)
+- `GCP_REGION`: GCP region (optional, defaults to us-central1)
 
 ## 🎬 Pipeline Flow Details
 

@@ -28,7 +28,7 @@ const UPLOAD_DIR = process.env.UPLOAD_DIR || '/tmp/vdp-uploads';
 const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
 const MAX_JSON_SIZE = 10 * 1024 * 1024; // 10MB
 const SUPPORTED_VIDEO_FORMATS = ['mp4'];
-const T2_EXTRACT_URL = process.env.T2_EXTRACT_URL || 'https://t2-vdp-355516763169.us-west1.run.app';
+const T2_EXTRACT_URL = process.env.T2_EXTRACT_URL || 'https://t2-vdp-355516763169.us-central1.run.app';
 const GCS_OUTPUT_BUCKET = process.env.GCS_OUTPUT_BUCKET || 'tough-variety-gold';
 const MAX_SCHEMA_RETRIES = 2;
 

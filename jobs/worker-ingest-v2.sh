@@ -856,14 +856,14 @@ monitor_cross_region_access() {
     local correlation_id="$2"
     
     # Monitor for cross-region service calls
-    if [[ "$service_endpoint" == *"us-west1"* || "$service_endpoint" == *"us-east1"* || "$service_endpoint" == *"europe-"* ]]; then
+    if [[ "$service_endpoint" == *"us-central1"* || "$service_endpoint" == *"us-east1"* || "$service_endpoint" == *"europe-"* ]]; then
         log_with_correlation "WARNING" "CROSS_REGION_ACCESS_DETECTED: Service call outside required region" "$correlation_id"
         log_with_correlation "WARNING" "Required region: $REQUIRED_REGION, Service: $service_endpoint" "$correlation_id"
         
         # Calculate estimated latency increase
         local estimated_latency="unknown"
         case "$service_endpoint" in
-            *"us-west1"*) estimated_latency="+20-40ms" ;;
+            *"us-central1"*) estimated_latency="+20-40ms" ;;
             *"us-east1"*) estimated_latency="+40-80ms" ;;
             *"europe-"*) estimated_latency="+100-200ms" ;;
         esac

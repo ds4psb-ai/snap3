@@ -145,7 +145,7 @@ services/vdp-extractor/
 gcloud run deploy vdp-extractor \
   --source=. \
   --allow-unauthenticated \
-  --region=us-west1 \
+  --region=us-central1 \
   --set-env-vars=GEMINI_API_KEY=${GEMINI_API_KEY}
 
 # 서울

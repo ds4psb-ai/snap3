@@ -47,7 +47,7 @@ function analyzeJsonError(text, error) {
 ### Phase 3: Infrastructure Optimization
 **Implementation**: Regional alignment
 ```bash
-# Before: Vertex AI (us-central1) + Cloud Run (us-west1)
+# Before: Vertex AI (us-central1) + Cloud Run (us-central1)
 # After: Both services in us-central1
 ```
 **Result**: Network stability improved, but parsing issues remained

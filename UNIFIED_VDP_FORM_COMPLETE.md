@@ -146,7 +146,7 @@ npm start
 **Environment Variables**:
 ```bash
 export PORT=3000
-export T2_EXTRACT_URL="https://t2-vdp-355516763169.us-west1.run.app"
+export T2_EXTRACT_URL="https://t2-vdp-355516763169.us-central1.run.app"
 export UPLOAD_DIR="/tmp/vdp-uploads"
 export ALLOWED_ORIGINS="https://app.outlier.example,http://localhost:3000"
 ```

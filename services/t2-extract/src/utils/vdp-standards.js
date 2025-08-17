@@ -30,5 +30,15 @@ export function enforceVdpStandards(vdp, reqBody, opts = {}) {
   out.load_timestamp = out.load_timestamp || ts;
   out.load_date = out.load_date || ts.substring(0,10);
 
+  // 5) 증거팩 무결성 보강 - 빈 증거팩 최소 구조 보장
+  out.evidence = out.evidence || {};
+  out.evidence.audio_fingerprint = out.evidence.audio_fingerprint || { present: false };
+  out.evidence.product_mentions = out.evidence.product_mentions || [];
+  
+  // 증거팩 메타데이터 추가
+  if (!out.evidence.generated_at) {
+    out.evidence.generated_at = ts;
+  }
+
   return out;
 }

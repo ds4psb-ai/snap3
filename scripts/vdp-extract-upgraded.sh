@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # 설정
-T2_URL="${T2_EXTRACT_URL:-https://t2-extract-355516763169.us-west1.run.app}"
+T2_URL="${T2_EXTRACT_URL:-https://t2-extract-355516763169.us-central1.run.app}"
 PROJECT_ID="${PROJECT_ID:-tough-variety-466003-c5}"
 RAW_BUCKET="${RAW_BUCKET:-tough-variety-raw}"
 GOLD_BUCKET="${GOLD_BUCKET:-tough-variety-gold}"
@@ -16,7 +16,7 @@ usage() {
     echo "예시: $0 https://www.youtube.com/shorts/6_I2FmT1mbY"
     echo ""
     echo "환경변수:"
-    echo "  T2_EXTRACT_URL: t2-extract 서비스 URL (기본값: https://t2-extract-355516763169.us-west1.run.app)"
+    echo "  T2_EXTRACT_URL: t2-extract 서비스 URL (기본값: https://t2-extract-355516763169.us-central1.run.app)"
     echo "  RAW_BUCKET: GCS RAW 버킷명 (기본값: tough-variety-raw)"
     echo "  GOLD_BUCKET: GCS GOLD 버킷명 (기본값: tough-variety-gold)"
     exit 1

@@ -108,7 +108,7 @@ curl -X POST https://your-service-url/api/vdp/extract-vertex \
 ### 로그 확인
 ```bash
 # 배포 후 실시간 로그 모니터링
-gcloud run services logs tail t2-extract --region=us-west1
+gcloud run services logs tail t2-extract --region=us-central1
 
 # fileData 패턴 로그 검색
 gcloud logging read 'resource.type="cloud_run_revision" AND textPayload:"[VDP fileData]"'

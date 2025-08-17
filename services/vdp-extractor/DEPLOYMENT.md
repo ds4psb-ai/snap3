@@ -33,7 +33,7 @@ gcloud run deploy vdp-extractor \
 gcloud run deploy vdp-extractor \
   --source=. \
   --allow-unauthenticated \
-  --region=us-west1 \
+  --region=us-central1 \
   --memory=2Gi \
   --cpu=2 \
   --timeout=300s \
@@ -43,13 +43,13 @@ gcloud run deploy vdp-extractor \
 ### 4. 자동 배포 스크립트 사용
 ```bash
 # 배포 스크립트 실행 (미국 서부)
-./deploy-cloud-run.sh us-west1
+./deploy-cloud-run.sh us-central1
 
 # 배포 스크립트 실행 (서울)
 ./deploy-cloud-run.sh asia-northeast3
 
 # Cloud Build 사용
-./deploy-cloud-run.sh us-west1 your-project-id --cloud-build
+./deploy-cloud-run.sh us-central1 your-project-id --cloud-build
 ```
 
 ## 📋 배포 후 API 엔드포인트
@@ -167,7 +167,7 @@ curl "https://your-service-url/api/v1/metrics"
 
 ### 로그 확인
 ```bash
-gcloud run logs tail vdp-extractor --region=us-west1
+gcloud run logs tail vdp-extractor --region=us-central1
 ```
 
 ### 서비스 상태 확인
@@ -233,7 +233,7 @@ await snap3.vdp.store(vdp.data);
 LOG_LEVEL=debug npm run dev
 
 # Cloud Run 로그 확인
-gcloud run logs tail vdp-extractor --region=us-west1 --follow
+gcloud run logs tail vdp-extractor --region=us-central1 --follow
 ```
 
 ## 📦 배포 아티팩트
@@ -247,10 +247,10 @@ gcloud run logs tail vdp-extractor --region=us-west1 --follow
 
 ```bash
 # 코드 변경 후 재배포
-./deploy-cloud-run.sh us-west1
+./deploy-cloud-run.sh us-central1
 
 # 또는 gcloud 직접 사용
-gcloud run deploy vdp-extractor --source=. --region=us-west1
+gcloud run deploy vdp-extractor --source=. --region=us-central1
 ```
 
 ## 📈 확장성

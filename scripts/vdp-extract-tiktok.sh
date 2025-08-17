@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # 설정
-T2_URL="${T2_EXTRACT_URL:-https://t2-extract-355516763169.us-west1.run.app}"
+T2_URL="${T2_EXTRACT_URL:-https://t2-extract-355516763169.us-central1.run.app}"
 RAW_BUCKET="${RAW_BUCKET:-tough-variety-raw}"
 GOLD_BUCKET="${GOLD_BUCKET:-tough-variety-gold}"
 

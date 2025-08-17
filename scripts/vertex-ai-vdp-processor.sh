@@ -32,7 +32,7 @@ echo ""
 cd /Users/ted/snap3
 
 export PROJECT_ID="${PROJECT_ID:-tough-variety-466003-c5}"
-export LOCATION="${LOCATION:-us-west1}"
+export LOCATION="${LOCATION:-us-central1}"
 export RAW_BUCKET="${RAW_BUCKET:-tough-variety-raw}"
 export GOLD_BUCKET="${GOLD_BUCKET:-tough-variety-gold}"
 export DATASET="${DATASET:-vdp_dataset}"

@@ -4,6 +4,25 @@
 Claude Code 실행 시 자동으로 이 디렉토리에서 시작:
 - Working Directory: `/Users/ted/snap3`
 
+## 🚨 CRITICAL: Regional Alignment Policy
+**모든 Vertex AI 배포는 반드시 us-central1 리전을 사용**
+- **PROJECT_ID**: `tough-variety-466003-c5`
+- **REGION**: `us-central1` (필수)
+- **RAW_BUCKET**: `tough-variety-raw-central1`
+- **이유**: Event 기반 파이프라인 최적화, Cloud Run/GCS/Eventarc 지연 최소화
+
+### 환경변수 설정 (모든 터미널에서 필수)
+```bash
+export PROJECT_ID="tough-variety-466003-c5"
+export REGION="us-central1"
+export RAW_BUCKET="tough-variety-raw-central1"
+```
+
+### 배포 시 주의사항
+- ❌ **절대 us-west1 사용 금지** (지연 발생)
+- ✅ **모든 서비스 us-central1 배포 필수**
+- ✅ **배포 전 리전 확인 필수**: `echo $REGION`
+
 ## 역할 / 루프
 - **역할**
   - **Claude Code**: 플래너/오케스트레이터 (Plan → Apply → Test → Review). *기본은 Plan Mode*.
