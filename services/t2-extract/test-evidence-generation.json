@@ -1,0 +1,8 @@
+{
+  "gcsUri": "gs://tough-variety-raw-central1/raw/ingest/TEST_EVIDENCE_GEN.mp4",
+  "meta": {
+    "platform": "youtube",
+    "language": "ko",
+    "content_id": "TEST_EVIDENCE_GEN"
+  }
+}
