@@ -7,8 +7,8 @@ set -e
 
 echo "🔍 ClaudeCode 메시지 확인 중..."
 
-# 1. 최신 ClaudeCode 메시지 찾기 (macOS 호환)
-LATEST_MESSAGE=$(find . -name ".collab-msg-*" -not -name "*.processed" -type f -exec ls -t {} + | head -1)
+# 1. 최신 ClaudeCode 메시지 찾기 (Cursor 응답 파일 제외)
+LATEST_MESSAGE=$(find . -name ".collab-msg-*" -not -name "*.processed" -not -path "./.auto-responses/*" -not -name "*cursor*" -type f -exec ls -t {} + | head -1)
 
 if [ -z "$LATEST_MESSAGE" ]; then
     echo "❌ 새로운 ClaudeCode 메시지가 없습니다."
