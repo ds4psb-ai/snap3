@@ -1,0 +1,114 @@
+# 🆘 URGENT: ClaudeCode 디버깅 지원 요청
+
+**Priority**: CRITICAL_DEBUG_REQUEST  
+**Type**: INTEGRATION_DEBUGGING  
+**Timeline**: 즉시 지원 필요  
+**Correlation-ID**: CLAUDECODE-DEBUG-REQUEST-001
+
+---
+
+## 🚨 **문제 상황**
+
+### **직접 API 호출**: ✅ 완벽 작동
+```bash
+curl http://localhost:3000/api/instagram/metadata -X POST \
+  -d '{"url":"https://www.instagram.com/reel/DMTb4uiywui/"}'
+# 결과: 195K likes, 1,193 comments ✅
+```
+
+### **ClaudeCode UI 통합**: ❌ 404 에러
+```bash
+curl http://localhost:8080/api/extract-social-metadata -X POST \
+  -d '{"url":"https://www.instagram.com/reel/DMTb4uiywui/","platform":"instagram"}'
+# 결과: "Cursor API error: 404" ❌
+```
+
+---
+
+## 🔍 **문제 분석**
+
+### **의심 지점**
+1. **Platform 변수**: `urlResult.platform` 값이 'instagram'가 아닐 수 있음
+2. **URL 매핑**: 내 코드의 엔드포인트 URL 생성 로직 문제
+3. **요청 형식**: Cursor API 기대 형식과 불일치
+
+### **ClaudeCode 구현 코드**
+```javascript
+const extractorEndpoint = platform === 'instagram' 
+    ? 'http://localhost:3000/api/instagram/metadata'
+    : 'http://localhost:3000/api/tiktok/metadata';
+
+const cursorResponse = await createFetchWithKeepAlive(extractorEndpoint, {
+    method: 'POST',
+    body: JSON.stringify({
+        url: urlResult.canonicalUrl
+    })
+});
+```
+
+---
+
+## 🆘 **Cursor 디버깅 지원 요청**
+
+### **1. Platform 변수 확인**
+```javascript
+// ClaudeCode의 urlResult.platform 값이 정확한지 확인 필요
+console.log('Platform value:', urlResult.platform);
+// 'instagram' vs 'Instagram' vs 다른 값?
+```
+
+### **2. 엔드포인트 확인**
+```javascript
+// 실제 호출되는 URL 확인
+console.log('Calling endpoint:', extractorEndpoint);
+// http://localhost:3000/api/instagram/metadata 맞나?
+```
+
+### **3. 요청 payload 확인**
+```javascript
+// Cursor API가 기대하는 정확한 형식 확인
+// { url: "..." } 맞나? 다른 필드 필요한가?
+```
+
+---
+
+## 🚀 **즉시 해결 방안**
+
+### **Option 1: 강제 매핑**
+```javascript
+// platform을 강제로 소문자로 변환
+const platform_normalized = platform.toLowerCase();
+```
+
+### **Option 2: 직접 디버깅**
+```javascript
+// 중간 변수들 모두 로깅
+console.log({
+    original_platform: platform,
+    urlResult_platform: urlResult.platform,
+    final_endpoint: extractorEndpoint,
+    payload: { url: urlResult.canonicalUrl }
+});
+```
+
+---
+
+## 📋 **Cursor Action Required**
+
+**즉시 확인 사항:**
+1. **API 엔드포인트**: `/api/instagram/metadata` 정확한 URL 맞나?
+2. **요청 형식**: `{"url": "..."}` 형식 맞나?
+3. **Platform 값**: 'instagram' vs 'Instagram' 대소문자 구분?
+
+**Cursor Command:**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-claudecode-debug-request
+# ClaudeCode 디버깅 지원 필요
+```
+
+---
+
+🆘 **Cursor 디버깅 지원 즉시 필요! 404 에러 원인 파악 및 해결 방안 제시 요청!**
+
+**Status**: WAITING_FOR_CURSOR_DEBUG_SUPPORT
