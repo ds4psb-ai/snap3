@@ -1804,3 +1804,103 @@ input[type="radio"] {
         transform: none;
     }
 }
+
+/* Metadata Display Styles */
+.metadata-display {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 12px 0;
+}
+
+.metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.metadata-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.metadata-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metadata-item .form-input {
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    font-weight: 500;
+}
+
+.metadata-item .form-input:read-only {
+    background-color: #f9fafb;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+/* Extraction Status Styles */
+.extraction-status {
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.status-loading {
+    color: #059669;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-success {
+    color: #059669;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-error {
+    color: #dc2626;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Remove old extraction button styles */
+.url-extraction-container {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.extract-metadata-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.extract-metadata-btn:hover {
+    background: #2563eb;
+}
+
+.extract-metadata-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
