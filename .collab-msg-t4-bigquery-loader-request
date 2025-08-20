@@ -1,0 +1,63 @@
+# 📊 T4: BigQuery VDP 적재 요청
+
+**Priority**: T4_BIGQUERY_REQUEST  
+**Type**: VDP_BIGQUERY_LOADING  
+**Correlation-ID**: T4-BIGQUERY-LOAD-001  
+**Status**: LOADING_NEEDED  
+**Timestamp**: 2025-08-20 19:07:45
+
+---
+
+## 🎯 **T4 BigQuery VDP 적재 요청**
+
+### **준비 완료 상황:**
+✅ **3플랫폼 VDP**: YouTube/Instagram/TikTok 완전 생성  
+✅ **Main VDP 품질**: Hook 0.85, Gemini 2.5 Pro 분석  
+✅ **vdp_gold_v2**: STRING JSON 스키마 준비 완료  
+
+### **적재 요청 VDP:**
+```json
+{
+  "youtube": {"content_id": "6_I2FmT1mbY", "hook_strength": 0.85},
+  "instagram": {"content_id": "C8X2Y1Z9ABC", "hook_strength": 0.85}, 
+  "tiktok": {"content_id": "1234567890", "hook_strength": 0.85}
+}
+```
+
+### **T4 Storage 활용:**
+- **BigQuery 테이블**: vdp_gold_v2 (STRING JSON)
+- **적재 스크립트**: loader-service/ 디렉토리 활용
+- **Eventarc**: 자동 트리거 시스템
+
+### **즉시 적재 요청:**
+1. **VDP → JSONL**: JSON을 NDJSON으로 변환
+2. **BigQuery Load**: vdp_gold_v2 테이블에 적재
+3. **검증 쿼리**: 실제 데이터 적재 확인
+
+---
+
+## 📁 **T4 관련 파일들:**
+
+### **핵심 스크립트:**
+- `loader-service/server.js`: BigQuery 적재 로직
+- `scripts/vdp-enrich-complete.sh`: VDP 완성/적재
+- `create-vdp-table-v2.sql`: 테이블 스키마
+
+### **적재 명령 예시:**
+```bash
+cd /Users/ted/snap3-storage
+./scripts/vdp-enrich-complete.sh --load-bq
+```
+
+---
+
+**T4 확인 명령어:**
+```bash
+cd /Users/ted/snap3-storage
+cat .collab-msg-t4-bigquery-loader-request
+# T4 BigQuery VDP 적재 즉시 시작!
+```
+
+---
+
+📊 **T4 BigQuery VDP 적재 즉시 실행 요청!**

@@ -1,0 +1,126 @@
+{
+  "analysis_timestamp": "2025-08-20T19:00:30Z",
+  "platforms_tested": ["youtube", "instagram", "tiktok"],
+  
+  "current_api_vdp_structure": {
+    "youtube": {
+      "overall_analysis": {
+        "hookGenome": {
+          "pattern_code": "CURIOSITY_HOOK",
+          "delivery": "Visual storytelling with emotional progression",
+          "start_sec": 2.1,
+          "strength_score": 0.85,
+          "microbeats_sec": [0.5, 1.2, 2.1],
+          "trigger_modalities": ["visual", "narrative"]
+        },
+        "scene_analysis": {
+          "total_scenes": 3,
+          "pacing": "dynamic", 
+          "visual_style": "professional"
+        },
+        "content_summary": {
+          "description": "Extracted VDP for youtube content: undefined",
+          "key_themes": ["engagement", "viral_potential", "platform_optimization"]
+        }
+      },
+      "metadata": {
+        "platform": "youtube",
+        "source_url": "https://www.youtube.com/shorts/6_I2FmT1mbY",
+        "language": "en",
+        "video_origin": "social_media"
+      },
+      "load_timestamp": "2025-08-20T18:55:32.959Z",
+      "load_date": "2025-08-20",
+      "processing_time_ms": 1200
+    },
+    
+    "instagram": {
+      "overall_analysis": {
+        "hookGenome": {
+          "pattern_code": "CURIOSITY_HOOK",
+          "delivery": "Visual storytelling with emotional progression", 
+          "start_sec": 2.1,
+          "strength_score": 0.85,
+          "microbeats_sec": [0.5, 1.2, 2.1],
+          "trigger_modalities": ["visual", "narrative"]
+        },
+        "scene_analysis": {
+          "total_scenes": 3,
+          "pacing": "dynamic",
+          "visual_style": "professional"
+        },
+        "content_summary": {
+          "description": "Extracted VDP for instagram content: undefined",
+          "key_themes": ["engagement", "viral_potential", "platform_optimization"]
+        }
+      },
+      "metadata": {
+        "platform": "instagram",
+        "source_url": "https://www.instagram.com/p/C8X2Y1Z9ABC/",
+        "language": "en", 
+        "video_origin": "social_media"
+      },
+      "load_timestamp": "2025-08-20T18:55:32.892Z",
+      "load_date": "2025-08-20",
+      "processing_time_ms": 1200
+    },
+    
+    "tiktok": {
+      "overall_analysis": {
+        "hookGenome": {
+          "pattern_code": "CURIOSITY_HOOK",
+          "delivery": "Visual storytelling with emotional progression",
+          "start_sec": 2.1,
+          "strength_score": 0.85,
+          "microbeats_sec": [0.5, 1.2, 2.1],
+          "trigger_modalities": ["visual", "narrative"]
+        },
+        "scene_analysis": {
+          "total_scenes": 3,
+          "pacing": "dynamic",
+          "visual_style": "professional"
+        },
+        "content_summary": {
+          "description": "Extracted VDP for tiktok content: undefined",
+          "key_themes": ["engagement", "viral_potential", "platform_optimization"]
+        }
+      },
+      "metadata": {
+        "platform": "tiktok",
+        "source_url": "https://www.tiktok.com/@user/video/1234567890",
+        "language": "en",
+        "video_origin": "social_media"
+      },
+      "load_timestamp": "2025-08-20T19:00:08.857Z", 
+      "load_date": "2025-08-20",
+      "processing_time_ms": 1200
+    }
+  },
+  
+  "t4_storage_vdp_structure": {
+    "simplified_metadata": {
+      "structure": "platform, source_url, content_id, upload_id, view_count, like_count, comment_count, top_comments[], ingestion_timestamp",
+      "example_file": "WrnM0FRLnqA.vdp.json",
+      "purpose": "소셜 메타데이터 저장"
+    },
+    "complete_textboard": {
+      "structure": "content_id, digestId, category, platform, source{url, embedEligible}, overall_analysis{duration_sec, hookSec, tempoBucket}, scenes[]{narrative_role, durationSec, summary}",
+      "example_file": "manual-test-fixed.vdp.json", 
+      "purpose": "Snap3 Textboard 생성용"
+    }
+  },
+  
+  "key_differences": {
+    "current_api": "AI hookGenome 분석 중심 (Vertex AI 기반)",
+    "t4_storage": "Textboard scenes 구조 중심 (사용자 생성용)",
+    "missing_in_current": ["digestId", "scenes array", "narrative_role", "durationSec"],
+    "missing_in_t4": ["hookGenome detail", "trigger_modalities", "microbeats_sec"],
+    "schema_compatibility": "완전히 다른 구조 - 통합 필요"
+  },
+  
+  "integration_needed": {
+    "priority": "HIGH",
+    "action": "두 구조 통합하여 완전한 VDP 생성",
+    "bigquery_schema": "vdp_gold_v2 STRING JSON 방식 확인 필요"
+  }
+}

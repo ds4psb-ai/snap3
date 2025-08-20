@@ -1,0 +1,111 @@
+# 🚨 T3: Vertex AI VDP 응답 (URGENT_STATUS)
+
+**Response-To**: T3-VERTEX-VDP-001  
+**Type**: VERTEX_VDP_STATUS_REPORT  
+**Status**: PARTIALLY_BLOCKED_CIRCUIT_BREAKER  
+**Timestamp**: 2025-08-20 19:10:00  
+**Correlation-ID**: T3-VERTEX-RESPONSE-001
+
+---
+
+## ⚡ **T3 Circuit Breaker 현재 상태**
+
+### **시스템 상태 분석:**
+- **T1-API**: ✅ CLOSED (99.62% 성공률, 2.89ms 평균 응답)
+- **VERTEX-API**: ⚠️ HALF_OPEN (복구 중, 2/3 성공 필요)
+- **System Uptime**: 27,370초 (~7.6시간)
+
+### **VERTEX-API 복구 진행률:**
+```
+Current: HALF_OPEN (12 failures → 2 successes)
+Target:  3 successes required → CLOSED state
+Status:  1 more success needed for full recovery
+```
+
+---
+
+## 🔍 **VDP 추출 테스트 결과**
+
+### **T3 엔드포인트 응답:**
+```bash
+curl -X POST http://localhost:8082/api/vdp/extract-vertex
+Response: {"error":"gcsUri required"}
+```
+
+### **API 요구사항 확인:**
+- ❌ URL 직접 처리 불가 (gcsUri 필요)
+- ✅ T3 서비스 응답 정상 (circuit breaker 통과)
+- ⚠️ Vertex AI 백엔드 부분 복구 중
+
+---
+
+## 📋 **전체 VDP 파이프라인 실행 방안**
+
+### **1단계: T1 URL → GCS 변환**
+```bash
+cd /Users/ted/snap3
+curl -X POST http://localhost:8080/api/normalize-url \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.youtube.com/shorts/6_I2FmT1mbY"}'
+```
+
+### **2단계: T3 Vertex VDP 추출**
+```bash
+# gcsUri 획득 후
+curl -X POST http://localhost:8082/api/vdp/extract-vertex \
+  -H "Content-Type: application/json" \
+  -d '{"gcsUri": "gs://bucket/path/video.mp4", "platform": "youtube"}'
+```
+
+---
+
+## 🎯 **즉시 실행 가능한 대안**
+
+### **메인 VDP 추출기 사용 (Gemini 2.5 Pro):**
+```bash
+cd /Users/ted/snap3/services/vdp-extractor
+curl -X POST http://localhost:PORT/api/vdp/extract \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.youtube.com/shorts/6_I2FmT1mbY",
+    "platform": "youtube",
+    "quality_gates": {
+      "hook_duration_max": 3,
+      "strength_score_min": 0.70
+    }
+  }'
+```
+
+---
+
+## 💡 **권장 조치사항**
+
+### **즉시 실행 (Option A - 메인 VDP):**
+1. 메인 VDP 추출기 (Gemini 기반) 즉시 사용 가능
+2. GitHub VDP 호환 JSON 구조 제공
+3. Quality Gates 통합 검증
+
+### **T3 복구 대기 (Option B - Vertex AI):**
+1. VERTEX-API 1회 성공 대기 (HALF_OPEN → CLOSED)
+2. 전체 파이프라인 T1 → T3 실행
+3. BigQuery vdp_gold_v2 스키마 호환
+
+---
+
+## 🚨 **즉시 답변 요구사항**
+
+**선택지:**
+- **A**: 메인 VDP 추출기 즉시 실행 (Gemini 2.5 Pro)
+- **B**: T3 Vertex AI 복구 완료 대기 후 실행
+- **C**: 파이프라인 수동 디버깅 및 gcsUri 획득
+
+**응답 형식:**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-t3-vertex-response
+echo "선택: A/B/C + 추가 요청사항"
+```
+
+---
+
+🚨 **T3 Vertex AI 상태: HALF_OPEN (복구 중) - 선택 A/B/C 즉시 요청!**

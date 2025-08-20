@@ -4872,3 +4872,313 @@
 [2025-08-21 03:49:15] State: CLOSED | Failures: 0 | Requests: 1742 | Success: 100.00% | Avg: 2.94ms
 [2025-08-21 03:49:20] State: CLOSED | Failures: 0 | Requests: 1742 | Success: 100.00% | Avg: 2.94ms
 [2025-08-21 03:49:25] State: CLOSED | Failures: 0 | Requests: 1742 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:49:30] State: CLOSED | Failures: 0 | Requests: 1743 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:49:35] State: CLOSED | Failures: 0 | Requests: 1743 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:49:40] State: CLOSED | Failures: 0 | Requests: 1743 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:49:45] State: CLOSED | Failures: 0 | Requests: 1744 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:49:50] State: CLOSED | Failures: 0 | Requests: 1744 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:49:55] State: CLOSED | Failures: 0 | Requests: 1744 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:50:00] State: CLOSED | Failures: 0 | Requests: 1745 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:50:05] State: CLOSED | Failures: 0 | Requests: 1745 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:50:11] State: CLOSED | Failures: 0 | Requests: 1745 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:50:16] State: CLOSED | Failures: 0 | Requests: 1746 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:50:21] State: CLOSED | Failures: 0 | Requests: 1746 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:50:26] State: CLOSED | Failures: 0 | Requests: 1746 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:50:31] State: CLOSED | Failures: 0 | Requests: 1747 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:50:36] State: CLOSED | Failures: 0 | Requests: 1747 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:50:41] State: CLOSED | Failures: 0 | Requests: 1747 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:50:46] State: CLOSED | Failures: 0 | Requests: 1748 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:50:51] State: CLOSED | Failures: 0 | Requests: 1748 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:50:56] State: CLOSED | Failures: 0 | Requests: 1748 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:51:01] State: CLOSED | Failures: 0 | Requests: 1749 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:51:06] State: CLOSED | Failures: 0 | Requests: 1749 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:51:11] State: CLOSED | Failures: 0 | Requests: 1749 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:51:16] State: CLOSED | Failures: 0 | Requests: 1750 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:51:21] State: CLOSED | Failures: 0 | Requests: 1750 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:51:26] State: CLOSED | Failures: 0 | Requests: 1750 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:51:31] State: CLOSED | Failures: 0 | Requests: 1751 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:51:36] State: CLOSED | Failures: 0 | Requests: 1751 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:51:41] State: CLOSED | Failures: 0 | Requests: 1751 | Success: 100.00% | Avg: 2.94ms
+[2025-08-21 03:51:46] State: CLOSED | Failures: 1 | Requests: 1752 | Success: 99.94% | Avg: 2.94ms
+[2025-08-21 03:51:51] State: CLOSED | Failures: 1 | Requests: 1752 | Success: 99.94% | Avg: 2.94ms
+[2025-08-21 03:51:56] State: CLOSED | Failures: 1 | Requests: 1752 | Success: 99.94% | Avg: 2.94ms
+[2025-08-21 03:52:01] State: CLOSED | Failures: 2 | Requests: 1753 | Success: 99.89% | Avg: 2.94ms
+[2025-08-21 03:52:06] State: CLOSED | Failures: 2 | Requests: 1753 | Success: 99.89% | Avg: 2.94ms
+[2025-08-21 03:52:11] State: CLOSED | Failures: 2 | Requests: 1753 | Success: 99.89% | Avg: 2.94ms
+[2025-08-21 03:52:16] State: OPEN | Failures: 3 | Requests: 1754 | Success: 99.83% | Avg: 2.94ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:52:21] State: OPEN | Failures: 3 | Requests: 1754 | Success: 99.83% | Avg: 2.94ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:52:26] State: OPEN | Failures: 3 | Requests: 1754 | Success: 99.83% | Avg: 2.94ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:52:31] State: OPEN | Failures: 3 | Requests: 1754 | Success: 99.83% | Avg: 2.94ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:52:36] State: OPEN | Failures: 3 | Requests: 1754 | Success: 99.83% | Avg: 2.94ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:52:41] State: OPEN | Failures: 3 | Requests: 1754 | Success: 99.83% | Avg: 2.94ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:52:46] State: OPEN | Failures: 3 | Requests: 1754 | Success: 99.83% | Avg: 2.94ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:52:51] State: OPEN | Failures: 3 | Requests: 1754 | Success: 99.83% | Avg: 2.94ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:52:56] State: OPEN | Failures: 3 | Requests: 1754 | Success: 99.83% | Avg: 2.94ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:53:01] State: OPEN | Failures: 4 | Requests: 1755 | Success: 99.77% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:53:06] State: OPEN | Failures: 4 | Requests: 1755 | Success: 99.77% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:53:11] State: OPEN | Failures: 4 | Requests: 1755 | Success: 99.77% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:53:16] State: OPEN | Failures: 4 | Requests: 1755 | Success: 99.77% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:53:21] State: OPEN | Failures: 4 | Requests: 1755 | Success: 99.77% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:53:26] State: OPEN | Failures: 4 | Requests: 1755 | Success: 99.77% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:53:31] State: OPEN | Failures: 5 | Requests: 1756 | Success: 99.72% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:53:37] State: OPEN | Failures: 5 | Requests: 1756 | Success: 99.72% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:53:42] State: OPEN | Failures: 5 | Requests: 1756 | Success: 99.72% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:53:47] State: OPEN | Failures: 5 | Requests: 1756 | Success: 99.72% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:53:52] State: OPEN | Failures: 5 | Requests: 1756 | Success: 99.72% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:53:57] State: OPEN | Failures: 5 | Requests: 1756 | Success: 99.72% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:54:02] State: OPEN | Failures: 6 | Requests: 1757 | Success: 99.66% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:54:07] State: OPEN | Failures: 6 | Requests: 1757 | Success: 99.66% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:54:12] State: OPEN | Failures: 6 | Requests: 1757 | Success: 99.66% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:54:17] State: OPEN | Failures: 6 | Requests: 1757 | Success: 99.66% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:54:22] State: OPEN | Failures: 6 | Requests: 1757 | Success: 99.66% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:54:27] State: OPEN | Failures: 6 | Requests: 1757 | Success: 99.66% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:54:32] State: OPEN | Failures: 7 | Requests: 1758 | Success: 99.60% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:54:37] State: OPEN | Failures: 7 | Requests: 1758 | Success: 99.60% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:54:42] State: OPEN | Failures: 7 | Requests: 1758 | Success: 99.60% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:54:47] State: OPEN | Failures: 7 | Requests: 1758 | Success: 99.60% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:54:52] State: OPEN | Failures: 7 | Requests: 1758 | Success: 99.60% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:54:57] State: OPEN | Failures: 7 | Requests: 1758 | Success: 99.60% | Avg: 2.93ms
+🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송
+[2025-08-21 03:55:02] State: HALF_OPEN | Failures: 7 | Requests: 1759 | Success: 99.60% | Avg: 2.93ms
+⚠️ [T3] Circuit Breaker HALF_OPEN 상태 - 복구 시도 중
+[2025-08-21 03:55:07] State: HALF_OPEN | Failures: 7 | Requests: 1759 | Success: 99.60% | Avg: 2.93ms
+⚠️ [T3] Circuit Breaker HALF_OPEN 상태 - 복구 시도 중
+[2025-08-21 03:55:12] State: HALF_OPEN | Failures: 7 | Requests: 1759 | Success: 99.60% | Avg: 2.93ms
+⚠️ [T3] Circuit Breaker HALF_OPEN 상태 - 복구 시도 중
+[2025-08-21 03:55:17] State: CLOSED | Failures: 0 | Requests: 1760 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:55:22] State: CLOSED | Failures: 0 | Requests: 1760 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:55:27] State: CLOSED | Failures: 0 | Requests: 1760 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:55:32] State: CLOSED | Failures: 0 | Requests: 1761 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:55:37] State: CLOSED | Failures: 0 | Requests: 1761 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:55:42] State: CLOSED | Failures: 0 | Requests: 1761 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:55:47] State: CLOSED | Failures: 0 | Requests: 1762 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:55:52] State: CLOSED | Failures: 0 | Requests: 1762 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:55:57] State: CLOSED | Failures: 0 | Requests: 1762 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:56:02] State: CLOSED | Failures: 0 | Requests: 1763 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:56:07] State: CLOSED | Failures: 0 | Requests: 1763 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:56:12] State: CLOSED | Failures: 0 | Requests: 1763 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:56:17] State: CLOSED | Failures: 0 | Requests: 1764 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:56:22] State: CLOSED | Failures: 0 | Requests: 1764 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:56:27] State: CLOSED | Failures: 0 | Requests: 1764 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:56:32] State: CLOSED | Failures: 0 | Requests: 1765 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:56:37] State: CLOSED | Failures: 0 | Requests: 1765 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:56:42] State: CLOSED | Failures: 0 | Requests: 1765 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:56:48] State: CLOSED | Failures: 0 | Requests: 1766 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:56:53] State: CLOSED | Failures: 0 | Requests: 1766 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:56:58] State: CLOSED | Failures: 0 | Requests: 1766 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:57:03] State: CLOSED | Failures: 0 | Requests: 1767 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:57:08] State: CLOSED | Failures: 0 | Requests: 1767 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:57:13] State: CLOSED | Failures: 0 | Requests: 1767 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:57:18] State: CLOSED | Failures: 0 | Requests: 1768 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:57:23] State: CLOSED | Failures: 0 | Requests: 1768 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:57:28] State: CLOSED | Failures: 0 | Requests: 1768 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:57:33] State: CLOSED | Failures: 0 | Requests: 1769 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:57:38] State: CLOSED | Failures: 0 | Requests: 1769 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:57:43] State: CLOSED | Failures: 0 | Requests: 1769 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:57:48] State: CLOSED | Failures: 0 | Requests: 1770 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:57:53] State: CLOSED | Failures: 0 | Requests: 1770 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:57:58] State: CLOSED | Failures: 0 | Requests: 1770 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:58:03] State: CLOSED | Failures: 0 | Requests: 1771 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:58:08] State: CLOSED | Failures: 0 | Requests: 1771 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:58:13] State: CLOSED | Failures: 0 | Requests: 1771 | Success: 99.60% | Avg: 2.93ms
+[2025-08-21 03:58:18] State: CLOSED | Failures: 0 | Requests: 1772 | Success: 99.60% | Avg: 2.92ms
+[2025-08-21 03:58:23] State: CLOSED | Failures: 0 | Requests: 1772 | Success: 99.60% | Avg: 2.92ms
+[2025-08-21 03:58:28] State: CLOSED | Failures: 0 | Requests: 1772 | Success: 99.60% | Avg: 2.92ms
+[2025-08-21 03:58:33] State: CLOSED | Failures: 0 | Requests: 1773 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:58:38] State: CLOSED | Failures: 0 | Requests: 1773 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:58:43] State: CLOSED | Failures: 0 | Requests: 1773 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:58:48] State: CLOSED | Failures: 0 | Requests: 1774 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:58:53] State: CLOSED | Failures: 0 | Requests: 1774 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:58:58] State: CLOSED | Failures: 0 | Requests: 1774 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:59:03] State: CLOSED | Failures: 0 | Requests: 1775 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:59:08] State: CLOSED | Failures: 0 | Requests: 1775 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:59:13] State: CLOSED | Failures: 0 | Requests: 1775 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:59:18] State: CLOSED | Failures: 0 | Requests: 1776 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:59:23] State: CLOSED | Failures: 0 | Requests: 1776 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:59:28] State: CLOSED | Failures: 0 | Requests: 1776 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:59:33] State: CLOSED | Failures: 0 | Requests: 1777 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:59:38] State: CLOSED | Failures: 0 | Requests: 1777 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:59:43] State: CLOSED | Failures: 0 | Requests: 1777 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:59:48] State: CLOSED | Failures: 0 | Requests: 1778 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:59:53] State: CLOSED | Failures: 0 | Requests: 1778 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 03:59:58] State: CLOSED | Failures: 0 | Requests: 1778 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:00:03] State: CLOSED | Failures: 0 | Requests: 1779 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:00:09] State: CLOSED | Failures: 0 | Requests: 1779 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:00:14] State: CLOSED | Failures: 0 | Requests: 1779 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:00:19] State: CLOSED | Failures: 0 | Requests: 1780 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:00:24] State: CLOSED | Failures: 0 | Requests: 1780 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:00:29] State: CLOSED | Failures: 0 | Requests: 1780 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:00:34] State: CLOSED | Failures: 0 | Requests: 1781 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:00:39] State: CLOSED | Failures: 0 | Requests: 1781 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:00:44] State: CLOSED | Failures: 0 | Requests: 1781 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:00:49] State: CLOSED | Failures: 0 | Requests: 1782 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:00:54] State: CLOSED | Failures: 0 | Requests: 1782 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:00:59] State: CLOSED | Failures: 0 | Requests: 1782 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:01:04] State: CLOSED | Failures: 0 | Requests: 1783 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:01:09] State: CLOSED | Failures: 0 | Requests: 1783 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:01:14] State: CLOSED | Failures: 0 | Requests: 1783 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:01:19] State: CLOSED | Failures: 0 | Requests: 1784 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:01:24] State: CLOSED | Failures: 0 | Requests: 1784 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:01:29] State: CLOSED | Failures: 0 | Requests: 1784 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:01:34] State: CLOSED | Failures: 0 | Requests: 1785 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:01:39] State: CLOSED | Failures: 0 | Requests: 1785 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:01:44] State: CLOSED | Failures: 0 | Requests: 1785 | Success: 99.61% | Avg: 2.92ms
+[2025-08-21 04:01:49] State: CLOSED | Failures: 0 | Requests: 1786 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:01:54] State: CLOSED | Failures: 0 | Requests: 1786 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:01:59] State: CLOSED | Failures: 0 | Requests: 1786 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:02:04] State: CLOSED | Failures: 0 | Requests: 1787 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:02:09] State: CLOSED | Failures: 0 | Requests: 1787 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:02:14] State: CLOSED | Failures: 0 | Requests: 1787 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:02:19] State: CLOSED | Failures: 0 | Requests: 1788 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:02:24] State: CLOSED | Failures: 0 | Requests: 1788 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:02:29] State: CLOSED | Failures: 0 | Requests: 1788 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:02:34] State: CLOSED | Failures: 0 | Requests: 1789 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:02:39] State: CLOSED | Failures: 0 | Requests: 1789 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:02:44] State: CLOSED | Failures: 0 | Requests: 1789 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:02:49] State: CLOSED | Failures: 0 | Requests: 1790 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:02:54] State: CLOSED | Failures: 0 | Requests: 1790 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:02:59] State: CLOSED | Failures: 0 | Requests: 1790 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:03:04] State: CLOSED | Failures: 0 | Requests: 1791 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:03:09] State: CLOSED | Failures: 0 | Requests: 1791 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:03:14] State: CLOSED | Failures: 0 | Requests: 1792 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:03:19] State: CLOSED | Failures: 0 | Requests: 1792 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:03:24] State: CLOSED | Failures: 0 | Requests: 1792 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:03:30] State: CLOSED | Failures: 0 | Requests: 1793 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:03:35] State: CLOSED | Failures: 0 | Requests: 1793 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:03:40] State: CLOSED | Failures: 0 | Requests: 1793 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:03:45] State: CLOSED | Failures: 0 | Requests: 1794 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:03:50] State: CLOSED | Failures: 0 | Requests: 1794 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:03:55] State: CLOSED | Failures: 0 | Requests: 1794 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:04:00] State: CLOSED | Failures: 0 | Requests: 1795 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:04:05] State: CLOSED | Failures: 0 | Requests: 1795 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:04:10] State: CLOSED | Failures: 0 | Requests: 1795 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:04:15] State: CLOSED | Failures: 0 | Requests: 1796 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:04:20] State: CLOSED | Failures: 0 | Requests: 1796 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:04:25] State: CLOSED | Failures: 0 | Requests: 1796 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:04:30] State: CLOSED | Failures: 0 | Requests: 1797 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:04:35] State: CLOSED | Failures: 0 | Requests: 1797 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:04:40] State: CLOSED | Failures: 0 | Requests: 1797 | Success: 99.61% | Avg: 2.91ms
+[2025-08-21 04:04:45] State: CLOSED | Failures: 0 | Requests: 1798 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:04:50] State: CLOSED | Failures: 0 | Requests: 1798 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:04:55] State: CLOSED | Failures: 0 | Requests: 1798 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:05:00] State: CLOSED | Failures: 0 | Requests: 1799 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:05:05] State: CLOSED | Failures: 0 | Requests: 1799 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:05:10] State: CLOSED | Failures: 0 | Requests: 1799 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:05:15] State: CLOSED | Failures: 0 | Requests: 1800 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:05:20] State: CLOSED | Failures: 0 | Requests: 1800 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:05:25] State: CLOSED | Failures: 0 | Requests: 1800 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:05:30] State: CLOSED | Failures: 0 | Requests: 1801 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:05:35] State: CLOSED | Failures: 0 | Requests: 1801 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:05:40] State: CLOSED | Failures: 0 | Requests: 1801 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:05:45] State: CLOSED | Failures: 0 | Requests: 1802 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:05:50] State: CLOSED | Failures: 0 | Requests: 1802 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:05:55] State: CLOSED | Failures: 0 | Requests: 1802 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:06:00] State: CLOSED | Failures: 0 | Requests: 1803 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:06:05] State: CLOSED | Failures: 0 | Requests: 1803 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:06:10] State: CLOSED | Failures: 0 | Requests: 1803 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:06:15] State: CLOSED | Failures: 0 | Requests: 1804 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:06:20] State: CLOSED | Failures: 0 | Requests: 1804 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:06:25] State: CLOSED | Failures: 0 | Requests: 1804 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:06:30] State: CLOSED | Failures: 0 | Requests: 1805 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:06:35] State: CLOSED | Failures: 0 | Requests: 1805 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:06:40] State: CLOSED | Failures: 0 | Requests: 1805 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:06:45] State: CLOSED | Failures: 0 | Requests: 1806 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:06:50] State: CLOSED | Failures: 0 | Requests: 1806 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:06:56] State: CLOSED | Failures: 0 | Requests: 1806 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:07:01] State: CLOSED | Failures: 0 | Requests: 1807 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:07:06] State: CLOSED | Failures: 0 | Requests: 1807 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:07:11] State: CLOSED | Failures: 0 | Requests: 1807 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:07:16] State: CLOSED | Failures: 0 | Requests: 1808 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:07:21] State: CLOSED | Failures: 0 | Requests: 1808 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:07:26] State: CLOSED | Failures: 0 | Requests: 1808 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:07:31] State: CLOSED | Failures: 0 | Requests: 1809 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:07:36] State: CLOSED | Failures: 0 | Requests: 1809 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:07:41] State: CLOSED | Failures: 0 | Requests: 1809 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:07:46] State: CLOSED | Failures: 0 | Requests: 1810 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:07:51] State: CLOSED | Failures: 0 | Requests: 1810 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:07:56] State: CLOSED | Failures: 0 | Requests: 1810 | Success: 99.61% | Avg: 2.90ms
+[2025-08-21 04:08:01] State: CLOSED | Failures: 0 | Requests: 1811 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:08:06] State: CLOSED | Failures: 0 | Requests: 1811 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:08:11] State: CLOSED | Failures: 0 | Requests: 1811 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:08:16] State: CLOSED | Failures: 0 | Requests: 1812 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:08:21] State: CLOSED | Failures: 0 | Requests: 1812 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:08:26] State: CLOSED | Failures: 0 | Requests: 1812 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:08:31] State: CLOSED | Failures: 0 | Requests: 1813 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:08:36] State: CLOSED | Failures: 0 | Requests: 1813 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:08:41] State: CLOSED | Failures: 0 | Requests: 1813 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:08:46] State: CLOSED | Failures: 0 | Requests: 1814 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:08:51] State: CLOSED | Failures: 0 | Requests: 1814 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:08:56] State: CLOSED | Failures: 0 | Requests: 1814 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:09:01] State: CLOSED | Failures: 0 | Requests: 1815 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:09:06] State: CLOSED | Failures: 0 | Requests: 1815 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:09:11] State: CLOSED | Failures: 0 | Requests: 1815 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:09:16] State: CLOSED | Failures: 0 | Requests: 1816 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:09:21] State: CLOSED | Failures: 0 | Requests: 1816 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:09:26] State: CLOSED | Failures: 0 | Requests: 1816 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:09:31] State: CLOSED | Failures: 0 | Requests: 1817 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:09:36] State: CLOSED | Failures: 0 | Requests: 1817 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:09:41] State: CLOSED | Failures: 0 | Requests: 1817 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:09:46] State: CLOSED | Failures: 0 | Requests: 1818 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:09:51] State: CLOSED | Failures: 0 | Requests: 1818 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:09:56] State: CLOSED | Failures: 0 | Requests: 1818 | Success: 99.61% | Avg: 2.89ms
+[2025-08-21 04:10:01] State: CLOSED | Failures: 0 | Requests: 1819 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:10:06] State: CLOSED | Failures: 0 | Requests: 1819 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:10:12] State: CLOSED | Failures: 0 | Requests: 1819 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:10:17] State: CLOSED | Failures: 0 | Requests: 1820 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:10:22] State: CLOSED | Failures: 0 | Requests: 1820 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:10:27] State: CLOSED | Failures: 0 | Requests: 1820 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:10:32] State: CLOSED | Failures: 0 | Requests: 1821 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:10:37] State: CLOSED | Failures: 0 | Requests: 1821 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:10:42] State: CLOSED | Failures: 0 | Requests: 1821 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:10:47] State: CLOSED | Failures: 0 | Requests: 1822 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:10:52] State: CLOSED | Failures: 0 | Requests: 1822 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:10:57] State: CLOSED | Failures: 0 | Requests: 1822 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:11:02] State: CLOSED | Failures: 0 | Requests: 1823 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:11:07] State: CLOSED | Failures: 0 | Requests: 1823 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:11:12] State: CLOSED | Failures: 0 | Requests: 1823 | Success: 99.62% | Avg: 2.89ms
+[2025-08-21 04:11:17] State: CLOSED | Failures: 0 | Requests: 1824 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:11:22] State: CLOSED | Failures: 0 | Requests: 1824 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:11:27] State: CLOSED | Failures: 0 | Requests: 1824 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:11:32] State: CLOSED | Failures: 0 | Requests: 1825 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:11:37] State: CLOSED | Failures: 0 | Requests: 1825 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:11:42] State: CLOSED | Failures: 0 | Requests: 1825 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:11:47] State: CLOSED | Failures: 0 | Requests: 1826 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:11:52] State: CLOSED | Failures: 0 | Requests: 1826 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:11:57] State: CLOSED | Failures: 0 | Requests: 1826 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:12:02] State: CLOSED | Failures: 0 | Requests: 1827 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:12:07] State: CLOSED | Failures: 0 | Requests: 1827 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:12:12] State: CLOSED | Failures: 0 | Requests: 1827 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:12:17] State: CLOSED | Failures: 0 | Requests: 1828 | Success: 99.62% | Avg: 2.88ms
+[2025-08-21 04:12:22] State: CLOSED | Failures: 0 | Requests: 1828 | Success: 99.62% | Avg: 2.88ms

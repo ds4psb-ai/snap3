@@ -12,6 +12,7 @@ const https = require('https');
 const http = require('http');
 const Ajv = require('ajv');
 const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
 
 // T3 Metrics Integration (Performance Dashboard)
 const { httpLatency, vdpProcessingLatency, registry } = require('./libs/metrics.ts');
@@ -1525,12 +1526,12 @@ app.post('/api/vdp/extract-main', async (req, res) => {
         // Extract proper content_id from URL if not provided
         let content_id = req.body.content_id;
         if (!content_id && url) {
-            const urlResult = normalizeUrl(url);
+            const urlResult = await normalizeSocialUrl(url);
             content_id = urlResult.contentId;
         }
         
-        // Call simple VDP extractor on port 3005
-        const vdpResponse = await fetch('http://localhost:3005/api/vdp/extract', {
+        // Call GitHub VDP compatible extractor 
+        const vdpResponse = await fetch('http://localhost:3006/api/vdp/extract', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
