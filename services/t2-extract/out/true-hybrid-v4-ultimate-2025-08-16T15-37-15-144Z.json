@@ -1,0 +1,566 @@
+{
+  "content_id": "6_I2FmT1mbY",
+  "default_lang": "en",
+  "metadata": {
+    "platform": "YouTube Shorts",
+    "source_url": "https://www.youtube.com/shorts/6_I2FmT1mbY",
+    "view_count": 6530000,
+    "like_count": 110000,
+    "comment_count": 3354,
+    "share_count": 2000,
+    "upload_date": "2025-07-13T13:36:00.000Z",
+    "video_origin": "AI-Generated",
+    "hashtags": [
+      "직장인",
+      "야근",
+      "햄스터",
+      "코미디",
+      "공감",
+      "더빙"
+    ],
+    "cta_types": [],
+    "original_sound": {
+      "id": null,
+      "title": "Custom dubbing by creator"
+    }
+  },
+  "overall_analysis": {
+    "summary": "This comedic short portrays the universally dreaded experience of working overtime through the eyes of an anthropomorphic hamster. The narrative follows the hamster's emotional rollercoaster, from the initial hope of leaving work on time, to the crushing despair of a last-minute assignment, the catastrophic failure of technology, a desperate caffeine-fueled recovery, and a final, soul-destroying twist that renders the entire ordeal pointless. It masterfully uses cuteness and high-pitched voice acting to contrast with the grim reality of corporate life, creating a highly relatable and humorous piece.",
+    "emotional_arc": "The video begins with cautious optimism as the hamster calculates its departure time. This is immediately shattered by dread and resignation upon receiving an overtime task. A period of focused struggle leads to a brief moment of accomplishment, which plummets into absolute panic and despair when the computer crashes. This is followed by a desperate, self-motivated rally, fueled by caffeine, culminating in a state of exhausted shock and utter emptiness upon learning the truth.",
+    "audience_reaction": {
+      "analysis": "The video's immense popularity stems from its profound relatability, especially within cultures with a strong emphasis on demanding work environments like South Korea's 'yakın' (overtime) culture. The psychological core of the humor is the juxtaposition of an adorable, helpless-looking hamster with the intense, profane internal monologue of a stressed-out employee. This creates a cathartic release for viewers who see their own frustrations mirrored in a non-threatening, comedic form. The specific pain points—last-minute tasks, computer errors, and pointless work—are universal traumas of modern office life, making the content instantly accessible and shareable.",
+      "common_reactions": [
+        "The hamster's voice is incredibly cute",
+        "The overtime situation is painfully realistic",
+        "The 'Don't f*** with me!' line is a masterpiece of voice acting",
+        "The ending is both hilarious and tragic"
+      ],
+      "notable_comments": [
+        {
+          "text": "지랄하지마는 진짜 쏘울 담긴 더빙인데욬ㅋㅋㅋㅋㅋㅋ",
+          "lang": "ko",
+          "translation_en": "The 'Don't f*** with me' part is a truly soul-filled dubbing lololol"
+        },
+        {
+          "text": "지랄하지마가 진짜 웃겨욬ㅋㅋㅋㅋㅋㅋㄱㅋ",
+          "lang": "ko",
+          "translation_en": "The 'Don't f*** with me' part is so funny lolololol"
+        },
+        {
+          "text": "fucken해ㅋㅋㅋㅋㅋ는 뭐야ㅋㅋㅋ",
+          "lang": "ko",
+          "translation_en": "What is this 'FUCKEN do it' lololol"
+        }
+      ],
+      "overall_sentiment": "Overwhelmingly Positive"
+    },
+    "safety_flags": [
+      {
+        "type": "Profanity",
+        "level": "Mild",
+        "description": "The video includes subtitled and spoken profanity such as '지랄하지마' (jiralhajima), which is a strong curse word akin to 'don't f*** with me' or 'cut the crap', and the English word 'FUCKEN'."
+      }
+    ],
+    "confidence": {
+      "overall": 0.98,
+      "scene_classification": 0.96,
+      "device_analysis": 0.95
+    },
+    "hookGenome": {
+      "start_sec": 0,
+      "pattern_code": "RELATABLE_PROBLEM_SETUP",
+      "strength_score": 0.92,
+      "trigger_modalities": [
+        "visual",
+        "auditory"
+      ],
+      "microbeats_sec": [
+        0.5,
+        1.5
+      ],
+      "connected_scene_id": "S01_TheAssignment",
+      "hook_integration_analysis": "The hook is exceptionally effective by immediately establishing a universally relatable scenario: an office worker calculating their escape. The visual of a cute hamster wearing an ID badge is instantly intriguing and sets a comedic tone, while the hopeful internal monologue creates immediate audience empathy. This setup is the perfect foundation for the impending comedic disaster."
+    },
+    "asr_transcript": "아.. 회의 끝나니까 6시. 그렇다면 퇴근. 햄트씨, 회의에서 나온 리서치 건 내일 중으로 한번 보자! 넵! (자동 반사) 그렇다면 야근.. 추.. (체념의 주문) 어.. 눈 뻐근해. 무슨 일이 있어도 9시엔 퇴근한다. (허언이 있는편) 됐다. 이제 다 했어. 저장! ...? 아! 야! 아 지랄하지마!! 지랄하지마!! 지랄하지마!!!!!! ...다.. 끝이다.. 모 오와리.. 안돼. 안돼 안돼. 정신차렷!!!!!!!!!!!!!!!!! 붙잡아!!!!!!!!!!!!!!!!! 끅. 어어어오오오 이이이이ㅣㅣㅣ 마지막 저장은 1시간 전.. 세상이 암만 억까해도 결국 해내야 한다. 안녕하세요.. 허억. 햄트씨.. 어제 야근했다며?? 아 네.. 오늘 팀장님이랑 볼 게 있어가지구요.. 어?! 오늘 팀장님 연차인데? 몰랐어? ...",
+    "asr_lang": "ko",
+    "asr_translation_en": "Ah.. the meeting ends, so it's 6 o'clock. In that case, time to go home. Hamt-ssi, that research thing from the meeting, let's take a look at it by tomorrow! Yes! (Automatic reflex) In that case, overtime.. Choo.. (A spell of resignation) Ugh.. my eyes are strained. No matter what, I'm leaving at 9 PM. (Tends to make empty promises) Done. It's all done now. Save! ...? Ah! Hey! Ah, don't f*** with me!! Don't f*** with me!! DON'T F*** WITH ME!!!!!! ...It's... over... Mou owari (It's over in Japanese)... No. No, no. Get a grip!!!!!!!!!!!!!!!!! Hold on!!!!!!!!!!!!!!!!! *Gulp*. Uuuuhhhhh Eeeeeee... The last save was... an hour ago... No matter how much the world screws me over, I have to get it done in the end. Hello... *Gasp*. Hamt-ssi... I heard you worked overtime yesterday?? Ah, yes.. I had something to review with the team manager today... Huh?! The team manager is on annual leave today? You didn't know? ...",
+    "ocr_text": [
+      {
+        "text": "직장인의 흔한 야근 시발점",
+        "lang": "ko",
+        "translation_en": "A common starting point for an office worker's overtime"
+      },
+      {
+        "text": "정서불안 김햄찌",
+        "lang": "ko",
+        "translation_en": "Emotionally Unstable Kim Ham-jji (Hamster)"
+      },
+      {
+        "text": "FUCKEN 해",
+        "lang": "en",
+        "translation_en": "FUCKEN do it"
+      },
+      {
+        "text": "10:50 PM",
+        "lang": "en",
+        "translation_en": "10:50 PM"
+      },
+      {
+        "text": "(허언이 있는편)",
+        "lang": "ko",
+        "translation_en": "(Tends to make empty promises)"
+      },
+      {
+        "text": "(기절 일보 직전)",
+        "lang": "ko",
+        "translation_en": "(On the verge of fainting)"
+      },
+      {
+        "text": "Corp Research",
+        "lang": "en",
+        "translation_en": "Corp Research"
+      },
+      {
+        "text": "Error. An error occurred.",
+        "lang": "en",
+        "translation_en": "Error. An error occurred."
+      },
+      {
+        "text": "(저장할 수 없지롱)",
+        "lang": "ko",
+        "translation_en": "(Teasingly: You can't save~)"
+      },
+      {
+        "text": "(에너지 UP)",
+        "lang": "ko",
+        "translation_en": "(Energy UP)"
+      }
+    ]
+  },
+  "scenes": [
+    {
+      "scene_id": "S01_TheAssignment",
+      "time_start": 0,
+      "time_end": 12,
+      "duration_sec": 12,
+      "importance": "critical",
+      "hook_connection": {
+        "is_hook_scene": true,
+        "hook_elements": [
+          "Relatable internal monologue",
+          "Anthropomorphic animal character",
+          "Office setting"
+        ],
+        "viral_mechanics": "The immediate setup of a relatable problem (wanting to leave work) combined with the cute-but-stressed hamster creates instant comedic tension and shareability."
+      },
+      "narrative_unit": {
+        "narrative_role": "Inciting Incident",
+        "summary": "A hamster office worker, Kim Ham-jji, is relieved that a meeting is over and anticipates leaving at 6 PM. However, their hopes are instantly crushed when a manager's voice assigns an urgent research task due the next day, forcing them to work overtime.",
+        "dialogue": "아.. 회의 끝나니까 6시. 그렇다면 퇴근. 햄트씨, 회의에서 나온 리서치 건 내일 중으로 한번 보자! 넵! (자동 반사) 그렇다면 야근..",
+        "dialogue_lang": "ko",
+        "dialogue_translation_en": "Ah.. the meeting ends, so it's 6 o'clock. In that case, time to go home. Hamt-ssi, that research thing from the meeting, let's take a look at it by tomorrow! Yes! (Automatic reflex) In that case, overtime..",
+        "rhetoric": [
+          "Internal Monologue",
+          "Dramatic Irony"
+        ],
+        "rhetoric_analysis": "The use of internal monologue allows the audience to connect directly with the hamster's inner thoughts and hopes, creating strong empathy. This is immediately followed by dramatic irony, as the audience understands the impending doom before the hamster fully processes the manager's casual but devastating request.",
+        "comedic_device": [
+          "Anthropomorphism",
+          "Subversion of Expectation"
+        ],
+        "comedic_analysis": "The core comedic device is anthropomorphism, placing a hamster in a human corporate role. The humor is triggered by the sharp subversion of expectation: the hamster's hopeful calculation for freedom is immediately and brutally nullified by the manager's command, a universally painful moment for any office worker, made hilarious by the cute protagonist."
+      },
+      "setting": {
+        "location": "Modern corporate office",
+        "visual_style": {
+          "cinematic_properties": "The cinematography masterfully uses a combination of medium shots and extreme close-ups to manipulate audience emotion. The initial medium shot establishes the hamster within the sterile office environment, while the rapid cuts to extreme close-ups on its face amplify its internal emotional state—from hope to shock and despair. The camera remains at the hamster's eye level, treating it as a peer and enhancing the relatability of its plight. The composition frequently centers the hamster, emphasizing its solitude and the weight of the task. This tight, character-focused framing ensures the comedy lands with maximum impact.",
+          "lighting_analysis": "Standard, slightly cool fluorescent office lighting creates a mundane and sterile atmosphere, which contrasts with the high emotional drama of the hamster's experience.",
+          "color_psychology": "The neutral greys and beiges of the office environment make the hamster's warm, golden-brown fur pop, ensuring it is always the central focus.",
+          "mood_palette": [
+            "Hopeful",
+            "Anxious",
+            "Comedic"
+          ],
+          "edit_grammar": {
+            "cut_speed": "fast",
+            "camera_style": "static_shot",
+            "subtitle_style": "broadcast_entertainment"
+          }
+        },
+        "audio_style": {
+          "music": "No music, emphasizing the stark reality of the office.",
+          "ambient_sound": "Faint, generic office hum, keyboard clicks.",
+          "tone": "The hamster's high-pitched, cute voice contrasts sharply with the deep, authoritative voice of the unseen manager, heightening the power imbalance and comedic effect.",
+          "audio_emotional_impact": "The audio design is crucial. The hamster's cute, squeaky voice delivering lines about corporate dread creates a powerful comedic dissonance that is central to the video's appeal.",
+          "audio_events": [
+            {
+              "timestamp": 4.5,
+              "event": "Voice-over",
+              "description": "The manager's voice interrupts the hamster's thoughts, delivering the overtime order.",
+              "intensity": "High"
+            }
+          ]
+        }
+      },
+      "shots": [
+        {
+          "shot_id": "S01_Shot01",
+          "start": 0,
+          "end": 4,
+          "camera": {
+            "shot": "MS",
+            "angle": "eye",
+            "move": "static"
+          },
+          "composition": {
+            "grid": "center",
+            "notes": [
+              "Hamster stands by a door, looking hopeful.",
+              "ID badge is clearly visible."
+            ],
+            "visual_impact": "Establishes the character and their initial desire to leave."
+          },
+          "keyframes": [
+            {
+              "role": "start",
+              "t_rel_shot": 0.5,
+              "desc": "Hamster peeks into the room, calculating."
+            },
+            {
+              "role": "peak",
+              "t_rel_shot": 3,
+              "desc": "Extreme close-up on the hamster's face as it thinks 'time to go home'."
+            }
+          ],
+          "confidence": "high"
+        },
+        {
+          "shot_id": "S01_Shot02",
+          "start": 4,
+          "end": 8,
+          "camera": {
+            "shot": "ECU",
+            "angle": "eye",
+            "move": "static"
+          },
+          "composition": {
+            "grid": "center",
+            "notes": [
+              "Focus on the hamster's shocked expression.",
+              "Eyes widen upon hearing the manager's request."
+            ],
+            "visual_impact": "Captures the precise moment of hope being crushed."
+          },
+          "keyframes": [
+            {
+              "role": "peak",
+              "t_rel_shot": 3.2,
+              "desc": "The hamster's eyes widen in an automatic 'Yes!' reflex, followed by dawning horror."
+            }
+          ],
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "scene_id": "S02_TheCrash",
+      "time_start": 12,
+      "time_end": 24,
+      "duration_sec": 12,
+      "importance": "critical",
+      "hook_connection": {
+        "is_hook_scene": false,
+        "hook_elements": [],
+        "viral_mechanics": ""
+      },
+      "narrative_unit": {
+        "narrative_role": "Crisis",
+        "summary": "After working late into the night, the hamster is about to save its work when a sudden error message appears on the laptop, followed by the infamous 'spinning wheel of death'. This triggers a complete, profanity-laced meltdown as all its hard work vanishes.",
+        "dialogue": "됐다. 이제 다 했어. 저장! ...? 아! 야! 아 지랄하지마!! 지랄하지마!! 지랄하지마!!!!!!",
+        "dialogue_lang": "ko",
+        "dialogue_translation_en": "Done. It's all done now. Save! ...? Ah! Hey! Ah, don't f*** with me!! Don't f*** with me!! DON'T F*** WITH ME!!!!!!",
+        "rhetoric": [
+          "Apostrophe",
+          "Hyperbole"
+        ],
+        "rhetoric_analysis": "The hamster directly addresses the inanimate computer (apostrophe) with extreme emotion ('Don't f*** with me!'), a rhetorical move that personifies the machine as a malicious entity. This hyperbolic reaction perfectly captures the outsized rage felt during a technological failure, making the moment intensely relatable.",
+        "comedic_device": [
+          "Escalation",
+          "Juxtaposition"
+        ],
+        "comedic_analysis": "The comedy escalates from the mundane stress of work to the catastrophic stress of data loss. The primary comedic engine is the juxtaposition of the hamster's cute appearance and high-pitched voice with the raw, vulgar fury of its screams. This contrast is the video's comedic apex, creating an unforgettable and hilarious moment of shared trauma."
+      },
+      "setting": {
+        "location": "Office desk",
+        "visual_style": {
+          "cinematic_properties": "This scene utilizes a rapid-fire editing style to convey panic. It cuts between a POV shot of the laptop screen displaying the error, an extreme close-up of the hamster's horrified face, and a shot of the dreaded spinning rainbow wheel. This montage structure mirrors the chaotic and fragmented thoughts of someone in a crisis. The use of a crash zoom on the hamster's face as it starts screaming visually punctuates the moment of peak frustration, making the reaction feel explosive and visceral. The visual language is universal, tapping into a shared digital nightmare.",
+          "lighting_analysis": "The harsh, cold light from the laptop screen illuminates the hamster's face, casting dramatic shadows and highlighting its expression of pure terror.",
+          "color_psychology": "The alarming yellow of the error icon and the chaotic colors of the spinning wheel are designed to induce anxiety, contrasting with the otherwise muted scene.",
+          "mood_palette": [
+            "Panicked",
+            "Desperate",
+            "Tragicomic"
+          ],
+          "edit_grammar": {
+            "cut_speed": "very_fast",
+            "camera_style": "pov_shot",
+            "subtitle_style": "broadcast_entertainment"
+          }
+        },
+        "audio_style": {
+          "music": "Abrupt silence followed by a dramatic error chime.",
+          "ambient_sound": "None. The silence emphasizes the shock.",
+          "tone": "Shifts from relieved to horrified and enraged.",
+          "audio_emotional_impact": "The system error sound is a critical audio cue that triggers the emotional climax. The hamster's subsequent high-pitched, distorted screaming is both funny and cathartic for the viewer.",
+          "audio_events": [
+            {
+              "timestamp": 18.5,
+              "event": "Critical SFX",
+              "description": "A sharp, jarring system error sound effect.",
+              "intensity": "High"
+            },
+            {
+              "timestamp": 20,
+              "event": "Scream",
+              "description": "The hamster lets out a series of high-pitched, desperate screams.",
+              "intensity": "Very High"
+            }
+          ]
+        }
+      },
+      "shots": [
+        {
+          "shot_id": "S02_Shot01",
+          "start": 17,
+          "end": 21,
+          "camera": {
+            "shot": "POV",
+            "angle": "eye",
+            "move": "static"
+          },
+          "composition": {
+            "grid": "center",
+            "notes": [
+              "Laptop screen shows 'Corp Research' presentation.",
+              "An 'Error' dialog box suddenly appears."
+            ],
+            "visual_impact": "The visual punchline that triggers the crisis."
+          },
+          "keyframes": [
+            {
+              "role": "peak",
+              "t_rel_shot": 1.5,
+              "desc": "The error message pops up, followed by the spinning wheel."
+            }
+          ],
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "scene_id": "S03_TheRally",
+      "time_start": 24,
+      "time_end": 39,
+      "duration_sec": 15,
+      "importance": "high",
+      "hook_connection": {
+        "is_hook_scene": false,
+        "hook_elements": [],
+        "viral_mechanics": ""
+      },
+      "narrative_unit": {
+        "narrative_role": "Turning Point",
+        "summary": "After a moment of complete despair where it seems to give up, the hamster gives itself a fierce pep talk. It grabs a can of soda, chugs it like an energy drink, and experiences a cartoonish power-up, resolving to redo all the lost work.",
+        "dialogue": "안돼 안돼. 정신차렷!!!!!!!!!!!!!!!!! 붙잡아!!!!!!!!!!!!!!!!! ... 마지막 저장은 1시간 전.. 세상이 암만 억까해도 결국 해내야 한다.",
+        "dialogue_lang": "ko",
+        "dialogue_translation_en": "No, no. Get a grip!!!!!!!!!!!!!!!!! Hold on!!!!!!!!!!!!!!!!! ... The last save was... an hour ago... No matter how much the world screws me over, I have to get it done in the end.",
+        "rhetoric": [
+          "Self-Address",
+          "Metaphor"
+        ],
+        "rhetoric_analysis": "The hamster's internal monologue becomes a form of self-address, a powerful pep talk to overcome adversity. This rhetorical shift from victim to hero is classic storytelling. The energy drink acts as a metaphor for finding inner strength or a second wind, a tangible symbol of its renewed determination.",
+        "comedic_device": [
+          "Parody",
+          "Visual Gag"
+        ],
+        "comedic_analysis": "This scene hilariously parodies epic movie and anime tropes of a hero rallying before a final battle. The visual gag of the tiny hamster wrestling with and chugging a human-sized soda can, followed by the over-the-top 'power-up' visual effects, provides a moment of pure, silly comedy after the intense stress of the previous scene."
+      },
+      "setting": {
+        "location": "Office desk",
+        "visual_style": {
+          "cinematic_properties": "The scene employs dramatic slow-motion and intense close-ups on the hamster's face as it screams 'Get a grip!', mimicking action movie clichés. The editing then cuts to a wide shot showing the hamster with the soda can to emphasize the size disparity. The climax is a sequence of flashy, colorful visual effects and a rapid zoom-in, a clear parody of anime power-up sequences. This stylistic shift into fantasy provides comedic relief and visual flair.",
+          "lighting_analysis": "During the 'power-up', the lighting flashes and changes color, breaking from the realistic office lighting to signify a shift in the hamster's state.",
+          "color_psychology": "The bright red of the soda can symbolizes energy and urgency. The flashing blue and white lights of the power-up sequence evoke a sense of electric energy.",
+          "mood_palette": [
+            "Determined",
+            "Parodic",
+            "Energized"
+          ],
+          "edit_grammar": {
+            "cut_speed": "mixed",
+            "camera_style": "dramatic_closeup",
+            "subtitle_style": "broadcast_entertainment"
+          }
+        },
+        "audio_style": {
+          "music": "A faint, heroic synth swell during the power-up.",
+          "ambient_sound": "Exaggerated can-opening and gulping sound effects.",
+          "tone": "Shifts from desperate to fiercely determined and heroic.",
+          "audio_emotional_impact": "The sound design enhances the parody. The crisp sound of the can opening and the loud gulping, followed by a 'whoosh' power-up sound, perfectly complements the visual gags and reinforces the comedic tone.",
+          "audio_events": [
+            {
+              "timestamp": 30,
+              "event": "SFX",
+              "description": "Loud, crisp sound of a soda can being opened.",
+              "intensity": "Medium"
+            },
+            {
+              "timestamp": 32,
+              "event": "SFX",
+              "description": "A dramatic 'whoosh' and sparkling sound effect for the power-up.",
+              "intensity": "High"
+            }
+          ]
+        }
+      },
+      "shots": [
+        {
+          "shot_id": "S03_Shot01",
+          "start": 27,
+          "end": 32,
+          "camera": {
+            "shot": "ECU",
+            "angle": "low",
+            "move": "static"
+          },
+          "composition": {
+            "grid": "center",
+            "notes": [
+              "Hamster screams at itself to get a grip.",
+              "Grabs a large soda can."
+            ],
+            "visual_impact": "Showcases the character's desperate resolve."
+          },
+          "keyframes": [
+            {
+              "role": "peak",
+              "t_rel_shot": 3.5,
+              "desc": "The hamster chugs from the can, eyes closed in determination."
+            }
+          ],
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "scene_id": "S04_TheTwist",
+      "time_start": 39,
+      "time_end": 52,
+      "duration_sec": 13,
+      "importance": "critical",
+      "hook_connection": {
+        "is_hook_scene": false,
+        "hook_elements": [],
+        "viral_mechanics": ""
+      },
+      "narrative_unit": {
+        "narrative_role": "Resolution (Punchline)",
+        "summary": "The next morning, the exhausted hamster arrives at the office. A female colleague expresses sympathy, mentioning she heard it worked overtime with the team manager. She then casually reveals that the manager is on annual leave, rendering the hamster's entire night of suffering completely pointless.",
+        "dialogue": "안녕하세요.. 허억. 햄트씨.. 어제 야근했다며?? 아 네.. 오늘 팀장님이랑 볼 게 있어가지구요.. 어?! 오늘 팀장님 연차인데? 몰랐어?",
+        "dialogue_lang": "ko",
+        "dialogue_translation_en": "Hello... *Gasp*. Hamt-ssi... I heard you worked overtime yesterday?? Ah, yes.. I had something to review with the team manager today... Huh?! The team manager is on annual leave today? You didn't know?",
+        "rhetoric": [
+          "Situational Irony"
+        ],
+        "rhetoric_analysis": "The entire narrative culminates in this moment of crushing situational irony. The discrepancy between the hamster's immense effort and the reality that it was all for a boss who wasn't even there creates a powerful, bleakly comedic statement on the absurdity of some workplace demands. The irony is the punchline.",
+        "comedic_device": [
+          "Twist Ending",
+          "Anticlimax"
+        ],
+        "comedic_analysis": "The humor is derived from the final twist, a classic comedic structure. After building up the hamster's heroic struggle, the story delivers an anticlimax: it was all for nothing. This invalidation of the character's suffering is the ultimate punchline, transforming the story from a tragedy into a farce. The hamster's silent, dead-eyed stare is the perfect visual representation of this comedic defeat."
+      },
+      "setting": {
+        "location": "Office, the next morning",
+        "visual_style": {
+          "cinematic_properties": "The scene returns to a more objective, observational style. It uses a standard shot-reverse-shot sequence for the conversation between the colleague and the hamster. The final, lingering extreme close-up on the hamster's face is the most critical shot. The camera holds steady as all life drains from its eyes, a masterful piece of non-verbal acting that conveys the full weight of the soul-crushing revelation. The stillness of the camera amplifies the hamster's stunned paralysis.",
+          "lighting_analysis": "Bright, normal morning office light, which feels harsh and unforgiving in contrast to the hamster's exhausted and defeated state.",
+          "color_psychology": "The return to the neutral, mundane color palette of the office underscores the return to a bleak reality.",
+          "mood_palette": [
+            "Exhausted",
+            "Shocked",
+            "Ironic"
+          ],
+          "edit_grammar": {
+            "cut_speed": "slow",
+            "camera_style": "shot_reverse_shot",
+            "subtitle_style": "broadcast_entertainment"
+          }
+        },
+        "audio_style": {
+          "music": "A soft, slightly melancholic piano melody begins to play as the truth is revealed, highlighting the tragicomic nature of the ending.",
+          "ambient_sound": "Faint office sounds return.",
+          "tone": "Shifts from sympathetic to shocking, ending in stunned silence.",
+          "audio_emotional_impact": "The gentle piano music that fades in is perfectly chosen. It's not overly sad, but has a wistful quality that perfectly scores the bleakly funny and absurd situation.",
+          "audio_events": [
+            {
+              "timestamp": 49.5,
+              "event": "Music",
+              "description": "A gentle, melancholic piano track begins, underscoring the punchline.",
+              "intensity": "Low"
+            }
+          ]
+        }
+      },
+      "shots": [
+        {
+          "shot_id": "S04_Shot01",
+          "start": 41,
+          "end": 52,
+          "camera": {
+            "shot": "ECU",
+            "angle": "eye",
+            "move": "static"
+          },
+          "composition": {
+            "grid": "center",
+            "notes": [
+              "The hamster's eyes are wide and exhausted.",
+              "After the colleague's line, its eyes slowly glaze over."
+            ],
+            "visual_impact": "The final, devastating emotional payoff of the story."
+          },
+          "keyframes": [
+            {
+              "role": "start",
+              "t_rel_shot": 1,
+              "desc": "Hamster looks tired but present, responding to the colleague."
+            },
+            {
+              "role": "peak",
+              "t_rel_shot": 10,
+              "desc": "Extreme close-up on the hamster's eyes as they lose all focus, conveying utter defeat."
+            }
+          ],
+          "confidence": "high"
+        }
+      ]
+    }
+  ],
+  "product_mentions": [
+    {
+      "product_name": "Apple MacBook",
+      "type": "Laptop",
+      "brand": "Apple",
+      "mention_type": "visual",
+      "confidence": 0.95
+    },
+    {
+      "product_name": "Apple AirPods Max",
+      "type": "Headphones",
+      "brand": "Apple",
+      "mention_type": "visual",
+      "confidence": 0.9
+    }
+  ],
+  "service_mentions": []
+}

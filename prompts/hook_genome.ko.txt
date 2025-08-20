@@ -1,0 +1,14 @@
+출력은 JSON 스키마를 100% 준수한다.
+특히 overall_analysis.hookGenome 을 반드시 채운다:
+- start_sec: 0~3.0 초 범위에서 최초의 명시적 '후킹' 시점을 소수 초 단위로 기록
+- pattern_code: ["pattern_break","question","shock","proof","social_proof","problem_solution","joke","meme_reference","other"] 중 선택
+- delivery: ["dialogue","voiceover","on_screen_text","visual_gag","sfx_only"] 중 선택(주방식 1개)
+- trigger_modalities: ["visual","text","audio"] 중 관측된 모달리티 나열
+- microbeats_sec: 0~3초 구간 내 컷/온셋 타임스탬프(오름차순, 최대 4개 권장)
+- strength_score: 0~1 스칼라(명료성/호기심/멀티모달/리듬정합/타이밍 가중)
+
+규칙:
+1) Hook window는 0~3초다(반드시 이 구간에서 판정).
+2) 가능한 한 실제 장면/샷/자막/ASR 증거를 근거로 판단한다.
+3) Scenes[0]은 Hook 역할이어야 하며 end_time ≤ 3.0 을 권장한다.
+4) 근거가 불충분하면 pattern_code="other" 로 낮은 strength_score를 부여한다.

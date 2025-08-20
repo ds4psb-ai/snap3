@@ -1,0 +1,14 @@
+{
+  "contents": [{
+    "role": "user",
+    "parts": [
+      {"file_data": {"file_uri": "gs://tough-variety-raw/raw/ingest/6_I2FmT1mbY.mp4", "mime_type": "video/mp4"}},
+      {"text": "PROMPT_PLACEHOLDER"}
+    ]
+  }],
+  "generationConfig": {
+    "response_mime_type": "application/json",
+    "response_schema": {"type": "object"},
+    "temperature": 0.2
+  }
+}

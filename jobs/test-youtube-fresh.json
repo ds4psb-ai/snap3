@@ -1,0 +1,13 @@
+{
+  "url": "https://www.youtube.com/watch?v=6_I2FmT1mbY",
+  "content_id": "6_I2FmT1mbY",
+  "platform": "youtube",
+  "source": "user_submission",
+  "priority": "normal",
+  "timestamp": "2025-08-17T21:51:00Z",
+  "metadata": {
+    "requested_by": "test_user", 
+    "request_id": "test_fresh_001",
+    "content_type": "video"
+  }
+}

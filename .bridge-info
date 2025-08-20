@@ -1,0 +1,22 @@
+# Cursor ↔ ClaudeCode Bridge Branch
+Created: 2025-08-20 07:37:05 UTC
+Purpose: Sync between Cursor and ClaudeCode
+Status: Active
+
+## Recent Changes
+cb708bd ClaudeCode: Respond to 1755675395805
+bebc033 Cursor: Git Collaboration System
+d3196a6 feat: implement GPT-5↔ClaudeCode↔Cursor triangular workflow system
+ba45bb9 chore: add GPT-5↔ClaudeCode workflow tooling
+920cab9 🧬 Evidence 실제 데이터 생성 구현
+42dae2e docs: VDP 안정성 개선 로깅 및 CLAUDE.md 운영 규칙 업데이트
+afe2d7a feat: 핵심 안정성 개선 - 환경변수 검증, 헬스체크, 증거팩 무결성, Correlation ID 안전성
+2dbb112 VDP standards enforced before save - guarantee required fields
+fcbe1ac feat: VDP 폴링 및 Evidence 검증 시스템 v2.1
+16e5e91 Revert: keep VDP server clean (no YouTube API calls)
+
+## Next Steps
+1. Cursor: Frontend work
+2. ClaudeCode: Backend work
+3. Integration test
+4. Merge to main

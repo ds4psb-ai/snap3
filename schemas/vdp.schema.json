@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://snap3.example.com/schemas/vdp.schema.json",
+  "title": "VDP (Video Data Package) Schema",
+  "description": "Schema for Video Data Package containing comprehensive video analysis data",
+  "type": "object",
+  "required": [
+    "content_id",
+    "platform", 
+    "source_url",
+    "upload_id",
+    "metadata",
+    "overall_analysis",
+    "scenes",
+    "ingestion_timestamp"
+  ],
+  "properties": {
+    "content_id": {
+      "type": "string",
+      "description": "Unique identifier for the video content",
+      "pattern": "^[a-zA-Z0-9_-]+$",
+      "minLength": 3,
+      "maxLength": 50
+    },
+    "platform": {
+      "type": "string",
+      "enum": ["youtube", "tiktok", "instagram", "reels"],
+      "description": "Source platform of the video"
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Original URL of the video"
+    },
+    "upload_id": {
+      "type": "string",
+      "description": "Unique upload identifier for tracking",
+      "pattern": "^[0-9A-F-]{36}$"
+    },
+    "video_origin": {
+      "type": "string",
+      "enum": ["Real-Footage", "AI-Generated"],
+      "description": "Classification of video content origin"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["view_count", "like_count", "comment_count"],
+      "properties": {
+        "view_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of views"
+        },
+        "like_count": {
+          "type": "integer", 
+          "minimum": 0,
+          "description": "Number of likes"
+        },
+        "comment_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of comments"
+        },
+        "share_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of shares"
+        },
+        "hashtags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^#[a-zA-Z0-9_가-힣]+$"
+          },
+          "maxItems": 20,
+          "description": "List of hashtags used"
+        }
+      }
+    },
+    "overall_analysis": {
+      "type": "object",
+      "required": ["emotional_arc", "overall_sentiment", "confidence"],
+      "properties": {
+        "emotional_arc": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 200,
+          "description": "Description of emotional progression"
+        },
+        "overall_sentiment": {
+          "type": "string",
+          "enum": [
+            "Highly Positive",
+            "Positive", 
+            "Neutral",
+            "Negative",
+            "Highly Negative",
+            "Mixed",
+            "Highly Positive and Inquisitive"
+          ],
+          "description": "Overall sentiment classification"
+        },
+        "potential_meme_template": {
+          "type": "boolean",
+          "description": "Whether content has meme potential"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Confidence score for analysis"
+        },
+        "asr_transcript": {
+          "type": "string",
+          "description": "Audio speech recognition transcript"
+        },
+        "asr_translation_en": {
+          "type": "string", 
+          "description": "English translation of transcript"
+        },
+        "ocr_text": {
+          "type": "string",
+          "description": "Optical character recognition text"
+        }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4,
+      "description": "Breakdown of video scenes",
+      "items": {
+        "type": "object",
+        "required": ["narrative_role", "duration_sec", "visual_summary"],
+        "properties": {
+          "narrative_role": {
+            "type": "string",
+            "enum": ["Hook", "Demonstration", "Problem_Solution", "Conclusion", "Transition"],
+            "description": "Role of scene in narrative structure"
+          },
+          "duration_sec": {
+            "type": "number",
+            "minimum": 0.1,
+            "maximum": 15.0,
+            "description": "Duration of scene in seconds"
+          },
+          "visual_summary": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500,
+            "description": "Visual description of the scene"
+          },
+          "audio_summary": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "Audio description of the scene"
+          },
+          "rhetoric": {
+            "type": "string",
+            "enum": ["storytelling", "curiosity_gap", "pathos", "logos", "ethos"],
+            "description": "Rhetorical device used"
+          },
+          "comedic_device": {
+            "type": "string",
+            "enum": ["relatability", "surprise", "timing", "exaggeration", "irony"],
+            "description": "Comedic technique employed"
+          }
+        }
+      }
+    },
+    "top_comments": {
+      "type": "array",
+      "maxItems": 5,
+      "description": "Top comments from the video",
+      "items": {
+        "type": "object",
+        "required": ["text", "author"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Comment text content"
+          },
+          "author": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Comment author name"
+          },
+          "likes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of likes on comment"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When comment was posted"
+          }
+        }
+      }
+    },
+    "product_mentions": {
+      "type": "array",
+      "description": "Products or services mentioned in video",
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Product/service name"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["product", "service", "brand", "app"],
+            "description": "Type of mention"
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Product category"
+          },
+          "time_ranges": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "description": "Time ranges where product appears"
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["OCR", "ASR", "Visual"]
+            },
+            "description": "Source of evidence for mention"
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["high", "medium", "low"],
+            "description": "Confidence in detection"
+          }
+        }
+      }
+    },
+    "ingestion_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the video was ingested into the system"
+    }
+  },
+  "additionalProperties": false
+}

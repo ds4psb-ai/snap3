@@ -1,0 +1,11 @@
+content_id,source_url,upload_datetime,platform,video_origin,view_count,like_count,comment_count,original_sound_id,original_sound_title,top_comment_1,top_comment_2,top_comment_3,top_comment_4,top_comment_5
+C000901,https://example.com/tiktok/video/901,2025-08-12T10:02:00Z,tiktok,real_footage,935421,52341,1320,SND_901,"Street Vibes","🔥 Hook 미쳤다","카메라 워크 깔끔","이 음악 뭐지?","룩앤필 너무 좋음",
+C000902,https://example.com/instagram/reel/902,2025-08-12T10:05:17Z,instagram,ai_generated,251004,15220,455,,,"AI인데 자연스러움","색감 고급지네","후반부 반전 굿",,
+C000903,https://example.com/youtube/shorts/903,2025-08-12T10:13:45Z,youtube,real_footage,1789020,98002,5403,SND_903,"Night Runner","첫 2초에 끝남","사운드 찢었다","편집 리듬 찰떡","로케이션 어딤?","엔딩 웃겼음"
+C000904,https://example.com/tiktok/video/904,2025-08-12T10:20:00Z,tiktok,unknown,120443,5020,123,,,"후킹 약함","중반 템포 끊김",,,
+C000905,https://example.com/instagram/reel/905,2025-08-12T10:26:31Z,instagram,real_footage,845330,40311,1200,SND_905,"Morning Flow","룩앤필 상쾌","전개 매끄러움","브랜딩 각","배경음악 좋음",
+C000906,https://example.com/youtube/shorts/906,2025-08-12T10:30:10Z,youtube,ai_generated,442210,23001,910,,,"VFX 깔끔","텍스트 가독성 굿",,,
+C000907,https://example.com/tiktok/video/907,2025-08-12T10:41:02Z,tiktok,real_footage,1700040,100421,6330,SND_907,"Rush Hour","첫 1초 강력","카메라 무빙 최고","톤앤무드 통일감",,
+C000908,https://example.com/instagram/reel/908,2025-08-12T10:55:22Z,instagram,unknown,30211,1444,120,,,"템포 느림",,,
+C000909,https://example.com/youtube/shorts/909,2025-08-12T11:00:00Z,youtube,real_footage,985440,54000,2104,SND_909,"Seaside Walk","컬러그레이딩 굿","내러티브 깔끔","훅 타이밍 정확",,
+C000910,https://example.com/tiktok/video/910,2025-08-12T11:12:08Z,tiktok,ai_generated,640120,28040,802,,,"모션자막 재밌음","후킹 문구 직관적",,,

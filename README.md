@@ -1,114 +1,305 @@
-이 프로젝트는 [`EasyNext`](https://github.com/easynext/easynext)를 사용해 생성된 [Next.js](https://nextjs.org) 프로젝트입니다.
+# File-Only Curation System
 
-## Getting Started
+A scalable file curation system with bulk upload capabilities, manual field entry, CSV/TSV import, and intelligent merge policies.
 
-개발 서버를 실행합니다.<br/>
-환경에 따른 명령어를 사용해주세요.
+## Features
 
+### 1. Bulk Upload with Direct GCS Upload
+- **Drag & Drop Multi-File**: Support for up to 100 files per batch
+- **Signed URL Generation**: Secure direct upload to Google Cloud Storage
+- **Progress Tracking**: Real-time upload progress for each file
+- **Batch Management**: Group uploads by batch ID for easier management
+
+### 2. Manual Curation Fields
+- **Required Fields**:
+  - `uploadDateTime`: Original upload timestamp
+  - `viewCount`: View count from platform
+  - `likeCount`: Like/favorite count
+  - `commentCount`: Comment count
+  - `platform`: Source platform (YouTube, TikTok, Instagram, etc.)
+  - `origin`: Original URL
+
+- **Optional Fields**:
+  - `topComments`: Top 5 comments with metadata
+  - `soundId` / `soundTitle`: Audio track information
+  - `curatorNotes`: Additional notes from curator
+  - `tags`: Content tags
+  - `category`: Content category
+
+### 3. Intelligent Merge Policy
+- **Manual Priority**: Curator-provided fields override model-extracted data by default
+- **Conflict Tracking**: All merge conflicts are logged for review
+- **Custom Merge Rules**: Field-level merge strategies (replace, append, average, etc.)
+- **Validation**: Schema validation ensures data integrity
+
+### 4. CSV/TSV Import Wizard
+- **Column Mapping**: Visual interface to map CSV columns to schema fields
+- **Data Transformation**: Built-in transformers (number, date, JSON, case conversion)
+- **Dry-Run Validation**: Preview validation errors before import
+- **Batch Processing**: Efficient chunk-based import for large files
+
+## Architecture
+
+### API Endpoints
+
+#### `POST /api/upload`
+Generate signed URLs for bulk file upload
+```typescript
+{
+  files: Array<{
+    filename: string
+    contentType: string
+    size: number
+  }>
+  metadata: {
+    curatorId: string
+    projectId: string
+  }
+}
+```
+
+#### `POST /api/curation/import`
+Import CSV/TSV records
+```typescript
+{
+  batchId: string
+  projectId: string
+  records: Array<ManualCurationFields>
+}
+```
+
+### Job Queue System
+
+Uses BullMQ with Redis for async processing:
+
+1. **File Processing Queue** (`file-processing`)
+   - Downloads files from GCS
+   - Extracts model fields
+   - Merges with manual fields
+   - Stores curation records
+
+2. **Batch Import Queue** (`batch-import`)
+   - Processes CSV/TSV imports
+   - Creates virtual file entries
+   - Queues individual records for processing
+
+### Data Schema
+
+#### CurationRecord
+```typescript
+{
+  id: string
+  fileId: string
+  batchId: string
+  curatorId: string
+  projectId: string
+  
+  // File metadata
+  filename: string
+  contentType: string
+  size: number
+  gcsPath: string
+  
+  // Curation data
+  manualFields: ManualCurationFields
+  modelFields: ModelExtractedFields
+  mergedFields: Record<string, any>
+  
+  // Merge metadata
+  mergeStrategy: 'manual_priority' | 'model_priority' | 'custom'
+  mergeConflicts: Array<ConflictRecord>
+  
+  // Status
+  status: 'pending' | 'processing' | 'completed' | 'failed'
+  processedAt: string
+}
+```
+
+## Setup
+
+### Prerequisites
+- Node.js 18+
+- Redis server
+- Google Cloud Storage bucket
+- PostgreSQL database
+
+### Environment Variables
+```env
+# Google Cloud Storage
+GCP_PROJECT_ID=your-project-id
+GCP_KEY_FILE=path/to/service-account.json
+GCS_BUCKET_NAME=curation-uploads
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=optional-password
+
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/curation
+
+# Worker Configuration
+FILE_PROCESSING_CONCURRENCY=5
+BATCH_IMPORT_CONCURRENCY=3
+```
+
+### Installation
+```bash
+npm install
+```
+
+### Running the System
+
+1. **Start the web server**:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 결과를 확인할 수 있습니다.
-
-`app/page.tsx` 파일을 수정하여 페이지를 편집할 수 있습니다. 파일을 수정하면 자동으로 페이지가 업데이트됩니다.
-
-## 기본 포함 라이브러리
-
-- [Next.js](https://nextjs.org)
-- [React](https://react.dev)
-- [Tailwind CSS](https://tailwindcss.com)
-- [TypeScript](https://www.typescriptlang.org)
-- [ESLint](https://eslint.org)
-- [Prettier](https://prettier.io)
-- [Shadcn UI](https://ui.shadcn.com)
-- [Lucide Icon](https://lucide.dev)
-- [date-fns](https://date-fns.org)
-- [react-use](https://github.com/streamich/react-use)
-- [es-toolkit](https://github.com/toss/es-toolkit)
-- [Zod](https://zod.dev)
-- [React Query](https://tanstack.com/query/latest)
-- [React Hook Form](https://react-hook-form.com)
-- [TS Pattern](https://github.com/gvergnaud/ts-pattern)
-
-## 사용 가능한 명령어
-
-한글버전 사용
-
-```sh
-easynext lang ko
+2. **Start the job workers**:
+```bash
+npm run worker
 ```
 
-최신버전으로 업데이트
-
-```sh
-npm i -g @easynext/cli@latest
-# or
-yarn add -g @easynext/cli@latest
-# or
-pnpm add -g @easynext/cli@latest
+3. **Monitor queues** (optional):
+```bash
+npm run queue-ui
 ```
 
-Supabase 설정
+### Operational Check System
 
-```sh
-easynext supabase
+4. **Pre-bulk loading health check**:
+```bash
+npm run ops:test
 ```
 
-Next-Auth 설정
-
-```sh
-easynext auth
-
-# ID,PW 로그인
-easynext auth idpw
-# 카카오 로그인
-easynext auth kakao
+5. **Daily system monitoring**:
+```bash
+npm run ops:health
+npm run ops:monitor
 ```
 
-유용한 서비스 연동
-
-```sh
-# Google Analytics
-easynext gtag
-
-# Microsoft Clarity
-easynext clarity
-
-# ChannelIO
-easynext channelio
-
-# Sentry
-easynext sentry
-
-# Google Adsense
-easynext adsense
+6. **Platform-specific testing**:
+```bash
+npm run ops:youtube
+npm run ops:instagram  
+npm run ops:tiktok
 ```
 
-## Google Analytics 사용법
+### Ingest UI (YouTube/Instagram/TikTok Link Processing)
 
-이 프로젝트는 Google Analytics(GA4)가 설정되어 있습니다. 측정 ID: `G-123456`
+7. **Start ingest UI server**:
+```bash
+npm run ingest:ui
+```
 
-### 페이지 추적
-페이지 추적은 자동으로 설정되어 있습니다.
+8. **Open ingest UI in browser**:
+```bash
+npm run ingest:open
+# Opens: http://localhost:8080
+```
 
-### 이벤트 추적
-이벤트를 추적하려면 다음과 같이 사용하세요:
+## Usage
+
+### Bulk File Upload
 
 ```javascript
-import { event } from './app/gtag';
-
-// 이벤트 추적
-event({
-  action: '버튼_클릭',
-  category: '사용자_상호작용',
-  label: '로그인_버튼',
-  value: 1
-});
+// Client-side upload
+const uploadFiles = async (files) => {
+  // 1. Request signed URLs
+  const response = await fetch('/api/upload', {
+    method: 'POST',
+    body: JSON.stringify({
+      files: files.map(f => ({
+        filename: f.name,
+        contentType: f.type,
+        size: f.size
+      })),
+      metadata: {
+        curatorId: userId,
+        projectId: projectId
+      }
+    })
+  });
+  
+  const { signedUrls } = await response.json();
+  
+  // 2. Upload directly to GCS
+  for (let i = 0; i < files.length; i++) {
+    await fetch(signedUrls[i].uploadUrl, {
+      method: 'PUT',
+      headers: signedUrls[i].uploadHeaders,
+      body: files[i]
+    });
+  }
+};
 ```
+
+### CSV Import
+
+```javascript
+// Use the CSV Import Wizard component
+import { CSVImportWizard } from './components/CSVImportWizard';
+
+<CSVImportWizard
+  projectId={projectId}
+  onImportComplete={(batchId, count) => {
+    console.log(`Imported ${count} records in batch ${batchId}`);
+  }}
+  onError={(error) => {
+    console.error('Import failed:', error);
+  }}
+/>
+```
+
+### Custom Merge Policy
+
+```javascript
+import { MergePolicy } from './schemas/curation';
+
+const customPolicy: MergePolicy = {
+  strategy: 'custom',
+  fieldRules: {
+    viewCount: { source: 'merge', mergeFunction: 'max' },
+    tags: { source: 'merge', mergeFunction: 'append' },
+    category: { source: 'manual' }
+  },
+  conflictResolution: {
+    defaultSource: 'manual',
+    requireReview: true,
+    notifyOnConflict: true
+  }
+};
+```
+
+## Monitoring
+
+### Queue Health Check
+```bash
+curl http://localhost:3000/api/health/queues
+```
+
+### Metrics
+- Upload success rate
+- Processing time per file
+- Merge conflict rate
+- Import validation errors
+
+## Scaling Considerations
+
+1. **GCS Upload**: Direct upload bypasses server, scales with GCS limits
+2. **Job Processing**: Adjust concurrency via environment variables
+3. **Database**: Use connection pooling and read replicas
+4. **Redis**: Consider Redis Cluster for high throughput
+5. **CSV Import**: Process in chunks to avoid memory issues
+
+## Security
+
+- Signed URLs expire after 1 hour
+- File size limits enforced (500MB per file)
+- Authentication required for all endpoints
+- Row-level security in database
+- Input validation with Zod schemas
+
+## License
+
+MIT

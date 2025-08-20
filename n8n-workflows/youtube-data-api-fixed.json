@@ -1,0 +1,201 @@
+{
+  "name": "YouTube Data API - Fixed Comments Collector",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "youtube-metadata-fixed",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "YouTube Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "youtube-metadata-fixed"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "apiKey",
+              "value": "={{ $env.YOUTUBE_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-api-key",
+      "name": "Set API Key",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [380, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract YouTube Video ID - Fixed Version\ntry {\n  const input = $input.all()?.[0]?.json || {};\n  let url = '';\n  \n  // Try different input sources\n  if (input.body?.content) {\n    url = input.body.content;\n  } else if (input.body?.url) {\n    url = input.body.url;\n  } else if (input.query?.url) {\n    url = input.query.url;\n  } else if (input.url) {\n    url = input.url;\n  } else if (input.content) {\n    url = input.content;\n  }\n  \n  if (!url) {\n    throw new Error('No URL found in request');\n  }\n  \n  // Extract video ID\n  const videoId = url.match(/(?:youtube\\.com\\/(?:watch\\?v=|shorts\\/)|youtu\\.be\\/)([a-zA-Z0-9_-]+)/)?.[1];\n  \n  if (!videoId) {\n    throw new Error(`Invalid YouTube URL: ${url}`);\n  }\n  \n  return [{\n    json: {\n      videoId: videoId,\n      originalUrl: url,\n      apiKey: $node['Set API Key'].json.apiKey\n    }\n  }];\n  \n} catch (error) {\n  return [{\n    json: {\n      error: error.message,\n      success: false\n    }\n  }];\n}"
+      },
+      "id": "extract-video-id",
+      "name": "Extract Video ID (Fixed)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [520, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id={{ $json.videoId }}&key={{ $json.apiKey }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "youtube-api-call",
+      "name": "Get Video Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId={{ $json.videoId }}&maxResults=5&order=relevance&key={{ $json.apiKey }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "youtube-comments-call",  
+      "name": "Get Comments Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Process Comments - Fixed Version\ntry {\n  console.log('Processing comments data...');\n  \n  const inputData = $input.all()?.[0]?.json || {};\n  console.log('Input data keys:', Object.keys(inputData));\n  \n  let apiResponse = {};\n  \n  // Handle different response formats\n  if (inputData.body) {\n    apiResponse = inputData.body;\n  } else if (inputData.data) {\n    apiResponse = inputData.data;\n  } else {\n    apiResponse = inputData;\n  }\n  \n  console.log('API response keys:', Object.keys(apiResponse));\n  \n  let topComments = [];\n  \n  if (apiResponse && apiResponse.items && Array.isArray(apiResponse.items)) {\n    console.log('Processing', apiResponse.items.length, 'comments');\n    \n    topComments = apiResponse.items.slice(0, 5).map((item, index) => {\n      try {\n        const snippet = item.snippet?.topLevelComment?.snippet;\n        if (!snippet) {\n          console.log(`Comment ${index}: Missing snippet data`);\n          return null;\n        }\n        \n        return {\n          id: item.id || `comment_${index}`,\n          text: snippet.textDisplay || snippet.textOriginal || '',\n          author: snippet.authorDisplayName || 'Unknown',\n          authorChannelUrl: snippet.authorChannelUrl || '',\n          likeCount: snippet.likeCount || 0,\n          publishedAt: snippet.publishedAt || '',\n          updatedAt: snippet.updatedAt || snippet.publishedAt || ''\n        };\n      } catch (err) {\n        console.error(`Error processing comment ${index}:`, err.message);\n        return null;\n      }\n    }).filter(comment => comment !== null);\n    \n    console.log('Processed comments count:', topComments.length);\n  } else {\n    console.log('No items found in API response');\n  }\n  \n  return [{\n    json: {\n      topComments: topComments,\n      commentsCount: topComments.length,\n      success: true,\n      debug: {\n        inputKeys: Object.keys(inputData),\n        responseKeys: Object.keys(apiResponse),\n        hasItems: !!(apiResponse.items)\n      }\n    }\n  }];\n  \n} catch (error) {\n  console.error('Process Comments Error:', error.message);\n  return [{\n    json: {\n      topComments: [],\n      commentsCount: 0,\n      success: false,\n      error: error.message\n    }\n  }];\n}"
+      },
+      "id": "process-comments",
+      "name": "Process Comments (Fixed)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [860, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Transform to VDP Format - Fixed Version\ntry {\n  console.log('Transforming to VDP format...');\n  \n  const allInputs = $input.all() || [];\n  console.log('Input count:', allInputs.length);\n  \n  let videoData = {};\n  let commentsData = {};\n  \n  // Process video data (first input)\n  if (allInputs[0]?.json) {\n    const videoInput = allInputs[0].json;\n    if (videoInput.body) {\n      videoData = videoInput.body;\n    } else if (videoInput.data) {\n      videoData = videoInput.data;\n    } else {\n      videoData = videoInput;\n    }\n  }\n  \n  // Process comments data (second input)\n  if (allInputs[1]?.json) {\n    commentsData = allInputs[1].json;\n  }\n  \n  console.log('Video data keys:', Object.keys(videoData));\n  console.log('Comments data keys:', Object.keys(commentsData));\n  \n  const video = videoData.items?.[0];\n  if (!video) {\n    return [{\n      json: {\n        error: 'Video not found or private',\n        success: false,\n        debug: {\n          videoDataKeys: Object.keys(videoData),\n          hasVideoItems: !!(videoData.items)\n        }\n      }\n    }];\n  }\n  \n  const snippet = video.snippet || {};\n  const statistics = video.statistics || {};\n  const contentDetails = video.contentDetails || {};\n  \n  // Parse duration\n  const duration = contentDetails.duration || 'PT0S';\n  const match = duration.match(/PT(?:(\\d+)M)?(?:(\\d+)S)?/);\n  const minutes = parseInt(match?.[1] || '0');\n  const seconds = parseInt(match?.[2] || '0');\n  const durationSeconds = minutes * 60 + seconds;\n  \n  const metadata = {\n    platform: 'youtube',\n    videoId: video.id,\n    title: snippet.title || 'Unknown Title',\n    description: (snippet.description || '').substring(0, 500), // Limit description\n    channelTitle: snippet.channelTitle || 'Unknown Channel',\n    publishedAt: snippet.publishedAt || '',\n    thumbnails: snippet.thumbnails || {},\n    duration: {\n      iso8601: duration,\n      seconds: durationSeconds\n    },\n    statistics: {\n      viewCount: parseInt(statistics.viewCount || '0'),\n      likeCount: parseInt(statistics.likeCount || '0'),\n      commentCount: parseInt(statistics.commentCount || '0')\n    },\n    tags: snippet.tags || [],\n    categoryId: snippet.categoryId || '',\n    defaultLanguage: snippet.defaultLanguage || '',\n    top_comments: commentsData.topComments || [],\n    vdp: {\n      extractedAt: new Date().toISOString(),\n      source: 'youtube_data_api',\n      confidence: 0.95,\n      embedEligible: true,\n      hasTopComments: (commentsData.topComments || []).length > 0\n    }\n  };\n  \n  console.log('Generated metadata with', metadata.top_comments.length, 'comments');\n  \n  return [{\n    json: {\n      success: true,\n      metadata: metadata,\n      'x-goog-meta-vdp-platform': 'youtube',\n      'x-goog-meta-vdp-duration': durationSeconds.toString(),\n      'x-goog-meta-vdp-views': statistics.viewCount || '0',\n      'x-goog-meta-vdp-top-comments-count': (commentsData.topComments || []).length.toString()\n    }\n  }];\n  \n} catch (error) {\n  console.error('Transform Error:', error.message);\n  return [{\n    json: {\n      success: false,\n      error: error.message,\n      debug: {\n        inputCount: ($input.all() || []).length\n      }\n    }\n  }];\n}"
+      },
+      "id": "transform-response",
+      "name": "Transform to VDP (Fixed)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1040, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-with-metadata",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1220, 300]
+    }
+  ],
+  "connections": {
+    "YouTube Request": {
+      "main": [
+        [
+          {
+            "node": "Set API Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set API Key": {
+      "main": [
+        [
+          {
+            "node": "Extract Video ID (Fixed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Video ID (Fixed)": {
+      "main": [
+        [
+          {
+            "node": "Get Video Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Comments Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Data": {
+      "main": [
+        [
+          {
+            "node": "Transform to VDP (Fixed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Comments Data": {
+      "main": [
+        [
+          {
+            "node": "Process Comments (Fixed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Comments (Fixed)": {
+      "main": [
+        [
+          {
+            "node": "Transform to VDP (Fixed)",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Transform to VDP (Fixed)": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {},
+  "staticData": null,
+  "tags": []
+}

@@ -1,0 +1,82 @@
+{
+  "test_cases": [
+    {
+      "name": "Short Video Test (Mode S)",
+      "request": {
+        "gcsUri": "gs://test-bucket/short-video.mp4",
+        "meta": {
+          "platform": "tiktok",
+          "language": "ko",
+          "duration_sec": 7
+        }
+      },
+      "expected": {
+        "mode": "S",
+        "density_targets": {
+          "minScenes": 1,
+          "minShots": 1,
+          "minKfPerShot": 2
+        },
+        "hook_limit": 2.8,
+        "hook_factor": 0.4
+      }
+    },
+    {
+      "name": "Medium Video Test (Mode M)",
+      "request": {
+        "gcsUri": "gs://test-bucket/medium-video.mp4",
+        "meta": {
+          "platform": "youtube",
+          "language": "ko",
+          "duration_sec": 15
+        }
+      },
+      "expected": {
+        "mode": "M",
+        "density_targets": {
+          "minScenes": 3,
+          "minShots": 5,
+          "minKfPerShot": 3
+        },
+        "hook_limit": 3.0,
+        "hook_factor": 1.0
+      }
+    },
+    {
+      "name": "Long Video Test (Mode L)",
+      "request": {
+        "gcsUri": "gs://test-bucket/long-video.mp4",
+        "meta": {
+          "platform": "instagram",
+          "language": "ko",
+          "duration_sec": 45
+        }
+      },
+      "expected": {
+        "mode": "L",
+        "density_targets": {
+          "minScenes": 5,
+          "minShots": 8,
+          "minKfPerShot": 3
+        },
+        "hook_limit": 3.0,
+        "hook_factor": 1.0
+      }
+    }
+  ],
+  "usage_examples": {
+    "curl_command": "curl -X POST 'http://localhost:8080/api/vdp/extract-vertex' -H 'Content-Type: application/json' -d @test-adaptive-api.json",
+    "expected_logs": [
+      "[Adaptive VDP] 🎯 Mode S (7s) targets: 1 scenes, 1 shots, 2 keyframes",
+      "[Adaptive Hook] Mode S for 7s video: hook limit 2.8s (factor: 0.4)",
+      "[Adaptive Pass 2] 🔧 Using mode S specific repair logic"
+    ]
+  },
+  "backward_compatibility": {
+    "note": "If meta.duration_sec is not provided, system defaults to Mode S",
+    "environment_variables": {
+      "DENSITY_SCENES_MIN": "Still used as fallback for undefined cases",
+      "HOOK_MAX_START_SEC": "Still used as maximum limit (3.0s)"
+    }
+  }
+}

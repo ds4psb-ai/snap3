@@ -1,0 +1,42 @@
+{
+  "brands": [
+    {"key": "apple", "aliases": ["apple", "애플", "맥북", "macbook", "iphone", "아이폰", "ipad", "아이패드", "airpods", "에어팟"]},
+    {"key": "samsung", "aliases": ["samsung", "삼성", "galaxy", "갤럭시", "note", "노트"]},
+    {"key": "google", "aliases": ["google", "구글", "pixel", "픽셀", "android", "안드로이드"]},
+    {"key": "microsoft", "aliases": ["microsoft", "마이크로소프트", "xbox", "엑스박스", "surface", "서피스"]},
+    {"key": "nike", "aliases": ["nike", "나이키", "air jordan", "에어조던", "swoosh"]},
+    {"key": "adidas", "aliases": ["adidas", "아디다스", "three stripes", "삼선"]},
+    {"key": "kangol", "aliases": ["kangol", "캉골"]},
+    {"key": "jansport", "aliases": ["jansport", "잔스포츠", "백팩"]},
+    {"key": "coca_cola", "aliases": ["coca cola", "coke", "코카콜라", "콜라"]},
+    {"key": "pepsi", "aliases": ["pepsi", "펩시"]},
+    {"key": "starbucks", "aliases": ["starbucks", "스타벅스", "siren"]},
+    {"key": "mcdonalds", "aliases": ["mcdonalds", "맥도날드", "golden arches", "빅맥"]},
+    {"key": "netflix", "aliases": ["netflix", "넷플릭스"]},
+    {"key": "youtube", "aliases": ["youtube", "유튜브"]},
+    {"key": "instagram", "aliases": ["instagram", "인스타그램", "insta", "인스타"]},
+    {"key": "tiktok", "aliases": ["tiktok", "틱톡"]},
+    {"key": "tesla", "aliases": ["tesla", "테슬라"]},
+    {"key": "bmw", "aliases": ["bmw", "비엠더블유"]},
+    {"key": "mercedes", "aliases": ["mercedes", "메르세데스", "benz", "벤츠"]}
+  ],
+  "products": [
+    {"key": "smartphone", "aliases": ["smartphone", "스마트폰", "phone", "휴대폰", "핸드폰"]},
+    {"key": "laptop", "aliases": ["laptop", "노트북", "computer", "컴퓨터"]},
+    {"key": "tablet", "aliases": ["tablet", "태블릿"]},
+    {"key": "smartwatch", "aliases": ["smartwatch", "스마트워치", "watch", "시계"]},
+    {"key": "earbuds", "aliases": ["earbuds", "이어버드", "earphones", "이어폰", "headphones", "헤드폰"]},
+    {"key": "microfiber_towel", "aliases": ["microfiber towel", "극세사 타월", "극세사타월", "마이크로파이버"]},
+    {"key": "car_gap_filler", "aliases": ["사이드포켓", "틈새포켓", "gap filler", "car organizer", "차량 틈새", "시트 틈새"]},
+    {"key": "tripod", "aliases": ["삼각대", "tripod", "camera stand", "카메라 거치대"]},
+    {"key": "backpack", "aliases": ["backpack", "백팩", "가방", "배낭"]},
+    {"key": "sneakers", "aliases": ["sneakers", "운동화", "신발", "shoes"]},
+    {"key": "clothing", "aliases": ["clothing", "옷", "shirt", "셔츠", "pants", "바지"]},
+    {"key": "makeup", "aliases": ["makeup", "화장품", "cosmetics", "코스메틱"]},
+    {"key": "skincare", "aliases": ["skincare", "스킨케어", "lotion", "로션", "cream", "크림"]},
+    {"key": "coffee", "aliases": ["coffee", "커피", "latte", "라떼", "americano", "아메리카노"]},
+    {"key": "energy_drink", "aliases": ["energy drink", "에너지드링크", "monster", "몬스터", "red bull", "레드불"]},
+    {"key": "car", "aliases": ["car", "자동차", "vehicle", "차량"]},
+    {"key": "gaming_gear", "aliases": ["gaming", "게이밍", "controller", "컨트롤러", "keyboard", "키보드", "mouse", "마우스"]}
+  ]
+}

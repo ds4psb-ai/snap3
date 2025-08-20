@@ -1,0 +1,8 @@
+{
+  "gcsUri": "gs://tough-variety-raw-central1/raw/input/youtube/cFyBJaoNyGY.mp4",
+  "meta": {
+    "platform": "YouTube",
+    "content_id": "cFyBJaoNyGY",
+    "source_url": "https://www.youtube.com/shorts/cFyBJaoNyGY"
+  }
+}

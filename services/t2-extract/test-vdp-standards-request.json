@@ -1,0 +1,8 @@
+{
+  "gcsUri": "gs://tough-variety-raw-central1/test/sample-video.mp4",
+  "meta": {
+    "platform": "YouTube Shorts",
+    "content_id": "test123"
+  },
+  "test_mode": true
+}

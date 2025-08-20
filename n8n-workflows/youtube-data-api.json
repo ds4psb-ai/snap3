@@ -1,0 +1,147 @@
+{
+  "name": "YouTube Data API Metadata Collector",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "youtube-metadata",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "YouTube Metadata Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "youtube-metadata"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract YouTube Video ID from URL\nconst url = items[0].json.url;\nconst videoId = url.match(/(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([a-zA-Z0-9_-]+)/)?.[1];\n\nif (!videoId) {\n  throw new Error('Invalid YouTube URL');\n}\n\nreturn [{\n  json: {\n    videoId,\n    originalUrl: url,\n    apiKey: $node[\"Set API Key\"].json.apiKey\n  }\n}];"
+      },
+      "id": "extract-video-id",
+      "name": "Extract Video ID",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "apiKey",
+              "value": "={{ $env.YOUTUBE_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-api-key",
+      "name": "Set API Key",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [320, 200]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id={{ $json.videoId }}&key={{ $json.apiKey }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "youtube-api-call",
+      "name": "YouTube Data API Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Transform YouTube API response to VDP metadata format\nconst apiResponse = items[0].json;\nconst video = apiResponse.items?.[0];\n\nif (!video) {\n  return [{\n    json: {\n      error: 'Video not found or private',\n      success: false\n    }\n  }];\n}\n\nconst snippet = video.snippet;\nconst statistics = video.statistics;\nconst contentDetails = video.contentDetails;\n\n// Parse duration (PT1M30S -> 90 seconds)\nconst duration = contentDetails.duration;\nconst match = duration.match(/PT(?:(\\d+)M)?(?:(\\d+)S)?/);\nconst minutes = parseInt(match?.[1] || '0');\nconst seconds = parseInt(match?.[2] || '0');\nconst durationSeconds = minutes * 60 + seconds;\n\nconst metadata = {\n  platform: 'youtube',\n  videoId: video.id,\n  title: snippet.title,\n  description: snippet.description,\n  channelTitle: snippet.channelTitle,\n  publishedAt: snippet.publishedAt,\n  thumbnails: snippet.thumbnails,\n  duration: {\n    iso8601: duration,\n    seconds: durationSeconds\n  },\n  statistics: {\n    viewCount: parseInt(statistics.viewCount || '0'),\n    likeCount: parseInt(statistics.likeCount || '0'),\n    commentCount: parseInt(statistics.commentCount || '0')\n  },\n  tags: snippet.tags || [],\n  categoryId: snippet.categoryId,\n  defaultLanguage: snippet.defaultLanguage,\n  // VDP metadata extensions\n  vdp: {\n    extractedAt: new Date().toISOString(),\n    source: 'youtube_data_api',\n    confidence: 0.95,\n    embedEligible: true\n  }\n};\n\nreturn [{\n  json: {\n    success: true,\n    metadata,\n    // Ready for T4 consumption\n    'x-goog-meta-vdp-platform': 'youtube',\n    'x-goog-meta-vdp-duration': durationSeconds.toString(),\n    'x-goog-meta-vdp-views': statistics.viewCount,\n    'x-goog-meta-vdp-engagement': (parseInt(statistics.likeCount || '0') + parseInt(statistics.commentCount || '0')).toString()\n  }\n}];"
+      },
+      "id": "transform-response",
+      "name": "Transform to VDP Format",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-with-metadata",
+      "name": "Respond with Metadata",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "YouTube Metadata Request": {
+      "main": [
+        [
+          {
+            "node": "Set API Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set API Key": {
+      "main": [
+        [
+          {
+            "node": "Extract Video ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Video ID": {
+      "main": [
+        [
+          {
+            "node": "YouTube Data API Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube Data API Call": {
+      "main": [
+        [
+          {
+            "node": "Transform to VDP Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform to VDP Format": {
+      "main": [
+        [
+          {
+            "node": "Respond with Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "versionId": "1"
+}

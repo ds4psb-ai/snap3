@@ -1,0 +1,21 @@
+{
+  "name": "t2-extract",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^7.7.0",
+    "@google-cloud/vertexai": "^1.2.0",
+    "@google/generative-ai": "^0.21.0",
+    "express": "^4.19.2"
+  },
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-cli": "^5.0.0"
+  }
+}

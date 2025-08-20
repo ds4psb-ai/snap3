@@ -266,3 +266,4 @@ console.log('플래그 정보:', metadata);
 - [마틴 파울러의 Feature Toggle](https://martinfowler.com/articles/feature-toggles.html)
 - [Trunk Based Development](https://trunkbaseddevelopment.com/)
 - [Progressive Delivery](https://launchdarkly.com/blog/what-is-progressive-delivery/)
+

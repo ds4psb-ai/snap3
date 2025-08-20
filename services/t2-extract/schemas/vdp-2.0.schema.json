@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VDP v2.0",
+  "type": "object",
+  "required": ["content_id","metadata","overall_analysis","scenes"],
+  "properties": {
+    "content_id": { "type": "string", "minLength": 1 },
+    "metadata": {
+      "type": "object",
+      "required": ["platform","language","source_url"],
+      "properties": {
+        "platform": { "type": "string", "enum": ["YouTube","Instagram","TikTok","unknown","youtube","instagram","tiktok"] },
+        "language": { "type": "string", "minLength": 1 },
+        "source_url": { "type": "string", "minLength": 1 },
+        "upload_date": { "type": "string" },
+        "video_origin": { "type": "string" },
+        "hashtags": { "type": "array", "items": { "type": "string" } },
+        "original_sound": {
+          "type": "object",
+          "properties": { "id":{"type":"string"}, "title":{"type":"string"} }
+        },
+        "engagement_snapshot": {
+          "type": "object",
+          "properties": {
+            "view_count":{"type":"number"}, "like_count":{"type":"number"},
+            "comment_count":{"type":"number"}, "share_count":{"type":"number"}
+          }
+        }
+      }
+    },
+    "overall_analysis": {
+      "type": "object",
+      "required": ["hookGenome"],
+      "properties": {
+        "duration_sec": { "type": "number" },
+        "aspect_ratio": { "type": "string" },
+        "summary": { "type": "string", "description": "Comprehensive summary of the video's plot and message" },
+        "emotional_arc": { "type": "string", "description": "Description of the emotional journey from start to finish" },
+        "story_telling": {
+          "type": "object",
+          "properties": {
+            "has_story": { "type": "boolean" },
+            "plot": {
+              "type": "object",
+              "properties": {
+                "conflict": {"type":"string"},
+                "action_taken": {"type":"string"},
+                "resolution": {"type":"string"}
+              }
+            }
+          }
+        },
+        "audience_reaction": {
+          "type": "object",
+          "properties": {
+            "analysis": {"type": "string"},
+            "common_reactions": {"type": "array", "items": {"type": "string"}},
+            "notable_comments": {
+              "type": "array",
+              "items": {
+                "type": "object", 
+                "properties": {
+                  "text": {"type": "string"},
+                  "lang": {"type": "string", "description": "BCP-47 language code"},
+                  "translation_en": {"type": "string"}
+                },
+                "required": ["text", "lang"]
+              }
+            },
+            "overall_sentiment": {"type": "string"}
+          }
+        },
+        "confidence": {
+          "type": "object",
+          "properties": {
+            "overall": {"type": "number"},
+            "scene_classification": {"type": "number"},
+            "device_analysis": {"type": "number"}
+          }
+        },
+        "asr_transcript": {"type": "string"},
+        "asr_lang": {"type": "string", "description": "BCP-47 language code"},
+        "asr_translation_en": {"type": "string"},
+        "ocr_text": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {"type": "string"},
+              "lang": {"type": "string", "description": "BCP-47 language code"},
+              "translation_en": {"type": "string"}
+            },
+            "required": ["text", "lang"]
+          }
+        },
+        "hookGenome": {
+          "type": "object",
+          "required": ["start_sec","strength_score","pattern_code"],
+          "properties": {
+            "start_sec": { "type": "number", "maximum": 3.0 },
+            "end_sec":   { "type": "number" },
+            "strength_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+            "pattern_code": {
+              "oneOf": [
+                { "type":"string" },
+                { "type":"array", "items":{"type":"string"}, "minItems":1 }
+              ]
+            },
+            "delivery": { "type":"string" },
+            "trigger_modalities": { "type":"array", "items":{"type":"string"} },
+            "microbeats_sec": { "type":"array", "items":{"type":"number"} }
+          }
+        }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["start_sec","end_sec","narrative_role"],
+        "properties": {
+          "start_sec": { "type": "number" },
+          "end_sec": { "type": "number" },
+          "narrative_role": { "type": "string" },
+          "transcript": { "type": "string" },
+          "on_screen_text": { "type": "array", "items": {"type":"string"} },
+          "visual_summary": { "type": "string" },
+          "camera": {
+            "type": "object",
+            "properties": { 
+              "shot_type": {"type":"string", "enum": ["ECU","CU","MCU","MS","MLS","WS","EWS"]},
+              "angle": {"type":"string", "enum": ["eye","high","low","overhead","dutch"]},
+              "movement": {"type":"string", "enum": ["static","pan","tilt","dolly","truck","handheld","crane","zoom"]}
+            },
+            "required": ["shot_type", "angle", "movement"]
+          },
+          "audio": {
+            "type": "object",
+            "properties": { 
+              "music":{"type":"string"}, 
+              "sfx":{"type":"string"},
+              "tone":{"type":"string"},
+              "audio_events": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "timestamp": {"type": "number"},
+                    "event": {"type": "string", "enum": ["music_starts","music_stops","music_change","critical_sfx","narration_starts","laughter","singing_starts"]},
+                    "description": {"type": "string"},
+                    "intensity": {"type": "string", "enum": ["Low","Medium","High"]}
+                  },
+                  "required": ["timestamp", "event", "description", "intensity"]
+                }
+              }
+            },
+            "required": ["music", "sfx", "tone"]
+          },
+          "tags": { "type":"array", "items":{"type":"string"} }
+        }
+      }
+    },
+    "technical": {
+      "type": "object",
+      "properties": { "fps":{"type":"number"}, "resolution":{"type":"string"} }
+    }
+  }
+}

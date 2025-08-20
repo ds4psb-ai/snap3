@@ -1,0 +1,62 @@
+{
+  "video_id": "uD4I-t0l1a0",
+  "title": "직장인의 흔한 야근 시발점 (A common trigger for office overtime)",
+  "description": "A short, humorous video depicting a hamster office worker's relatable struggle with sudden overtime, culminating in a computer crash and an ironic twist. The hamster, 'Kim Hamster,' is asked to do last-minute work, stays up late, loses the file, rallies with an energy drink to finish it, only to find out the next day that the boss who assigned the work is on vacation.",
+  "overall_analysis": {
+    "hookGenome": {
+      "start_sec": 0,
+      "pattern_code": ["joke", "problem_solution"],
+      "delivery": "on_screen_text",
+      "trigger_modalities": ["visual", "text", "audio"],
+      "microbeats_sec": [0, 1.01, 2.14, 2.73],
+      "strength_score": 0.9
+    },
+    "narrative_arcs": ["problem", "rising_action", "climax", "falling_action", "resolution"],
+    "key_takeaways": [
+      "The video effectively uses a highly relatable office scenario (sudden overtime) to connect with a specific audience.",
+      "The use of a cute hamster character in a stressful human situation creates a strong comedic and memetic effect, making the content more palatable and shareable.",
+      "A classic narrative structure with a clear problem, a climax of struggle, and an ironic punchline ending makes the story engaging from start to finish.",
+      "The combination of visual gags, character voiceover, and on-screen text creates a multi-layered comedic experience."
+    ],
+    "target_audience_appeal": "The primary audience is office workers, particularly in cultures with a strong overtime work ethic, who can directly relate to the pain of last-minute tasks and technical failures. The cute animal format broadens the appeal to general audiences who enjoy meme-style humor and character-driven skits.",
+    "recommendations": "The character 'Kim Hamster' has franchise potential. Creating a series of shorts depicting other relatable office struggles could be highly successful. The pacing, rapid cuts, and use of internal monologue are effective and should be maintained in future videos."
+  },
+  "scenes": [
+    {
+      "start_time": 0,
+      "end_time": 3.2,
+      "transcript": "아.. 회의 끝나니까 여섯시.. 그렇다면 퇴근",
+      "description": "The video opens with the title 'A common trigger for office overtime' and introduces 'Emotionally unstable Kim Hamster.' The hamster, dressed as an office worker, calculates that since the meeting ends at 6 PM, it's time to go home."
+    },
+    {
+      "start_time": 3.2,
+      "end_time": 8.53,
+      "transcript": "햄찌씨 회의에서 나온 리서치 건 내일 중으로 한번 보자! 어.. 네! (자동 반사) 그렇다면 야근..",
+      "description": "A boss's voice is heard off-screen, demanding a research report by the next day. The hamster automatically agrees, and its thought bubble immediately changes from 'going home' to 'overtime.'"
+    },
+    {
+      "start_time": 8.53,
+      "end_time": 17.57,
+      "transcript": "추... (체념의 주문) 어, 눈 뻐근해. 무슨 일이 있어도 아홉시엔 퇴근한다. (허언이 있는편) 됐다. 이제 다했어. 저장!",
+      "description": "Resigned to its fate, the hamster starts working, chanting a resigned spell. It vows to leave by 9 PM, but a shot of a clock showing 10:50 PM proves this to be an empty promise. Finally, it finishes the work and goes to save the file."
+    },
+    {
+      "start_time": 17.57,
+      "end_time": 26.54,
+      "transcript": "(저장할 수 없지롱) ...? 아! 야! 아, ㅈㅣ랄하지마! ㅈㅣ랄하지마!!!!!!! 아.. 다.. 끝이다.. 모오와리 (It's over..)",
+      "description": "An error message pops up, preventing the file from saving, followed by the spinning wheel of death. The hamster panics and screams in frustration before collapsing in despair, believing it's all over."
+    },
+    {
+      "start_time": 26.54,
+      "end_time": 38.6,
+      "transcript": "안돼 안돼. 정신차렷!!!!!!!!!!! 붙잡아!!!!!!!!!!! (에너지 UP) 꺽. 어어어오오오 이이이이이! 마지막 저장은 1시간 전.. 세상이 암만 억까해도 결국 해내야 한다.",
+      "description": "The hamster gives itself a pep talk, grabs a can of 'Soul' energy drink, and gets a massive energy boost. Realizing the last save was an hour ago, it resolves to finish the work no matter what."
+    },
+    {
+      "start_time": 38.6,
+      "end_time": 51.6,
+      "transcript": "안녕하세요.. 허억. 햄찌씨... 어제 야근했다며?? 아 네.. 오늘 팀장님이랑 볼 게 있어가지구요.. 어억?! 오늘 팀장님 연차인데? 몰랐어? ...",
+      "description": "The next morning, an exhausted hamster arrives at the office. A colleague expresses surprise about the overtime. The hamster explains it was for the team leader, only for the colleague to reveal that the team leader is on vacation, meaning all the work was for nothing. The hamster is left in stunned silence."
+    }
+  ]
+}

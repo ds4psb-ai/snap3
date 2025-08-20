@@ -1,0 +1,10 @@
+{
+  "gcsUri": "gs://tough-variety-raw-central1/test/sample-video.mp4",
+  "meta": {
+    "platform": "YouTube Shorts",
+    "content_id": "TEST_SEGMENT_001",
+    "language": "ko",
+    "source_url": "https://www.youtube.com/shorts/TEST_SEGMENT_001"
+  },
+  "outGcsUri": "gs://tough-variety-raw-central1/raw/vdp/youtube/TEST_SEGMENT_001.NEW.universal.json"
+}

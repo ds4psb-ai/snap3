@@ -1,0 +1,18 @@
+{
+  "content_id": "TEST_IG_001",
+  "platform": "Instagram",
+  "source_url": "https://www.instagram.com/p/TEST123456/",
+  "outGcsUri": "gs://tough-variety-raw/raw/vdp/TEST_IG_001.vdp.json",
+  "metadata": {
+    "requested_at": "2025-08-17T12:30:00.000Z",
+    "request_source": "worker_test",
+    "priority": "normal",
+    "creator": "test_user",
+    "hashtags": ["#test", "#instagram"],
+    "estimated_views": 1000
+  },
+  "processing_options": {
+    "metadata_only": true,
+    "reason": "legal_constraints"
+  }
+}

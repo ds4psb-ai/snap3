@@ -139,3 +139,4 @@ expect(res.headers.get('X-Export-SHA256')).toBe(responseHash);
 - ✅ Security impact assessment
 
 **Next Steps**: Consider implementing Option A to resolve content integrity vulnerability while maintaining digest calculation requirements (timestamp exclusion preserved).
+

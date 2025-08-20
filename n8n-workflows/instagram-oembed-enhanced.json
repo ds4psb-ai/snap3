@@ -1,0 +1,300 @@
+{
+  "name": "Instagram oEmbed/Graph API Collector with Top Comments",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "instagram-metadata",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Instagram Metadata Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "instagram-metadata"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract Instagram post URL and determine approach\n// Handle different input sources: body, query params, or headers\nconst input = items[0].json;\nlet url;\n\n// Try to get URL from different sources\nif (input.body && input.body.content) {\n  url = input.body.content;\n} else if (input.body && input.body.url) {\n  url = input.body.url;\n} else if (input.query && input.query.url) {\n  url = input.query.url;\n} else if (input.url) {\n  url = input.url;\n} else if (input.content) {\n  url = input.content;\n} else {\n  throw new Error('No URL found in request. Expected URL in body.content, body.url, query.url, or content field');\n}\n\nconst accessToken = $env.INSTAGRAM_ACCESS_TOKEN;\n\n// Check if it's a valid Instagram URL\nif (!url.match(/instagram\\.com\\/(p|reel|tv)\\/[a-zA-Z0-9_-]+/)) {\n  throw new Error(`Invalid Instagram URL: ${url}. Supported formats: instagram.com/p/ID, instagram.com/reel/ID, instagram.com/tv/ID`);\n}\n\n// Extract media shortcode from URL for Graph API\nconst shortcodeMatch = url.match(/instagram\\.com\\/(p|reel|tv)\\/([a-zA-Z0-9_-]+)/);\nconst shortcode = shortcodeMatch ? shortcodeMatch[2] : null;\n\nreturn [{\n  json: {\n    url,\n    shortcode,\n    accessToken,\n    hasToken: !!accessToken,\n    useOEmbed: !accessToken // Fallback to oEmbed if no token\n  }\n}];"
+      },
+      "id": "check-instagram-url",
+      "name": "Check Instagram URL",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.useOEmbed }}",
+              "value2": "true"
+            }
+          ]
+        }
+      },
+      "id": "route-by-token",
+      "name": "Route by Token Availability",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.instagram.com/oembed/?url={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "oembed-call",
+      "name": "Instagram oEmbed Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Get Instagram media ID using shortcode (placeholder for Graph API)\nconst shortcode = items[0].json.shortcode;\nconst accessToken = items[0].json.accessToken;\n\nif (!shortcode || !accessToken) {\n  return [{\n    json: {\n      error: 'Missing shortcode or access token for Graph API',\n      fallbackToOEmbed: true,\n      url: items[0].json.url\n    }\n  }];\n}\n\n// Note: This is a simplified example. In practice, you'd need to:\n// 1. Convert shortcode to media ID using Instagram's internal API or scraping\n// 2. Use the media ID with Graph API\n// For now, we'll simulate the media ID\n\nconst simulatedMediaId = `17841${shortcode.slice(0, 8)}234567890`; // Placeholder\n\nreturn [{\n  json: {\n    mediaId: simulatedMediaId,\n    shortcode,\n    accessToken,\n    url: items[0].json.url,\n    needsMediaIdResolution: true\n  }\n}];"
+      },
+      "id": "resolve-media-id",
+      "name": "Resolve Media ID",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [900, 350]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v19.0/{{ $json.mediaId }}/comments?fields=id,text,username,like_count,timestamp&limit=50&access_token={{ $json.accessToken }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "instagram-comments-call",
+      "name": "Instagram Comments API Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 450]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v19.0/{{ $json.mediaId }}?fields=id,media_type,media_url,thumbnail_url,timestamp,caption,like_count,comments_count&access_token={{ $json.accessToken }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "graph-api-call",
+      "name": "Instagram Graph API Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Process Instagram comments from Graph API\nconst commentsResponse = items[0].json;\n\nlet topComments = [];\n\ntry {\n  if (commentsResponse && commentsResponse.data && commentsResponse.data.length > 0) {\n    // Sort by like_count descending and take top 5\n    topComments = commentsResponse.data\n      .sort((a, b) => (b.like_count || 0) - (a.like_count || 0))\n      .slice(0, 5)\n      .map(comment => ({\n        id: comment.id,\n        text: comment.text,\n        username: comment.username,\n        likeCount: comment.like_count || 0,\n        timestamp: comment.timestamp\n      }));\n  }\n} catch (error) {\n  console.error('Error processing Instagram comments:', error);\n  topComments = [];\n}\n\nreturn [{\n  json: {\n    topComments,\n    commentsCount: topComments.length,\n    success: true\n  }\n}];"
+      },
+      "id": "process-instagram-comments",
+      "name": "Process Instagram Comments",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1120, 450]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Transform Instagram oEmbed response to VDP metadata format\nconst response = items[0].json;\n\nif (response.error) {\n  return [{\n    json: {\n      error: 'Instagram post not accessible via oEmbed',\n      success: false,\n      metadata: {\n        platform: 'instagram',\n        top_comments: [], // Empty array for failed requests\n        vdp: {\n          extractedAt: new Date().toISOString(),\n          source: 'instagram_oembed_failed',\n          confidence: 0.0,\n          embedEligible: false,\n          hasTopComments: false\n        }\n      }\n    }\n  }];\n}\n\nconst metadata = {\n  platform: 'instagram',\n  title: response.title || 'Instagram Post',\n  authorName: response.author_name,\n  authorUrl: response.author_url,\n  thumbnailUrl: response.thumbnail_url,\n  width: response.width,\n  height: response.height,\n  html: response.html,\n  version: response.version,\n  type: response.type,\n  top_comments: [], // oEmbed doesn't provide comments\n  // VDP metadata extensions\n  vdp: {\n    extractedAt: new Date().toISOString(),\n    source: 'instagram_oembed',\n    confidence: 0.7, // Lower confidence due to limited data\n    embedEligible: true,\n    hasTopComments: false,\n    limitations: 'oEmbed provides limited metadata - Graph API recommended for full stats and comments'\n  }\n};\n\nreturn [{\n  json: {\n    success: true,\n    metadata,\n    // Ready for T4 consumption\n    'x-goog-meta-vdp-platform': 'instagram',\n    'x-goog-meta-vdp-author': response.author_name,\n    'x-goog-meta-vdp-type': response.type,\n    'x-goog-meta-vdp-top-comments-count': '0'\n  }\n}];"
+      },
+      "id": "transform-oembed",
+      "name": "Transform oEmbed Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Combine Graph API metadata and comments\nconst graphResponse = items[0].json;\nconst commentsData = items[1].json;\n\nif (graphResponse.error || !graphResponse.id) {\n  return [{\n    json: {\n      error: 'Instagram Graph API call failed',\n      fallbackToOEmbed: true,\n      url: items[0].json?.url || 'unknown'\n    }\n  }];\n}\n\nconst metadata = {\n  platform: 'instagram',\n  mediaId: graphResponse.id,\n  mediaType: graphResponse.media_type,\n  mediaUrl: graphResponse.media_url,\n  thumbnailUrl: graphResponse.thumbnail_url,\n  timestamp: graphResponse.timestamp,\n  caption: graphResponse.caption,\n  statistics: {\n    likeCount: graphResponse.like_count || 0,\n    commentCount: graphResponse.comments_count || 0\n  },\n  top_comments: commentsData.topComments || [],\n  // VDP metadata extensions\n  vdp: {\n    extractedAt: new Date().toISOString(),\n    source: 'instagram_graph_api',\n    confidence: 0.95,\n    embedEligible: true,\n    hasTopComments: (commentsData.topComments || []).length > 0\n  }\n};\n\nreturn [{\n  json: {\n    success: true,\n    metadata,\n    // Ready for T4 consumption\n    'x-goog-meta-vdp-platform': 'instagram',\n    'x-goog-meta-vdp-media-type': graphResponse.media_type,\n    'x-goog-meta-vdp-likes': (graphResponse.like_count || 0).toString(),\n    'x-goog-meta-vdp-comments': (graphResponse.comments_count || 0).toString(),\n    'x-goog-meta-vdp-top-comments-count': (commentsData.topComments || []).length.toString()\n  }\n}];"
+      },
+      "id": "transform-graph-response",
+      "name": "Transform Graph API Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1340, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Merge both paths - prioritize Graph API if available\nconst item = items[0].json;\n\nif (item.fallbackToOEmbed || item.needsMediaIdResolution) {\n  // Redirect to oEmbed path\n  return [{\n    json: {\n      url: item.url,\n      useOEmbed: true,\n      error: item.error || 'Graph API unavailable, using oEmbed fallback'\n    }\n  }];\n}\n\nreturn [{ json: item }];"
+      },
+      "id": "merge-responses",
+      "name": "Merge API Responses",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1340, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-with-metadata",
+      "name": "Respond with Metadata",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1560, 300]
+    }
+  ],
+  "connections": {
+    "Instagram Metadata Request": {
+      "main": [
+        [
+          {
+            "node": "Check Instagram URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Instagram URL": {
+      "main": [
+        [
+          {
+            "node": "Route by Token Availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Token Availability": {
+      "main": [
+        [
+          {
+            "node": "Instagram oEmbed Call",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resolve Media ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram oEmbed Call": {
+      "main": [
+        [
+          {
+            "node": "Transform oEmbed Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve Media ID": {
+      "main": [
+        [
+          {
+            "node": "Instagram Graph API Call",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Instagram Comments API Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram Graph API Call": {
+      "main": [
+        [
+          {
+            "node": "Transform Graph API Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram Comments API Call": {
+      "main": [
+        [
+          {
+            "node": "Process Instagram Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Instagram Comments": {
+      "main": [
+        [
+          {
+            "node": "Transform Graph API Response",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Transform oEmbed Response": {
+      "main": [
+        [
+          {
+            "node": "Respond with Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Graph API Response": {
+      "main": [
+        [
+          {
+            "node": "Respond with Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge API Responses": {
+      "main": [
+        [
+          {
+            "node": "Respond with Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "versionId": "1"
+}

@@ -1,0 +1,306 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function POST(request: NextRequest) {
+  try {
+    const { url } = await request.json();
+    
+    if (!url) {
+      return NextResponse.json(
+        { error: 'URL이 필요합니다.' },
+        { status: 400 }
+      );
+    }
+
+    console.log('TikTok 다운로드 요청:', url);
+
+    const result = await downloadTikTok(url);
+    
+    if (result.kind === 'download') {
+      // 비디오 파일 다운로드
+      const videoResponse = await fetch(result.fileUrl!, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': 'https://www.tiktok.com/',
+          'Accept': 'video/webm,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Connection': 'keep-alive',
+          'Sec-Fetch-Dest': 'video',
+          'Sec-Fetch-Mode': 'no-cors',
+          'Sec-Fetch-Site': 'cross-site',
+        }
+      });
+
+      if (!videoResponse.ok) {
+        throw new Error('비디오 파일을 가져올 수 없습니다.');
+      }
+
+      const videoBuffer = await videoResponse.arrayBuffer();
+      
+      return new NextResponse(videoBuffer, {
+        status: 200,
+        headers: {
+          'Content-Type': 'video/mp4',
+          'Content-Disposition': `attachment; filename="tiktok_${Date.now()}.mp4"`,
+          'Content-Length': videoBuffer.byteLength.toString(),
+        },
+      });
+    } else {
+      // 임베드 정보 반환
+      return NextResponse.json({
+        kind: 'embed',
+        embed: result.embed,
+        meta: result.meta
+      });
+    }
+
+  } catch (error) {
+    console.error('TikTok 다운로드 오류:', error);
+    return NextResponse.json(
+      { error: `다운로드 중 오류가 발생했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}` },
+      { status: 500 }
+    );
+  }
+}
+
+// TikTok 서드파티 API 활용 다운로드 (안정적이고 확실한 방법)
+async function downloadTikTok(url: string): Promise<{
+  kind: 'download' | 'embed';
+  videoId?: string;
+  fileUrl?: string;
+  embed?: any;
+  meta?: any;
+}> {
+  const videoId = extractVideoId(url);
+  if (!videoId) {
+    throw new Error('유효하지 않은 TikTok URL입니다.');
+  }
+
+  console.log('TikTok video ID:', videoId);
+
+  // 1. TIKWM.COM API 활용 (가장 안정적, HD 지원, JSON 응답)
+  try {
+    console.log('TIKWM.COM API 시도...');
+    
+    const tikwmResponse = await fetch('https://www.tikwm.com/api/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Origin': 'https://www.tikwm.com',
+        'Referer': 'https://www.tikwm.com/',
+      },
+      body: JSON.stringify({ url: url })
+    });
+
+    if (tikwmResponse.ok) {
+      const tikwmData = await tikwmResponse.json();
+      
+      if (tikwmData.code === 0 && tikwmData.data) {
+        // 노워터마크 비디오 우선, 없으면 HD, 마지막으로 워터마크 버전
+        const videoUrl = tikwmData.data.play || tikwmData.data.hdplay || tikwmData.data.wmplay;
+        
+        if (videoUrl) {
+          console.log('TIKWM.COM API: 비디오 URL 발견 (노워터마크):', videoUrl);
+          return {
+            kind: 'download',
+            videoId: tikwmData.data.id,
+            fileUrl: videoUrl
+          };
+        }
+      }
+    }
+  } catch (e) {
+    console.log('TIKWM.COM API 실패:', e);
+  }
+
+  // 2. SSSTIK.IO API 활용 (백업 서비스)
+  try {
+    console.log('SSSTIK.IO API 시도...');
+    
+    const ssstikResponse = await fetch('https://ssstik.io/abc', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Origin': 'https://ssstik.io',
+        'Referer': 'https://ssstik.io/',
+      },
+      body: `id=${encodeURIComponent(url)}`
+    });
+
+    if (ssstikResponse.ok) {
+      const html = await ssstikResponse.text();
+      
+      // HTML에서 다운로드 링크 추출 (정규식 패턴)
+      const videoPatterns = [
+        /href="([^"]*\.mp4[^"]*)"/g,
+        /"download_url":"([^"]+)"/g,
+        /"video_url":"([^"]+)"/g,
+        /"url":"([^"]*\.mp4[^"]*)"/g,
+      ];
+
+      for (const pattern of videoPatterns) {
+        const matches = [...html.matchAll(pattern)];
+        for (const match of matches) {
+          if (match[1] && (match[1].includes('.mp4') || match[1].includes('ssstik'))) {
+            const videoUrl = match[1].replace(/\\u0026/g, '&').replace(/\\/g, '');
+            console.log('SSSTIK.IO API: 비디오 URL 발견:', videoUrl);
+            return {
+              kind: 'download',
+              videoId: videoId,
+              fileUrl: videoUrl
+            };
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.log('SSSTIK.IO API 실패:', e);
+  }
+
+  // 3. 추가 백업 서비스들
+  const backupServices = [
+    {
+      name: 'SnapTik',
+      url: 'https://snaptik.app/abc',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Origin': 'https://snaptik.app',
+        'Referer': 'https://snaptik.app/',
+      },
+      body: `url=${encodeURIComponent(url)}`
+    },
+    {
+      name: 'TikMate',
+      url: 'https://tikmate.online/api/convert',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Origin': 'https://tikmate.online',
+        'Referer': 'https://tikmate.online/',
+      },
+      body: JSON.stringify({ url: url })
+    }
+  ];
+
+  for (const service of backupServices) {
+    try {
+      console.log(`${service.name} API 시도...`);
+      
+      const response = await fetch(service.url, {
+        method: service.method,
+        headers: service.headers,
+        body: service.body
+      });
+
+      if (response.ok) {
+        const data = await response.text();
+        
+        // JSON 응답인지 확인
+        try {
+          const jsonData = JSON.parse(data);
+          if (jsonData.video || jsonData.download_url || jsonData.url) {
+            const videoUrl = jsonData.video || jsonData.download_url || jsonData.url;
+            console.log(`${service.name} API: 비디오 URL 발견:`, videoUrl);
+            return {
+              kind: 'download',
+              videoId: videoId,
+              fileUrl: videoUrl
+            };
+          }
+        } catch {
+          // HTML 응답인 경우 정규식으로 추출
+          const videoPatterns = [
+            /href="([^"]*\.mp4[^"]*)"/g,
+            /"download_url":"([^"]+)"/g,
+            /"video_url":"([^"]+)"/g,
+            /"url":"([^"]*\.mp4[^"]*)"/g,
+          ];
+
+          for (const pattern of videoPatterns) {
+            const matches = [...data.matchAll(pattern)];
+            for (const match of matches) {
+              if (match[1] && (match[1].includes('.mp4') || match[1].includes('http'))) {
+                const videoUrl = match[1].replace(/\\u0026/g, '&').replace(/\\/g, '');
+                console.log(`${service.name} API: 비디오 URL 발견:`, videoUrl);
+                return {
+                  kind: 'download',
+                  videoId: videoId,
+                  fileUrl: videoUrl
+                };
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.log(`${service.name} API 실패:`, e);
+    }
+  }
+
+  // 4. 최후의 방법: 서드파티 다운로드 사이트 링크 제공
+  return {
+    kind: 'embed',
+    embed: {
+      embedUrl: `https://www.tiktok.com/embed/${videoId}`,
+      embedHtml: `<blockquote class="tiktok-embed" cite="${url}" data-video-id="${videoId}">`
+    },
+    meta: {
+      videoId: videoId,
+      message: '모든 서드파티 API에서 다운로드에 실패했습니다. 직접 다운로드 사이트를 이용해주세요.',
+      downloadLinks: [
+        {
+          name: 'TIKWM.COM',
+          url: `https://www.tikwm.com/?url=${encodeURIComponent(url)}`
+        },
+        {
+          name: 'SSSTIK.IO',
+          url: `https://ssstik.io/abc?url=${encodeURIComponent(url)}`
+        },
+        {
+          name: 'SnapTik',
+          url: `https://snaptik.app/?url=${encodeURIComponent(url)}`
+        },
+        {
+          name: 'TikMate',
+          url: `https://tikmate.online/?url=${encodeURIComponent(url)}`
+        }
+      ]
+    }
+  };
+}
+
+// URL에서 video ID 추출 (단축 링크 포함)
+function extractVideoId(url: string): string | null {
+  // 단축 링크 정규화
+  if (url.includes('vm.tiktok.com') || url.includes('vt.tiktok.com')) {
+    // 단축 링크는 실제 URL로 리다이렉트되므로 그대로 사용
+    return null; // 실제 구현에서는 리다이렉트 처리 필요
+  }
+  
+  // 일반 TikTok URL에서 video ID 추출
+  const patterns = [
+    /\/video\/(\d+)/,
+    /\/@[^\/]+\/video\/(\d+)/,
+    /\/v\/(\d+)/,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) {
+      return match[1];
+    }
+  }
+  
+  return null;
+}

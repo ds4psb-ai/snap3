@@ -1,0 +1,24 @@
+{
+  "content_id": "Kec1NiP8uDc",
+  "content_key": "youtube:Kec1NiP8uDc",
+  "metadata": {
+    "platform": "youtube",
+    "language": "ko",
+    "video_origin": "Real-Footage"
+  },
+  "load_timestamp": "2025-08-18T04:00:00.000Z",
+  "load_date": "2025-08-18",
+  "evidence": {
+    "audio_fingerprint": {
+      "present": false
+    },
+    "product_mentions": []
+  },
+  "overall_analysis": {
+    "summary": {
+      "lang": "ko",
+      "text": "테스트용 VDP 샘플"
+    }
+  },
+  "scenes": []
+}

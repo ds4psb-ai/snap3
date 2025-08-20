@@ -1,0 +1,190 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# GPT-5 Pro용 컨텍스트 생성 스크립트
+# 사용법: ./scripts/generate_context_for_gpt5.sh [--include-files] [--include-diff]
+
+cd "$(git rev-parse --show-toplevel)"
+
+# 옵션 파싱
+INCLUDE_FILES=false
+INCLUDE_DIFF=false
+OUTPUT_FILE=""
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --include-files)
+      INCLUDE_FILES=true
+      shift
+      ;;
+    --include-diff)
+      INCLUDE_DIFF=true
+      shift
+      ;;
+    --output)
+      OUTPUT_FILE="$2"
+      shift 2
+      ;;
+    -h|--help)
+      echo "Usage: $0 [OPTIONS]"
+      echo "Options:"
+      echo "  --include-files    Include changed files list"
+      echo "  --include-diff     Include diff preview"
+      echo "  --output FILE      Save to file instead of stdout"
+      echo "  -h, --help         Show this help"
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# 출력 함수
+output() {
+  if [[ -n "$OUTPUT_FILE" ]]; then
+    echo "$1" >> "$OUTPUT_FILE"
+  else
+    echo "$1"
+  fi
+}
+
+# 출력 파일 초기화
+if [[ -n "$OUTPUT_FILE" ]]; then
+  > "$OUTPUT_FILE"
+fi
+
+# 헤더
+output "## 🎯 GPT-5 Pro Context Summary"
+output ""
+output "**Generated**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+output "**Repository**: $(basename "$(git rev-parse --show-toplevel)")"
+output "**Branch**: $(git branch --show-current)"
+output "**HEAD**: $(git rev-parse --short HEAD)"
+output ""
+
+# 최근 5커밋 요약
+output "### 📋 Recent 5 Commits"
+output '```'
+bash scripts/generate_summary.sh | while IFS= read -r line; do
+  output "$line"
+done
+output '```'
+output ""
+
+# 현재 작업 디렉토리 상태
+output "### 🏠 Current Working State"
+output "- **Working Directory**: \`$(pwd)\`"
+output "- **Git Status**: $(git status --porcelain | wc -l) modified files"
+output "- **Staged Changes**: $(git diff --cached --stat | tail -1 || echo "No staged changes")"
+output "- **Unstaged Changes**: $(git diff --stat | tail -1 || echo "No unstaged changes")"
+output ""
+
+# 변경된 파일 목록 (옵션)
+if [[ "$INCLUDE_FILES" == true ]]; then
+  output "### 📁 Changed Files (Last Commit)"
+  output '```'
+  git diff --name-only HEAD^ HEAD | head -20 | while IFS= read -r line; do
+    output "$line"
+  done
+  output '```'
+  output ""
+fi
+
+# Diff 미리보기 (옵션)
+if [[ "$INCLUDE_DIFF" == true ]]; then
+  output "### 🔍 Recent Changes Preview"
+  output '```diff'
+  git diff HEAD^ HEAD --patch-with-stat | head -50 | while IFS= read -r line; do
+    output "$line"
+  done
+  output '```'
+  output ""
+fi
+
+# 터미널 상태 체크 힌트
+output "### 🖥️ Terminal Status Commands"
+output "```bash"
+output "# Main T1 (~/snap3)"
+output "cd ~/snap3 && scripts/generate_summary.sh"
+output ""
+output "# Jobs T2 (~/snap3-jobs)"  
+output "cd ~/snap3-jobs && ./worker-ingest-v2.sh --health"
+output ""
+output "# T2VDP T3 (~/snap3/services/t2-extract)"
+output "cd ~/snap3/services/t2-extract && ./run-all-checks.sh"
+output ""
+output "# Storage T4 (~/snap3-storage)"
+output "cd ~/snap3-storage && ./scripts/quick-validation.sh"
+output '```'
+output ""
+
+# 프로젝트 핵심 정보
+output "### 🎯 Project Core Info"
+output "- **Type**: VDP RAW Generation Pipeline"
+output "- **Platforms**: YouTube, Instagram, TikTok"
+output "- **Architecture**: Multi-terminal (4x), Platform-segmented GCS"
+output "- **Key Bucket**: \`tough-variety-raw-central1\`"
+output "- **Key Region**: \`us-central1\`"
+output ""
+
+# GPT-5 사용 가이드
+output "### 🚀 GPT-5 Quick Start Instructions"
+output "1. **Copy this entire output** to new GPT-5 Pro chat"
+output "2. **Add prompt**: \"Use this context to guide ClaudeCode collaboration for VDP pipeline work\""
+output "3. **Reference docs**: [Triangular Workflow](docs/GPT5_CLAUDECODE_CURSOR_TRIANGULAR_WORKFLOW.md)"
+output "4. **Terminal setup**: Use the 4-terminal structure shown above"
+output ""
+
+# 주요 명령어 레퍼런스
+output "### 🔧 Key Commands Reference"
+output "```bash"
+output "# 컨텍스트 업데이트"
+output "scripts/generate_context_for_gpt5.sh --include-files --output /tmp/gpt5_context.md"
+output ""
+output "# 인제스트 UI 실행"
+output "node simple-web-server.js  # http://localhost:8080"
+output ""
+output "# 메인 UI 실행"
+output "npm run dev  # http://localhost:3000"
+output ""
+output "# 전체 시스템 검증"
+output "cd services/t2-extract && ./run-all-checks.sh"
+output '```'
+output ""
+
+# 현재 환경 변수 상태
+output "### ⚙️ Environment Status"
+output "```bash"
+output "PROJECT_ID=${PROJECT_ID:-'not_set'}"
+output "REGION=${REGION:-'not_set'}" 
+output "RAW_BUCKET=${RAW_BUCKET:-'not_set'}"
+output "PLATFORM_SEGMENTED_PATH=${PLATFORM_SEGMENTED_PATH:-'not_set'}"
+output '```'
+output ""
+
+# 최근 로그 파일 상태 
+if [[ -d "logs" ]]; then
+  output "### 📝 Recent Logs Status"
+  output "```"
+  ls -la logs/ | tail -5 | while IFS= read -r line; do
+    output "$line"
+  done 2>/dev/null || output "No logs directory or files"
+  output '```'
+  output ""
+fi
+
+# 푸터
+output "---"
+output "*🤖 Generated by \`scripts/generate_context_for_gpt5.sh\` • $(date)*"
+
+# 성공 메시지
+if [[ -n "$OUTPUT_FILE" ]]; then
+  echo "✅ Context summary saved to: $OUTPUT_FILE"
+  echo "📋 Copy content to GPT-5 Pro for seamless collaboration!"
+else
+  echo "" >&2
+  echo "✅ Context summary generated!" >&2
+  echo "📋 Copy the above output to GPT-5 Pro chat" >&2
+fi

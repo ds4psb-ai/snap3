@@ -14,6 +14,7 @@
 - **Snap3 Turbo**: Textboard generation (Story/Tone/Wild variants)
 - **Hook Lab**: 5-8 hook candidates with scores
 - **Evidence Pack**: Trust Score + 3-5 chips + Digest ID
+- **Flux Kontext**: First-frame generation for product scenes (consumes CR)
 - **Output**: Storyboard Detail URL with prefilled content
 
 ## Performance Requirements
@@ -24,9 +25,11 @@
 
 ## Product-First Frame Integration
 - **Scene marking**: Automatically mark scenes as requires_product
-- **First frame**: Uploaded image becomes frame 0
+- **First frame**: Uploaded image becomes frame 0 OR Flux Kontext generation
 - **Motion suggestions**: dolly_in, parallax, tilt_reveal options
 - **Image→video prompts**: Compile with motion directives
+- **CR consumption**: Kontext image generation/editing consumes credits
+- **Tiers**: dev|pro|max pricing anchors ($0.04/image [pro], $0.08/image [max])
 
 ## Hook Lab Integration
 - **Hook generation**: 5-8 candidates with 0-3s timestamps
@@ -47,6 +50,9 @@
 - **UNSUPPORTED_AR_FOR_PREVIEW**: Non-16:9 aspect ratio
 - **PROVIDER_QUOTA_EXCEEDED**: Rate limit exceeded
 - **PROVIDER_POLICY_BLOCKED**: Content policy violation
+- **CREDIT_INSUFFICIENT**: Insufficient credits for generation
+- **KONCONTEXT_GENERATION_FAILED**: Flux Kontext generation error
+- **FLUX_KONCONTEXT_QUOTA_EXCEEDED**: Kontext rate limit exceeded
 
 ## Auto-attach Triggers
 This rule auto-attaches when working on:
@@ -56,5 +62,7 @@ This rule auto-attaches when working on:
 - Snap3 Turbo workflow
 - Hook Lab functionality
 - Evidence Pack generation
+- Flux Kontext integration
+- Credit system integration
 - Performance optimization
 - Error handling and recovery

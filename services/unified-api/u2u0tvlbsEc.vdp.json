@@ -1,0 +1,245 @@
+{
+  "content_id": "u2u0tvlbsEc",
+  "metadata": {
+    "platform": "youtube_shorts",
+    "source_url": "https://www.youtube.com/shorts/u2u0tvlbsEc",
+    "view_count": 58260,
+    "like_count": 2250,
+    "comment_count": 86,
+    "share_count": 52,
+    "hashtags": [
+      "viral",
+      "trending",
+      "shorts",
+      "fyp"
+    ],
+    "upload_date": "2025-08-15T14:17:27.247Z",
+    "video_origin": "Real-Footage",
+    "duration_sec": 8.2,
+    "resolution": "1080x1920",
+    "fps": 30
+  },
+  "overall_analysis": {
+    "overall_sentiment": "Highly Positive and Engaging",
+    "asr_transcript": [
+      {
+        "text": "안녕하세요! 오늘 정말 놀라운 걸 발견했어요",
+        "start_time": 0,
+        "end_time": 2.5,
+        "confidence": 0.95
+      },
+      {
+        "text": "이걸 보시면 깜짝 놀라실 거예요",
+        "start_time": 2.5,
+        "end_time": 4.8,
+        "confidence": 0.92
+      },
+      {
+        "text": "정말 대박이에요!",
+        "start_time": 4.8,
+        "end_time": 6.2,
+        "confidence": 0.89
+      }
+    ],
+    "asr_translation_en": [
+      {
+        "text": "Hello! I discovered something amazing today",
+        "start_time": 0,
+        "end_time": 2.5
+      },
+      {
+        "text": "You'll be surprised when you see this",
+        "start_time": 2.5,
+        "end_time": 4.8
+      },
+      {
+        "text": "This is really amazing!",
+        "start_time": 4.8,
+        "end_time": 6.2
+      }
+    ],
+    "ocr_text": [
+      "놀라운 발견!",
+      "대박 꿀팁",
+      "구독 좋아요"
+    ],
+    "confidence": {
+      "overall": 0.92,
+      "scene_detection": 0.88,
+      "audio_analysis": 0.85,
+      "text_analysis": 0.91,
+      "emotion_detection": 0.87
+    },
+    "emotional_arc": {
+      "start": "Curiosity",
+      "peak": "Excitement",
+      "end": "Satisfaction"
+    },
+    "audience_reaction": {
+      "notable_comments": [
+        {
+          "text": "와 이거 진짜 신기하다",
+          "sentiment": "positive",
+          "engagement_score": 0.9
+        },
+        {
+          "text": "어떻게 이런 생각을 했지?",
+          "sentiment": "curious",
+          "engagement_score": 0.8
+        }
+      ],
+      "common_reactions": [
+        "amazement",
+        "curiosity",
+        "sharing_intent"
+      ],
+      "virality_indicators": [
+        "high_completion_rate",
+        "rapid_sharing",
+        "comment_engagement"
+      ]
+    },
+    "content_classification": {
+      "primary_category": "lifestyle_tips",
+      "secondary_categories": [
+        "educational",
+        "entertaining"
+      ],
+      "target_demographics": [
+        "18-34",
+        "korean_speakers",
+        "lifestyle_enthusiasts"
+      ],
+      "trending_potential": 0.84
+    },
+    "hookGenome": {
+      "start_sec": 0.07482516437294917,
+      "pattern_code": "curiosity_gap",
+      "delivery": "direct_address",
+      "trigger_modalities": [
+        "visual",
+        "audio",
+        "text"
+      ],
+      "microbeats_sec": [
+        0.8,
+        1.7,
+        2.4
+      ],
+      "strength_score": 0.8911669136792486,
+      "engagement_predictors": [
+        "question_hook",
+        "visual_surprise",
+        "relatability"
+      ]
+    },
+    "content_analysis": {
+      "pacing_analysis": {
+        "overall_pace": "dynamic",
+        "cut_frequency": "high",
+        "attention_retention": 0.89
+      },
+      "visual_elements": {
+        "color_palette": [
+          "bright",
+          "vibrant",
+          "attention_grabbing"
+        ],
+        "composition_quality": 0.85,
+        "visual_clarity": 0.91
+      },
+      "audio_elements": {
+        "voice_energy": "high",
+        "background_music": "upbeat",
+        "audio_quality": 0.88
+      }
+    }
+  },
+  "scenes": [
+    {
+      "scene_id": "scene_001",
+      "start_time": 0,
+      "end_time": 2.8,
+      "narrative_unit": {
+        "narrative_role": "Hook",
+        "summary": "Opening with curiosity-inducing question and direct address",
+        "rhetoric": "Curiosity gap creation"
+      },
+      "visual_analysis": {
+        "shot_type": "medium_close_up",
+        "lighting": "bright_natural",
+        "movement": "slight_handheld"
+      },
+      "audio_analysis": {
+        "voice_tone": "enthusiastic",
+        "pace": "moderate",
+        "emphasis_points": [
+          0.5,
+          1.2,
+          2.1
+        ]
+      }
+    },
+    {
+      "scene_id": "scene_002",
+      "start_time": 2.8,
+      "end_time": 5.5,
+      "narrative_unit": {
+        "narrative_role": "Demonstration",
+        "summary": "Revealing the surprising discovery with visual proof",
+        "rhetoric": "Problem-solution presentation"
+      },
+      "visual_analysis": {
+        "shot_type": "close_up_detail",
+        "lighting": "focused_highlight",
+        "movement": "steady_reveal"
+      }
+    },
+    {
+      "scene_id": "scene_003",
+      "start_time": 5.5,
+      "end_time": 8.2,
+      "narrative_unit": {
+        "narrative_role": "Call_to_Action",
+        "summary": "Excitement expression and engagement request",
+        "rhetoric": "Social proof and participation"
+      },
+      "visual_analysis": {
+        "shot_type": "medium_shot",
+        "lighting": "bright_even",
+        "movement": "energetic_gestures"
+      }
+    }
+  ],
+  "product_mentions": [
+    {
+      "name": "생활용품 X",
+      "type": "household_item",
+      "category": "lifestyle",
+      "time_ranges": [
+        [
+          2.8,
+          5.1
+        ]
+      ],
+      "evidence": [
+        "visual",
+        "spoken"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "service_mentions": [],
+  "performance_metrics": {
+    "estimated_completion_rate": 0.87,
+    "predicted_engagement_rate": 0.12,
+    "virality_score": 0.74,
+    "brand_safety_score": 0.95
+  },
+  "default_lang": "ko",
+  "processing_metadata": {
+    "analysis_version": "v2.1.0",
+    "processing_time": "2025-08-15T14:17:27.247Z",
+    "confidence_threshold": 0.7
+  }
+}

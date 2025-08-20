@@ -1,0 +1,182 @@
+🔄 Ingest Request Polling Worker v2 (Platform-Segmented)
+========================================================
+📍 Polling: gs://tough-variety-raw-central1/ingest/requests/{youtube,instagram,tiktok}/
+📁 Work dir: /Users/ted/snap3-jobs/work
+🎯 VDP Service: https://t2-vdp-355516763169.us-central1.run.app
+🏷️  Regional Policy: us-central1 (v1.3.1)
+🧩 Platform Segmentation: true
+
+[2025-08-17T12:57:03.3NZ] [INFO] [correlation_id=worker-v2-1755435423-2714-b8fb66bd] Validating Regional Alignment Policy v1.3.1
+[2025-08-17T12:57:03.3NZ] [INFO] [correlation_id=worker-v2-1755435423-2714-b8fb66bd] Platform segmentation enabled (PLATFORM_SEGMENTED_PATH=true)
+[2025-08-17T12:57:03.3NZ] [INFO] [correlation_id=worker-v2-1755435423-2714-b8fb66bd] Regional alignment validation passed
+[2025-08-17T12:57:03.3NZ] [DEBUG] [correlation_id=worker-v2-1755435423-2714-b8fb66bd] Region: us-central1, Bucket: tough-variety-raw-central1, Service: https://t2-vdp-355516763169.us-central1.run.app
+[2025-08-17T12:57:03.3NZ] [INFO] [correlation_id=worker-v2-1755435423-2714-b8fb66bd] Worker v2 starting with master correlation ID
+[2025-08-17T12:57:03.3NZ] [INFO] [correlation_id=worker-v2-1755435423-2714-b8fb66bd] Running in single execution mode (--once)
+
+[2025-08-17T12:57:03.3NZ] [DEBUG] [correlation_id=worker-v2-1755435423-2714-dc2a0484] Polling iteration #1 started
+[2025-08-17T12:57:07.3NZ] [INFO] [correlation_id=worker-v2-1755435423-2714-dc2a0484] Found 6 request(s) to process
+[2025-08-17T12:57:07.3NZ] [INFO] [correlation_id=worker-v2-1755435427-2714-156405d7] Processing request: gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-cFyBJaoNyGY.json
+Copying gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-cFyBJaoNyGY.json...
+/ [0 files][    0.0 B/  329.0 B]                                                / [1 files][  329.0 B/  329.0 B]                                                
+Operation completed over 1 objects/329.0 B.                                      
+[2025-08-17T12:57:08.3NZ] [DEBUG] [correlation_id=worker-v2-1755435427-2714-156405d7] Request download completed in 1.513224000s
+   Raw platform: youtube
+   Normalized platform: youtube
+   Content ID: cFyBJaoNyGY
+   Content key: 
+[2025-08-17T12:57:08.3NZ] [INFO] [correlation_id=worker-v2-1755435427-2714-156405d7] Generated content_key: youtube:cFyBJaoNyGY
+[2025-08-17T12:57:08.3NZ] [DEBUG] [correlation_id=worker-v2-1755435427-2714-156405d7] Validating content_key format compliance
+[2025-08-17T12:57:08.3NZ] [DEBUG] [correlation_id=worker-v2-1755435427-2714-156405d7] Platform validation passed: youtube
+[2025-08-17T12:57:08.3NZ] [DEBUG] [correlation_id=worker-v2-1755435427-2714-156405d7] Content key format validation passed: youtube:cFyBJaoNyGY
+   Source URL: https://www.youtube.com/watch?v=cFyBJaoNyGY
+   Output GCS: 
+   Platform: youtube
+[2025-08-17T12:57:10.3NZ] [INFO] [correlation_id=worker-v2-1755435427-2714-156405d7] YouTube processing started
+[2025-08-17T12:57:10.3NZ] [DEBUG] [correlation_id=worker-v2-1755435427-2714-156405d7] Content ID: cFyBJaoNyGY, Source: https://www.youtube.com/watch?v=cFyBJaoNyGY
+[2025-08-17T12:57:10.3NZ] [DEBUG] [correlation_id=worker-v2-1755435427-2714-156405d7] Validating platform segmentation for input path
+[2025-08-17T12:57:10.3NZ] [DEBUG] [correlation_id=worker-v2-1755435427-2714-156405d7] Platform segmentation validation passed for input
+[2025-08-17T12:57:10.3NZ] [DEBUG] [correlation_id=worker-v2-1755435427-2714-156405d7] Validating platform segmentation for output path
+[2025-08-17T12:57:10.3NZ] [DEBUG] [correlation_id=worker-v2-1755435427-2714-156405d7] Platform segmentation validation passed for output
+[2025-08-17T12:57:10.3NZ] [DEBUG] [correlation_id=worker-v2-1755435427-2714-156405d7] Validating platform segmentation for evidence path
+[2025-08-17T12:57:10.3NZ] [DEBUG] [correlation_id=worker-v2-1755435427-2714-156405d7] Platform segmentation validation passed for evidence
+[2025-08-17T12:57:10.3NZ] [DEBUG] [correlation_id=worker-v2-1755435427-2714-156405d7] Platform paths - Input: gs://tough-variety-raw-central1/raw/input/youtube/cFyBJaoNyGY.mp4, Evidence: gs://tough-variety-raw-central1/raw/vdp/evidence/youtube/, Output: gs://tough-variety-raw-central1/raw/vdp/youtube/cFyBJaoNyGY.NEW.universal.json
+📹 Downloading video via yt-dlp: https://www.youtube.com/watch?v=cFyBJaoNyGY
+[youtube] Extracting URL: https://www.youtube.com/watch?v=cFyBJaoNyGY
+[youtube] cFyBJaoNyGY: Downloading webpage
+Copying from <STDIN>...
+/ [0 files][    0.0 B/    0.0 B]                                                [youtube] cFyBJaoNyGY: Downloading tv client config
+[youtube] cFyBJaoNyGY: Downloading tv player API JSON
+[youtube] cFyBJaoNyGY: Downloading ios player API JSON
+[youtube] cFyBJaoNyGY: Downloading m3u8 information
+[info] cFyBJaoNyGY: Downloading 1 format(s): 18
+[download] Destination: -
+[download]   0.0% of    1.98MiB at  191.49KiB/s ETA 00:10[download]   0.1% of    1.98MiB at  501.75KiB/s ETA 00:04[download]   0.3% of    1.98MiB at    1.09MiB/s ETA 00:01[download]   0.7% of    1.98MiB at    2.23MiB/s ETA 00:00[download]   1.5% of    1.98MiB at    1.05MiB/s ETA 00:01[download]   3.1% of    1.98MiB at    1.09MiB/s ETA 00:01[download]   6.3% of    1.98MiB at    1.19MiB/s ETA 00:01[download]  12.6% of    1.98MiB at    1.56MiB/s ETA 00:01[download]  25.2% of    1.98MiB at    2.61MiB/s ETA 00:00[download]  50.5% of    1.98MiB at    3.48MiB/s ETA 00:00[download] 100.0% of    1.98MiB at    5.07MiB/s ETA 00:00[download] 100% of    1.98MiB in 00:00:00 at 2.72MiB/s   
+/ [0 files][264.0 KiB/    0.0 B]                                                / [0 files][  2.0 MiB/    0.0 B]                                                / [1 files][    0.0 B/    0.0 B]                                                
+Operation completed over 1 objects.                                              
+✅ Video uploaded to: gs://tough-variety-raw-central1/raw/input/youtube/cFyBJaoNyGY.mp4
+🔍 Generating Evidence Packs...
+   → Audio fingerprint (3-sample strategy)
+
+> snap3-jobs-url-normalizer@1.0.0 evidence:audio
+> ./evidence-generator/audio-fingerprint-enhanced.sh gs://tough-variety-raw-central1/raw/input/youtube/cFyBJaoNyGY.mp4 cFyBJaoNyGY /Users/ted/snap3-jobs/work/cFyBJaoNyGY.audio.fp.json
+
+🎵 Enhanced Audio Fingerprint Generator
+======================================
+📁 Input: gs://tough-variety-raw-central1/raw/input/youtube/cFyBJaoNyGY.mp4
+🆔 Content ID: cFyBJaoNyGY
+📄 Output: /Users/ted/snap3-jobs/work/cFyBJaoNyGY.audio.fp.json
+
+⏱️ Analyzing video duration...
+   ⚠️  Audio fingerprint generation skipped (npm script not available)
+Copying file:///Users/ted/snap3-jobs/work/cFyBJaoNyGY.audio.fp.json [Content-Type=application/json]...
+/ [0 files][    0.0 B/  103.0 B]                                                / [1 files][  103.0 B/  103.0 B]                                                
+Operation completed over 1 objects/103.0 B.                                      
+   → Product/brand evidence extraction
+
+> snap3-jobs-url-normalizer@1.0.0 evidence:brands
+> cd evidence-generator && node product-evidence.mjs /Users/ted/snap3-jobs/work/cFyBJaoNyGY.vdp.seed.json /Users/ted/snap3-jobs/work/cFyBJaoNyGY.product.evidence.json
+
+🏷️ Product Evidence Extractor
+=============================
+📁 Input VDP: /Users/ted/snap3-jobs/work/cFyBJaoNyGY.vdp.seed.json
+📄 Output: /Users/ted/snap3-jobs/work/cFyBJaoNyGY.product.evidence.json
+
+🔍 Analyzing 0 text segments...
+✅ Found 0 brands, 0 products
+
+📊 Evidence Summary:
+===================
+🏷️ Total mentions: 0
+📈 Detection score: 0
+📝 Text segments: 0
+
+✅ Product evidence → /Users/ted/snap3-jobs/work/cFyBJaoNyGY.product.evidence.json
+Copying file:///Users/ted/snap3-jobs/work/cFyBJaoNyGY.product.evidence.json [Content-Type=application/json]...
+/ [0 files][    0.0 B/  430.0 B]                                                / [1 files][  430.0 B/  430.0 B]                                                
+Operation completed over 1 objects/430.0 B.                                      
+   ✅ Product evidence uploaded
+🚀 Triggering VDP generation: https://t2-vdp-355516763169.us-central1.run.app
+✅ VDP generation triggered successfully
+   Response: OK
+Copying from <STDIN>...
+/ [0 files][    0.0 B/    0.0 B]                                                / [0 files][    4.0 B/    0.0 B]                                                / [1 files][    0.0 B/    0.0 B]                                                
+Operation completed over 1 objects.                                              
+[2025-08-17T12:58:28.3NZ] [INFO] [correlation_id=worker-v2-1755435427-2714-156405d7] Request completed successfully in 81.442079000s
+[2025-08-17T12:58:28.3NZ] [INFO] [correlation_id=worker-v2-1755435427-2714-156405d7] Content key: youtube:cFyBJaoNyGY, Platform: youtube, Base: test-youtube-cFyBJaoNyGY.json
+----------------------------------------
+[2025-08-17T12:58:28.3NZ] [DEBUG] [correlation_id=worker-v2-1755435423-2714-dc2a0484] Request processed successfully in 81.466217000s
+[2025-08-17T12:58:28.3NZ] [INFO] [correlation_id=worker-v2-1755435508-2714-26b02d7c] Processing request: gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-fresh.json
+Copying gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-fresh.json...
+/ [0 files][    0.0 B/  327.0 B]                                                / [1 files][  327.0 B/  327.0 B]                                                
+Operation completed over 1 objects/327.0 B.                                      
+[2025-08-17T12:58:30.3NZ] [DEBUG] [correlation_id=worker-v2-1755435508-2714-26b02d7c] Request download completed in 1.480920000s
+   Raw platform: youtube
+   Normalized platform: youtube
+   Content ID: 6_I2FmT1mbY
+   Content key: 
+[2025-08-17T12:58:30.3NZ] [INFO] [correlation_id=worker-v2-1755435508-2714-26b02d7c] Generated content_key: youtube:6_I2FmT1mbY
+[2025-08-17T12:58:30.3NZ] [DEBUG] [correlation_id=worker-v2-1755435508-2714-26b02d7c] Validating content_key format compliance
+[2025-08-17T12:58:30.3NZ] [DEBUG] [correlation_id=worker-v2-1755435508-2714-26b02d7c] Platform validation passed: youtube
+[2025-08-17T12:58:30.3NZ] [DEBUG] [correlation_id=worker-v2-1755435508-2714-26b02d7c] Content key format validation passed: youtube:6_I2FmT1mbY
+⏭️  Already processed youtube:6_I2FmT1mbY
+[2025-08-17T12:58:31.3NZ] [DEBUG] [correlation_id=worker-v2-1755435423-2714-dc2a0484] Request processed successfully in 2.643830000s
+[2025-08-17T12:58:31.3NZ] [INFO] [correlation_id=worker-v2-1755435511-2714-7af51860] Processing request: gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-new.json
+Copying gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-new.json...
+/ [0 files][    0.0 B/  321.0 B]                                                / [1 files][  321.0 B/  321.0 B]                                                
+Operation completed over 1 objects/321.0 B.                                      
+[2025-08-17T12:58:32.3NZ] [DEBUG] [correlation_id=worker-v2-1755435511-2714-7af51860] Request download completed in 1.446481000s
+   Raw platform: youtube
+   Normalized platform: youtube
+   Content ID: jNQXAC9IVRw
+   Content key: 
+[2025-08-17T12:58:32.3NZ] [INFO] [correlation_id=worker-v2-1755435511-2714-7af51860] Generated content_key: youtube:jNQXAC9IVRw
+[2025-08-17T12:58:32.3NZ] [DEBUG] [correlation_id=worker-v2-1755435511-2714-7af51860] Validating content_key format compliance
+[2025-08-17T12:58:32.3NZ] [DEBUG] [correlation_id=worker-v2-1755435511-2714-7af51860] Platform validation passed: youtube
+[2025-08-17T12:58:32.3NZ] [DEBUG] [correlation_id=worker-v2-1755435511-2714-7af51860] Content key format validation passed: youtube:jNQXAC9IVRw
+⏭️  Already processed youtube:jNQXAC9IVRw
+[2025-08-17T12:58:34.3NZ] [DEBUG] [correlation_id=worker-v2-1755435423-2714-dc2a0484] Request processed successfully in 2.566132000s
+[2025-08-17T12:58:34.3NZ] [INFO] [correlation_id=worker-v2-1755435514-2714-59cecd22] Processing request: gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-real.json
+Copying gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-real.json...
+/ [0 files][    0.0 B/  321.0 B]                                                -- [1 files][  321.0 B/  321.0 B]                                                
+Operation completed over 1 objects/321.0 B.                                      
+[2025-08-17T12:58:36.3NZ] [DEBUG] [correlation_id=worker-v2-1755435514-2714-59cecd22] Request download completed in 1.932824000s
+   Raw platform: youtube
+   Normalized platform: youtube
+   Content ID: Wo5h0K_b_So
+   Content key: 
+[2025-08-17T12:58:36.3NZ] [INFO] [correlation_id=worker-v2-1755435514-2714-59cecd22] Generated content_key: youtube:Wo5h0K_b_So
+[2025-08-17T12:58:36.3NZ] [DEBUG] [correlation_id=worker-v2-1755435514-2714-59cecd22] Validating content_key format compliance
+[2025-08-17T12:58:36.3NZ] [DEBUG] [correlation_id=worker-v2-1755435514-2714-59cecd22] Platform validation passed: youtube
+[2025-08-17T12:58:36.3NZ] [DEBUG] [correlation_id=worker-v2-1755435514-2714-59cecd22] Content key format validation passed: youtube:Wo5h0K_b_So
+⏭️  Already processed youtube:Wo5h0K_b_So
+[2025-08-17T12:58:37.3NZ] [DEBUG] [correlation_id=worker-v2-1755435423-2714-dc2a0484] Request processed successfully in 3.116533000s
+[2025-08-17T12:58:37.3NZ] [INFO] [correlation_id=worker-v2-1755435517-2714-e6d3a31f] Processing request: gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-request-v2.json
+Copying gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-request-v2.json...
+/ [0 files][    0.0 B/  320.0 B]                                                / [1 files][  320.0 B/  320.0 B]                                                
+Operation completed over 1 objects/320.0 B.                                      
+[2025-08-17T12:58:38.3NZ] [DEBUG] [correlation_id=worker-v2-1755435517-2714-e6d3a31f] Request download completed in 1.519788000s
+   Raw platform: youtube
+   Normalized platform: youtube
+   Content ID: dQw4w9WgXcQ
+   Content key: 
+[2025-08-17T12:58:38.3NZ] [INFO] [correlation_id=worker-v2-1755435517-2714-e6d3a31f] Generated content_key: youtube:dQw4w9WgXcQ
+[2025-08-17T12:58:38.3NZ] [DEBUG] [correlation_id=worker-v2-1755435517-2714-e6d3a31f] Validating content_key format compliance
+[2025-08-17T12:58:38.3NZ] [DEBUG] [correlation_id=worker-v2-1755435517-2714-e6d3a31f] Platform validation passed: youtube
+[2025-08-17T12:58:38.3NZ] [DEBUG] [correlation_id=worker-v2-1755435517-2714-e6d3a31f] Content key format validation passed: youtube:dQw4w9WgXcQ
+⏭️  Already processed youtube:dQw4w9WgXcQ
+[2025-08-17T12:58:39.3NZ] [DEBUG] [correlation_id=worker-v2-1755435423-2714-dc2a0484] Request processed successfully in 2.588572000s
+[2025-08-17T12:58:39.3NZ] [INFO] [correlation_id=worker-v2-1755435519-2714-853d4664] Processing request: gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-request.json
+Copying gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-request.json...
+/ [0 files][    0.0 B/  289.0 B]                                                / [1 files][  289.0 B/  289.0 B]                                                
+Operation completed over 1 objects/289.0 B.                                      
+[2025-08-17T12:58:41.3NZ] [DEBUG] [correlation_id=worker-v2-1755435519-2714-853d4664] Request download completed in 1.585937000s
+   Raw platform: youtube
+   Normalized platform: youtube
+   Content ID: 
+   Content key: 
+[2025-08-17T12:58:41.3NZ] [ERROR] [correlation_id=worker-v2-1755435519-2714-853d4664] CONTENT_KEY_MISSING: content_id missing after correction attempts
+[2025-08-17T12:58:41.3NZ] [ERROR] [correlation_id=worker-v2-1755435519-2714-853d4664] Request: test-youtube-request.json, Platform: youtube, Content Key: 
+[2025-08-17T12:58:41.3NZ] [ERROR] [correlation_id=worker-v2-1755435423-2714-dc2a0484] Processing failed after 1.677035000s
+[2025-08-17T12:58:41.3NZ] [ERROR] [correlation_id=worker-v2-1755435423-2714-dc2a0484] Failed request: gs://tough-variety-raw-central1/ingest/requests/youtube/test-youtube-request.json
+[2025-08-17T12:58:41.3NZ] [INFO] [correlation_id=worker-v2-1755435423-2714-dc2a0484] Single execution completed
+[2025-08-17T12:58:41.3NZ] [INFO] [correlation_id=worker-v2-1755435423-2714-b8fb66bd] Platform-segmented worker shutdown completed

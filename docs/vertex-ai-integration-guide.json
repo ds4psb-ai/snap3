@@ -1,0 +1,1134 @@
+{
+  "vertex_ai_integration": {
+    "model_configuration": {
+      "model": "gemini-2.5-pro",
+      "response_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "VDP Vertex AI Response Schema",
+        "description": "Strict VDP schema optimized for Vertex AI response_schema enforcement based on C000888/889 samples",
+        "type": "object",
+        "required": [
+          "content_id",
+          "metadata",
+          "overall_analysis",
+          "product_mentions",
+          "scenes",
+          "service_mentions",
+          "default_lang"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "content_id": {
+            "type": "string",
+            "pattern": "^C\\d{6}$",
+            "description": "Content identifier in format C######",
+            "x-vertex-guidance": "Generate unique content ID in format C followed by 6 digits"
+          },
+          "metadata": {
+            "type": "object",
+            "required": [
+              "comment_count",
+              "cta_types",
+              "hashtags",
+              "like_count",
+              "original_sound",
+              "platform",
+              "share_count",
+              "source_url",
+              "upload_date",
+              "video_origin",
+              "view_count"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "comment_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000000
+              },
+              "cta_types": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "comment",
+                    "share",
+                    "product_recommendation",
+                    "like",
+                    "follow",
+                    "subscribe",
+                    "visit_profile",
+                    "visit_link"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 10,
+                "uniqueItems": true
+              },
+              "hashtags": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9가-힣_]+$",
+                  "minLength": 1,
+                  "maxLength": 50
+                },
+                "minItems": 1,
+                "maxItems": 20,
+                "uniqueItems": true
+              },
+              "like_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000000
+              },
+              "original_sound": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "title"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "title": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              },
+              "platform": {
+                "type": "string",
+                "enum": [
+                  "YouTube",
+                  "Instagram",
+                  "TikTok",
+                  "Facebook",
+                  "Twitter",
+                  "Snapchat"
+                ]
+              },
+              "share_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000000
+              },
+              "source_url": {
+                "type": "string",
+                "pattern": "^https?://"
+              },
+              "upload_date": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+              },
+              "video_origin": {
+                "type": "string",
+                "enum": [
+                  "AI-Generated",
+                  "Real-Footage",
+                  "Mixed",
+                  "Animation",
+                  "CGI",
+                  "Stock-Footage"
+                ]
+              },
+              "view_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000000000
+              }
+            },
+            "x-vertex-guidance": "Extract comprehensive metadata from video analysis"
+          },
+          "overall_analysis": {
+            "type": "object",
+            "required": [
+              "audience_reaction",
+              "confidence",
+              "emotional_arc",
+              "graph_refs",
+              "safety_flags",
+              "summary",
+              "asr_lang",
+              "asr_transcript",
+              "asr_translation_en",
+              "ocr_text"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "audience_reaction": {
+                "type": "object",
+                "required": [
+                  "analysis",
+                  "common_reactions",
+                  "notable_comments",
+                  "overall_sentiment"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "analysis": {
+                    "type": "string",
+                    "minLength": 50,
+                    "maxLength": 2000
+                  },
+                  "common_reactions": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 5,
+                      "maxLength": 200
+                    },
+                    "minItems": 2,
+                    "maxItems": 10
+                  },
+                  "notable_comments": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "lang",
+                        "text",
+                        "translation_en"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "lang": {
+                          "type": "string",
+                          "pattern": "^[a-z]{2}$"
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        "translation_en": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        }
+                      }
+                    },
+                    "minItems": 1,
+                    "maxItems": 10
+                  },
+                  "overall_sentiment": {
+                    "type": "string",
+                    "enum": [
+                      "Highly Positive and Amused",
+                      "Highly Positive and Inquisitive",
+                      "Positive and Engaged",
+                      "Mixed but Favorable",
+                      "Neutral",
+                      "Mixed",
+                      "Negative",
+                      "Highly Negative"
+                    ]
+                  }
+                }
+              },
+              "confidence": {
+                "type": "object",
+                "required": [
+                  "device_analysis",
+                  "overall",
+                  "scene_classification"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "device_analysis": {
+                    "type": "number",
+                    "minimum": 0.8,
+                    "maximum": 1
+                  },
+                  "overall": {
+                    "type": "number",
+                    "minimum": 0.9,
+                    "maximum": 1
+                  },
+                  "scene_classification": {
+                    "type": "number",
+                    "minimum": 0.9,
+                    "maximum": 1
+                  }
+                }
+              },
+              "emotional_arc": {
+                "type": "string",
+                "minLength": 20,
+                "maxLength": 1000
+              },
+              "graph_refs": {
+                "type": "object",
+                "required": [
+                  "potential_meme_template",
+                  "related_hashtags"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "potential_meme_template": {
+                    "type": "string",
+                    "minLength": 20,
+                    "maxLength": 1000
+                  },
+                  "related_hashtags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^#[A-Za-z0-9가-힣_]+$"
+                    },
+                    "minItems": 3,
+                    "maxItems": 15,
+                    "uniqueItems": true
+                  }
+                }
+              },
+              "safety_flags": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "violence",
+                    "adult_content",
+                    "hate_speech",
+                    "misinformation",
+                    "spam",
+                    "copyright",
+                    "dangerous_activity",
+                    "harassment"
+                  ]
+                },
+                "uniqueItems": true
+              },
+              "summary": {
+                "type": "string",
+                "minLength": 50,
+                "maxLength": 2000
+              },
+              "asr_lang": {
+                "type": "string",
+                "pattern": "^[a-z]{2}$"
+              },
+              "asr_transcript": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 5000
+              },
+              "asr_translation_en": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 5000
+              },
+              "ocr_text": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "lang",
+                    "text"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "lang": {
+                      "type": "string",
+                      "pattern": "^[a-z]{2}$"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    },
+                    "translation_en": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1000
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "x-vertex-guidance": "Provide detailed analysis with confidence scores 0.9+"
+          },
+          "product_mentions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "confidence",
+                "evidence",
+                "name",
+                "promotion",
+                "sources",
+                "type",
+                "category",
+                "time_ranges"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "low",
+                    "medium",
+                    "high",
+                    "very_high"
+                  ]
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 5,
+                    "maxLength": 500
+                  },
+                  "minItems": 1,
+                  "maxItems": 10
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "promotion": {
+                  "type": "object",
+                  "required": [
+                    "signals",
+                    "status"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "signals": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "discount_code",
+                          "affiliate_link",
+                          "sponsored_tag",
+                          "call_to_action",
+                          "price_mention",
+                          "brand_partnership"
+                        ]
+                      },
+                      "uniqueItems": true
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "unknown",
+                        "organic",
+                        "sponsored",
+                        "affiliate",
+                        "partnership"
+                      ]
+                    }
+                  }
+                },
+                "sources": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "visual",
+                      "audio",
+                      "text",
+                      "ocr",
+                      "asr",
+                      "metadata"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "product",
+                    "service",
+                    "brand",
+                    "app",
+                    "website",
+                    "location"
+                  ]
+                },
+                "category": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "time_ranges": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 3600
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "minItems": 1,
+                  "maxItems": 20
+                }
+              }
+            }
+          },
+          "scenes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "duration_sec",
+                "narrative_unit",
+                "scene_id",
+                "setting",
+                "shots",
+                "time_end",
+                "time_start"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "duration_sec": {
+                  "type": "number",
+                  "minimum": 0.1,
+                  "maximum": 300
+                },
+                "narrative_unit": {
+                  "type": "object",
+                  "required": [
+                    "comedic_device",
+                    "dialogue",
+                    "narrative_role",
+                    "rhetoric",
+                    "summary",
+                    "dialogue_lang"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "comedic_device": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "relatability_humor",
+                          "character_humor",
+                          "montage",
+                          "hyperbole",
+                          "physical_comedy",
+                          "anticlimax",
+                          "situational_irony",
+                          "expectation_subversion",
+                          "running_gag",
+                          "relatability"
+                        ]
+                      },
+                      "uniqueItems": true
+                    },
+                    "dialogue": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "narrative_role": {
+                      "type": "string",
+                      "enum": [
+                        "Hook",
+                        "Rising Action",
+                        "Demonstration",
+                        "Problem_Solution",
+                        "Climax",
+                        "Punchline",
+                        "Resolution",
+                        "Transition"
+                      ]
+                    },
+                    "rhetoric": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "juxtaposition",
+                          "storytelling",
+                          "curiosity_gap",
+                          "problem_solution",
+                          "demonstration",
+                          "pathos",
+                          "comparison",
+                          "hyperbole"
+                        ]
+                      },
+                      "uniqueItems": true
+                    },
+                    "summary": {
+                      "type": "string",
+                      "minLength": 20,
+                      "maxLength": 1000
+                    },
+                    "dialogue_lang": {
+                      "type": "string",
+                      "pattern": "^[a-z]{2}$"
+                    },
+                    "dialogue_translation_en": {
+                      "type": "string",
+                      "maxLength": 2000
+                    }
+                  }
+                },
+                "scene_id": {
+                  "type": "string",
+                  "pattern": "^S\\d{2}_[A-Za-z0-9_]+$"
+                },
+                "setting": {
+                  "type": "object",
+                  "required": [
+                    "audio_style",
+                    "location",
+                    "visual_style"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "audio_style": {
+                      "type": "object",
+                      "required": [
+                        "ambient_sound",
+                        "audio_events",
+                        "music",
+                        "tone"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "ambient_sound": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "audio_events": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "description",
+                              "event",
+                              "intensity",
+                              "timestamp"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                              "description": {
+                                "type": "string",
+                                "minLength": 5,
+                                "maxLength": 500
+                              },
+                              "event": {
+                                "type": "string",
+                                "enum": [
+                                  "music_starts",
+                                  "music_stops",
+                                  "music_change",
+                                  "critical_sfx",
+                                  "ambient_change",
+                                  "voice_change"
+                                ]
+                              },
+                              "intensity": {
+                                "type": "string",
+                                "enum": [
+                                  "Low",
+                                  "Medium",
+                                  "High",
+                                  "Very High"
+                                ]
+                              },
+                              "timestamp": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 300
+                              }
+                            }
+                          }
+                        },
+                        "music": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "tone": {
+                          "type": "string",
+                          "maxLength": 200
+                        }
+                      }
+                    },
+                    "location": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "visual_style": {
+                      "type": "object",
+                      "required": [
+                        "cinematic_properties",
+                        "edit_grammar",
+                        "lighting",
+                        "mood_palette"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "cinematic_properties": {
+                          "type": "string",
+                          "minLength": 10,
+                          "maxLength": 1000
+                        },
+                        "edit_grammar": {
+                          "type": "object",
+                          "required": [
+                            "camera_style",
+                            "cut_speed",
+                            "subtitle_style"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "camera_style": {
+                              "type": "string",
+                              "enum": [
+                                "static",
+                                "static_shot",
+                                "handheld",
+                                "tracking",
+                                "mixed",
+                                "crane",
+                                "drone"
+                              ]
+                            },
+                            "cut_speed": {
+                              "type": "string",
+                              "enum": [
+                                "slow",
+                                "medium",
+                                "fast",
+                                "none",
+                                "variable"
+                              ]
+                            },
+                            "subtitle_style": {
+                              "type": "string",
+                              "enum": [
+                                "broadcast_entertainment",
+                                "minimal",
+                                "none",
+                                "stylized",
+                                "overlay"
+                              ]
+                            }
+                          }
+                        },
+                        "lighting": {
+                          "type": "string",
+                          "minLength": 5,
+                          "maxLength": 500
+                        },
+                        "mood_palette": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 50
+                          },
+                          "minItems": 1,
+                          "maxItems": 10,
+                          "uniqueItems": true
+                        }
+                      }
+                    }
+                  }
+                },
+                "shots": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "camera",
+                      "composition",
+                      "confidence",
+                      "end",
+                      "keyframes",
+                      "shot_id",
+                      "start"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "camera": {
+                        "type": "object",
+                        "required": [
+                          "angle",
+                          "move",
+                          "shot"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "angle": {
+                            "type": "string",
+                            "enum": [
+                              "eye",
+                              "high",
+                              "low",
+                              "overhead",
+                              "dutch",
+                              "worm"
+                            ]
+                          },
+                          "move": {
+                            "type": "string",
+                            "enum": [
+                              "static",
+                              "handheld",
+                              "truck",
+                              "pan",
+                              "tilt",
+                              "zoom",
+                              "dolly"
+                            ]
+                          },
+                          "shot": {
+                            "type": "string",
+                            "enum": [
+                              "ECU",
+                              "CU",
+                              "MCU",
+                              "MS",
+                              "MLS",
+                              "LS",
+                              "ELS",
+                              "POV"
+                            ]
+                          }
+                        }
+                      },
+                      "composition": {
+                        "type": "object",
+                        "required": [
+                          "grid",
+                          "notes"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "grid": {
+                            "type": "string",
+                            "enum": [
+                              "center",
+                              "left_third",
+                              "right_third",
+                              "upper_third",
+                              "lower_third",
+                              "left_upper",
+                              "right_upper",
+                              "left_lower",
+                              "right_lower"
+                            ]
+                          },
+                          "notes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "maxLength": 500
+                            }
+                          }
+                        }
+                      },
+                      "confidence": {
+                        "type": "string",
+                        "enum": [
+                          "low",
+                          "medium",
+                          "high",
+                          "very_high"
+                        ]
+                      },
+                      "end": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 300
+                      },
+                      "keyframes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "desc",
+                            "role"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "desc": {
+                              "type": "string",
+                              "minLength": 5,
+                              "maxLength": 1000
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "start",
+                                "mid",
+                                "peak",
+                                "end"
+                              ]
+                            },
+                            "t_rel_shot": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 60
+                            }
+                          }
+                        },
+                        "minItems": 1,
+                        "maxItems": 10
+                      },
+                      "shot_id": {
+                        "type": "string",
+                        "pattern": "^S\\d{2}_[A-Za-z0-9_]+$"
+                      },
+                      "start": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 300
+                      }
+                    }
+                  },
+                  "minItems": 1,
+                  "maxItems": 20
+                },
+                "time_end": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 300
+                },
+                "time_start": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 300
+                },
+                "importance": {
+                  "type": "string",
+                  "enum": [
+                    "low",
+                    "medium",
+                    "high",
+                    "critical"
+                  ]
+                }
+              }
+            },
+            "minItems": 1,
+            "maxItems": 50,
+            "x-vertex-guidance": "Break down video into 1-8 distinct narrative scenes with shot details"
+          },
+          "service_mentions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "confidence",
+                "evidence",
+                "name",
+                "promotion",
+                "sources",
+                "type",
+                "category",
+                "time_ranges"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "low",
+                    "medium",
+                    "high",
+                    "very_high"
+                  ]
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 5,
+                    "maxLength": 500
+                  },
+                  "minItems": 1,
+                  "maxItems": 10
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "promotion": {
+                  "type": "object",
+                  "required": [
+                    "signals",
+                    "status"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "signals": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "discount_code",
+                          "affiliate_link",
+                          "sponsored_tag",
+                          "call_to_action",
+                          "price_mention",
+                          "brand_partnership"
+                        ]
+                      },
+                      "uniqueItems": true
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "unknown",
+                        "organic",
+                        "sponsored",
+                        "affiliate",
+                        "partnership"
+                      ]
+                    }
+                  }
+                },
+                "sources": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "visual",
+                      "audio",
+                      "text",
+                      "ocr",
+                      "asr",
+                      "metadata"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "product",
+                    "service",
+                    "brand",
+                    "app",
+                    "website",
+                    "location"
+                  ]
+                },
+                "category": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "time_ranges": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 3600
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "minItems": 1,
+                  "maxItems": 20
+                }
+              }
+            }
+          },
+          "default_lang": {
+            "type": "string",
+            "pattern": "^[a-z]{2}$"
+          }
+        },
+        "x-vertex-ai": {
+          "model": "gemini-2.5-pro",
+          "strictness": "high",
+          "validation": "comprehensive",
+          "samples": [
+            "vdp-C000888.json",
+            "vdp-C000889.json"
+          ],
+          "version": "1.0",
+          "created": "2025-08-14T03:12:23.804Z"
+        },
+        "errorMessage": {
+          "type": "VDP must be a valid object with all required fields",
+          "required": {
+            "content_id": "content_id is required and must match pattern C######",
+            "metadata": "metadata object is required with all platform fields",
+            "overall_analysis": "overall_analysis is required with comprehensive analysis",
+            "scenes": "scenes array is required with detailed scene breakdown",
+            "product_mentions": "product_mentions array is required (can be empty)",
+            "service_mentions": "service_mentions array is required (can be empty)",
+            "default_lang": "default_lang is required (ISO 639-1 code)"
+          }
+        }
+      },
+      "temperature": 0.1,
+      "max_output_tokens": 32768,
+      "safety_settings": [
+        {
+          "category": "HARM_CATEGORY_HATE_SPEECH",
+          "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+        },
+        {
+          "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+          "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+        }
+      ]
+    },
+    "prompt_structure": {
+      "system_instruction": "You are a video analysis expert. Analyze the provided video and generate a comprehensive VDP (Video Data Package) following the exact schema structure. Ensure all required fields are populated with accurate, detailed information.",
+      "user_prompt_template": "Analyze this video and provide a complete VDP analysis:\n\nVideo URL: {video_url}\nPlatform: {platform}\nDuration: {duration}s\n\nGenerate a comprehensive VDP following the strict schema requirements.",
+      "response_format": "JSON object strictly conforming to the provided response_schema"
+    },
+    "validation_workflow": [
+      "1. Video ingestion and preprocessing",
+      "2. Multi-modal analysis (visual, audio, text)",
+      "3. Scene segmentation and shot detection",
+      "4. Product/service mention extraction",
+      "5. Audience reaction analysis",
+      "6. Schema-compliant JSON generation",
+      "7. Validation against strict schema",
+      "8. Quality assurance checks"
+    ],
+    "error_handling": {
+      "schema_violations": "Retry with corrected structure",
+      "missing_required_fields": "Re-analyze and populate all required fields",
+      "invalid_confidence_scores": "Ensure confidence scores are realistic (0.8-1.0)",
+      "malformed_timestamps": "Validate all timing data is consistent and logical"
+    }
+  }
+}

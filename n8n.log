@@ -1,0 +1,24 @@
+Permissions 0644 for n8n settings file /Users/ted/.n8n/config are too wide. This is ignored for now, but in the future n8n will attempt to change the permissions automatically. To automatically enforce correct permissions now set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true (recommended), or turn this check off set N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=false.
+Initializing n8n process
+n8n ready on ::, port 5678
+
+There is a deprecation related to your environment variables. Please take the recommended actions to update your configuration:
+ - N8N_RUNNERS_ENABLED -> Running n8n without task runners is deprecated. Task runners will be turned on by default in a future version. Please set `N8N_RUNNERS_ENABLED=true` to enable task runners now and avoid potential issues in the future. Learn more: https://docs.n8n.io/hosting/configuration/task-runners/
+
+[license SDK] Skipping renewal on init: license cert is not initialized
+Version: 1.106.3
+Start Active Workflows:
+Activated workflow "Instagram oEmbed/Graph API Collector with Top Comments" (ID: df6NS50i4fGflxUy)
+Activated workflow "Instagram oEmbed/Graph API Collector with Top Comments" (ID: stuJTSxGZx2jGbXW)
+Activated workflow "Instagram oEmbed/Graph API Collector" (ID: yogQZAElHActDxWr)
+Activated workflow "TikTok oEmbed + Comments Microservice Collector" (ID: uelcdLcIEi1aA5nd)
+Activated workflow "TikTok oEmbed + Playwright Scraper" (ID: pMBYx7GHECn8FY9t)
+Activated workflow "YouTube Data API Metadata Collector with Top Comments" (ID: 1scgIyMmaVr2AZ2Y)
+Activated workflow "YouTube Data API Metadata Collector" (ID: RLPc0cbEqXQZMXBZ)
+Activated workflow "YouTube Data API - Fixed Comments Collector" (ID: TdmqlLld3nKAWFWb)
+
+Editor is now accessible via:
+http://localhost:5678
+(node:75942) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Received SIGTERM. Shutting down...

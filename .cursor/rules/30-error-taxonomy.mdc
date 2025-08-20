@@ -34,6 +34,9 @@ All API errors MUST follow Problem Details (RFC 9457). Base fields:
 - STORYBOARD_INVALID → 422 (Fix: 2-4 scenes, total 8.0s, narrative flow)
 - EVIDENCE_PACK_MISSING → 400 (Fix: include Evidence Pack with trust score)
 - CHANNEL_QUALITY_FAIL → 422 (Fix: meet channel-specific requirements)
+- CREDIT_INSUFFICIENT → 402 Payment Required (Fix: add credits to wallet)
+- KONCONTEXT_GENERATION_FAILED → 422 (Fix: retry with different parameters)
+- FLUX_KONCONTEXT_QUOTA_EXCEEDED → 429 (Fix: honor Retry-After for Kontext)
 
 ## OpenAPI + Schema
 - OpenAPI 3.1: declare `application/problem+json` schema under components.

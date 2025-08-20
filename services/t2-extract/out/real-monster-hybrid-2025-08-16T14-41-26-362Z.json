@@ -1,0 +1,562 @@
+{
+  "video_meta": {
+    "content_id": "6_I2FmT1mbY",
+    "source_url": "https://www.youtube.com/shorts/6_I2FmT1mbY",
+    "duration_sec": 52,
+    "title": {
+      "text": "직장인의 흔한 야근 시발점",
+      "lang": "ko",
+      "translation_en": "A common starting point for an office worker's overtime"
+    },
+    "description": {
+      "text": "#shorts #직장인 #공감",
+      "lang": "ko",
+      "translation_en": "#shorts #OfficeWorker #Relatable"
+    },
+    "asr_transcript_excerpt": {
+      "text": "그렇다면 퇴근.. 김햄찌씨 회의에서 나온 리서치 건 내일 중으로 한번 보자! 넵! (자동 반사) 그렇다면 야근.. 아.. 저장할 수 없지롱. 으악! 야! 아! 지랄하지마!!!",
+      "lang": "ko",
+      "translation_en": "In that case, time to go home.. Mr. Ham, let's review the research from the meeting tomorrow! Yes! (Automatic reflex) In that case, overtime.. Ah.. You can't save it. Argh! Hey! Ah! Don't fuck with me!!!"
+    },
+    "ocr_text": [
+      {
+        "text": "직장인의 흔한 야근 시발점",
+        "lang": "ko",
+        "translation_en": "A common starting point for an office worker's overtime"
+      },
+      {
+        "text": "정서불안 김햄찌",
+        "lang": "ko",
+        "translation_en": "Emotionally unstable Kim Ham"
+      },
+      {
+        "text": "10:50 PM",
+        "lang": "en"
+      },
+      {
+        "text": "Error An error occurred.",
+        "lang": "en"
+      },
+      {
+        "text": "Corp Research",
+        "lang": "en"
+      }
+    ]
+  },
+  "platform_metrics": {
+    "platform": "youtube_shorts",
+    "views": 6530000,
+    "likes": 110000,
+    "comments": 3354,
+    "shares": 2000
+  },
+  "overall_analysis": {
+    "summary": {
+      "text": "This viral short humorously depicts the all-too-relatable struggles of a Korean office worker, personified by an adorable but internally screaming hamster named 'Kim Ham'. The video's comedy stems from the stark contrast between the cute visuals and the character's frustrated, profanity-laced inner monologue as they navigate unexpected overtime, technical failures, and a final ironic twist. Its success lies in its perfect encapsulation of 'yak-eun' (overtime) culture, using rapid cuts, expressive close-ups, and pitch-shifted audio to create a highly shareable and emotionally resonant narrative of workplace suffering.",
+      "lang": "en"
+    },
+    "overall_sentiment": "Very positive, hilarious, and deeply relatable",
+    "hook_genome": {
+      "start_sec": 0,
+      "end_sec": 2.9,
+      "pattern_code": "Relatable Problem",
+      "strength_score": 0.9,
+      "trigger_modalities": [
+        "visual",
+        "audio",
+        "narrative",
+        "emotional"
+      ],
+      "microbeats_sec": [
+        0.1,
+        0.9,
+        1.8,
+        2.6
+      ],
+      "description": {
+        "text": "The hook immediately establishes a universally relatable problem: an office worker calculating the end of their day. This is amplified by the visual of a cute, anthropomorphic hamster, creating an instant emotional connection and curiosity. The high-pitched, anxious voiceover detailing the calculation ('meeting ends at 6, so I can go home') solidifies the narrative hook within the first 3 seconds.",
+        "lang": "en"
+      }
+    }
+  },
+  "narrative_cultural_analysis": {
+    "narrative_structure": {
+      "act_1_setup": "The hamster, an office worker, is hopeful about going home on time after a meeting.",
+      "act_2_confrontation": "The boss assigns last-minute work due the next day, forcing the hamster into overtime. The hamster struggles with fatigue and a vow to leave by 9 PM is broken. The climax occurs when the presentation file fails to save, leading to a complete meltdown.",
+      "act_3_resolution": "After a moment of despair, the hamster rallies with an energy drink and finishes the work. The next day, a colleague reveals the ultimate punchline: the boss who assigned the work was on vacation, making the entire ordeal pointless."
+    },
+    "characters": [
+      {
+        "name": "Kim Ham-jji (김햄찌)",
+        "role": "Protagonist",
+        "description": "An anthropomorphic hamster representing a junior office worker. Visually cute and small, but internally filled with anxiety, frustration, and profanity. Embodies the suffering and resilience of the modern employee."
+      },
+      {
+        "name": "The Boss (팀장님)",
+        "role": "Antagonist",
+        "description": "An off-screen voice that casually assigns urgent overtime work, acting as the catalyst for the conflict. Represents the pressures of corporate hierarchy."
+      },
+      {
+        "name": "The Colleague",
+        "role": "Supporting Character",
+        "description": "A human colleague who appears at the end to deliver the punchline, revealing the dramatic irony of the hamster's all-nighter."
+      }
+    ],
+    "themes": [
+      "Workplace Culture",
+      "Overtime (야근)",
+      "Relatability",
+      "Dark Comedy",
+      "Resilience"
+    ],
+    "cultural_references": [
+      {
+        "reference": "Yageun (야근) Culture",
+        "explanation": "The video is a satire of the pervasive overtime culture in South Korea. The hamster's automatic 'yes' to the boss and subsequent internal suffering is a deeply relatable experience for many Korean workers."
+      },
+      {
+        "reference": "Sibal-jeom (시발점)",
+        "explanation": "The title '야근 시발점' is a pun. '시발점' (sibaljeom) means 'starting point', but it sounds very similar to the curse word '씨발' (ssibal), meaning 'fuck'. This wordplay sets the dark-comedy tone from the start."
+      },
+      {
+        "reference": "FUCKEN 해",
+        "explanation": "At 0:11, the on-screen text reads 'FUCKEN 해' (Do it, FUCKEN), while the audio is '눈 뻐근해' (My eyes are sore/strained). This is a humorous, stylized subtitle choice that adds to the comedic effect by externalizing the character's raw frustration."
+      }
+    ]
+  },
+  "audience_psychology": {
+    "common_reactions": [
+      "Extreme relatability with the overtime situation.",
+      "Finding the hamster's cute appearance contrasted with its angry inner voice hilarious.",
+      "Sympathy and empathy for the character's suffering.",
+      "Praise for the high-quality voice acting and sound design.",
+      "Sharing personal stories of similar workplace disasters."
+    ],
+    "notable_comments": [
+      {
+        "text": "지랄하지마는 진짜 쏘울 담긴 더빙인데욬ㅋㅋㅋㅋㅋㅋ",
+        "lang": "ko",
+        "translation_en": "The 'Don't fuck with me' is some truly soul-filled dubbing lolololol"
+      },
+      {
+        "text": "fucken해ㅋㅋㅋㅋㅋ는 뭐야ㅋㅋㅋ",
+        "lang": "ko",
+        "translation_en": "What the heck is 'fucken do it' lolololol"
+      },
+      {
+        "text": "햄스터 목소리가 너무 귀여워요",
+        "lang": "ko",
+        "translation_en": "The hamster's voice is so cute"
+      },
+      {
+        "text": "야근 상황이 너무 현실적이에요",
+        "lang": "ko",
+        "translation_en": "The overtime situation is so realistic"
+      }
+    ]
+  },
+  "cinematic_analysis": {
+    "scenes": [
+      {
+        "scene_id": 1,
+        "time_start": 0,
+        "time_end": 7.9,
+        "summary": "The hamster, an office worker, calculates it can go home at 6 PM, but its hope is crushed when the boss assigns an urgent task for the next day.",
+        "importance": "critical",
+        "shots": [
+          {
+            "shot_id": "1-1",
+            "time_start": 0,
+            "time_end": 4.2,
+            "summary": "A hopeful hamster calculates its departure time, transitioning from a medium shot to an extreme close-up on its face.",
+            "camera": {
+              "shot": "MS",
+              "angle": "eye",
+              "move": "static"
+            },
+            "composition": {
+              "grid": "center",
+              "notes": [
+                "The initial shot establishes the office setting.",
+                "A rapid zoom/cut to an ECU emphasizes the hamster's internal thought process."
+              ]
+            },
+            "keyframes": [
+              {
+                "time": 0.1,
+                "description": "MS of the hamster standing by a door, wearing an ID badge, looking slightly anxious."
+              },
+              {
+                "time": 1.8,
+                "description": "Cut to an ECU of the hamster's face as it looks at a laptop screen (off-camera)."
+              },
+              {
+                "time": 3.2,
+                "description": "ECU. The hamster's eyes are wide with hopeful realization as it thinks '퇴근' (go home)."
+              }
+            ]
+          },
+          {
+            "shot_id": "1-2",
+            "time_start": 4.2,
+            "time_end": 7.9,
+            "summary": "The boss's voice interrupts, and the hamster's expression shifts to shock and dismay upon hearing about more work.",
+            "camera": {
+              "shot": "ECU",
+              "angle": "eye",
+              "move": "static"
+            },
+            "composition": {
+              "grid": "center",
+              "notes": [
+                "The sustained ECU captures the micro-expressions of the hamster's reaction.",
+                "The lack of camera movement focuses all attention on the emotional shift."
+              ]
+            },
+            "keyframes": [
+              {
+                "time": 4.5,
+                "description": "ECU. The hamster's eyes are wide as it listens to the boss's voice."
+              },
+              {
+                "time": 6.5,
+                "description": "ECU. A slight twitch in the hamster's expression as the reality of overtime sinks in."
+              },
+              {
+                "time": 7.5,
+                "description": "ECU. The hamster gives a reflexive, polite '넵!' (Yes!) with a dead-eyed stare, signifying resignation."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "scene_id": 2,
+        "time_start": 7.9,
+        "time_end": 24.3,
+        "summary": "Resigned to fate, the hamster works late into the night, only to face a catastrophic file error right as it's about to save, triggering a full-blown panic.",
+        "importance": "high",
+        "shots": [
+          {
+            "shot_id": "2-1",
+            "time_start": 7.9,
+            "time_end": 17.9,
+            "summary": "A montage shows the hamster's struggle with fatigue, a promise to leave by 9 PM broken by the clock showing 10:50 PM, and the final push to save the file.",
+            "camera": {
+              "shot": "ECU",
+              "angle": "eye",
+              "move": "static"
+            },
+            "composition": {
+              "grid": "center",
+              "notes": [
+                "Rapid cuts between the tired hamster, a cityscape, and a clock effectively convey the passage of time and mounting dread.",
+                "The shot of the hands about to press 'save' builds suspense."
+              ]
+            },
+            "keyframes": [
+              {
+                "time": 9.2,
+                "description": "ECU. The hamster rubs its face with its tiny paws in exhaustion."
+              },
+              {
+                "time": 12.7,
+                "description": "WS of a city highway at night, symbolizing the late hour."
+              },
+              {
+                "time": 14.2,
+                "description": "CU on a digital clock showing '10:50 PM', with the caption '(허언이 있는편)' meaning '(Tends to make empty promises)'."
+              },
+              {
+                "time": 17.5,
+                "description": "CU of the hamster's paws over a laptop keyboard, about to save the document."
+              }
+            ]
+          },
+          {
+            "shot_id": "2-2",
+            "time_start": 17.9,
+            "time_end": 24.3,
+            "summary": "The save fails. An error message appears, followed by the dreaded spinning wheel, and the hamster erupts in a high-pitched, profanity-laced scream.",
+            "camera": {
+              "shot": "ECU",
+              "angle": "low",
+              "move": "handheld"
+            },
+            "composition": {
+              "grid": "center",
+              "notes": [
+                "The sudden appearance of the error dialog is the scene's climax.",
+                "A shaky, slightly low angle ECU of the hamster's face enhances the feeling of panic and chaos.",
+                "The zoom-in on the screaming mouth is a key comedic beat."
+              ]
+            },
+            "keyframes": [
+              {
+                "time": 18.2,
+                "description": "MS of the laptop screen showing a presentation titled 'Corp Research' with an 'Error' dialog box."
+              },
+              {
+                "time": 20.1,
+                "description": "Cut to the laptop screen showing the spinning rainbow wheel of death."
+              },
+              {
+                "time": 21.5,
+                "description": "ECU of the hamster's face, eyes wide in horror, screaming '지랄하지마!!!' (Don't fuck with me!!!)."
+              },
+              {
+                "time": 23.8,
+                "description": "The hamster slumps back in its chair, utterly defeated."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "scene_id": 3,
+        "time_start": 24.3,
+        "time_end": 40.8,
+        "summary": "After hitting rock bottom, the hamster rallies, drinks an energy drink for a power-up, and furiously re-does the work with renewed, frantic determination.",
+        "importance": "medium",
+        "shots": [
+          {
+            "shot_id": "3-1",
+            "time_start": 24.3,
+            "time_end": 33.8,
+            "summary": "The hamster gives itself a pep talk, grabs a can of SOL energy drink, and chugs it, resulting in a visual and auditory 'power-up' effect.",
+            "camera": {
+              "shot": "CU",
+              "angle": "eye",
+              "move": "static"
+            },
+            "composition": {
+              "grid": "center",
+              "notes": [
+                "The use of sound effects (can opening, gulping) is crucial here.",
+                "A visual flare and whooshing sound effect signify the energy boost."
+              ]
+            },
+            "keyframes": [
+              {
+                "time": 25.5,
+                "description": "CU. The hamster looks completely drained, whispering '다.. 끝이다..' (It's... over..)."
+              },
+              {
+                "time": 28.5,
+                "description": "ECU. The hamster's eyes narrow as it tells itself to '정신차렷!!!!!!!!' (Get a grip!!!!!!!!)."
+              },
+              {
+                "time": 30.5,
+                "description": "CU of the hamster grabbing a can of SOL energy drink."
+              },
+              {
+                "time": 32.5,
+                "description": "ECU of the hamster's eyes widening as a bright light effect flashes, signifying the caffeine hitting."
+              }
+            ]
+          },
+          {
+            "shot_id": "3-2",
+            "time_start": 33.8,
+            "time_end": 40.8,
+            "summary": "Energized, the hamster types furiously on the laptop in a montage, determined to finish the work no matter what.",
+            "camera": {
+              "shot": "CU",
+              "angle": "high",
+              "move": "truck"
+            },
+            "composition": {
+              "grid": "left_third",
+              "notes": [
+                "The fast-paced typing montage with determined inner monologue conveys a sense of frantic progress."
+              ]
+            },
+            "keyframes": [
+              {
+                "time": 34.5,
+                "description": "CU of the hamster's paws typing rapidly on the keyboard."
+              },
+              {
+                "time": 37.2,
+                "description": "CU of the hamster's determined face, illuminated by the screen."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "scene_id": 4,
+        "time_start": 40.8,
+        "time_end": 51.8,
+        "summary": "The next morning, the exhausted hamster arrives at work, only to be told by a colleague that the boss who assigned the task is on vacation, revealing the absurdity of its struggle.",
+        "importance": "high",
+        "shots": [
+          {
+            "shot_id": "4-1",
+            "time_start": 40.8,
+            "time_end": 51.8,
+            "summary": "A human colleague casually reveals the boss is on leave, and the camera crash-zooms into the hamster's face, capturing its blank, horrified realization.",
+            "camera": {
+              "shot": "MS",
+              "angle": "eye",
+              "move": "zoom"
+            },
+            "composition": {
+              "grid": "center",
+              "notes": [
+                "The punchline is delivered through dialogue from a new character.",
+                "A dramatic, fast zoom (or whip pan) into an ECU of the hamster's face provides the final comedic beat."
+              ]
+            },
+            "keyframes": [
+              {
+                "time": 41.5,
+                "description": "MS of a human colleague talking to the hamster, who is sitting at its desk looking exhausted."
+              },
+              {
+                "time": 45.1,
+                "description": "CU of the hamster, holding a tiny backpack, explaining it had something to review with the team leader."
+              },
+              {
+                "time": 49.5,
+                "description": "The colleague looks shocked and says, '오늘 팀장님 연차인데?' (But the team leader is on annual leave today?)."
+              },
+              {
+                "time": 51.5,
+                "description": "Whip pan/zoom to an extreme close-up of the hamster's wide, empty eyes, frozen in shock as the video ends."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "audio_events": [
+      {
+        "time": 4.3,
+        "type": "dialogue",
+        "intensity": "medium",
+        "description": "Off-screen, deeper male voice of the 'Boss' begins speaking."
+      },
+      {
+        "time": 18.1,
+        "type": "sfx",
+        "intensity": "high",
+        "description": "System error sound effect (Windows-style 'ding')."
+      },
+      {
+        "time": 20.5,
+        "type": "dialogue",
+        "intensity": "high",
+        "description": "Hamster's voice, pitched high, screams '지랄하지마!!!' (Don't fuck with me!!!)."
+      },
+      {
+        "time": 30.2,
+        "type": "sfx",
+        "intensity": "medium",
+        "description": "Sound of a soda can being opened."
+      },
+      {
+        "time": 32.2,
+        "type": "sfx",
+        "intensity": "high",
+        "description": "Ascending 'power-up' whoosh sound effect."
+      },
+      {
+        "time": 51,
+        "type": "sfx",
+        "intensity": "high",
+        "description": "Dramatic 'dun dun dun' sound effect or a sudden cut to silence to emphasize the shock."
+      }
+    ]
+  },
+  "brand_service_mentions": [
+    {
+      "name": "Apple MacBook Pro",
+      "type": "product",
+      "promotion_status": "organic",
+      "confidence": "high",
+      "time_ranges": [
+        [
+          1.8,
+          3.8
+        ],
+        [
+          16.5,
+          21
+        ],
+        [
+          34,
+          38.5
+        ]
+      ],
+      "evidence": {
+        "visual": "The hamster is consistently shown using a laptop with a visible Apple logo and the classic MacBook design.",
+        "ocr": "Text 'Macbook Pro' visible under the screen at 0:18."
+      }
+    },
+    {
+      "name": "Apple AirPods Max",
+      "type": "product",
+      "promotion_status": "organic",
+      "confidence": "high",
+      "time_ranges": [
+        [
+          6,
+          51.8
+        ]
+      ],
+      "evidence": {
+        "visual": "The hamster wears large, silver over-ear headphones identical to Apple's AirPods Max for most of the video."
+      }
+    },
+    {
+      "name": "SOL",
+      "type": "product",
+      "promotion_status": "organic",
+      "confidence": "high",
+      "time_ranges": [
+        [
+          30,
+          31.8
+        ]
+      ],
+      "evidence": {
+        "visual": "The hamster picks up and drinks from a beverage can with the distinct red 'SOL' logo clearly visible."
+      }
+    },
+    {
+      "name": "Jansport",
+      "type": "product",
+      "promotion_status": "organic",
+      "confidence": "medium",
+      "time_ranges": [
+        [
+          44.8,
+          46
+        ]
+      ],
+      "evidence": {
+        "visual": "A small backpack held by the hamster has a logo that strongly resembles the Jansport brand logo."
+      }
+    }
+  ],
+  "metadata": {
+    "platform": "YouTube Shorts",
+    "source_url": "https://www.youtube.com/shorts/6_I2FmT1mbY",
+    "view_count": 6530000,
+    "like_count": 110000,
+    "comment_count": 3354,
+    "share_count": 2000,
+    "upload_date": "2025-07-13T13:36:00.000Z",
+    "video_origin": "AI-Generated",
+    "cta_types": [],
+    "hashtags": [],
+    "original_sound": {
+      "id": null,
+      "title": null
+    }
+  },
+  "content_id": "6_I2FmT1mbY",
+  "product_mentions": [],
+  "service_mentions": []
+}

@@ -27,10 +27,12 @@
 - `POST /ingest`: URL/text/upload normalization + embed eligibility
 - `POST /snap3/turbo`: Textboard(2-4 scenes) + Evidence Pack generation
 - `POST /compile/veo3`: Veo3 Prompt JSON validation (8s/16:9/720p|1080p)
-- `POST /preview/veo`: Async job pattern with Evidence Pack
+- `POST /preview/veo`: Async job pattern with Evidence Pack + Credit debits
+- `POST /kontext/generate`: Flux Kontext image generation/editing
 - `POST /qa/validate`: Storyboard quality + channel requirements
 - `GET /export/brief/{id}`: Brief PDF + Evidence Pack
 - `GET /export/json/{id}`: VideoGen IR + Veo3 Prompt + Evidence
+- `GET /credits/balance`: Current CR balance and usage
 
 ## Quality Validation
 - **Hook ≤ 3s**: First scene critical importance

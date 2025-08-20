@@ -10,6 +10,8 @@
 - **aspectRatio**: Must be "16:9" 
 - **resolution**: Must be either "720p" or "1080p"
 - **total scenes**: 2-4 scenes with total duration = 8.0s
+- **jump-cuts**: 2-3 cuts within 8s unit (e.g., 3s + 5s, or 2.5s + 2.7s + 2.8s)
+- **sequence-60**: up to 8 scenes (60s total) with external crop guidance
 
 ## Vertical Request Handling
 - For 9:16 aspect ratio requests: Render as 16:9 and return UI crop-proxy metadata only
@@ -26,6 +28,8 @@
 - Poll `GET /jobs/{id}` for status
 - Support `Retry-After` header
 - Include Evidence Pack in response
+- Credit debits: Pre-submit estimate, post-submit receipt
+- Flux Kontext integration: First-frame generation for product scenes
 
 ## Error Handling
 - Use `application/problem+json` (RFC 9457)

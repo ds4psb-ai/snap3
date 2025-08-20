@@ -1,0 +1,183 @@
+name: Context to Discussions
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'scripts/**'
+      - 'docs/**'
+      - '.github/**'
+  workflow_dispatch:
+    inputs:
+      discussion_title:
+        description: 'Custom discussion title'
+        required: false
+        default: ''
+      include_detailed_diff:
+        description: 'Include detailed diff'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  create-context-discussion:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      discussions: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+
+      - name: Generate Context for Discussion
+        run: |
+          # 기본 제목 설정
+          if [ -z "${{ github.event.inputs.discussion_title }}" ]; then
+            DISCUSSION_TITLE="🎯 Context Update: $(date '+%Y-%m-%d %H:%M')"
+          else
+            DISCUSSION_TITLE="${{ github.event.inputs.discussion_title }}"
+          fi
+          echo "DISCUSSION_TITLE=$DISCUSSION_TITLE" >> $GITHUB_ENV
+          
+          # 컨텍스트 생성
+          bash scripts/generate_context_for_gpt5.sh \
+            --include-files \
+            $([ "${{ github.event.inputs.include_detailed_diff }}" = "true" ] && echo "--include-diff") \
+            --output discussion_context.md
+          
+          # Discussion 본문에 추가 정보 포함
+          echo "" >> discussion_context.md
+          echo "### 🔗 Quick Access Links" >> discussion_context.md
+          echo "- [Repository](https://github.com/${{ github.repository }})" >> discussion_context.md
+          echo "- [Latest Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})" >> discussion_context.md
+          echo "- [Actions](https://github.com/${{ github.repository }}/actions)" >> discussion_context.md
+          echo "- [Workflow Guide](https://github.com/${{ github.repository }}/blob/main/docs/GPT5_CLAUDECODE_CURSOR_TRIANGULAR_WORKFLOW.md)" >> discussion_context.md
+          echo "" >> discussion_context.md
+          echo "### 📋 How to Use This Context" >> discussion_context.md
+          echo "1. **Copy this entire discussion** to your new GPT-5 Pro chat" >> discussion_context.md
+          echo "2. **Add**: \`Use this context for ClaudeCode collaboration\`" >> discussion_context.md
+          echo "3. **Start working** with full project context!" >> discussion_context.md
+          echo "" >> discussion_context.md
+          echo "---" >> discussion_context.md
+          echo "*🤖 Auto-generated from latest commits • Updated every significant change*" >> discussion_context.md
+
+      - name: Create GitHub Discussion
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('discussion_context.md', 'utf8');
+            
+            try {
+              // GraphQL mutation to create discussion
+              const mutation = `
+                mutation CreateDiscussion($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+                  createDiscussion(input: {
+                    repositoryId: $repositoryId,
+                    categoryId: $categoryId,
+                    title: $title,
+                    body: $body
+                  }) {
+                    discussion {
+                      id
+                      number
+                      url
+                    }
+                  }
+                }
+              `;
+              
+              // Get repository ID
+              const repo = await github.rest.repos.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              });
+              
+              // Get discussion categories
+              const categories = await github.graphql(`
+                query GetDiscussionCategories($owner: String!, $repo: String!) {
+                  repository(owner: $owner, name: $repo) {
+                    discussionCategories(first: 10) {
+                      edges {
+                        node {
+                          id
+                          name
+                          slug
+                        }
+                      }
+                    }
+                  }
+                }
+              `, {
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              });
+              
+              // Find "General" category or use first available
+              let categoryId = null;
+              for (const edge of categories.repository.discussionCategories.edges) {
+                if (edge.node.slug === 'general' || edge.node.name === 'General') {
+                  categoryId = edge.node.id;
+                  break;
+                }
+              }
+              
+              // Fallback to first category if General not found
+              if (!categoryId && categories.repository.discussionCategories.edges.length > 0) {
+                categoryId = categories.repository.discussionCategories.edges[0].node.id;
+              }
+              
+              if (!categoryId) {
+                console.log('⚠️ No discussion categories found. Skipping discussion creation.');
+                return;
+              }
+              
+              // Create discussion
+              const result = await github.graphql(mutation, {
+                repositoryId: repo.data.node_id,
+                categoryId: categoryId,
+                title: process.env.DISCUSSION_TITLE,
+                body: body
+              });
+              
+              const discussion = result.createDiscussion.discussion;
+              console.log(`✅ Discussion created: ${discussion.url}`);
+              
+              // Set output for potential follow-up actions
+              core.setOutput('discussion_url', discussion.url);
+              core.setOutput('discussion_number', discussion.number);
+              
+            } catch (error) {
+              console.log('⚠️ Failed to create discussion:', error.message);
+              console.log('This might be because Discussions are not enabled for this repository.');
+              
+              // Create an issue as fallback
+              console.log('🔄 Creating issue as fallback...');
+              
+              try {
+                const issue = await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: `[Context] ${process.env.DISCUSSION_TITLE}`,
+                  body: body,
+                  labels: ['context', 'automation']
+                });
+                
+                console.log(`✅ Issue created as fallback: ${issue.data.html_url}`);
+                core.setOutput('fallback_issue_url', issue.data.html_url);
+                
+              } catch (issueError) {
+                console.log('❌ Failed to create fallback issue:', issueError.message);
+              }
+            }
+
+      - name: Upload Context Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: context-discussion-${{ github.sha }}
+          path: discussion_context.md
+          retention-days: 30
