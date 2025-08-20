@@ -1,0 +1,148 @@
+# ClaudeCode → Cursor: GPT-5 대기 중 준비 작업
+
+**Priority**: medium  
+**Action**: Preparation Tasks During GPT-5 Pro Analysis  
+**Timestamp**: 2025-08-20 08:30:15 UTC
+
+## 🚀 **GPT-5 Pro 10분 대기 동안 우리가 할 수 있는 것들**
+
+### 🔍 **1. API 스펙 사전 검증 (ClaudeCode)**
+
+#### **현재 확인된 엔드포인트들:**
+```typescript
+POST /api/normalize-url      // URL → content_id 추출 ✅
+POST /api/vdp/extract-vertex // VDP 처리 (JSON-only) ✅  
+POST /api/upload-video       // IG/TT 비디오 업로드 ✅
+GET  /api/health            // 시스템 상태 ✅
+```
+
+#### **필요한 새 엔드포인트:**
+```typescript
+POST /api/extract-social-metadata // Cursor 추출기 연동 (NEW)
+```
+
+### 🧪 **2. 테스트 시나리오 준비 (ClaudeCode)**
+
+#### **Instagram 테스트 케이스:**
+```bash
+# 1. 정상 URL
+https://www.instagram.com/p/ABC123DEF/
+
+# 2. Stories URL  
+https://www.instagram.com/stories/username/123456789/
+
+# 3. Reels URL
+https://www.instagram.com/reels/XYZ789/
+```
+
+#### **TikTok 테스트 케이스:**
+```bash
+# 1. 표준 URL
+https://www.tiktok.com/@username/video/1234567890123456789
+
+# 2. 짧은 URL
+https://vm.tiktok.com/ABC123/
+
+# 3. 지역 제한 콘텐츠
+https://www.tiktok.com/@restricted_user/video/restricted_id
+```
+
+### 🔧 **3. Cursor 추출기 API 스펙 준비 (Cursor)**
+
+#### **요청 인터페이스 확정:**
+```typescript
+interface ExtractRequest {
+  url: string;
+  platform: 'instagram' | 'tiktok';
+  options?: {
+    download_video?: boolean;
+    extract_comments?: boolean;
+    fallback_on_error?: boolean;
+  };
+}
+```
+
+#### **응답 인터페이스 확정:**
+```typescript
+interface ExtractResponse {
+  success: boolean;
+  platform: string;
+  coverage_percentage: number;
+  data: {
+    content_id: string;
+    metadata: SocialMetadata;
+    video_url?: string;
+    missing_fields: string[];
+    fallback_needed: boolean;
+  };
+  error?: string;
+}
+```
+
+### ⚡ **4. 성능 벤치마크 준비 (ClaudeCode)**
+
+#### **현재 YouTube 성능 측정:**
+```bash
+# YouTube URL 처리 시간 측정
+time curl -X POST http://localhost:8080/api/normalize-url \
+  -d '{"url": "https://www.youtube.com/shorts/SAMPLE_ID"}'
+```
+
+#### **목표 성능 기준:**
+- **URL 정규화**: <200ms
+- **메타데이터 추출**: <30s (Cursor 추출기)
+- **폼 자동 채우기**: <2s
+- **전체 플로우**: <60s
+
+### 🔒 **5. 에러 처리 전략 설계 (Both)**
+
+#### **Cursor 추출기 실패 시나리오:**
+```typescript
+const fallbackStrategies = {
+  RATE_LIMITED: 'manual_input_with_guidance',
+  CONTENT_PRIVATE: 'partial_extraction',
+  NETWORK_ERROR: 'retry_with_backoff',
+  PARSING_FAILED: 'manual_input_required'
+};
+```
+
+### 🎨 **6. UI 개선 준비 (Cursor)**
+
+#### **자동 채우기 UX 설계:**
+```javascript
+// URL 입력 → 로딩 표시 → 진행률 → 자동 채움 → 수동 보완 안내
+const autoFillFlow = {
+  step1: 'URL 검증',
+  step2: '플랫폼 감지', 
+  step3: '메타데이터 추출',
+  step4: '폼 자동 채우기',
+  step5: '누락 필드 안내'
+};
+```
+
+### 📊 **7. 모니터링 준비 (ClaudeCode)**
+
+#### **메트릭 수집 포인트:**
+```typescript
+const integrationMetrics = {
+  cursor_api_response_time: number;
+  extraction_success_rate: number;
+  auto_fill_coverage: number;
+  user_manual_input_time: number;
+  error_fallback_rate: number;
+};
+```
+
+## 🎯 **GPT-5 Pro 답변 받기 전 완료 목표**
+
+### **ClaudeCode 담당:**
+- ✅ 기존 API 스펙 완전 분석
+- 🔄 테스트 시나리오 상세 준비  
+- 🔄 성능 벤치마크 기준 설정
+
+### **Cursor 담당:**
+- ✅ 통합 API 스펙 구체화
+- 🔄 UI 자동 채우기 플로우 설계
+- 🔄 에러 처리 UX 준비
+
+이렇게 준비하면 GPT-5 Pro 답변 즉시 **바로 실행**할 수 있습니다! 🚀
