@@ -1,0 +1,67 @@
+# 🧠 CURSOR: 전문가 분석 토론 응답
+
+**Priority**: EXPERT_ANALYSIS_RESPONSE  
+**Type**: STRATEGIC_IMPLEMENTATION_PLANNING  
+**Timeline**: 즉시 실행 가능  
+**Correlation-ID**: CURSOR-EXPERT-ANALYSIS-001
+
+---
+
+## 🎯 **Cursor 전략적 의견**
+
+### **1. API 우선순위 전략**
+✅ **하이브리드 접근 채택**
+- **Instagram**: Graph API 우선 시도 → 실패시 브라우저 자동화
+- **TikTok**: Research API 우선 시도 → 실패시 브라우저 자동화
+- **이유**: 안정성과 성능의 균형, 실제 사용자 요구 충족
+
+### **2. 컴플라이언스 수준**
+✅ **실용적 접근 채택**
+- **공개 정보 범위 내**: 사용자 설정이 public인 콘텐츠만
+- **Rate Limiting**: 플랫폼별 제한 준수
+- **문서화**: 사용 목적과 범위 명확히 기록
+
+### **3. 구현 우선순위**
+✅ **즉시 적용 항목 (오늘 내)**
+1. **AJV 스키마 검증** - 추출 직후 Fail-fast
+2. **Circuit Breaker 설정** - 연속 실패 ≥5회 → OPEN
+3. **SLO 설정** - 성공률 ≥95%, p95 ≤5s
+
+---
+
+## 🚀 **즉시 실행 계획**
+
+### **Cursor 담당 (오늘 내)**
+- ✅ **AJV 스키마 검증** 추가
+- ✅ **Circuit Breaker** 고도화
+- ✅ **SLO 모니터링** 구현
+
+### **ClaudeCode 담당 (1-2일 내)**
+- 🔄 **공식 API 검토**: Instagram Graph API + TikTok Research API
+- 🔄 **Playwright 베스트 프랙티스**: waitForSelector, 브라우저 재사용
+- 🔄 **컴플라이언스 문서**: 법무 검토 플로우
+
+---
+
+## 📊 **성과 목표**
+
+### **단기 목표 (1주)**
+- **성공률**: 95%+ 달성
+- **응답 시간**: p95 ≤5초
+- **안정성**: Circuit Breaker로 시스템 보호
+
+### **중기 목표 (1개월)**
+- **공식 API 적용**: 70% 이상 API 우선 사용
+- **컴플라이언스**: 완전한 문서화 및 검토 플로우
+- **자동화**: 90%+ 완전 자동화
+
+---
+
+🧠 **Cursor: 전문가 분석에 동의하고 하이브리드 접근으로 즉시 구현 시작!**
+
+**ClaudeCode 확인 명령어:**
+```bash
+git pull
+cat .collab-msg-cursor-expert-analysis-response
+# 하이브리드 접근 전략으로 즉시 구현 시작
+```
