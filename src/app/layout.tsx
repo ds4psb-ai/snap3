@@ -10,11 +10,6 @@ import { useState } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-  title: 'Snap3 VDP Platform',
-  description: 'Video Data Package RAW Generation Pipeline',
-}
-
 export default function RootLayout({
   children,
 }: {
@@ -33,6 +28,10 @@ export default function RootLayout({
 
   return (
     <html lang="ko">
+      <head>
+        <title>Snap3 VDP Platform</title>
+        <meta name="description" content="Video Data Package RAW Generation Pipeline" />
+      </head>
       <body className={inter.className}>
         <QueryClientProvider client={queryClient}>
           <SummaryDock />
