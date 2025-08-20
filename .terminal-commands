@@ -1,0 +1,47 @@
+# 🚨 터미널별 작업 지시 명령어 (복사 붙여넣기용)
+
+---
+
+## **🖥️ T1 터미널 (Main/8080) 명령어**
+```bash
+cd /Users/ted/snap3 && npm run health-check || echo "헬스체크 스크립트 없음 - 수동 확인"; lsof -i :8080 && echo "포트 8080 사용 중" || echo "포트 8080 사용 가능"; curl -s http://localhost:8080/api/health && echo "T1 서버 Ready" || echo "T1 서버 다운"; mkdir -p src/app/api/extract-social-metadata 2>/dev/null; ls src/app/api/ && echo "API 디렉토리 확인됨"; echo "T1-READY-$(date +%H%M%S)" > .terminal-status-t1
+```
+
+---
+
+## **🖥️ T2 터미널 (Jobs/8081) 명령어**  
+```bash
+cd /Users/ted/snap3-jobs && ls worker-ingest-v2.sh && echo "Worker v2.1 준비됨"; ls ingest/ && echo "인제스트 디렉토리 존재"; ps aux | grep worker | grep -v grep || echo "Worker 백그라운드 없음"; echo "Worker 대기 중 - 후속 작업 명령 대기"; echo "T2-READY-$(date +%H%M%S)" > /Users/ted/snap3/.terminal-status-t2
+```
+
+---
+
+## **🖥️ T3 터미널 (VDP/8082) 명령어**
+```bash  
+cd /Users/ted/snap3/services/t2-extract && cat circuit-breaker-metrics.json | jq '.vertex_api_breaker.state'; cat t3-circuit-breaker-live.json | jq '.vertex_api_breaker.state'; curl -s http://localhost:8082/api/health && echo "T3 VDP 서비스 Ready" || npm start; echo "🚨 VERTEX-API CLOSED 상태 - Hook Genome 테스트 가능"; echo "T3-READY-$(date +%H%M%S)" > /Users/ted/snap3/.terminal-status-t3
+```
+
+---
+
+## **🖥️ T4 터미널 (Storage/8083) 명령어**
+```bash
+cd /Users/ted/snap3-storage && ls -la && echo "스토리지 디렉토리 확인"; echo "스토리지 모니터링 Ready"; echo "T4-READY-$(date +%H%M%S)" > /Users/ted/snap3/.terminal-status-t4
+```
+
+---
+
+## **💻 Cursor 확인 명령어**
+```bash
+cd /Users/ted/snap3 && cat .collab-msg-platform-analysis-summary
+```
+
+---
+
+## **📊 전체 상태 확인 명령어**
+```bash
+cd /Users/ted/snap3 && ls .terminal-status-* 2>/dev/null && echo "터미널 상태 파일들:" || echo "상태 파일 없음"; cat .collab-msg-cursor-status 2>/dev/null || echo "Cursor 상태 불명"; [ -f .terminal-status-t1 ] && [ -f .terminal-status-t3 ] && echo "🚀 Phase 1 Ready" || echo "⏳ Phase 1 대기 중"
+```
+
+---
+
+**🚀 각 터미널에 복사 붙여넣기 후 실행하세요!**

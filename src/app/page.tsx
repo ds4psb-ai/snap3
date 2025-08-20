@@ -8,6 +8,7 @@ import UniversalSystemStatus from '@/components/universal/UniversalSystemStatus'
 import URISCoordinator from '@/components/universal/URISCoordinator';
 import AgentStatusGrid from '@/components/universal/AgentStatusGrid';
 import RoutingFlowChart from '@/components/universal/RoutingFlowChart';
+import { LimitedAutoModePanel } from '@/components/recursive-improvement/LimitedAutoModePanel';
 
 export default function HomePage() {
   const handleMetadataExtracted = (metadata: any) => {
@@ -29,6 +30,19 @@ export default function HomePage() {
         
         <div className="mb-8">
           <UniversalSystemStatus />
+        </div>
+
+        {/* 제한된 자동 모드 패널 */}
+        <div className="mb-8">
+          <div className="flex items-center space-x-2 mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">제한된 자동 모드</h2>
+            <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-sm font-medium">
+              과도한 자동화 방지
+            </span>
+          </div>
+          <div className="flex justify-center">
+            <LimitedAutoModePanel />
+          </div>
         </div>
 
         {/* URIS Dashboard 섹션 */}

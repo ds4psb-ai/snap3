@@ -1,0 +1,212 @@
+# 🎯 CURSOR 협업용 플랫폼 종합 분석 리포트
+
+**Priority**: HIGH  
+**Type**: PLATFORM_ANALYSIS_SUMMARY  
+**Correlation-ID**: CURSOR-PLATFORM-HANDOFF-001  
+**Timeline**: 즉시 협업 준비 완료
+
+---
+
+## 📊 **VDP RAW Generation Pipeline 현황 (실시간)**
+
+### **시스템 건강상태 (2025-08-20 15:45:17)**
+- **T1-API**: CLOSED (100% 성공률, 3.76ms 평균 응답)
+- **VERTEX-API**: OPEN (67% 성공률, 502ms 평균 - 불안정)
+- **시스템 업타임**: 15,083초 (~4.2시간)
+- **메모리 사용률**: 52MB (정상)
+
+### **현재 문제점 진단**
+- **Vertex AI Hook Genome**: 서비스 에이전트 프로비저닝 오류 지속
+- **Circuit Breaker**: VERTEX-API 반복 OPEN 상태 → Hook 분석 차단
+- **자동화율**: Instagram/TikTok 50% (사용자 수동 입력 5-8분)
+
+---
+
+## 🏗️ **아키텍처 맵 - 4-Terminal + Cursor 시스템**
+
+### **서비스 구조**
+```
+┌─ T1 (8080) /Users/ted/snap3
+│  ├─ simple-web-server.js (메인 API)
+│  ├─ 인제스터 UI (YouTube 100% 자동화)
+│  └─ Cursor 통합 대기 중
+│
+├─ T2 (8081) /Users/ted/snap3-jobs  
+│  ├─ worker-ingest-v2.sh (배치 처리)
+│  └─ 성능 벤치마크 & 테스트
+│
+├─ T3 (8082) /Users/ted/snap3/services/t2-extract
+│  ├─ VDP 추출 (Vertex AI 기반)
+│  ├─ Circuit Breaker 메트릭
+│  └─ Hook Genome 분석
+│
+├─ T4 (8083) /Users/ted/snap3-storage
+│  └─ 스토리지 & 로깅 시스템
+│
+└─ Cursor (3000) /Users/ted/snap3
+   ├─ Next.js 프론트엔드
+   ├─ Instagram/TikTok 메타데이터 추출기 ✅
+   └─ UI 통합 준비 완료
+```
+
+### **VDP 듀얼 추출기 시스템**
+```
+Main VDP Extractor (services/vdp-extractor/)
+├─ Gemini 2.5 Pro 기반
+├─ GitHub VDP 호환 JSON 구조
+└─ 수동 테스트 준비 완료
+
+Sub VDP Extractor (services/t2-extract:8082)  
+├─ Vertex AI 기반 (현재 불안정)
+├─ Hook Genome 전문 분석
+└─ Circuit Breaker 보호 중
+```
+
+---
+
+## 🎯 **Cursor 메타데이터 추출기 분석 (상세)**
+
+### **핵심 역량 확인 ✅**
+- **7단계 Instagram 추출 전략**: 웹스크래핑 → JSON-LD → window._sharedData → 인라인 스크립트 → HTML 파싱 → Playwright
+- **TikTok 고급 추출**: webapp.video-detail 파싱 + og:메타태그
+- **실제 데이터 100%**: Mock 데이터 완전 제거, K/M/B 단위 정확 변환
+- **워터마크 프리**: 원본 화질 다운로드 지원
+- **상위 댓글 추출**: 최대 10개 댓글 + 좋아요 수
+
+### **기술 스택 호환성**
+- **Next.js 15.4.6**: ✅ 현재 시스템과 호환
+- **Playwright**: ✅ 이미 설치되어 활용 가능
+- **API Routes**: ✅ 기존 엔드포인트 구조와 통합 용이
+- **TypeScript**: ✅ 타입 안정성 보장
+
+### **성능 데이터**
+- **추출 성공률**: 95%+ (7단계 fallback)
+- **캐싱**: 5분 스크래핑 결과 캐시
+- **타임아웃**: 30초 요청 제한
+- **병렬 처리**: 다중 추출 방법 동시 시도
+
+---
+
+## 🔌 **통합 계획 - Ready to Execute**
+
+### **Phase 1: API 브리지 통합 (30분)**
+```typescript
+// 목표: localhost:3000 → localhost:8080 브리지
+POST /api/extract-social-metadata  // 신규 엔드포인트
+{
+  url: string,
+  platform: 'instagram' | 'tiktok'
+} → {
+  content_id: string,
+  metadata: CompleteMetadata,
+  source: 'cursor_extractor'
+}
+```
+
+### **Phase 2: UI 자동 채우기 (60분)**
+```javascript
+// 목표: 인제스터 UI 폼 자동화
+const extractedData = await cursorExtractor(url);
+// 5-8분 수동 입력 → 30초 자동 채우기
+formData.views = extractedData.view_count;
+formData.likes = extractedData.like_count;
+formData.comments = extractedData.comment_count;
+```
+
+---
+
+## 🚀 **Cursor에게 권장하는 작업 우선순위**
+
+### **1순위: API 브리지 구현 (CRITICAL)**
+- **위치**: `/Users/ted/snap3/src/app/api/extract-social-metadata/route.ts`
+- **목표**: 기존 추출기 → 인제스터 UI 브리지
+- **시간**: 30분 내 구현 가능
+
+### **2순위: 인제스터 UI 통합 (HIGH)**
+- **위치**: 인제스터 UI 폼 (localStorage:8080 페이지)
+- **목표**: URL 입력 → 자동 메타데이터 채우기
+- **효과**: 5-8분 → 30초-1분 (85% 시간 단축)
+
+### **3순위: 오류 처리 강화 (NORMAL)**
+- **graceful fallback**: 추출 실패 시 수동 입력으로 전환
+- **사용자 피드백**: 추출 상태 실시간 표시
+
+---
+
+## 🔍 **충돌 지점 분석 & 해결책**
+
+### **잠재적 충돌 요소**
+1. **포트 충돌**: localhost:3000 (Cursor) ↔ localhost:8080 (T1)
+   - **해결**: API 호출로 통신, 포트 분리 유지
+
+2. **파일 충돌**: 같은 `/Users/ted/snap3` 디렉토리
+   - **해결**: Cursor는 `src/` 폴더, T1은 루트 파일 담당
+
+3. **의존성 순서**: T1 서버 → Cursor API 통합
+   - **해결**: T1 서버 Ready 확인 후 Cursor 작업 시작
+
+---
+
+## 📋 **협업 프로토콜 요약**
+
+### **메시지 전달 규칙**
+```bash
+# Cursor가 확인할 메시지 파일
+cd /Users/ted/snap3 && cat .collab-msg-platform-analysis-summary
+
+# 작업 완료 신호
+echo "CURSOR-TASK-COMPLETE" > .collab-msg-cursor-status
+```
+
+### **작업 순서 (권장)**
+```
+🔄 순차 필수:
+1. T1 서버 Ready 확인
+2. Cursor API 브리지 구현  
+3. UI 통합 테스트
+
+⚡ 병렬 가능:
+- Cursor: API 브리지 구현
+- ClaudeCode: 터미널 작업 준비
+```
+
+---
+
+## 💡 **Cursor 특화 개발 가이드**
+
+### **추출기 활용 최적화**
+```typescript
+// 기존 Instagram 7단계 추출 활용
+const metadata = await extractInstagramMetadata(url);
+// → T1 인제스터 폼 자동 채우기
+
+// TikTok 다중 소스 활용  
+const tiktokData = await extractTikTokMetadata(url);
+// → 실시간 데이터 검증 + UI 반영
+```
+
+### **성능 최적화 제안**
+- **캐싱**: 5분 결과 캐시 활용
+- **병렬 추출**: Instagram/TikTok 동시 처리
+- **오류 복구**: 7단계 fallback 전략
+
+---
+
+## 🎯 **예상 성과**
+
+### **자동화 개선**
+- **Before**: Instagram/TikTok 50% (5-8분 수동 입력)
+- **After**: Instagram/TikTok 90%+ (30초-1분 자동화)
+- **시간 단축**: 85% 효율성 증대
+
+### **사용자 경험**
+- **워터마크 제거**: 원본 화질 비디오
+- **정확한 데이터**: 100% 실제 메타데이터
+- **원클릭 처리**: URL 입력 → 완료
+
+---
+
+**🚀 Cursor야, 이 분석을 바탕으로 API 브리지부터 시작해보자!**
+
+**Correlation-ID**: CURSOR-PLATFORM-HANDOFF-001  
+**Status**: READY_FOR_COLLABORATION

@@ -98,6 +98,124 @@ User Time:  5-8min → 30sec-1min (85% reduction)
 
 ---
 
+## 🚀 **VDP 통합 작업 의사결정 결과 (2025-08-20)**
+
+### **담당자 분담 방식**
+- **Phase 1 (Cursor 담당)**: 
+  - TikTok/Instagram 메타데이터 자동 추출기
+  - 워터마크 제거 영상 다운로드
+  - 인제스터 UI 통합 (기존 코드 활용)
+
+- **Phase 2 (ClaudeCode 담당)**:
+  - 메인 VDP 추출기 (services/vdp-extractor/) 연동
+  - GitHub VDP 호환 JSON → UI 표시
+  - 메인/서브 추출기 선택 옵션
+
+### **우선순위 및 일정**
+- **우선순위**: VDP 통합 우선 (사용자 즉시 테스트 요구)
+- **일정**: 1-2일 빠른 구현
+  - Phase 1: Cursor 24시간 내 완료 목표
+  - Phase 2: ClaudeCode 24-48시간 내 완료
+
+### **시스템 복구 현황**
+- **VERTEX-API**: OPEN (11회 연속 실패) → CLOSED (복구 완료)
+- **성능**: 499ms 평균, 67% 성공률 → 안정화 중
+
+---
+
+## 🛡️ **제한된 자동 모드 시스템 (NEW)**
+
+### **과도한 자동화 방지 메커니즘**
+```typescript
+interface LimitedAutoModeConfig {
+  maxExecutionTime: 120000,       // 2분 (120초)
+  maxOperations: 3,               // 최대 3개 작업
+  maxConcurrentTasks: 2,          // 최대 2개 동시 작업
+  safetyTimeout: 30000,           // 30초 안전 타임아웃
+  userApprovalThreshold: 2,       // 2개 작업 후 승인 필요
+}
+```
+
+### **사용자 제어 기능**
+- **긴급 정지 버튼**: 모든 자동 작업 즉시 중단
+- **리셋 버튼**: 제한 사항 초기화
+- **실시간 모니터링**: 작업 진행률 및 상태 표시
+
+### **적용 범위**
+- **재귀개선 시스템**: 과도한 자동 판단 방지
+- **GPT-5 권장사항**: 단계별 안전한 구현
+- **VDP 통합**: 사용자 승인 게이트 통한 진행
+
+---
+
+## 📊 **GPT-5 전문가 분석 결과 (2025-08-20)**
+
+### **기술적 평가 동의**
+- ✅ **Hook 타이밍 2.5초**: 플랫폼 모범 사례 완벽 일치
+- ✅ **강도 점수 0.87**: 프로덕션 임계값 대폭 초과 달성
+- ✅ **멀티모달 구조**: ASR/OCR/감정아크 포괄성 우수
+
+### **프로덕션 준비도 핵심 격차**
+1. **스키마 강화**: Gemini Response Schema 필요
+2. **플랫폼 메트릭**: YouTube Analytics API 통합 필요
+3. **품질 게이트**: WER/CER 추적 시스템 구축 필요
+4. **Circuit Breaker**: VERTEX-API 안정성 확보
+
+### **구현 우선순위**
+1. **VERTEX-API Circuit Breaker 복구** (최우선)
+2. **Vertex Structured Output 구현**
+3. **WER/CER 품질 모니터링**
+4. **YouTube Analytics API 통합**
+
+### **전략적 권장사항**
+- **단기**: A/B ground truth 세트 (플랫폼별 100개 샘플)
+- **중기**: 플랫폼별 특화 기능 엔지니어링
+- **장기**: 성능 예측 모델
+
+---
+
+## 🏗️ **4-Terminal + Cursor 시스템 아키텍처 (업데이트)**
+
+### **서비스 구조**
+```
+┌─ T1 (8080) /Users/ted/snap3
+│  ├─ simple-web-server.js (메인 API)
+│  ├─ 인제스터 UI (YouTube 100% 자동화)
+│  └─ Cursor 통합 대기 중
+│
+├─ T2 (8081) /Users/ted/snap3-jobs  
+│  ├─ worker-ingest-v2.sh (배치 처리)
+│  └─ 성능 벤치마크 & 테스트
+│
+├─ T3 (8082) /Users/ted/snap3/services/t2-extract
+│  ├─ VDP 추출 (Vertex AI 기반)
+│  ├─ Circuit Breaker 메트릭
+│  └─ Hook Genome 분석
+│
+├─ T4 (8083) /Users/ted/snap3-storage
+│  └─ 스토리지 & 로깅 시스템
+│
+└─ Cursor (3000) /Users/ted/snap3
+   ├─ Next.js 프론트엔드
+   ├─ Instagram/TikTok 메타데이터 추출기 ✅
+   └─ UI 통합 준비 완료
+```
+
+### **VDP 듀얼 추출기 시스템**
+```
+Main VDP Extractor (services/vdp-extractor/)
+├─ Gemini 2.5 Pro 기반
+├─ GitHub VDP 호환 JSON 구조
+└─ 수동 테스트 준비 완료
+
+Sub VDP Extractor (services/t2-extract:8082)  
+├─ Vertex AI 기반 (현재 안정화 중)
+├─ Hook Genome 전문 분석
+└─ Circuit Breaker 보호 중
+```
+
+---
+
 ## 🚀 Recent Implementations (2025-08-20)
 
 ### ✅ Completed Features
@@ -246,5 +364,48 @@ curl -s http://localhost:[port]/health && echo "Ready" || echo "대기"
 - **Edit Allowed**: `src/**`, `web/**`, `scripts/**`, `docs/**`
 - **Edit Forbidden**: `/internal/vdp_full/**`, unauthorized network calls
 - **Commit Rules**: All tests green + Evidence Pack + No VDP_FULL exposure
+
+---
+
+## 📝 **로깅 및 모니터링 개선 (NEW)**
+
+### **구조화된 로깅 시스템**
+```typescript
+interface LogEntry {
+  timestamp: string;
+  level: 'info' | 'warn' | 'error';
+  message: string;
+  correlationId: string;
+  metadata: Record<string, any>;
+}
+```
+
+### **실시간 모니터링 지표**
+- **시스템 업타임**: 15,083초 (~4.2시간)
+- **메모리 사용률**: 52MB (정상)
+- **API 응답시간**: T1-API 3.76ms, VERTEX-API 502ms
+- **성공률**: T1-API 100%, VERTEX-API 67%
+
+### **Circuit Breaker 모니터링**
+- **T1-API**: CLOSED (100% 성공률)
+- **VERTEX-API**: CLOSED (복구 완료, 안정화 중)
+- **자동 복구**: 실패 임계값 도달 시 자동 OPEN → HALF_OPEN → CLOSED
+
+### **성능 메트릭 추적**
+- **Hook Genome 분석**: 0.87 강도 (목표 ≥0.70 초과)
+- **VDP 처리시간**: P95 42ms (목표 500ms 대폭 초과)
+- **자동화율**: YouTube 100%, Instagram/TikTok 50% → 90%+ 목표
+
+### **로깅 개선 사항**
+- **상관관계 ID**: 모든 요청에 고유 식별자 부여
+- **메타데이터 추적**: 플랫폼별, 작업별 상세 정보 기록
+- **에러 분류**: 시스템/네트워크/사용자 에러 구분
+- **성능 지표**: 응답시간, 처리량, 오류율 실시간 추적
+
+### **모니터링 대시보드**
+- **실시간 상태**: 4-Terminal + Cursor 시스템 상태
+- **성능 지표**: API 응답시간, 성공률, 처리량
+- **알림 시스템**: 임계값 초과 시 자동 알림
+- **트렌드 분석**: 시간별 성능 변화 추적
 
 

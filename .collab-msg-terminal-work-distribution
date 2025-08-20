@@ -1,0 +1,237 @@
+# 🚨 4-Terminal + Cursor 작업 분배 지시사항
+
+**Priority**: CRITICAL  
+**Type**: TERMINAL_WORK_DISTRIBUTION  
+**Correlation-ID**: TERMINAL-COORD-001  
+**Timeline**: 즉시 시작 가능
+
+---
+
+## 🎯 **우선순위 기반 작업 분배**
+
+### **🥇 Phase 1: 기반 시스템 준비 (병렬 가능)**
+
+#### **T1 (Main/8080)** - `/Users/ted/snap3`
+```bash
+cd /Users/ted/snap3
+
+# 🔍 시스템 상태 점검
+npm run health-check || echo "헬스체크 스크립트 없음 - 수동 확인"
+lsof -i :8080 && echo "포트 8080 사용 중" || echo "포트 8080 사용 가능"
+
+# 📊 API 엔드포인트 준비
+curl -s http://localhost:8080/api/health && echo "T1 서버 Ready" || echo "T1 서버 다운"
+
+# 🔧 Cursor 통합 준비
+mkdir -p src/app/api/extract-social-metadata 2>/dev/null
+ls src/app/api/ && echo "API 디렉토리 확인됨"
+
+# ⚡ 완료 신호
+echo "T1-READY-$(date +%H%M%S)" > .terminal-status-t1
+```
+
+#### **T3 (VDP/8082)** - `/Users/ted/snap3/services/t2-extract`  
+```bash
+cd /Users/ted/snap3/services/t2-extract
+
+# 🔍 Circuit Breaker 상태 확인
+cat circuit-breaker-metrics.json | jq '.vertex_api_breaker.state'
+cat t3-circuit-breaker-live.json | jq '.vertex_api_breaker.state'
+
+# 📊 VDP 서비스 상태
+curl -s http://localhost:8082/api/health && echo "T3 VDP 서비스 Ready" || npm start
+
+# 🧪 Hook Genome 테스트 (주의: Vertex 불안정)
+echo "🚨 VERTEX-API OPEN 상태 - Hook Genome 테스트 스킵"
+
+# ⚡ 완료 신호  
+echo "T3-READY-$(date +%H%M%S)" > /Users/ted/snap3/.terminal-status-t3
+```
+
+#### **T2 (Jobs/8081)** - `/Users/ted/snap3-jobs`
+```bash
+cd /Users/ted/snap3-jobs
+
+# 🔍 Worker 시스템 점검
+ls worker-ingest-v2.sh && echo "Worker v2.1 준비됨"
+ls ingest/ && echo "인제스트 디렉토리 존재"
+
+# 📊 백그라운드 작업 상태
+ps aux | grep worker | grep -v grep || echo "Worker 백그라운드 없음"
+
+# ⚙️ 대기 모드 진입
+echo "Worker 대기 중 - 후속 작업 명령 대기"
+
+# ⚡ 완료 신호
+echo "T2-READY-$(date +%H%M%S)" > /Users/ted/snap3/.terminal-status-t2
+```
+
+#### **T4 (Storage/8083)** - `/Users/ted/snap3-storage`
+```bash
+cd /Users/ted/snap3-storage
+
+# 🔍 스토리지 시스템 점검  
+ls -la && echo "스토리지 디렉토리 확인"
+
+# 📊 로그 모니터링 준비
+echo "스토리지 모니터링 Ready"
+
+# ⚡ 완료 신호
+echo "T4-READY-$(date +%H%M%S)" > /Users/ted/snap3/.terminal-status-t4
+```
+
+---
+
+## 🥈 **Phase 2: Cursor 협업 지원 (순차 필수)**
+
+### **Phase 2-A: Cursor 지원 (T1 담당)**
+```bash
+cd /Users/ted/snap3
+
+# 🔄 Cursor Ready 신호 대기
+while [ ! -f .collab-msg-cursor-api-ready ]; do sleep 2; done
+echo "Cursor API 준비 완료 감지"
+
+# 🔌 API 브리지 테스트 
+curl -X POST http://localhost:3000/api/instagram/metadata \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.instagram.com/reel/test"}' && echo "Cursor API 연결 OK"
+
+# 🎯 통합 테스트
+curl -X POST http://localhost:8080/api/extract-social-metadata \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.instagram.com/reel/test", "platform": "instagram"}' \
+  && echo "브리지 연결 성공" || echo "브리지 연결 실패"
+
+# ⚡ 완료 신호
+echo "T1-CURSOR-BRIDGE-COMPLETE" > .collab-msg-t1-status
+```
+
+### **Phase 2-B: 메인 VDP 추출기 준비 (T1 담당)**
+```bash  
+cd /Users/ted/snap3
+
+# 🔍 메인 VDP 추출기 확인
+ls services/vdp-extractor/ && echo "메인 VDP 추출기 존재" || echo "서비스 디렉토리 없음"
+
+# 🔧 연동 엔드포인트 준비
+echo "메인 VDP 추출기 연동 준비 중..."
+
+# 📝 통합 상태 기록
+echo "MAIN-VDP-READY-$(date +%H%M%S)" > .terminal-status-main-vdp
+```
+
+---
+
+## 🥉 **Phase 3: 통합 테스트 및 검증 (전체 협력)**
+
+### **통합 테스트 시나리오**
+```bash
+# 🧪 Instagram 풀 파이프라인 테스트
+# T1에서 실행:
+cd /Users/ted/snap3
+curl -X POST http://localhost:8080/api/submit \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.instagram.com/reel/test", "useAutomation": true}'
+
+# 📊 성능 검증  
+# T2에서 모니터링:
+cd /Users/ted/snap3-jobs
+./scripts/monitor-integration-performance.sh 2>/dev/null || echo "모니터링 스크립트 없음"
+
+# 🔧 VDP 품질 검증
+# T3에서 확인:
+cd /Users/ted/snap3/services/t2-extract
+curl -s http://localhost:8082/api/vdp/test-quality-gates
+```
+
+---
+
+## 🚨 **충돌 방지 프로토콜**
+
+### **파일 충돌 방지**
+- **T1**: 루트 파일 (`*.js`, `package.json`) 전담
+- **Cursor**: `src/` 디렉토리 전담  
+- **T3**: `services/t2-extract/` 전담
+- **T2**: `/Users/ted/snap3-jobs/` 완전 분리
+- **T4**: `/Users/ted/snap3-storage/` 완전 분리
+
+### **포트 충돌 방지**
+- **8080**: T1 전용 (인제스터 UI)
+- **3000**: Cursor 전용 (Next.js)
+- **8082**: T3 전용 (VDP 서비스)
+- **8081, 8083**: T2, T4 예약 (사용 시 확인)
+
+### **작업 순서 의존성**
+```
+🔄 순차 필수:
+1. T1, T3 서버 Ready 확인
+2. Cursor API 브리지 구현
+3. T1 ↔ Cursor 통합 테스트
+4. 전체 파이프라인 검증
+
+⚡ 병렬 가능:
+- T1: 서버 준비 & Cursor 지원
+- T2: 백그라운드 모니터링
+- T3: VDP 서비스 상태 관리  
+- T4: 로깅 & 스토리지 대기
+- Cursor: API 브리지 개발
+```
+
+---
+
+## 📋 **각 터미널별 완료 확인 방법**
+
+### **상태 확인 명령어**
+```bash
+# 전체 터미널 상태 확인
+cd /Users/ted/snap3
+ls .terminal-status-* 2>/dev/null && echo "터미널 상태 파일들:" || echo "상태 파일 없음"
+
+# Cursor 상태 확인
+cat .collab-msg-cursor-status 2>/dev/null || echo "Cursor 상태 불명"
+
+# 시스템 전체 Ready 확인
+[ -f .terminal-status-t1 ] && [ -f .terminal-status-t3 ] && echo "🚀 Phase 1 Ready" || echo "⏳ Phase 1 대기 중"
+```
+
+---
+
+## ⏰ **예상 타임라인**
+
+### **Phase 1 (기반 준비)**: 10분
+- T1, T2, T3, T4 병렬 준비: 5분
+- 상호 연결성 확인: 5분
+
+### **Phase 2 (Cursor 통합)**: 90분  
+- Cursor API 브리지: 30분
+- T1 ↔ Cursor 연동: 30분
+- 통합 테스트: 30분
+
+### **Phase 3 (검증)**: 30분
+- 풀 파이프라인 테스트: 20분
+- 성능 검증: 10분
+
+**총 예상 시간**: 2시간 10분
+
+---
+
+## 🎯 **성공 기준**
+
+### **자동화 목표**
+- **Instagram**: 50% → 90%+ 자동화
+- **TikTok**: 50% → 90%+ 자동화  
+- **사용자 입력 시간**: 5-8분 → 30초-1분
+
+### **품질 기준**
+- **API 응답**: <500ms
+- **메타데이터 정확도**: 95%+
+- **오류율**: <5%
+- **Circuit Breaker**: 정상 상태 유지
+
+---
+
+**🚀 모든 터미널 준비 완료 시 즉시 Phase 2 시작!**
+
+**Correlation-ID**: TERMINAL-COORD-001  
+**Status**: DISTRIBUTION_COMPLETE

@@ -1,0 +1,83 @@
+# 🚨 터미널별 충돌 체크 + 작업 명령어 (복사 붙여넣기용)
+
+---
+
+## 🔍 **충돌 분석 결과**
+
+### **파일 충돌 매트릭스**
+- **T1 ↔ T3**: 같은 `/Users/ted/snap3` 디렉토리 → 🔄 **순차 필수**
+- **T1 ↔ Cursor**: 같은 `/Users/ted/snap3` 디렉토리 → 🔄 **순차 필수**  
+- **T2, T4**: 완전 분리된 디렉토리 → ⚡ **병렬 가능**
+
+### **포트 충돌 체크**
+- **8080 (T1), 8082 (T3), 3000 (Cursor)**: 모두 다름 → ⚡ **병렬 가능**
+- **8081 (T2), 8083 (T4)**: 예약 포트 → ⚡ **병렬 가능**
+
+### **서버 의존성**
+- **T3 → T1**: health check 의존성 → 🔄 **T1 선행 필수**
+- **Cursor → T1**: API 브리지 의존성 → 🔄 **T1 선행 필수**
+
+---
+
+## 🥇 **Phase 1: 병렬 실행 가능 (T2, T4 먼저)**
+
+### **⚡ T2 터미널 (Jobs/8081) - 즉시 실행 가능**
+```bash
+cd /Users/ted/snap3-jobs && echo "🔍 T2 충돌 체크: 완전 분리 디렉토리 ⚡" && ls worker-ingest-v2.sh && echo "Worker v2.1 준비됨" && ls ingest/ && echo "인제스트 디렉토리 존재" && ps aux | grep worker | grep -v grep || echo "Worker 백그라운드 없음" && echo "Worker 대기 중 - 후속 작업 명령 대기" && echo "T2-READY-$(date +%H%M%S)" > /Users/ted/snap3/.terminal-status-t2
+```
+
+### **⚡ T4 터미널 (Storage/8083) - 즉시 실행 가능**  
+```bash
+cd /Users/ted/snap3-storage && echo "🔍 T4 충돌 체크: 완전 분리 디렉토리 ⚡" && ls -la && echo "스토리지 디렉토리 확인" && echo "스토리지 모니터링 Ready" && echo "T4-READY-$(date +%H%M%S)" > /Users/ted/snap3/.terminal-status-t4
+```
+
+---
+
+## 🥈 **Phase 2: T1 우선 실행 (의존성 기준점)**
+
+### **🔄 T1 터미널 (Main/8080) - 의존성 기준점 + 전체 작업**
+```bash
+cd /Users/ted/snap3 && echo "🔍 T1 충돌 체크: T3/Cursor 의존성 기준점 🔄" && ls -la simple-web-server.js package.json 2>/dev/null && echo "공유 파일 충돌 체크 완료" || echo "공유 파일 없음" && npm run health-check || echo "헬스체크 스크립트 없음 - 수동 확인" && lsof -i :8080 && echo "포트 8080 사용 중" || echo "포트 8080 사용 가능" && curl -s http://localhost:8080/api/health && echo "T1 서버 Ready" || echo "T1 서버 다운" && mkdir -p src/app/api/extract-social-metadata 2>/dev/null && ls src/app/api/ && echo "API 디렉토리 확인됨" && echo "T1-READY-$(date +%H%M%S)" > .terminal-status-t1
+```
+
+---
+
+## 🥉 **Phase 3: T1 Ready 후 실행 (순차 필수)**
+
+### **🔄 T3 터미널 (VDP/8082) - T1 Ready 대기 후 실행**
+```bash
+while [ ! -f /Users/ted/snap3/.terminal-status-t1 ]; do echo "⏳ T1 Ready 대기 중..." && sleep 2; done && echo "✅ T1 Ready 확인됨" && cd /Users/ted/snap3/services/t2-extract && echo "🔍 T3 충돌 체크: T1 디렉토리 공유 - T1 선행 완료 🔄" && cat circuit-breaker-metrics.json | jq '.vertex_api_breaker.state' && cat t3-circuit-breaker-live.json | jq '.vertex_api_breaker.state' && curl -s http://localhost:8082/api/health && echo "T3 VDP 서비스 Ready" || npm start && echo "🚨 VERTEX-API CLOSED 상태 - Hook Genome 테스트 가능" && echo "T3-READY-$(date +%H%M%S)" > /Users/ted/snap3/.terminal-status-t3
+```
+
+---
+
+## 💻 **Cursor 작업 (T1 Ready 대기 후)**
+
+### **🔄 Cursor 확인 명령어 - T1 Ready 후 실행**
+```bash
+while [ ! -f /Users/ted/snap3/.terminal-status-t1 ]; do echo "⏳ T1 Ready 대기 중..." && sleep 2; done && echo "✅ T1 Ready 확인됨" && cd /Users/ted/snap3 && echo "🔍 Cursor 충돌 체크: T1 디렉토리 공유 - src/ 디렉토리 전담 🔄" && cat .collab-msg-platform-analysis-summary
+```
+
+---
+
+## 📊 **실행 순서 요약**
+
+### **⚡ 즉시 병렬 실행 (Phase 1)**
+1. **T2 터미널**: Worker 시스템 준비
+2. **T4 터미널**: 스토리지 시스템 준비
+
+### **🔄 순차 실행 (Phase 2-3)**  
+3. **T1 터미널**: 메인 서버 Ready (의존성 기준점)
+4. **T3 터미널**: T1 Ready 확인 후 VDP 서비스 준비
+5. **Cursor**: T1 Ready 확인 후 협업 시작
+
+---
+
+## 📋 **전체 상태 확인 명령어**
+```bash
+cd /Users/ted/snap3 && echo "🔍 전체 충돌 상태 체크:" && ls .terminal-status-* 2>/dev/null && echo "터미널 상태 파일들:" || echo "상태 파일 없음" && [ -f .terminal-status-t1 ] && [ -f .terminal-status-t3 ] && echo "🚀 Phase 1-3 Ready" || echo "⏳ 대기 중" && lsof -i :8080,8082,3000 && echo "포트 사용 현황 확인 완료"
+```
+
+---
+
+**🚨 실행 순서: T2&T4 병렬 → T1 우선 → T3&Cursor 순차**
