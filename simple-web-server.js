@@ -1516,6 +1516,49 @@ app.post('/api/vdp/cursor-extract', async (req, res) => {
 
 // Main VDP Extractor Integration - Direct connection to services/vdp-extractor (port 3001)
 app.post('/api/vdp/extract-main', async (req, res) => {
+    const correlationId = uuidv4();
+    structuredLog('info', 'Main VDP extraction request', req.body, correlationId);
+    
+    try {
+        // Call simple VDP extractor on port 3005
+        const vdpResponse = await fetch('http://localhost:3005/api/vdp/extract', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Correlation-ID': correlationId
+            },
+            body: JSON.stringify(req.body)
+        });
+        
+        if (!vdpResponse.ok) {
+            throw new Error(`VDP extractor error: ${vdpResponse.status}`);
+        }
+        
+        const vdpData = await vdpResponse.json();
+        
+        structuredLog('success', 'Main VDP extraction completed', {
+            contentId: vdpData.content_id,
+            platform: vdpData.platform,
+            processingTime: vdpData.processing_time_ms
+        }, correlationId);
+        
+        res.json(vdpData);
+        
+    } catch (error) {
+        structuredLog('error', 'Main VDP extraction failed', {
+            error: error.message
+        }, correlationId);
+        
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            correlationId
+        });
+    }
+});
+
+// Original endpoint (backup)
+app.post('/api/vdp/extract-main-original', async (req, res) => {
     const startTime = Date.now();
     const correlationId = req.correlationId;
     
@@ -1529,8 +1572,8 @@ app.post('/api/vdp/extract-main', async (req, res) => {
     try {
         const { url, platform, metadata = {}, options = {} } = req.body;
         
-        // Main VDP service integration (localhost:3001)
-        const mainVdpResponse = await createFetchWithKeepAlive(`http://localhost:3001/api/v1/extract`, {
+        // Main VDP service integration (localhost:3005) 
+        const mainVdpResponse = await fetch(`http://localhost:3005/api/vdp/extract`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
