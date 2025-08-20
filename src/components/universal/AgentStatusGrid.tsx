@@ -51,7 +51,7 @@ export default function AgentStatusGrid() {
     };
 
     fetchStatuses();
-    const interval = setInterval(fetchStatuses, 3000); // 3초 간격 업데이트
+    const interval = setInterval(fetchStatuses, 30000); // 3초 → 30초로 변경
 
     return () => clearInterval(interval);
   }, []);

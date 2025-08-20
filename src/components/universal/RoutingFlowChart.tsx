@@ -53,7 +53,7 @@ export default function RoutingFlowChart() {
     };
 
     fetchRoutingData();
-    const interval = setInterval(fetchRoutingData, 2000); // 2초 간격 업데이트
+    const interval = setInterval(fetchRoutingData, 30000); // 2초 → 30초로 변경
 
     return () => clearInterval(interval);
   }, []);

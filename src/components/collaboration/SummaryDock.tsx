@@ -110,11 +110,11 @@ export default function SummaryDock({
   const [consensus, setConsensus] = useState<ConsensusResult>(sampleConsensusStatus);
   const [dlqCount, setDlqCount] = useState(0);
 
-  // 자동 새로고침 (5초 간격)
+  // 자동 새로고침 (30초 간격으로 변경)
   useEffect(() => {
     const interval = setInterval(() => {
       refreshData();
-    }, 5000);
+    }, 30000); // 5초 → 30초로 변경
 
     return () => clearInterval(interval);
   }, []);

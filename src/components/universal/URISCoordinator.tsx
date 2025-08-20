@@ -63,7 +63,7 @@ export default function URISCoordinator() {
     const interval = setInterval(() => {
       fetchURISStatus();
       fetchAgentStatuses();
-    }, 5000); // 5초 간격 업데이트
+    }, 30000); // 5초 → 30초로 변경
 
     return () => clearInterval(interval);
   }, []);
