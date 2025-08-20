@@ -1,0 +1,35 @@
+# 🚀 T2: VDP 파이프라인 최적화 요청
+
+**To**: T2 Jobs Terminal (8081)  
+**From**: T1 Main (8080)  
+**Type**: PIPELINE_OPTIMIZATION  
+**Priority**: HIGH  
+**Correlation-ID**: T1-T2-VDP-OPT-001  
+**Timestamp**: 2025-08-20T19:20:00Z
+
+---
+
+## 🎯 **T2 담당 작업**
+
+### **VDP 배치 처리 최적화**:
+1. **worker-ingest-v2.sh** 성능 튜닝
+2. **BigQuery JSONL 변환** 효율성 개선
+3. **성능 벤치마크** 실행 및 분석
+
+### **기대 성과**:
+- **처리 속도**: 현재 1.2초 → 1초 이하 목표
+- **배치 효율**: 동시 처리 최적화
+- **BigQuery 적재**: T4와 연동 최적화
+
+---
+
+**T2 확인 명령어:**
+```bash
+cd /Users/ted/snap3-jobs
+cat .collab-msg-t2-vdp-pipeline-optimization
+# T1에서 VDP 파이프라인 최적화 요청!
+```
+
+---
+
+🚀 **T2 VDP 파이프라인 최적화 - 병렬 작업 시작!**

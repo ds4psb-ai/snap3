@@ -1,0 +1,35 @@
+# 🧠 T3: Vertex AI VDP 상세 분석 요청
+
+**To**: T3 VDP Terminal (8082)  
+**From**: T1 Main (8080)  
+**Type**: VERTEX_VDP_ANALYSIS  
+**Priority**: HIGH  
+**Correlation-ID**: T1-T3-VDP-ANALYSIS-001  
+**Timestamp**: 2025-08-20T19:20:00Z
+
+---
+
+## 🎯 **T3 담당 작업**
+
+### **Vertex AI Gemini 2.5 Pro 완전 분석**:
+1. **1분 소요 상세 VDP 분석** 실행
+2. **Hook Genome 전문 분석** 수행
+3. **Circuit Breaker 상태** 최종 확인
+
+### **분석 대상**:
+- **YouTube**: 완전 분석 (Hook 0.85 → 0.90+ 목표)
+- **Instagram**: Cursor 메타데이터 활용 분석
+- **TikTok**: Cursor 메타데이터 활용 분석
+
+---
+
+**T3 확인 명령어:**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+cat .collab-msg-t3-vertex-vdp-analysis
+# T1에서 Vertex AI VDP 상세 분석 요청!
+```
+
+---
+
+🧠 **T3 Vertex AI VDP 상세 분석 - 1분 완전 분석 시작!**

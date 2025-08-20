@@ -1,0 +1,49 @@
+# 🚀 Cursor: 최종 통합 실행 요청
+
+**To**: Cursor UI Terminal (3000)  
+**From**: T1 Main (8080)  
+**Type**: FINAL_INTEGRATION  
+**Priority**: CRITICAL  
+**Correlation-ID**: T1-CURSOR-FINAL-001  
+**Timestamp**: 2025-08-20T19:20:00Z
+
+---
+
+## 🎯 **Cursor 최종 작업**
+
+### **Instagram/TikTok 메타데이터 최종 통합**:
+1. **실제 URL 테스트**: 진짜 Instagram/TikTok URL로 메타데이터 추출
+2. **API 연결 확인**: T1의 `/api/extract-social-metadata` 404 해결
+3. **End-to-End 테스트**: URL → 메타데이터 → VDP → BigQuery
+
+### **목표**:
+- **Instagram**: 50% → 90%+ 자동화
+- **TikTok**: 50% → 90%+ 자동화
+- **처리 시간**: 1분 이내 완전 자동화
+
+---
+
+## 🔧 **협력 포인트**
+
+### **T1이 준비한 것들**:
+- ✅ Main VDP Server (localhost:3001) 정상
+- ✅ Web Server (localhost:8080) API 엔드포인트
+- ✅ 3플랫폼 VDP 테스트 완료
+
+### **Cursor가 해야 할 것들**:
+- **API 연결 수정**: 404 에러 해결
+- **실제 데이터 테스트**: 진짜 URL로 검증
+- **UI 최종 통합**: 완전 자동화 달성
+
+---
+
+**Cursor 확인 명령어:**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-cursor-integration-final
+# T1에서 최종 통합 요청!
+```
+
+---
+
+🚀 **Cursor 최종 통합 - 90%+ 자동화 달성!**
