@@ -1,0 +1,21 @@
+# 인제스터 UI 개발 목표 (본업)
+targets:
+  instagram_automation:
+    current: "50% 수동 입력"
+    target: "90%+ 자동화"
+    method: "Cursor 추출 API + 자동 폼 채우기"
+    
+  tiktok_automation:
+    current: "50% 수동 입력"  
+    target: "90%+ 자동화"
+    method: "플랫폼 바이패스 + 메타데이터 추출"
+    
+  user_experience:
+    current: "5-8분 수동 입력"
+    target: "30초-1분 (85% 단축)"
+    method: "URL 입력 → 자동 처리 → VDP 생성"
+
+implementation_phases:
+  phase_a: "URL 입력 + 플랫폼 감지"
+  phase_b: "메타데이터 자동 추출 + 폼 채우기"  
+  phase_c: "에러 처리 + 품질 검증"

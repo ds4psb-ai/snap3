@@ -1,0 +1,243 @@
+# 🧠→🎯 재귀 시스템 고도화 완료 + 인제스터 UI 본업 복귀 전략
+
+**Priority**: CRITICAL  
+**Action**: Recursive-to-Main-Transition  
+**Timeline**: 즉시 시작 → 15분 내 전환 완료  
+**Correlation-ID**: RECURSIVE-MAIN-TRANSITION-001
+
+---
+
+## 🔬 **GPT-5 전문가 답변 핵심 분석**
+
+### ✅ **즉시 적용 가능한 개선사항:**
+1. **합의 임계값**: 0.85/0.60 → **가중치 2/3 합의 + SLO 연동** (≥0.70)
+2. **테스트 분리**: T2 Circuit Breaker 테스트를 **별도 네임스페이스**로
+3. **측정 지표**: **골든 시그널(p95/오류/트래픽/포화)** 중심
+4. **Phase 3 준비**: **Saga/Outbox 패턴**으로 트랜잭션 안정성
+
+### ⚡ **핵심 인사이트**: "재귀개선을 방해 요소가 아닌 백그라운드 품질 보조 시스템으로 전환"
+
+---
+
+## 🎯 **최적 전환 전략 (3단계)**
+
+### **Stage 1: 현재 Phase 2 즉시 조정** (5분)
+
+#### **T2 테스트 네임스페이스 분리:**
+```bash
+# T2에서 즉시 실행
+cd /Users/ted/snap3-jobs
+
+# 기존 테스트 중단
+pkill -f "circuit-breaker-failure-test"
+
+# 네임스페이스 분리 테스트 재시작
+cat > circuit-breaker-test-separated.sh << 'EOF'
+#!/bin/bash
+echo "🧪 [T2] Circuit Breaker 테스트 (네임스페이스 분리)"
+echo "🎯 테스트 모드: ISOLATED (운영 트래픽과 완전 분리)"
+
+for i in {1..30}; do
+    curl -s -X POST http://localhost:8080/api/vdp/extract-vertex \
+        -H "x-namespace: test" \
+        -H "x-test-mode: circuit-breaker-failure" \
+        -H "x-correlation-id: TEST-ISOLATED-$i" \
+        -d '{"gcsUri": "gs://test-bucket/invalid.mp4"}' > /dev/null
+    
+    [ $((i % 5)) -eq 0 ] && echo "테스트 진행: $i/30"
+    sleep 0.1
+done
+
+echo "✅ [T2] 격리된 Circuit Breaker 테스트 완료"
+EOF
+
+chmod +x circuit-breaker-test-separated.sh
+./circuit-breaker-test-separated.sh &
+```
+
+#### **T1 합의 시스템 SLO 연동:**
+```bash
+# T1에서 즉시 실행
+cd /Users/ted/snap3
+
+# SLO 연동 합의 시스템 설정
+cat > consensus-slo-config.json << 'EOF'
+{
+  "consensus_thresholds": {
+    "proceed": 0.70,
+    "modify": 0.60,
+    "reject": 0.60
+  },
+  "weights": {
+    "strategy": {"gpt5": 0.5},
+    "implementation": {"claudecode": 0.5}, 
+    "ux": {"cursor": 0.3}
+  },
+  "slo_guards": {
+    "p95_threshold_ms": 500,
+    "error_rate_threshold": 0.01,
+    "burn_rate_warning": 0.1
+  }
+}
+EOF
+
+echo "✅ [T1] SLO 연동 합의 시스템 설정 완료"
+```
+
+### **Stage 2: Phase 2 완료 + 하이브리드 모드 준비** (10분)
+
+#### **재귀개선 백그라운드 모니터링 전환:**
+```bash
+# T1에서 실행
+cd /Users/ted/snap3
+
+# 백그라운드 복잡도 모니터링 시스템 생성
+cat > recursive-background-monitor.sh << 'EOF'
+#!/bin/bash
+
+echo "🧠 재귀개선 백그라운드 모니터링 시작"
+echo "🎯 목표: 복잡도 임계값 초과시 자동 3-Agent 합의 트리거"
+
+COMPLEXITY_THRESHOLD=0.75
+CHECK_INTERVAL=30  # 30초마다 체크
+
+while true; do
+    # 현재 개발 복잡도 계산
+    FILES_MODIFIED=$(git status --porcelain | wc -l)
+    API_CALLS=$(grep -r "curl\|fetch\|http" . --include="*.js" --include="*.ts" 2>/dev/null | wc -l)
+    ERRORS_COUNT=$(grep -r "error\|Error\|ERROR" logs/ 2>/dev/null | wc -l)
+    
+    # 복잡도 점수 계산 (0.0-1.0)
+    COMPLEXITY_SCORE=$(echo "scale=2; ($FILES_MODIFIED * 0.1 + $API_CALLS * 0.05 + $ERRORS_COUNT * 0.2) / 10" | bc)
+    
+    echo "📊 [BG] 복잡도: $COMPLEXITY_SCORE | 파일: $FILES_MODIFIED | API: $API_CALLS | 에러: $ERRORS_COUNT"
+    
+    # 임계값 초과시 자동 트리거
+    if (( $(echo "$COMPLEXITY_SCORE > $COMPLEXITY_THRESHOLD" | bc -l) )); then
+        echo "🚨 [BG] 복잡도 임계값 초과 ($COMPLEXITY_SCORE > $COMPLEXITY_THRESHOLD)"
+        echo "🧠 [BG] 자동 재귀개선 트리거 활성화"
+        
+        # GPT-5 컨설팅 요청 자동 생성
+        cat > .collab-msg-auto-recursive-trigger << EOF_AUTO
+# 🚨 자동 재귀개선 트리거 (복잡도 임계값 초과)
+
+**Trigger**: AUTO-COMPLEXITY-EXCEEDED  
+**Score**: $COMPLEXITY_SCORE > $COMPLEXITY_THRESHOLD  
+**Context**: Instagram/TikTok 인제스터 UI 개발 중  
+
+## 현재 상황:
+- 수정 파일: $FILES_MODIFIED개
+- API 호출: $API_CALLS개  
+- 에러 발생: $ERRORS_COUNT개
+
+## 컨설팅 요청:
+복잡도 급증으로 3-Agent 합의 필요. 품질 저하 방지를 위한 즉시 개입 권장.
+EOF_AUTO
+        
+        echo "📨 [BG] GPT-5 자동 컨설팅 요청 생성됨"
+        break
+    fi
+    
+    sleep $CHECK_INTERVAL
+done
+EOF
+
+chmod +x recursive-background-monitor.sh
+./recursive-background-monitor.sh > .recursive-monitor.log 2>&1 &
+
+echo "✅ 재귀개선 백그라운드 모니터링 활성화"
+```
+
+### **Stage 3: 인제스터 UI 본업 복귀 + 실제 재귀 작동** (Phase 3)
+
+#### **하이브리드 개발 모드:**
+```yaml
+development_mode: "HYBRID"
+primary_focus: "Instagram/TikTok 인제스터 UI (80% 집중)"
+secondary_monitoring: "재귀개선 백그라운드 트리거 (20% 오버헤드)"
+
+workflow:
+  normal_development: "ClaudeCode 단독 → 빠른 구현"
+  complexity_trigger: "자동 감지 → 3-Agent 합의 → 품질 향상"
+  cursor_integration: "Platform Wizard → 90% 자동화 달성"
+
+targets:
+  instagram_automation: "50% → 90%+ (Cursor 추출 API 통합)"
+  tiktok_automation: "50% → 90%+ (플랫폼 바이패스)"
+  user_time_reduction: "5-8분 → 30초-1분 (85% 단축)"
+```
+
+---
+
+## 🚀 **즉시 실행 계획 (우선순위)**
+
+### **Priority 1: T2/T3 전문가 권고 반영** (지금 바로)
+
+#### **T2 명령어 업데이트:**
+```bash
+cd /Users/ted/snap3-jobs
+
+# 기존 테스트 중단 후 격리 테스트 시작
+pkill -f "circuit-breaker-failure-test" 2>/dev/null
+./circuit-breaker-test-separated.sh &
+
+echo "✅ [T2] 네임스페이스 분리 테스트 재시작"
+```
+
+#### **T3 명령어 업데이트:**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+
+# SLO 연동 메트릭 수집으로 업그레이드
+curl -s http://localhost:8080/api/circuit-breaker/status | jq '{
+    slo_status: (.performance_metrics.success_rate | tonumber > 90),
+    p95_within_slo: (.performance_metrics.avg_response_time | .[:-2] | tonumber < 500),
+    consensus_ready: (.state.state == "CLOSED")
+}'
+
+echo "✅ [T3] SLO 연동 메트릭 수집 활성화"
+```
+
+### **Priority 2: Cursor Platform Wizard 핵심 구현** (병렬)
+
+#### **Cursor 메시지 업데이트:**
+**파일**: `.collab-msg-platform-wizard-hybrid`
+**내용**: Instagram/TikTok URL → 자동 추출 → 폼 채우기 핵심 기능만 구현
+
+### **Priority 3: 하이브리드 모드 전환** (15분 후)
+
+#### **재귀개선 → 백그라운드 모니터링:**
+- 복잡도 실시간 감시
+- 임계값 초과시 자동 GPT-5 컨설팅
+- 본업 방해 최소화 (<10% 오버헤드)
+
+#### **인제스터 UI → 메인 개발:**
+- Platform Wizard 완성
+- Instagram/TikTok 자동화 90% 달성
+- 사용자 시간 85% 단축
+
+---
+
+## 🎪 **실제 재귀 작동 메커니즘**
+
+### **자동 트리거 시나리오:**
+```
+Instagram API 통합 중 → 복잡도 0.8 감지 → 자동 GPT-5 컨설팅 → 
+"API 에러 처리 강화 필요" → Cursor와 합의 → 에러 UI 자동 개선
+```
+
+### **백그라운드 품질 보장:**
+- 개발 중 실시간 복잡도 모니터링
+- SLO 위반시 자동 품질 개선 트리거
+- 사용자 인식 없는 백그라운드 품질 향상
+
+---
+
+## 🎯 **최종 권장 실행 순서**
+
+1. **지금 바로**: T2/T3 전문가 권고 반영 (5분)
+2. **Cursor**: Platform Wizard 핵심 기능 구현 (10분)  
+3. **전환**: 재귀→백그라운드, 본업→인제스터 UI (즉시)
+4. **검증**: 하이브리드 모드에서 실제 재귀 작동 확인 (진행 중)
+
+**🎯 결론**: 재귀개선을 "완전 구현"이 아닌 "실용적 백그라운드 시스템"으로 전환하여 본업과 효율적 병행!

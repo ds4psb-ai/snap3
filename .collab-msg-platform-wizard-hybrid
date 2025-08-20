@@ -1,0 +1,138 @@
+# 📨 Cursor - Platform Wizard 하이브리드 모드 구현
+
+**Priority**: CRITICAL  
+**Timeline**: 즉시 시작 → 30분 내 핵심 기능 완성  
+**Dependencies**: T4 Saga 완료 ✅, 재귀개선 백그라운드 활성화 ✅
+
+---
+
+## 🎯 **핵심 구현 목표**
+
+### **Primary Target**: Instagram/TikTok 자동화 50% → 90%+
+- **Current Pain**: 사용자가 5-8분간 수동으로 view/like/comment 입력
+- **Target**: URL 입력 → 30초-1분 자동 처리
+- **Method**: Cursor 메타데이터 추출 API + 자동 폼 채우기
+
+---
+
+## 📱 **구현 요구사항**
+
+### **Component**: `src/components/platform/PlatformWizard.tsx`
+
+#### **기능 1: URL 감지 + 플랫폼 자동 인식**
+```typescript
+// URL 입력 → 플랫폼 자동 감지
+const detectPlatform = (url: string) => {
+  if (url.includes('instagram.com')) return 'instagram';
+  if (url.includes('tiktok.com')) return 'tiktok';  
+  if (url.includes('youtube.com')) return 'youtube';
+  return 'unknown';
+};
+```
+
+#### **기능 2: Cursor 메타데이터 추출 API 통합**
+```typescript
+// POST /api/extract-social-metadata 호출
+const extractMetadata = async (url: string, platform: string) => {
+  const response = await fetch('/api/extract-social-metadata', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url, platform })
+  });
+  
+  return response.json(); // {views, likes, comments, top_comments}
+};
+```
+
+#### **기능 3: 자동 폼 채우기 + 검증**
+```typescript
+// 추출된 메타데이터로 폼 자동 채우기
+const autoFillForm = (metadata: SocialMetadata) => {
+  setViewCount(metadata.views);
+  setLikeCount(metadata.likes);
+  setCommentCount(metadata.comments);
+  setTopComments(metadata.top_comments);
+};
+```
+
+---
+
+## 🔗 **API 연동 요구사항**
+
+### **신규 API 엔드포인트**: `/api/extract-social-metadata`
+```typescript
+// 요청 형식
+POST /api/extract-social-metadata
+{
+  "url": "https://instagram.com/p/ABC123",
+  "platform": "instagram"
+}
+
+// 응답 형식  
+{
+  "success": true,
+  "data": {
+    "content_id": "ABC123",
+    "views": 12500,
+    "likes": 850,
+    "comments": 45,
+    "top_comments": ["댓글1", "댓글2"],
+    "extraction_time": "2025-08-20T21:30:00Z"
+  }
+}
+```
+
+---
+
+## 🚨 **에러 처리 요구사항**
+
+### **Graceful Fallback**: 추출 실패시 수동 입력 모드
+```typescript
+try {
+  const metadata = await extractMetadata(url, platform);
+  autoFillForm(metadata);
+  setExtractionStatus('success');
+} catch (error) {
+  setExtractionStatus('failed');
+  // 수동 입력 모드로 전환
+  setManualMode(true);
+}
+```
+
+### **진행률 표시**: 추출 중 로딩 상태
+```typescript
+const [extractionStatus, setExtractionStatus] = useState<'idle' | 'extracting' | 'success' | 'failed'>('idle');
+
+// UI 상태별 표시
+{extractionStatus === 'extracting' && <LoadingSpinner text="메타데이터 추출 중..." />}
+{extractionStatus === 'failed' && <Alert>자동 추출 실패 - 수동 입력으로 전환됩니다</Alert>}
+```
+
+---
+
+## 🧪 **테스트 요구사항**
+
+### **테스트 URL 예시**:
+- Instagram: `https://instagram.com/p/ABC123` 
+- TikTok: `https://tiktok.com/@user/video/123`
+- 무효 URL: 에러 처리 확인
+
+### **성능 목표**:
+- **추출 시간**: <5초
+- **폼 채우기**: <1초  
+- **총 처리 시간**: <10초 (기존 5-8분 대비 95% 단축)
+
+---
+
+## ✅ **완료 조건**
+
+1. **PlatformWizard 컴포넌트 완성** - URL 입력부터 자동 폼 채우기까지
+2. **API 통합 완료** - `/api/extract-social-metadata` 연동
+3. **에러 처리 구현** - Graceful fallback to manual mode
+4. **테스트 완료** - Instagram/TikTok URL 테스트 성공
+
+---
+
+**🚀 즉시 시작**: Instagram/TikTok 자동화로 사용자 경험 혁신!
+
+**Cursor 확인 명령어**: `cd /Users/ted/snap3 && cat .collab-msg-platform-wizard-hybrid`

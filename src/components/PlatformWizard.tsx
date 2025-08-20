@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle, Info, Youtube, Instagram, Music } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info, Youtube, Instagram, Music, Loader2 } from 'lucide-react';
 
 interface PlatformConfig {
   name: string;
@@ -13,9 +13,20 @@ interface PlatformConfig {
   color: string;
 }
 
+interface SocialMetadata {
+  content_id: string;
+  views: number;
+  likes: number;
+  comments: number;
+  top_comments: string[];
+  video_url?: string;
+  extraction_time: string;
+}
+
 interface PlatformWizardProps {
   onPlatformSelect: (platform: string) => void;
   onValidationComplete: (platform: string, isValid: boolean) => void;
+  onMetadataExtracted: (platform: string, metadata: SocialMetadata) => void;
 }
 
 const platformConfigs: Record<string, PlatformConfig> = {
@@ -48,11 +59,13 @@ const platformConfigs: Record<string, PlatformConfig> = {
   }
 };
 
-export default function PlatformWizard({ onPlatformSelect, onValidationComplete }: PlatformWizardProps) {
+export default function PlatformWizard({ onPlatformSelect, onValidationComplete, onMetadataExtracted }: PlatformWizardProps) {
   const [selectedPlatform, setSelectedPlatform] = useState<string>('');
   const [inputUrl, setInputUrl] = useState<string>('');
   const [validationStatus, setValidationStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
   const [validationMessage, setValidationMessage] = useState<string>('');
+  const [extractionStatus, setExtractionStatus] = useState<'idle' | 'extracting' | 'success' | 'failed'>('idle');
+  const [extractedMetadata, setExtractedMetadata] = useState<SocialMetadata | null>(null);
 
   const validateUrl = async (platform: string, url: string) => {
     if (!url.trim()) {
@@ -114,8 +127,37 @@ export default function PlatformWizard({ onPlatformSelect, onValidationComplete 
     
     const isValid = await validateUrl(selectedPlatform, inputUrl);
     if (isValid) {
-      // 자동 처리 시작
-      console.log(`${selectedPlatform} 자동 처리 시작:`, inputUrl);
+      // 자동 메타데이터 추출 시작
+      await extractSocialMetadata();
+    }
+  };
+
+  const extractSocialMetadata = async () => {
+    setExtractionStatus('extracting');
+    
+    try {
+      const response = await fetch('/api/extract-social-metadata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          url: inputUrl, 
+          platform: selectedPlatform 
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        setExtractedMetadata(result.data);
+        setExtractionStatus('success');
+        onMetadataExtracted(selectedPlatform, result.data);
+      } else {
+        setExtractionStatus('failed');
+        console.error('메타데이터 추출 실패:', result.error);
+      }
+    } catch (error) {
+      setExtractionStatus('failed');
+      console.error('메타데이터 추출 API 오류:', error);
     }
   };
 
@@ -224,18 +266,127 @@ export default function PlatformWizard({ onPlatformSelect, onValidationComplete 
         </div>
       )}
 
-      {/* 자동 처리 상태 */}
+      {/* 메타데이터 추출 상태 */}
       {validationStatus === 'valid' && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">4. 자동 처리</h3>
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">4. 메타데이터 추출</h3>
+          
+          {/* 추출 진행 상태 */}
+          {extractionStatus === 'extracting' && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                <div>
+                  <h4 className="font-medium text-blue-800">메타데이터 추출 중</h4>
+                  <p className="text-sm text-blue-700 mt-1">
+                    {platformConfigs[selectedPlatform].autoProcess}가 진행 중입니다...
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 추출 성공 */}
+          {extractionStatus === 'success' && extractedMetadata && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="font-medium text-green-800 mb-3">메타데이터 추출 완료</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium text-gray-700">콘텐츠 ID:</span>
+                      <span className="ml-2 text-gray-900">{extractedMetadata.content_id}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">작성자:</span>
+                      <span className="ml-2 text-gray-900">{extractedMetadata.author || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">조회수:</span>
+                      <span className="ml-2 text-gray-900">{extractedMetadata.views.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">좋아요:</span>
+                      <span className="ml-2 text-gray-900">{extractedMetadata.likes.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">댓글수:</span>
+                      <span className="ml-2 text-gray-900">{extractedMetadata.comments.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">추출 시간:</span>
+                      <span className="ml-2 text-gray-900">{new Date(extractedMetadata.extraction_time).toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  {/* 해시태그 */}
+                  {extractedMetadata.hashtags && extractedMetadata.hashtags.length > 0 && (
+                    <div className="mt-3">
+                      <span className="font-medium text-gray-700">해시태그:</span>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {extractedMetadata.hashtags.map((tag, index) => (
+                          <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 상위 댓글 */}
+                  {extractedMetadata.top_comments && extractedMetadata.top_comments.length > 0 && (
+                    <div className="mt-3">
+                      <span className="font-medium text-gray-700">인기 댓글:</span>
+                      <div className="mt-2 space-y-1">
+                        {extractedMetadata.top_comments.slice(0, 3).map((comment, index) => (
+                          <div key={index} className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                            {comment}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 추출 실패 */}
+          {extractionStatus === 'failed' && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <AlertCircle className="w-5 h-5 text-red-600" />
+                <div>
+                  <h4 className="font-medium text-red-800">메타데이터 추출 실패</h4>
+                  <p className="text-sm text-red-700 mt-1">
+                    다시 시도하거나 수동으로 메타데이터를 입력해주세요.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* VDP 처리 시작 */}
+      {extractionStatus === 'success' && extractedMetadata && (
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">5. VDP 빅데이터 적재</h3>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-center space-x-3">
-              <CheckCircle className="w-5 h-5 text-green-600" />
+              <Info className="w-5 h-5 text-blue-600" />
               <div>
-                <h4 className="font-medium text-green-800">자동 처리 준비 완료</h4>
-                <p className="text-sm text-green-700 mt-1">
-                  {platformConfigs[selectedPlatform].autoProcess}가 시작됩니다.
+                <h4 className="font-medium text-blue-800">VDP 파이프라인 준비</h4>
+                <p className="text-sm text-blue-700 mt-1">
+                  추출된 메타데이터가 VDP 파이프라인으로 전송됩니다.
                 </p>
+                <div className="mt-2 text-xs text-blue-600">
+                  • 콘텐츠 키: {selectedPlatform}:{extractedMetadata.content_id}
+                  • 플랫폼: {selectedPlatform}
+                  • 언어: ko (자동 감지)
+                </div>
               </div>
             </div>
           </div>

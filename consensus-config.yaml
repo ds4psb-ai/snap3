@@ -1,0 +1,27 @@
+# GPT-5 전문가 권고 기반 합의 설정
+consensus_thresholds:
+  proceed: 0.70    # 기존 0.85에서 하향 조정
+  modify: 0.60     # 유지
+  reject: 0.60     # 명시적 설정
+
+# 가중치 설정 (결정 유형별 동적)
+weights:
+  strategy_decisions:
+    gpt5: 0.5
+    claudecode: 0.3
+    cursor: 0.2
+  technical_decisions:
+    gpt5: 0.2
+    claudecode: 0.5
+    cursor: 0.3
+  ux_decisions:
+    gpt5: 0.1
+    claudecode: 0.3
+    cursor: 0.6
+
+# SLO 가드레일 (번레이트 기반)
+slo_guards:
+  p95_threshold_ms: 500
+  error_rate_threshold: 0.01
+  burn_rate_warning: 0.1
+  burn_rate_critical: 0.5

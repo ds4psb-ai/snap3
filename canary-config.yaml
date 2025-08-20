@@ -1,0 +1,19 @@
+# 카나리 배포 설정 (전문가 권고 기반)
+canary:
+  duration_minutes: 30
+  traffic_split:
+    canary: 10    # 10% 트래픽
+    stable: 90    # 90% 트래픽
+  
+  success_criteria:
+    error_rate_increase: 0.005  # 0.5% 이하 에러율 증가
+    p95_latency_increase: 50    # 50ms 이하 지연 증가
+    
+  auto_rollback:
+    enabled: true
+    threshold_failures: 5
+    
+namespaces:
+  test: "격리된 테스트 환경"
+  canary: "카나리 배포 환경"  
+  production: "운영 환경"

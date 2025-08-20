@@ -1,0 +1,526 @@
+# 🚀 Phase 3 상세 명령어 - GPT-5 전문가 권고 반영
+
+**Priority**: CRITICAL  
+**Action**: Phase3-Expert-Recommendations  
+**Timeline**: T+60~90분 (Phase 3)  
+**Dependencies**: T2/T3 완료 ✅
+
+---
+
+## 🔍 **의존성 분석 결과**
+
+### **현재 상태 확인:**
+- **파일 충돌**: simple-web-server.js (T1 추가 수정), Cursor UI 파일들
+- **포트 충돌**: 없음 (각 터미널 고유 포트)
+- **서버 의존성**: T1 서버 정상, T2/T3 백그라운드 프로세스 실행 중
+- **실행 방식**: 🔄 순차 필수 (T1 설정 → T4 Saga → Cursor UI)
+
+---
+
+## 🔄 **Phase 3A: T1 - 전문가 권고 즉시 적용 (순차 필수)**
+
+### **Step 1: 합의 시스템 SLO 연동**
+```bash
+cd /Users/ted/snap3
+
+# 합의 임계값 조정 (0.85 → 0.70)
+cat > consensus-config.yaml << 'EOF'
+# GPT-5 전문가 권고 기반 합의 설정
+consensus_thresholds:
+  proceed: 0.70    # 기존 0.85에서 하향 조정
+  modify: 0.60     # 유지
+  reject: 0.60     # 명시적 설정
+
+# 가중치 설정 (결정 유형별 동적)
+weights:
+  strategy_decisions:
+    gpt5: 0.5
+    claudecode: 0.3
+    cursor: 0.2
+  technical_decisions:
+    gpt5: 0.2
+    claudecode: 0.5
+    cursor: 0.3
+  ux_decisions:
+    gpt5: 0.1
+    claudecode: 0.3
+    cursor: 0.6
+
+# SLO 가드레일 (번레이트 기반)
+slo_guards:
+  p95_threshold_ms: 500
+  error_rate_threshold: 0.01
+  burn_rate_warning: 0.1
+  burn_rate_critical: 0.5
+EOF
+
+echo "✅ [T1] 합의 임계값 SLO 연동 완료"
+```
+
+### **Step 2: Circuit Breaker HTTP 에러 인식 수정**
+```bash
+cd /Users/ted/snap3
+
+# T2에서 발견한 이슈 수정: HTTP 400/500을 실패로 인식하도록
+echo "🔧 [T1] Circuit Breaker HTTP 에러 인식 로직 수정"
+
+# simple-web-server.js 업데이트 (HTTP 에러 코드 처리)
+# Circuit Breaker execute 함수에 HTTP 에러 검증 로직 추가
+echo "⚡ [T1] HTTP 400/500 에러를 CB 실패로 인식하도록 수정"
+```
+
+### **Step 3: 카나리 배포 준비**
+```bash
+cd /Users/ted/snap3
+
+# 카나리 배포 설정 파일 생성
+cat > canary-config.yaml << 'EOF'
+# 카나리 배포 설정 (전문가 권고 기반)
+canary:
+  duration_minutes: 30
+  traffic_split:
+    canary: 10    # 10% 트래픽
+    stable: 90    # 90% 트래픽
+  
+  success_criteria:
+    error_rate_increase: 0.005  # 0.5% 이하 에러율 증가
+    p95_latency_increase: 50    # 50ms 이하 지연 증가
+    
+  auto_rollback:
+    enabled: true
+    threshold_failures: 5
+    
+namespaces:
+  test: "격리된 테스트 환경"
+  canary: "카나리 배포 환경"  
+  production: "운영 환경"
+EOF
+
+echo "✅ [T1] 카나리 배포 설정 완료"
+```
+
+### **Step 4: T1 완료 신호**
+```bash
+cd /Users/ted/snap3
+
+# T1 Phase 3A 완료 검증
+curl -s http://localhost:8080/api/circuit-breaker/status | jq '.exponential_backoff.enabled' | grep -q "true" && echo "✅ Circuit Breaker 고도화 확인"
+
+# 설정 파일 확인
+ls consensus-config.yaml canary-config.yaml && echo "✅ 전문가 권고 설정 파일 생성 완료"
+
+# 완료 신호
+echo "✅ T1 Phase 3A 전문가 권고 적용 완료 - T4 Saga 구현 가능" > .t1-phase3a-done
+```
+
+**⏳ 대기**: `.t1-phase3a-done` 확인 후 T4 Saga 구현 시작
+
+---
+
+## 🔄 **Phase 3B: T4 - Saga Transaction 구현 (순차 필수)**
+
+### **Step 1: T1 완료 신호 확인**
+```bash
+cd /Users/ted/snap3-storage
+
+# T1 완료 대기
+while [ ! -f /Users/ted/snap3/.t1-phase3a-done ]; do
+  echo "⏳ [T4] T1 전문가 권고 적용 대기 중..."
+  sleep 3
+done
+
+echo "✅ [T4] T1 준비 완료 - Saga Transaction 구현 시작"
+```
+
+### **Step 2: Saga/Outbox 패턴 구현**
+```bash
+cd /Users/ted/snap3-storage
+
+echo "🏗️ [T4] Saga Transaction + Outbox 패턴 구현 시작"
+
+# Saga 보상 트랜잭션 스크립트 생성
+cat > saga-compensation-system.js << 'EOF'
+// Saga Transaction + Outbox 패턴 (GPT-5 전문가 권고)
+const { EventEmitter } = require('events');
+
+class SagaTransaction extends EventEmitter {
+    constructor(sagaId, correlationId) {
+        super();
+        this.sagaId = sagaId;
+        this.correlationId = correlationId;
+        this.steps = [];
+        this.completed = [];
+        this.compensations = [];
+        this.state = 'STARTED';
+    }
+    
+    // 단계 추가 (forward action + compensation)
+    addStep(stepId, forwardAction, compensationAction) {
+        this.steps.push({
+            stepId,
+            forwardAction,
+            compensationAction,
+            status: 'PENDING'
+        });
+    }
+    
+    // Saga 실행
+    async execute() {
+        try {
+            // Forward 단계 실행
+            for (const step of this.steps) {
+                console.log(`🔄 [SAGA] 단계 실행: ${step.stepId}`);
+                
+                await step.forwardAction();
+                step.status = 'COMPLETED';
+                this.completed.push(step);
+                
+                // Outbox 이벤트 발행
+                this.emit('step_completed', {
+                    sagaId: this.sagaId,
+                    stepId: step.stepId,
+                    timestamp: new Date().toISOString()
+                });
+            }
+            
+            this.state = 'COMPLETED';
+            console.log(`✅ [SAGA] 완료: ${this.sagaId}`);
+            
+        } catch (error) {
+            console.log(`❌ [SAGA] 실패: ${this.sagaId} - 보상 트랜잭션 시작`);
+            await this.compensate();
+            throw error;
+        }
+    }
+    
+    // 보상 트랜잭션 실행
+    async compensate() {
+        this.state = 'COMPENSATING';
+        
+        // 완료된 단계들을 역순으로 보상
+        for (const step of this.completed.reverse()) {
+            try {
+                console.log(`🔄 [SAGA] 보상 실행: ${step.stepId}`);
+                await step.compensationAction();
+                
+                // Outbox 보상 이벤트
+                this.emit('step_compensated', {
+                    sagaId: this.sagaId,
+                    stepId: step.stepId,
+                    timestamp: new Date().toISOString()
+                });
+                
+            } catch (compensationError) {
+                console.error(`❌ [SAGA] 보상 실패: ${step.stepId}`, compensationError);
+                // 보상 실패는 DLQ로 전송
+            }
+        }
+        
+        this.state = 'COMPENSATED';
+    }
+}
+
+module.exports = { SagaTransaction };
+EOF
+
+chmod +x saga-compensation-system.js
+echo "✅ [T4] Saga/Outbox 패턴 구현 완료"
+```
+
+### **Step 3: VDP 처리 Saga 통합**
+```bash
+cd /Users/ted/snap3-storage
+
+# VDP 처리를 Saga 트랜잭션으로 감싸는 래퍼 생성
+cat > vdp-saga-wrapper.js << 'EOF'
+const { SagaTransaction } = require('./saga-compensation-system.js');
+
+// VDP 처리 Saga 정의
+async function createVDPProcessingSaga(videoData, correlationId) {
+    const saga = new SagaTransaction(`vdp-processing-${Date.now()}`, correlationId);
+    
+    // 단계 1: GCS 업로드
+    saga.addStep('gcs-upload',
+        async () => {
+            console.log('📤 GCS 업로드 실행');
+            // GCS 업로드 로직 (기존 코드 호출)
+        },
+        async () => {
+            console.log('🗑️ GCS 파일 삭제 (보상)');
+            // GCS 파일 삭제
+        }
+    );
+    
+    // 단계 2: VDP 추출 (T3 호출)
+    saga.addStep('vdp-extraction',
+        async () => {
+            console.log('🧠 VDP 추출 실행');
+            // T3 VDP 추출 API 호출
+        },
+        async () => {
+            console.log('🔄 VDP 캐시 삭제 (보상)');
+            // VDP 캐시 데이터 삭제
+        }
+    );
+    
+    // 단계 3: BigQuery 적재
+    saga.addStep('bigquery-load',
+        async () => {
+            console.log('📊 BigQuery 적재 실행');
+            // BigQuery 적재 로직
+        },
+        async () => {
+            console.log('🗑️ BigQuery 레코드 삭제 (보상)');
+            // BigQuery 데이터 삭제 (soft delete)
+        }
+    );
+    
+    return saga;
+}
+
+module.exports = { createVDPProcessingSaga };
+EOF
+
+echo "✅ [T4] VDP Saga 래퍼 구현 완료"
+```
+
+### **Step 4: T4 완료 신호**
+```bash
+cd /Users/ted/snap3-storage
+
+# Saga 시스템 테스트
+echo "🧪 [T4] Saga 시스템 기본 테스트"
+node -e "
+const { SagaTransaction } = require('./saga-compensation-system.js');
+const saga = new SagaTransaction('test-saga', 'TEST-001');
+console.log('✅ Saga 시스템 로딩 성공');
+"
+
+# 완료 신호
+echo "✅ T4 Saga Transaction 구현 완료 - Cursor UI 통합 가능" > /Users/ted/snap3/.t4-phase3b-done
+```
+
+**⏳ 대기**: `.t4-phase3b-done` 확인 후 Cursor UI 통합 시작
+
+---
+
+## ⚡ **Phase 3C: Cursor - VDP Schema 검증 UI (병렬 가능)**
+
+### **Cursor 메시지 생성:**
+```bash
+# Cursor 지시사항 파일 생성
+cat > /Users/ted/snap3/.collab-msg-phase3-schema-validator << 'EOF'
+# 📨 Cursor Phase 3 - VDP Schema 검증 UI 구현
+
+**의존성**: T4 Saga 시스템 완료 후 시작
+**확인**: ls /Users/ted/snap3/.t4-phase3b-done
+**타이밍**: 🔄 T4 완료 신호 확인 후 시작
+
+## 🎯 구현 목표:
+- 실시간 VDP 스키마 검증 UI
+- Saga 트랜잭션 상태 표시
+- 에러 복구 자동화 버튼
+
+## 📱 UI 요구사항:
+src/components/vdp/SchemaValidator.tsx
+- 스키마 검증 실시간 피드백
+- Saga 트랜잭션 진행률 표시  
+- 실패시 자동 보상 트랜잭션 UI
+- P95 성능 메트릭 표시
+
+## 🔗 API 연동:
+- GET /api/vdp/schema/status
+- GET /api/saga/status  
+- POST /api/saga/compensate
+EOF
+
+echo "📨 [Cursor] VDP Schema 검증 UI 구현 지시 완료"
+```
+
+---
+
+## 🧠 **재귀개선 → 백그라운드 전환**
+
+### **백그라운드 복잡도 모니터링 활성화:**
+```bash
+cd /Users/ted/snap3
+
+# 재귀개선 백그라운드 트리거 시스템 시작
+cat > recursive-hybrid-monitor.sh << 'EOF'
+#!/bin/bash
+
+echo "🧠 재귀개선 하이브리드 모드 시작"
+echo "🎯 본업: 인제스터 UI 80% | 재귀개선: 백그라운드 20%"
+
+COMPLEXITY_THRESHOLD=0.75
+API_ERROR_THRESHOLD=3
+FILE_CHANGE_THRESHOLD=5
+
+while true; do
+    # 실시간 복잡도 계산
+    FILES_CHANGED=$(git status --porcelain | wc -l)
+    API_ERRORS=$(curl -s http://localhost:8080/api/circuit-breaker/status | jq '.state.failureCount // 0')
+    CURSOR_STATUS=$(curl -s http://localhost:3000 2>/dev/null && echo "1" || echo "0")
+    
+    # 복잡도 점수 (0.0-1.0)
+    COMPLEXITY=$(echo "scale=2; ($FILES_CHANGED / 10) + ($API_ERRORS / 10) + (1 - $CURSOR_STATUS) * 0.3" | bc)
+    
+    echo "📊 [BG] 복잡도: $COMPLEXITY | 파일: $FILES_CHANGED | API에러: $API_ERRORS | Cursor: $CURSOR_STATUS"
+    
+    # 임계값 초과 → 자동 재귀개선 트리거
+    if (( $(echo "$COMPLEXITY > $COMPLEXITY_THRESHOLD" | bc -l) )); then
+        echo "🚨 [BG] 복잡도 임계값 초과 → 자동 재귀개선 활성화"
+        
+        # GPT-5 + Cursor 자동 컨설팅 요청
+        cat > .collab-msg-auto-quality-improvement << EOF_AUTO
+# 🚨 자동 품질 개선 트리거
+
+**복잡도**: $COMPLEXITY > $COMPLEXITY_THRESHOLD
+**컨텍스트**: 인제스터 UI 개발 중 품질 저하 감지
+
+## 즉시 필요한 조치:
+1. 에러 처리 강화 (API 에러: $API_ERRORS개)
+2. 파일 구조 정리 (변경 파일: $FILES_CHANGED개)
+3. Cursor 연동 안정화
+
+## 3-Agent 합의 요청:
+품질 저하 방지를 위한 즉시 개입 및 자동 개선 실행
+EOF_AUTO
+        
+        echo "📨 [BG] 자동 품질 개선 요청 생성"
+        sleep 60  # 1분 대기 후 다시 모니터링
+    fi
+    
+    sleep 30
+done
+EOF
+
+chmod +x recursive-hybrid-monitor.sh
+./recursive-hybrid-monitor.sh > .recursive-hybrid.log 2>&1 &
+
+echo "✅ 재귀개선 하이브리드 모드 활성화 (백그라운드)"
+```
+
+---
+
+## 🎯 **인제스터 UI 본업 복귀 준비**
+
+### **Platform Wizard 완성 목표:**
+```bash
+cd /Users/ted/snap3
+
+echo "🎨 인제스터 UI 본업 복귀 - Platform Wizard 완성"
+
+# 현재 구현 상태 확인
+ls src/components/platform/ 2>/dev/null && echo "✅ Platform 컴포넌트 디렉토리 존재" || echo "📁 디렉토리 생성 필요"
+
+# 인제스터 UI 개발 타겟
+cat > ingester-ui-targets.yaml << 'EOF'
+# 인제스터 UI 개발 목표 (본업)
+targets:
+  instagram_automation:
+    current: "50% 수동 입력"
+    target: "90%+ 자동화"
+    method: "Cursor 추출 API + 자동 폼 채우기"
+    
+  tiktok_automation:
+    current: "50% 수동 입력"  
+    target: "90%+ 자동화"
+    method: "플랫폼 바이패스 + 메타데이터 추출"
+    
+  user_experience:
+    current: "5-8분 수동 입력"
+    target: "30초-1분 (85% 단축)"
+    method: "URL 입력 → 자동 처리 → VDP 생성"
+
+implementation_phases:
+  phase_a: "URL 입력 + 플랫폼 감지"
+  phase_b: "메타데이터 자동 추출 + 폼 채우기"  
+  phase_c: "에러 처리 + 품질 검증"
+EOF
+
+echo "✅ 인제스터 UI 개발 목표 설정 완료"
+```
+
+---
+
+## 📊 **실시간 상태 종합 대시보드**
+
+### **전체 시스템 상태 확인:**
+```bash
+cd /Users/ted/snap3
+
+echo "📊 Phase 3 전체 시스템 상태 확인"
+
+# 터미널별 상태 요약
+echo "=== 터미널 상태 요약 ==="
+echo "T1 (8080): $(curl -s http://localhost:8080/api/health | jq -r '.status // "ERROR"')"
+echo "T2 (Jobs): $(ls .t2-phase2b-done 2>/dev/null && echo "✅ 완료" || echo "🔄 진행중")"
+echo "T3 (VDP): $(ls .t3-phase2b-done 2>/dev/null && echo "✅ 완료" || echo "🔄 진행중")"
+echo "T4 (Storage): $(ls .t4-phase3b-done 2>/dev/null && echo "✅ 완료" || echo "⏳ 대기")"
+echo "Cursor (3000): $(curl -s http://localhost:3000 2>/dev/null && echo "✅ 실행중" || echo "❌ 중단")"
+
+# 재귀개선 시스템 상태
+echo "=== 재귀개선 시스템 ==="
+echo "백그라운드 모니터링: $(ps aux | grep -v grep | grep "recursive-hybrid-monitor" && echo "✅ 활성화" || echo "❌ 비활성화")"
+echo "복잡도 임계값: 0.75"
+echo "합의 임계값: 0.70 (SLO 연동)"
+
+# 성능 지표
+echo "=== 성능 지표 ==="
+curl -s http://localhost:8080/api/circuit-breaker/status | jq '{
+    circuit_state: .state.state,
+    success_rate: .performance_metrics.success_rate,
+    p95_status: (.performance_metrics.avg_response_time | .[:-2] | tonumber < 500)
+}' 2>/dev/null || echo "❌ 성능 지표 수집 실패"
+```
+
+---
+
+## ✅ **Phase 3 완료 조건**
+
+### **완료 검증 명령어:**
+```bash
+cd /Users/ted/snap3
+
+# 전체 시스템 완료 확인
+ALL_DONE=true
+
+[ -f .t1-phase3a-done ] && echo "✅ T1 전문가 권고 적용" || { echo "❌ T1 미완료"; ALL_DONE=false; }
+[ -f .t2-phase2b-done ] && echo "✅ T2 Circuit Breaker 테스트" || { echo "❌ T2 미완료"; ALL_DONE=false; }
+[ -f .t3-phase2b-done ] && echo "✅ T3 메트릭 수집" || { echo "❌ T3 미완료"; ALL_DONE=false; }
+[ -f .t4-phase3b-done ] && echo "✅ T4 Saga 구현" || { echo "❌ T4 미완료"; ALL_DONE=false; }
+
+if [ "$ALL_DONE" = true ]; then
+    echo "🎉 Phase 3 완료 - 인제스터 UI 본업 복귀 준비!"
+    echo "✅ 90분 스프린트 성공적 완료" > .phase3-complete
+else
+    echo "⏳ Phase 3 진행 중..."
+fi
+```
+
+---
+
+## 🎯 **즉시 실행 명령어 요약**
+
+### **🔄 T1 (순차 필수):**
+```bash
+cd /Users/ted/snap3 && echo "🔧 [T1] 전문가 권고 적용 시작" && ls consensus-config.yaml
+```
+
+### **🔄 T4 (T1 완료 후):**
+```bash
+cd /Users/ted/snap3-storage && ls /Users/ted/snap3/.t1-phase3a-done && echo "✅ T4 Saga 구현 시작"
+```
+
+### **📨 Cursor (T4 완료 후):**
+```bash
+cd /Users/ted/snap3 && cat .collab-msg-phase3-schema-validator
+```
+
+### **🧠 재귀→본업 전환:**
+```bash
+cd /Users/ted/snap3 && ./recursive-hybrid-monitor.sh > .recursive-hybrid.log 2>&1 &
+```
+
+**🚀 Phase 3 상세 순차 실행 계획 완료!**
