@@ -1,0 +1,56 @@
+# 🚀 ALL TERMINALS: 20분 스프린트 시작
+
+**Priority**: SPRINT_EXECUTION  
+**Timeline**: 20 minutes TOTAL  
+**Completion**: .collab-msg-[terminal]-complete files  
+**Timestamp**: 2025-08-20T19:21:30Z
+
+---
+
+## ⏰ **20분 스프린트 타임라인**
+
+### **모든 터미널 동시 시작**:
+- **T2 (Jobs)**: VDP 파이프라인 최적화 → `.collab-msg-t2-complete`
+- **T3 (VDP)**: Vertex AI 상세 분석 → `.collab-msg-t3-complete`  
+- **T4 (Storage)**: BigQuery 통합 → `.collab-msg-t4-complete`
+- **Cursor (UI)**: URIS Dashboard 구현 → `.collab-msg-cursor-complete`
+
+### **완료 보고 형식**:
+```
+완료 시간: [실제 소요 시간]
+성과: [달성 결과]
+메트릭: [성능 지표]
+다음 단계: [후속 작업]
+```
+
+---
+
+## 📋 **각 터미널 확인 명령어**
+
+### **T2**: 
+```bash
+cd /Users/ted/snap3-jobs
+cat .collab-msg-t2-timeline-20min
+```
+
+### **T3**:
+```bash
+cd /Users/ted/snap3/services/t2-extract  
+cat .collab-msg-t3-vertex-vdp-analysis
+```
+
+### **T4**:
+```bash
+cd /Users/ted/snap3-storage
+cat .collab-msg-t4-bigquery-integration
+```
+
+### **Cursor**:
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-cursor-uris-dashboard-ready
+```
+
+---
+
+🚀 **20분 스프린트 - 모든 터미널 동시 실행 시작!**
