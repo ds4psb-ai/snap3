@@ -1,9 +1,9 @@
 {
-    "timestamp": "2025-08-20T13:06:09Z",
+    "timestamp": "2025-08-20T13:11:23Z",
     "metrics": {
-        "p95_response_time_ms": 34,
-        "p50_response_time_ms": 27,
-        "avg_response_time_ms": 28,
+        "p95_response_time_ms": 41,
+        "p50_response_time_ms": 28,
+        "avg_response_time_ms": 30,
         "sample_count": 100
     },
     "target": {
