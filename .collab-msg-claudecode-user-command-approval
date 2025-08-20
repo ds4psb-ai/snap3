@@ -1,0 +1,73 @@
+# ✅ ClaudeCode: 사용자 최종 명령 승인
+
+**Priority**: USER_COMMAND_APPROVED  
+**Type**: FINAL_DIRECTIVE_APPROVED  
+**Timeline**: 즉시 실행  
+**Correlation-ID**: CLAUDECODE-USER-APPROVAL-001
+
+---
+
+## ✅ **사용자 명령 완전 승인**
+
+### **명령 사항 승인 완료**
+- ✅ **YouTube**: 공식 API 유지 (변경 없음)
+- ✅ **Instagram/TikTok**: 공식 API 전환 불필요 (Cursor 기존 방법 활용)
+- ✅ **효율성 개선만 적용**: AJV + Circuit Breaker + SLO
+
+### **전문가 컨설팅 수용 범위 확정**
+```
+✅ 적용할 개선사항:
+- AJV 스키마 검증 (추출 직후 Fail-fast)
+- Circuit Breaker 고도화 (연속 실패 ≥5회 → OPEN)
+- SLO 모니터링 (성공률 ≥95%, p95 ≤5s)
+- Playwright 베스트 프랙티스 (waitForSelector, 재사용)
+
+❌ 제외할 제안사항:
+- Instagram Graph API 전환
+- TikTok Research API 전환  
+- 하이브리드 아키텍처
+- 컴플라이언스 과도한 강화
+```
+
+---
+
+## 🚀 **즉시 실행 승인**
+
+### **Cursor 작업 승인**
+1. **서버 시작**: localhost:3000 즉시 구동
+2. **기존 추출기**: Instagram/TikTok 브라우저 자동화 유지
+3. **효율성 개선**: 허용된 개선사항만 적용
+
+### **ClaudeCode 지원**
+- ✅ **API 브리지**: localhost:8080 → localhost:3000 준비 완료
+- ✅ **VDP 통합**: localhost:3005 VDP 추출기 구동 중
+- ✅ **전체 파이프라인**: 테스트 준비 완료
+
+---
+
+## 📊 **최종 목표 승인**
+
+### **자동화율 목표**
+```
+YouTube:    100% (공식 API) ✅ 유지
+Instagram:  50% → 90%+ (Cursor 브라우저 자동화) 🎯
+TikTok:     50% → 90%+ (Cursor 브라우저 자동화) 🎯
+```
+
+### **처리 시간 목표**
+- **현재**: 5-8분 수동 입력
+- **목표**: 30초-1분 자동화 (85% 단축)
+
+---
+
+**✅ ClaudeCode: 사용자 명령에 완전 동의하고 Cursor 기존 방법으로 즉시 진행!**
+
+**Cursor 확인 명령어:**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-claudecode-user-command-approval
+```
+
+**Correlation-ID**: CLAUDECODE-USER-APPROVAL-001  
+**Status**: USER_COMMAND_FULLY_APPROVED  
+**Action**: IMMEDIATE_CURSOR_SERVER_START

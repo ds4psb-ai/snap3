@@ -269,3 +269,58 @@
 [2025-08-20T18:14:25.572Z] 📩 Processing 1 new messages
 [2025-08-20T18:14:25.573Z] 🔍 Analyzing: .collab-msg-cursor-user-final-command-approval
 [2025-08-20T18:14:25.573Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-user-final-command-approval
+[2025-08-20T18:14:46.581Z] 📩 Processing 1 new messages
+[2025-08-20T18:14:46.582Z] 🔍 Analyzing: .collab-msg-cursor-user-final-command-approval
+[2025-08-20T18:14:46.582Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-user-final-command-approval
+[2025-08-20T18:17:01.628Z] 📩 Processing 1 new messages
+[2025-08-20T18:17:01.629Z] 🔍 Analyzing: .collab-msg-claudecode-user-command-approval
+[2025-08-20T18:17:01.629Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-user-command-approval
+[2025-08-20T18:18:52.664Z] 📩 Processing 1 new messages
+[2025-08-20T18:18:52.666Z] 🔍 Analyzing: .collab-msg-claudecode-integration-success
+[2025-08-20T18:18:52.667Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-integration-success
+[2025-08-20T18:19:55.692Z] 📩 Processing 3 new messages
+[2025-08-20T18:19:55.695Z] 🔍 Analyzing: .collab-msg-cursor-phase1-complete
+[2025-08-20T18:19:55.696Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-phase1-complete
+[2025-08-20T18:19:55.696Z] 🔍 Analyzing: .collab-msg-critical-integration-issue
+[2025-08-20T18:19:55.697Z] ✅ Auto-response generated: .auto-response-claudecode-critical-integration-issue
+[2025-08-20T18:19:55.697Z] 🔍 Analyzing: .collab-msg-cursor-extractor-accurate-analysis
+[2025-08-20T18:19:55.697Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-extractor-accurate-analysis
+[2025-08-20T18:19:58.687Z] 📩 Processing 10 new messages
+[2025-08-20T18:19:58.688Z] 🔍 Analyzing: .collab-msg-cursor-extractor-analysis
+[2025-08-20T18:19:58.688Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-extractor-analysis
+[2025-08-20T18:19:58.688Z] 🔍 Analyzing: .collab-msg-cursor-extractor-final
+[2025-08-20T18:19:58.689Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-extractor-final
+[2025-08-20T18:19:58.689Z] 🔍 Analyzing: .collab-msg-cursor-waiting-for-claudecode
+[2025-08-20T18:19:58.689Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-waiting-for-claudecode
+[2025-08-20T18:19:58.689Z] 🔍 Analyzing: .collab-msg-cursor-port-3000-in-use
+[2025-08-20T18:19:58.689Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-port-3000-in-use
+[2025-08-20T18:19:58.690Z] 🔍 Analyzing: .collab-msg-cursor-debug-solution
+[2025-08-20T18:19:58.690Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-debug-solution
+[2025-08-20T18:19:58.690Z] 🔍 Analyzing: .collab-msg-cursor-recursive-system-reminder
+[2025-08-20T18:19:58.690Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-recursive-system-reminder
+[2025-08-20T18:19:58.691Z] 🔍 Analyzing: .collab-msg-cursor-gpt5-analysis-response
+[2025-08-20T18:19:58.691Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-gpt5-analysis-response
+[2025-08-20T18:19:58.691Z] 🔍 Analyzing: .collab-msg-cursor-expert-analysis-response
+[2025-08-20T18:19:58.691Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-expert-analysis-response
+[2025-08-20T18:19:58.691Z] 🔍 Analyzing: .collab-msg-cursor-user-final-command-approval
+[2025-08-20T18:19:58.692Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-user-final-command-approval
+[2025-08-20T18:19:58.692Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:19:58.692Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:20:04.688Z] 📩 Processing 7 new messages
+[2025-08-20T18:20:04.689Z] 🔍 Analyzing: .collab-msg-cursor-debug-solution
+[2025-08-20T18:20:04.690Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-debug-solution
+[2025-08-20T18:20:04.690Z] 🔍 Analyzing: .collab-msg-cursor-gpt5-analysis-response
+[2025-08-20T18:20:04.690Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-gpt5-analysis-response
+[2025-08-20T18:20:04.690Z] 🔍 Analyzing: .collab-msg-cursor-port-3000-in-use
+[2025-08-20T18:20:04.691Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-port-3000-in-use
+[2025-08-20T18:20:04.691Z] 🔍 Analyzing: .collab-msg-cursor-recursive-system-reminder
+[2025-08-20T18:20:04.691Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-recursive-system-reminder
+[2025-08-20T18:20:04.691Z] 🔍 Analyzing: .collab-msg-cursor-waiting-for-claudecode
+[2025-08-20T18:20:04.692Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-waiting-for-claudecode
+[2025-08-20T18:20:04.692Z] 🔍 Analyzing: .collab-msg-cursor-user-final-command-approval
+[2025-08-20T18:20:04.693Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-user-final-command-approval
+[2025-08-20T18:20:04.693Z] 🔍 Analyzing: .collab-msg-cursor-expert-analysis-response
+[2025-08-20T18:20:04.693Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-expert-analysis-response
+[2025-08-20T18:21:28.728Z] 📩 Processing 1 new messages
+[2025-08-20T18:21:28.730Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:21:28.730Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
