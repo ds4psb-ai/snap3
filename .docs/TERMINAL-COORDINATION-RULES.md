@@ -58,22 +58,22 @@ terminal_roles:
     conflicts: "서버 재시작 시 API 호출 차단"
   
   T2_Jobs_8081:
-    primary: "성능 테스트, 벤치마크"
-    directory: "/Users/ted/snap3"
+    primary: "Worker 성능 테스트, 벤치마크"
+    directory: "/Users/ted/snap3-jobs"
     conflicts: "T1 서버 Ready 상태 필요"
   
   T3_VDP_8082:
-    primary: "메트릭 수집, 모니터링"
-    directory: "/Users/ted/snap3"
+    primary: "VDP 추출, 메트릭 수집"
+    directory: "/Users/ted/snap3/services/t2-extract"
     conflicts: "메트릭 파일 공유 충돌 가능"
   
   T4_Storage_8083:
-    primary: "로깅, 스토리지"
-    directory: "/Users/ted/snap3"
+    primary: "스토리지, 로깅 시스템"
+    directory: "/Users/ted/snap3-storage"
     conflicts: "로그 파일 동시 쓰기 충돌"
   
   Cursor_3000:
-    primary: "프론트엔드 UI"
+    primary: "프론트엔드 UI (Next.js)"
     directory: "/Users/ted/snap3"
     conflicts: "백엔드 API 준비 상태 필요"
 ```
