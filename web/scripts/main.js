@@ -1661,11 +1661,28 @@ async function autoExtractInstagramMetadata() {
         const result = await response.json();
         
         if (response.ok && result.success) {
-            // Auto-fill metadata fields
-            document.getElementById('instagram-view-count').value = result.data.view_count || 0;
-            document.getElementById('instagram-like-count').value = result.data.like_count || 0;
-            document.getElementById('instagram-comment-count').value = result.data.comment_count || 0;
-            document.getElementById('instagram-author').value = result.data.author || '';
+            // Show metadata display for manual input
+            metadataDisplay.style.display = 'block';
+            
+            // Auto-fill fields if data is available (not 0 or null)
+            if (result.data.view_count && result.data.view_count > 0) {
+                document.getElementById('instagram-view-count').value = result.data.view_count;
+            }
+            if (result.data.like_count && result.data.like_count > 0) {
+                document.getElementById('instagram-like-count').value = result.data.like_count;
+            }
+            if (result.data.comment_count && result.data.comment_count > 0) {
+                document.getElementById('instagram-comment-count').value = result.data.comment_count;
+            }
+            if (result.data.author && result.data.author !== 'Unknown') {
+                document.getElementById('instagram-author').value = result.data.author;
+            }
+            if (result.data.hashtags && result.data.hashtags.length > 0) {
+                document.getElementById('instagram-hashtags').value = result.data.hashtags.join(' ');
+            }
+            if (result.data.upload_date) {
+                document.getElementById('instagram-upload-date').value = result.data.upload_date;
+            }
             
             // Store for submission
             window.instagramMetadata = {
@@ -1680,19 +1697,22 @@ async function autoExtractInstagramMetadata() {
                 followers: result.data.followers
             };
             
-            // Show metadata display
-            metadataDisplay.style.display = 'block';
             statusDiv.innerHTML = `
                 <div class="status-success">
-                    ✅ 메타데이터 자동 추출 완료!
+                    ✅ 메타데이터 추출 완료! 추출된 데이터가 자동으로 채워졌습니다.<br>
+                    <small>추출되지 않은 데이터는 수동으로 입력해주세요.</small>
                 </div>
             `;
         } else {
             throw new Error(result.detail || 'Instagram 메타데이터 추출 실패');
         }
     } catch (error) {
-        statusDiv.innerHTML = `<div class="status-error">❌ 추출 실패: ${error.message}</div>`;
-        metadataDisplay.style.display = 'none';
+        // Show metadata display even if extraction fails, so user can input manually
+        metadataDisplay.style.display = 'block';
+        statusDiv.innerHTML = `
+            <div class="status-error">❌ 자동 추출 실패: ${error.message}</div>
+            <div class="status-info">📝 수동으로 데이터를 입력해주세요.</div>
+        `;
     }
 }
 
@@ -1725,12 +1745,31 @@ async function autoExtractTikTokMetadata() {
         const result = await response.json();
         
         if (response.ok && result.success) {
-            // Auto-fill metadata fields
-            document.getElementById('tiktok-view-count').value = result.data.view_count || 0;
-            document.getElementById('tiktok-like-count').value = result.data.like_count || 0;
-            document.getElementById('tiktok-comment-count').value = result.data.comment_count || 0;
-            document.getElementById('tiktok-share-count').value = result.data.share_count || 0;
-            document.getElementById('tiktok-author').value = result.data.author || '';
+            // Show metadata display for manual input
+            metadataDisplay.style.display = 'block';
+            
+            // Auto-fill fields if data is available (not 0 or null)
+            if (result.data.view_count && result.data.view_count > 0) {
+                document.getElementById('tiktok-view-count').value = result.data.view_count;
+            }
+            if (result.data.like_count && result.data.like_count > 0) {
+                document.getElementById('tiktok-like-count').value = result.data.like_count;
+            }
+            if (result.data.comment_count && result.data.comment_count > 0) {
+                document.getElementById('tiktok-comment-count').value = result.data.comment_count;
+            }
+            if (result.data.share_count && result.data.share_count > 0) {
+                document.getElementById('tiktok-share-count').value = result.data.share_count;
+            }
+            if (result.data.author && result.data.author !== 'Unknown') {
+                document.getElementById('tiktok-author').value = result.data.author;
+            }
+            if (result.data.hashtags && result.data.hashtags.length > 0) {
+                document.getElementById('tiktok-hashtags').value = result.data.hashtags.join(' ');
+            }
+            if (result.data.upload_date) {
+                document.getElementById('tiktok-upload-date').value = result.data.upload_date;
+            }
             
             // Store for submission
             window.tiktokMetadata = {
@@ -1745,19 +1784,22 @@ async function autoExtractTikTokMetadata() {
                 followers: result.data.followers
             };
             
-            // Show metadata display
-            metadataDisplay.style.display = 'block';
             statusDiv.innerHTML = `
                 <div class="status-success">
-                    ✅ 메타데이터 자동 추출 완료!
+                    ✅ 메타데이터 추출 완료! 추출된 데이터가 자동으로 채워졌습니다.<br>
+                    <small>추출되지 않은 데이터는 수동으로 입력해주세요.</small>
                 </div>
             `;
         } else {
             throw new Error(result.detail || 'TikTok 메타데이터 추출 실패');
         }
     } catch (error) {
-        statusDiv.innerHTML = `<div class="status-error">❌ 추출 실패: ${error.message}</div>`;
-        metadataDisplay.style.display = 'none';
+        // Show metadata display even if extraction fails, so user can input manually
+        metadataDisplay.style.display = 'block';
+        statusDiv.innerHTML = `
+            <div class="status-error">❌ 자동 추출 실패: ${error.message}</div>
+            <div class="status-info">📝 수동으로 데이터를 입력해주세요.</div>
+        `;
     }
 }
 

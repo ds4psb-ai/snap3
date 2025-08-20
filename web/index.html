@@ -197,7 +197,7 @@
                                     required
                                     onblur="autoExtractInstagramMetadata()"
                                 >
-                                <div class="form-help">URL을 입력하면 자동으로 조회수, 좋아요, 댓글, 해시태그가 추출됩니다.</div>
+                                <div class="form-help">URL을 입력하면 자동으로 추출 가능한 데이터가 채워집니다.</div>
                                 <div id="instagram-extraction-status" class="extraction-status"></div>
                             </div>
                             
@@ -205,20 +205,28 @@
                             <div id="instagram-metadata-display" class="metadata-display" style="display: none;">
                                 <div class="metadata-grid">
                                     <div class="metadata-item">
-                                        <label class="metadata-label">조회수</label>
-                                        <input type="number" id="instagram-view-count" name="view_count" class="form-input" readonly>
+                                        <label class="metadata-label">조회수 (수동 입력)</label>
+                                        <input type="number" id="instagram-view-count" name="view_count" class="form-input" placeholder="조회수를 입력하세요">
                                     </div>
                                     <div class="metadata-item">
-                                        <label class="metadata-label">좋아요</label>
-                                        <input type="number" id="instagram-like-count" name="like_count" class="form-input" readonly>
+                                        <label class="metadata-label">좋아요 (수동 입력)</label>
+                                        <input type="number" id="instagram-like-count" name="like_count" class="form-input" placeholder="좋아요 수를 입력하세요">
                                     </div>
                                     <div class="metadata-item">
-                                        <label class="metadata-label">댓글</label>
-                                        <input type="number" id="instagram-comment-count" name="comment_count" class="form-input" readonly>
+                                        <label class="metadata-label">댓글 (수동 입력)</label>
+                                        <input type="number" id="instagram-comment-count" name="comment_count" class="form-input" placeholder="댓글 수를 입력하세요">
                                     </div>
                                     <div class="metadata-item">
-                                        <label class="metadata-label">작성자</label>
-                                        <input type="text" id="instagram-author" name="author" class="form-input" readonly>
+                                        <label class="metadata-label">작성자 (수동 입력)</label>
+                                        <input type="text" id="instagram-author" name="author" class="form-input" placeholder="작성자를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">해시태그 (수동 입력)</label>
+                                        <input type="text" id="instagram-hashtags" name="hashtags" class="form-input" placeholder="#태그1 #태그2 #태그3">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">업로드 날짜 (수동 입력)</label>
+                                        <input type="date" id="instagram-upload-date" name="upload_date" class="form-input">
                                     </div>
                                 </div>
                             </div>
@@ -255,7 +263,7 @@
                                     required
                                     onblur="autoExtractTikTokMetadata()"
                                 >
-                                <div class="form-help">URL을 입력하면 자동으로 조회수, 좋아요, 댓글, 공유수가 추출됩니다.</div>
+                                <div class="form-help">URL을 입력하면 자동으로 추출 가능한 데이터가 채워집니다.</div>
                                 <div id="tiktok-extraction-status" class="extraction-status"></div>
                             </div>
                             
@@ -263,24 +271,32 @@
                             <div id="tiktok-metadata-display" class="metadata-display" style="display: none;">
                                 <div class="metadata-grid">
                                     <div class="metadata-item">
-                                        <label class="metadata-label">조회수</label>
-                                        <input type="number" id="tiktok-view-count" name="view_count" class="form-input" readonly>
+                                        <label class="metadata-label">조회수 (수동 입력)</label>
+                                        <input type="number" id="tiktok-view-count" name="view_count" class="form-input" placeholder="조회수를 입력하세요">
                                     </div>
                                     <div class="metadata-item">
-                                        <label class="metadata-label">좋아요</label>
-                                        <input type="number" id="tiktok-like-count" name="like_count" class="form-input" readonly>
+                                        <label class="metadata-label">좋아요 (수동 입력)</label>
+                                        <input type="number" id="tiktok-like-count" name="like_count" class="form-input" placeholder="좋아요 수를 입력하세요">
                                     </div>
                                     <div class="metadata-item">
-                                        <label class="metadata-label">댓글</label>
-                                        <input type="number" id="tiktok-comment-count" name="comment_count" class="form-input" readonly>
+                                        <label class="metadata-label">댓글 (수동 입력)</label>
+                                        <input type="number" id="tiktok-comment-count" name="comment_count" class="form-input" placeholder="댓글 수를 입력하세요">
                                     </div>
                                     <div class="metadata-item">
-                                        <label class="metadata-label">공유</label>
-                                        <input type="number" id="tiktok-share-count" name="share_count" class="form-input" readonly>
+                                        <label class="metadata-label">공유 (수동 입력)</label>
+                                        <input type="number" id="tiktok-share-count" name="share_count" class="form-input" placeholder="공유 수를 입력하세요">
                                     </div>
                                     <div class="metadata-item">
-                                        <label class="metadata-label">작성자</label>
-                                        <input type="text" id="tiktok-author" name="author" class="form-input" readonly>
+                                        <label class="metadata-label">작성자 (수동 입력)</label>
+                                        <input type="text" id="tiktok-author" name="author" class="form-input" placeholder="작성자를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">해시태그 (수동 입력)</label>
+                                        <input type="text" id="tiktok-hashtags" name="hashtags" class="form-input" placeholder="#태그1 #태그2 #태그3">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">업로드 날짜 (수동 입력)</label>
+                                        <input type="date" id="tiktok-upload-date" name="upload_date" class="form-input">
                                     </div>
                                 </div>
                             </div>

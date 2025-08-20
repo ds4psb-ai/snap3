@@ -1847,6 +1847,11 @@ input[type="radio"] {
     cursor: not-allowed;
 }
 
+.metadata-item .form-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 /* Extraction Status Styles */
 .extraction-status {
     margin-top: 8px;
@@ -1874,6 +1879,36 @@ input[type="radio"] {
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+.status-info {
+    color: #2563eb;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+/* Manual Input Field Styles */
+.metadata-item .form-input::placeholder {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.metadata-item .form-input:not(:read-only):hover {
+    border-color: #9ca3af;
+}
+
+/* Auto-filled vs Manual Input Visual Distinction */
+.metadata-item.auto-filled .form-input {
+    background-color: #f0fdf4;
+    border-color: #22c55e;
+}
+
+.metadata-item.manual-input .form-input {
+    background-color: #fef3c7;
+    border-color: #f59e0b;
 }
 
 /* Remove old extraction button styles */
