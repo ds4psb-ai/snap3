@@ -5,9 +5,16 @@ const { Storage } = require('@google-cloud/storage');
 const fetch = require('node-fetch');
 const multer = require('multer');
 const crypto = require('crypto');
+const LRU = require('lru-cache');
 
 // Import the URL normalizer (ES6 import in CommonJS using dynamic import)
 let normalizeSocialUrl;
+
+// LRU Cache for metadata responses (60-second TTL)
+const metadataCache = new LRU({
+    max: 500,
+    maxAge: 60000 // 60 seconds
+});
 
 // GCS Configuration
 const storage = new Storage({
@@ -601,6 +608,23 @@ app.post('/api/extract-social-metadata', async (req, res) => {
     try {
         const { url, platform, options = {} } = req.body;
         
+        // Check cache first
+        const cacheKey = `${platform}:${url}`;
+        const cachedResult = metadataCache.get(cacheKey);
+        
+        if (cachedResult) {
+            structuredLog('performance', 'Cache hit for metadata extraction', {
+                cacheKey,
+                ttlRemaining: metadataCache.getRemainingTTL(cacheKey)
+            }, correlationId);
+            
+            return res.json({
+                ...cachedResult,
+                cache_hit: true,
+                correlationId
+            });
+        }
+        
         // Validation
         if (!url || !platform) {
             structuredLog('error', 'Missing required fields for metadata extraction', {
@@ -760,6 +784,15 @@ app.post('/api/extract-social-metadata', async (req, res) => {
             contentId: urlResult.id,
             integrationStatus: 'READY_FOR_CURSOR'
         }, correlationId);
+        
+        // Cache successful response
+        if (extractionResponse.success) {
+            metadataCache.set(cacheKey, extractionResponse);
+            structuredLog('performance', 'Response cached successfully', {
+                cacheKey,
+                ttl: 60000
+            }, correlationId);
+        }
         
         res.json(extractionResponse);
         
