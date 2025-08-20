@@ -1,0 +1,184 @@
+# 🚨 재귀개선 전문가 컨설팅 요청 - VERTEX-API 안정성 최적화
+
+**Priority**: CRITICAL  
+**Type**: EXPERT_CONSULTATION_REQUEST  
+**Expert**: 재귀개선 전문가  
+**Timeline**: 즉시 분석 및 권장사항 필요  
+**Correlation-ID**: EXPERT-VERTEX-STABILITY-001
+
+---
+
+## 📊 **현재 시스템 상태 (실시간)**
+
+### **Circuit Breaker 메트릭 (2025-08-20 16:02:22)**
+```json
+T1-API: {
+  "state": "CLOSED",
+  "successRate": "100.00%",
+  "avgResponseTime": "3.63ms",
+  "totalRequests": 1074,
+  "uptime": "16108.4s"
+}
+
+VERTEX-API: {
+  "state": "CLOSED", 
+  "successRate": "68.13%",  ← 🚨 프로덕션 미달 (목표 95%+)
+  "avgResponseTime": "500.50ms",
+  "totalRequests": 684,
+  "uptime": "146.2s",
+  "failureThreshold": 5
+}
+```
+
+### **핵심 문제점**
+1. **VERTEX-API 불안정성**: 32% 실패율 (목표 5% 미만)
+2. **반복적 OPEN/CLOSED**: 2분마다 state 변경
+3. **Hook Genome 생성 실패**: "Service agents being provisioned" 오류
+4. **프로덕션 준비도 미달**: GPT-5 권장사항 미구현
+
+---
+
+## 🎯 **GPT-5 전문가 권장사항 (미구현 상태)**
+
+### **1순위: Structured Output (미구현)**
+```typescript
+// 현재: 텍스트 파싱 → JSON 변환 (불안정)
+const response = await vertex.generateContent(prompt);
+const parsed = JSON.parse(response.text); // ← 실패 지점
+
+// 목표: Vertex Structured Output
+const schema = {
+  type: "object",
+  properties: {
+    hookGenome: { type: "object" },
+    scene_analysis: { type: "object" }
+  }
+};
+```
+
+### **2순위: Platform Metrics Integration (미구현)**
+- YouTube Analytics API 통합 필요
+- 플랫폼별 성능 지표 수집
+- WER/CER 품질 모니터링
+
+### **3순위: Quality Gates (부분 구현)**
+- Hook Duration ≤3s ✅ 구현됨
+- Strength Score ≥0.70 ✅ 구현됨
+- WER/CER 모니터링 ❌ 미구현
+
+---
+
+## 🔍 **실패 패턴 분석**
+
+### **Vertex AI 오류 로그**
+```
+Error: Service agents are being provisioned. 
+This may take a few minutes to complete.
+Hook Genome test failed after 3 retry attempts.
+```
+
+### **Circuit Breaker 패턴**
+```
+15:44:40 → OPEN (5 failures)
+15:46:25 → HALF_OPEN (1 success)  
+15:46:56 → CLOSED (reset)
+15:50:40 → OPEN (5 failures again)
+15:58:10 → OPEN (6 failures)
+15:59:56 → CLOSED (reset again)
+```
+
+### **반복 실패 요인**
+1. **GCP Service Agent 프로비저닝**: 인프라 지연
+2. **Retry Logic 부족**: 지수 백오프 미구현
+3. **Circuit Breaker 임계값**: 너무 엄격 (5회)
+4. **예측적 모니터링 부족**: 장애 예측 불가
+
+---
+
+## 🎯 **컨설팅 요청 사항**
+
+### **주요 질문**
+1. **Circuit Breaker 최적화**: 68% → 95%+ 성공률 달성 방법
+2. **Vertex Structured Output**: 안정적 JSON 파싱 구현
+3. **예측적 모니터링**: 장애 사전 감지 시스템
+4. **자동 복구**: 지능형 재시도 및 백오프 전략
+
+### **기술적 제약사항**
+- **Region**: us-central1 고정 (regional alignment)
+- **Model**: gemini-2.5-pro 필수
+- **API 호출**: 신규 모델 인스턴스 패턴
+- **Response**: 텍스트 → JSON 파싱 (현재 불안정)
+
+---
+
+## 📋 **현재 구현 코드 (문제 지점)**
+
+### **Vertex API 호출 코드**
+```javascript
+// src/services/t2-extract/vertex-api.js
+const model = await vertex.createModel({
+  model: 'gemini-2.5-pro',
+  location: 'us-central1'
+});
+
+const result = await model.generateContent({
+  fileData: { fileUri: gcsUri, mimeType: 'video/mp4' },
+  prompt: hookGenomePrompt
+});
+
+// 문제 지점: 텍스트 파싱
+const vdpData = JSON.parse(result.text); // ← 실패율 32%
+```
+
+### **Circuit Breaker 설정**
+```javascript
+// circuit-breaker.js
+const breaker = new CircuitBreaker(vertexCall, {
+  timeout: 60000,           // 60초 타임아웃
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000,      // 30초 리셋
+  failureThreshold: 5       // ← 너무 엄격?
+});
+```
+
+---
+
+## 🚀 **요청하는 개선 전략**
+
+### **1단계: 즉시 안정성 개선**
+- Circuit Breaker 임계값 조정
+- 지수 백오프 retry 구현
+- Structured Output 마이그레이션
+
+### **2단계: 예측적 모니터링**
+- 장애 예측 알고리즘
+- 성능 트렌드 분석
+- 자동 스케일링 트리거
+
+### **3단계: 자동 복구**
+- 장애 자동 감지
+- 대체 처리 경로
+- 사용자 알림 시스템
+
+---
+
+## 📊 **성공 기준**
+
+### **정량적 목표**
+- **성공률**: 68% → 95%+
+- **평균 응답**: 500ms → 300ms 목표
+- **장애 복구**: 30초 → 10초 목표
+- **안정성**: 24시간 무중단 운영
+
+### **정성적 목표**
+- Hook Genome 생성 안정성
+- 사용자 경험 개선
+- 운영 복잡성 감소
+
+---
+
+**🚨 긴급도**: Cursor 작업과 병렬로 즉시 시작 필요  
+**🎯 목표**: 프로덕션 수준 안정성 달성
+
+**Correlation-ID**: EXPERT-VERTEX-STABILITY-001  
+**Status**: URGENT_CONSULTATION_REQUEST

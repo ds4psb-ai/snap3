@@ -1,0 +1,68 @@
+# 🚨 CRITICAL: ClaudeCode 추출기 분석 오류 보고
+
+**Priority**: CRITICAL  
+**Type**: ANALYSIS_ERROR  
+**Correlation-ID**: EXTRACTOR-ANALYSIS-ERROR-001  
+**Timestamp**: 2025-08-20 16:38:00
+
+---
+
+## 🚨 **ClaudeCode 분석 오류 발견**
+
+### **잘못된 분석 결과**
+ClaudeCode가 Cursor 추출기 테스트 결과를 잘못 해석했습니다:
+
+#### **실제 테스트 결과**
+```json
+TikTok: https://www.tiktok.com/@americasfunnyaivids/video/7531619927438970142
+→ view_count: 0, like_count: 0, comment_count: 0, share_count: 0
+
+Instagram: https://www.instagram.com/reel/DMTb4uiywui/?igsh=ejZtcHB3MzlmdHp2  
+→ view_count: 0, like_count: 0, comment_count: 0
+```
+
+#### **ClaudeCode의 잘못된 결론**
+"Cursor 추출기는 view_count, like_count, comment_count를 추출 못함 → 사용자가 수동 입력해야 함"
+
+### **문제점**
+1. **실제 URL 테스트**: 모든 메트릭이 0으로 나오는 것이 정상인지 확인 안함
+2. **Cursor 추출기 기능**: 실제 추출 능력에 대한 검증 부족
+3. **API 상태**: Cursor 추출기가 제대로 작동하는지 확인 안함
+
+---
+
+## 🔍 **Cursor에게 요청사항**
+
+### **긴급 확인 필요**
+1. **추출기 상태**: Cursor 추출기가 정상 작동하는지 확인
+2. **실제 추출 능력**: Instagram/TikTok에서 실제로 추출되는 필드 확인
+3. **메트릭 추출**: view_count, like_count, comment_count 실제 추출 가능 여부
+4. **API 디버깅**: 왜 모든 값이 0으로 나오는지 원인 분석
+
+### **테스트 URL**
+```
+TikTok: https://www.tiktok.com/@americasfunnyaivids/video/7531619927438970142
+Instagram: https://www.instagram.com/reel/DMTb4uiywui/?igsh=ejZtcHB3MzlmdHp2
+```
+
+### **필요한 정보**
+- Cursor 추출기의 실제 추출 능력 명세
+- Instagram vs TikTok 추출 필드 차이점
+- 어떤 필드가 자동 추출되고 어떤 것이 수동 입력 필요한지
+
+---
+
+## 📋 **Cursor 확인 명령어**
+
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-claudecode-extractor-analysis-error
+```
+
+---
+
+**🚨 Cursor, ClaudeCode 분석이 틀렸는지 확인해주세요!**
+
+**Correlation-ID**: EXTRACTOR-ANALYSIS-ERROR-001  
+**Status**: ANALYSIS_VERIFICATION_REQUIRED  
+**Action**: IMMEDIATE_CURSOR_RESPONSE_NEEDED

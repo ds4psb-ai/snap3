@@ -20,6 +20,9 @@ class VDPProcessor {
         
         // Initialize enhanced logging
         this.initializeLogging();
+        
+        // Start circuit breaker monitoring
+        this.startCircuitBreakerMonitoring();
     }
     
     initializeLogging() {
@@ -438,7 +441,10 @@ class VDPProcessor {
             this.showProgressSection();
             this.updateProgress(0, '제출 내용을 검증하고 있습니다...', []);
             
-            const endpoint = this.testMode ? '/vdp/test-submit' : '/api/vdp/extract-vertex';
+            // Determine endpoint based on extractor selection
+            const selectedExtractor = document.querySelector('input[name="extractor"]:checked')?.value || 'main';
+            const endpoint = this.testMode ? '/vdp/test-submit' : 
+                           selectedExtractor === 'main' ? '/api/vdp/extract-main' : '/api/vdp/extract-vertex';
             // Enhanced logging for JSON-only submission
             window.logger.info('JSON-only submission initiated', {
                 correlationId: this.correlationId,
@@ -744,11 +750,18 @@ class VDPProcessor {
     
     showSuccess(job) {
         const resultsSection = document.getElementById('results-section');
-        const result = job.result || {};
-        const hookAnalysis = result.hook_analysis || {};
+        const result = job.result || job; // Support direct VDP response
+        const hookAnalysis = result.hook_analysis || result.overall_analysis?.hookGenome || {};
         const qualityIndicators = result.quality_indicators || {};
         const hookGatePass = result.hook_gate_status === 'PASS';
         const legacyMode = result.legacy_mode || false;
+        const selectedExtractor = document.querySelector('input[name="extractor"]:checked')?.value || 'main';
+        
+        // Show appropriate display based on extractor type
+        if (selectedExtractor === 'main') {
+            this.showMainVdpResults(result);
+            return;
+        }
         
         // Show and update metrics display
         this.showMetricsDisplay(qualityIndicators, hookGatePass, result);
@@ -1238,6 +1251,173 @@ class VDPProcessor {
             throw new Error(`파일 업로드 실패: ${error.message}`);
         }
     }
+    
+    showMainVdpResults(vdpData) {
+        const resultsSection = document.getElementById('results-section');
+        const vdpResults = document.getElementById('vdp-results');
+        const errorResults = document.getElementById('error-results');
+        
+        // Hide error display
+        errorResults.style.display = 'none';
+        
+        // Show VDP results
+        vdpResults.style.display = 'block';
+        resultsSection.style.display = 'block';
+        
+        // Update extractor badge
+        document.getElementById('extractor-used').textContent = 'Main VDP (Gemini 2.5 Pro)';
+        document.getElementById('processing-time').textContent = `${vdpData.processing_time || 'N/A'}ms`;
+        
+        // Display scene analysis
+        this.displaySceneAnalysis(vdpData.scene_analysis || []);
+        
+        // Display hook analysis if available
+        const hookData = vdpData.overall_analysis?.hookGenome || vdpData.hook_analysis;
+        if (hookData) {
+            this.displayHookAnalysis(hookData);
+        }
+        
+        // Display content summary
+        this.displayContentSummary(vdpData.content_summary || vdpData.overall_analysis?.content_summary);
+        
+        // Setup export functions
+        this.setupVdpExportActions(vdpData);
+        
+        // Hide progress section
+        document.getElementById('progress-section').style.display = 'none';
+    }
+    
+    displaySceneAnalysis(scenes) {
+        const container = document.getElementById('scene-analysis');
+        if (!scenes || scenes.length === 0) {
+            container.innerHTML = '<p class="no-data">Scene analysis not available</p>';
+            return;
+        }
+        
+        container.innerHTML = scenes.map((scene, index) => `
+            <div class="scene-card">
+                <div class="scene-header">
+                    <span class="scene-number">${index + 1}</span>
+                    <span class="scene-timing">${scene.start_sec || 0}s - ${scene.end_sec || 0}s</span>
+                </div>
+                <div class="scene-content">
+                    <h4>${scene.description || 'No description'}</h4>
+                    ${scene.objects ? `<p><strong>Objects:</strong> ${scene.objects.join(', ')}</p>` : ''}
+                    ${scene.emotion ? `<p><strong>Emotion:</strong> ${scene.emotion}</p>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    displayHookAnalysis(hookData) {
+        document.getElementById('hook-timing').querySelector('.metric-value').textContent = 
+            `${hookData.start_sec || 0}s`;
+        document.getElementById('hook-strength').querySelector('.metric-value').textContent = 
+            `${(hookData.strength_score || 0).toFixed(2)}`;
+            
+        const hookContent = document.getElementById('hook-content');
+        hookContent.innerHTML = `
+            <div class="hook-details">
+                <p><strong>Pattern:</strong> ${hookData.pattern_code || 'N/A'}</p>
+                <p><strong>Delivery:</strong> ${hookData.delivery || 'N/A'}</p>
+                ${hookData.trigger_modalities ? `<p><strong>Modalities:</strong> ${hookData.trigger_modalities.join(', ')}</p>` : ''}
+            </div>
+        `;
+    }
+    
+    displayContentSummary(summary) {
+        const container = document.getElementById('content-summary');
+        if (!summary) {
+            container.innerHTML = '<p class="no-data">Content summary not available</p>';
+            return;
+        }
+        
+        container.innerHTML = `
+            <div class="summary-content">
+                <h4>${summary.title || 'No title'}</h4>
+                <p>${summary.description || summary.summary || 'No description available'}</p>
+                ${summary.key_moments ? `
+                    <div class="key-moments">
+                        <h5>Key Moments:</h5>
+                        <ul>
+                            ${summary.key_moments.map(moment => 
+                                `<li>${moment.time || 0}s: ${moment.description || 'No description'}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+    
+    setupVdpExportActions(vdpData) {
+        document.getElementById('export-json-btn').onclick = () => {
+            this.downloadVdpAsJson(vdpData);
+        };
+        
+        document.getElementById('view-raw-btn').onclick = () => {
+            this.showRawVdpData(vdpData);
+        };
+    }
+    
+    downloadVdpAsJson(vdpData) {
+        const blob = new Blob([JSON.stringify(vdpData, null, 2)], {
+            type: 'application/json'
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `vdp-${vdpData.content_id || 'unknown'}-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    
+    showRawVdpData(vdpData) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>RAW VDP Data</h3>
+                    <button type="button" class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+                </div>
+                <div class="modal-body">
+                    <pre class="raw-json">${JSON.stringify(vdpData, null, 2)}</pre>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    startCircuitBreakerMonitoring() {
+        // Monitor circuit breaker status every 5 seconds
+        this.circuitBreakerInterval = setInterval(async () => {
+            try {
+                const response = await fetch(`${this.apiBase}/api/circuit-breaker/status`);
+                if (response.ok) {
+                    const status = await response.json();
+                    this.updateExtractorStatus(status);
+                }
+            } catch (error) {
+                console.warn('Circuit breaker status check failed:', error.message);
+            }
+        }, 5000);
+    }
+    
+    updateExtractorStatus(status) {
+        const vertexStatus = document.getElementById('vertex-status');
+        if (vertexStatus && status.vertex_api_breaker) {
+            const state = status.vertex_api_breaker.state;
+            const className = state === 'CLOSED' ? 'extractor-option__status--ready' : 
+                           state === 'HALF_OPEN' ? 'extractor-option__status--warning' :
+                           'extractor-option__status--error';
+            
+            vertexStatus.className = `extractor-option__status ${className}`;
+            vertexStatus.textContent = state;
+        }
+    }
 }
 
 // Problem Details Error Class
@@ -1356,6 +1536,105 @@ function switchActionTab(tabName) {
     // Add active states
     document.querySelector(`[data-tab="${tabName}"]`).classList.add('toggle-tab--active');
     document.querySelector(`[data-content="${tabName}"]`).classList.add('tab-content--active');
+}
+
+// Cursor metadata extraction functions
+async function extractInstagramMetadata() {
+    const urlInput = document.getElementById('instagram-source-url');
+    const statusDiv = document.getElementById('instagram-extraction-status');
+    const extractBtn = document.querySelector('#instagram-form .extract-metadata-btn');
+    
+    const url = urlInput.value.trim();
+    if (!url) {
+        statusDiv.innerHTML = '<div class="status-error">❌ URL을 입력해주세요</div>';
+        return;
+    }
+    
+    const originalText = extractBtn.textContent;
+    extractBtn.textContent = '🔄 추출 중...';
+    extractBtn.disabled = true;
+    statusDiv.innerHTML = '<div class="status-loading">🔄 메타데이터 추출 중...</div>';
+    
+    try {
+        const response = await fetch('/api/extract-social-metadata', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                url: url,
+                platform: 'instagram'
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            // Auto-fill hidden metadata fields (Cursor handles all metadata extraction)
+            statusDiv.innerHTML = `
+                <div class="status-success">
+                    ✅ 메타데이터 자동 추출 완료!<br>
+                    <small>👁 ${result.data.view_count || 0} 조회 | ❤️ ${result.data.like_count || 0} 좋아요 | 💬 ${result.data.comment_count || 0} 댓글</small>
+                </div>
+            `;
+        } else {
+            throw new Error(result.detail || 'Instagram 메타데이터 추출 실패');
+        }
+    } catch (error) {
+        statusDiv.innerHTML = `<div class="status-error">❌ 추출 실패: ${error.message}</div>`;
+    } finally {
+        extractBtn.textContent = originalText;
+        extractBtn.disabled = false;
+    }
+}
+
+async function extractTikTokMetadata() {
+    const urlInput = document.getElementById('tiktok-source-url');
+    const statusDiv = document.getElementById('tiktok-extraction-status');
+    const extractBtn = document.querySelector('#tiktok-form .extract-metadata-btn');
+    
+    const url = urlInput.value.trim();
+    if (!url) {
+        statusDiv.innerHTML = '<div class="status-error">❌ URL을 입력해주세요</div>';
+        return;
+    }
+    
+    const originalText = extractBtn.textContent;
+    extractBtn.textContent = '🔄 추출 중...';
+    extractBtn.disabled = true;
+    statusDiv.innerHTML = '<div class="status-loading">🔄 메타데이터 추출 중...</div>';
+    
+    try {
+        const response = await fetch('/api/extract-social-metadata', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                url: url,
+                platform: 'tiktok'
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            // Auto-fill hidden metadata fields (Cursor handles all metadata extraction)
+            statusDiv.innerHTML = `
+                <div class="status-success">
+                    ✅ 메타데이터 자동 추출 완료!<br>
+                    <small>👁 ${result.data.view_count || 0} 조회 | ❤️ ${result.data.like_count || 0} 좋아요 | 💬 ${result.data.comment_count || 0} 댓글</small>
+                </div>
+            `;
+        } else {
+            throw new Error(result.detail || 'TikTok 메타데이터 추출 실패');
+        }
+    } catch (error) {
+        statusDiv.innerHTML = `<div class="status-error">❌ 추출 실패: ${error.message}</div>`;
+    } finally {
+        extractBtn.textContent = originalText;
+        extractBtn.disabled = false;
+    }
 }
 
 // Initialize when DOM is ready

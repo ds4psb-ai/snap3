@@ -1504,6 +1504,136 @@ app.post('/api/vdp/cursor-extract', async (req, res) => {
     }
 });
 
+// Main VDP Extractor Integration - Direct connection to services/vdp-extractor (port 3001)
+app.post('/api/vdp/extract-main', async (req, res) => {
+    const startTime = Date.now();
+    const correlationId = req.correlationId;
+    
+    structuredLog('info', 'Main VDP extractor integration initiated', {
+        endpoint: '/api/vdp/extract-main',
+        platform: req.body.platform,
+        url: req.body.url?.substring(0, 50) + '...',
+        extractor: 'services/vdp-extractor (Gemini 2.5 Pro)'
+    }, correlationId);
+    
+    try {
+        const { url, platform, metadata = {}, options = {} } = req.body;
+        
+        // Main VDP service integration (localhost:3001)
+        const mainVdpResponse = await createFetchWithKeepAlive(`http://localhost:3001/api/v1/extract`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Correlation-ID': correlationId
+            },
+            body: JSON.stringify({
+                url,
+                options: {
+                    ...options,
+                    includeContentAnalysis: true,
+                    includeViralFactors: true,
+                    maxComments: 5
+                }
+            })
+        });
+        
+        if (!mainVdpResponse.ok) {
+            throw new Error(`Main VDP extraction failed: ${mainVdpResponse.status}`);
+        }
+        
+        const vdpResult = await mainVdpResponse.json();
+        
+        if (!vdpResult.success) {
+            throw new Error(`Main VDP processing failed: ${vdpResult.error?.message || 'Unknown error'}`);
+        }
+        
+        // Convert to GitHub VDP compatible format and store
+        const githubVdp = {
+            content_id: vdpResult.data.contentId,
+            content_key: `${platform.toLowerCase()}:${vdpResult.data.contentId}`,
+            metadata: {
+                platform: platform.toLowerCase(),
+                source_url: url,
+                video_origin: 'Real-Footage',
+                language: 'ko',
+                ...metadata,
+                ...vdpResult.data.metadata
+            },
+            overall_analysis: vdpResult.data.analysis || vdpResult.data.overall_analysis,
+            load_timestamp: new Date().toISOString(),
+            load_date: new Date().toISOString().split('T')[0]
+        };
+        
+        // Store in GCS for BigQuery loading
+        const timestamp = Date.now();
+        const fileName = `vdp/processed/${platform.toLowerCase()}/${githubVdp.content_id}_main_${timestamp}.json`;
+        
+        const bucket = storage.bucket(RAW_BUCKET);
+        const file = bucket.file(fileName);
+        
+        await file.save(JSON.stringify(githubVdp, null, 2), {
+            metadata: {
+                contentType: 'application/json',
+                metadata: {
+                    'vdp-platform': platform.toLowerCase(),
+                    'vdp-content-id': githubVdp.content_id,
+                    'vdp-content-key': githubVdp.content_key,
+                    'vdp-extractor-type': 'main_gemini',
+                    'vdp-correlation-id': correlationId,
+                    'vdp-ai-studio-builder': 'true'
+                }
+            }
+        });
+        
+        const gcsUri = `gs://${RAW_BUCKET}/${fileName}`;
+        const totalProcessingTime = Date.now() - startTime;
+        
+        structuredLog('success', 'Main VDP extraction completed', {
+            gcsUri,
+            contentKey: githubVdp.content_key,
+            extractorType: 'main_gemini',
+            aiStudioBuilder: true,
+            totalProcessingTimeMs: totalProcessingTime
+        }, correlationId);
+        
+        res.status(200).json({
+            success: true,
+            message: '메인 VDP 추출기 처리 완료',
+            data: {
+                content_key: githubVdp.content_key,
+                content_id: githubVdp.content_id,
+                platform: platform.toLowerCase(),
+                extractor_type: 'main_gemini',
+                gcs_uri: gcsUri,
+                github_vdp_compatible: true,
+                ai_studio_builder: true
+            },
+            processing: {
+                total_processing_time_ms: totalProcessingTime,
+                extractor_response_time_ms: vdpResult.meta?.processingTime || 0
+            },
+            correlationId
+        });
+        
+    } catch (error) {
+        const processingTime = Date.now() - startTime;
+        
+        structuredLog('error', 'Main VDP extraction failed', {
+            error: error.message,
+            stack: error.stack,
+            processingTimeMs: processingTime,
+            errorCode: 'MAIN_VDP_EXTRACTION_ERROR'
+        }, correlationId);
+        
+        res.status(500).json({
+            error: 'MAIN_VDP_EXTRACTION_ERROR',
+            message: '메인 VDP 추출기 처리 중 오류 발생',
+            details: error.message,
+            correlationId
+        });
+    }
+});
+
 // Test VDP submission endpoint (for compatibility)
 app.post('/api/vdp/test-submit', (req, res) => {
     console.log('📝 Test submission received');
@@ -1704,6 +1834,8 @@ async function startServer() {
             endpoints: {
                 normalization: 'POST /api/normalize-url',
                 vdpExtract: 'POST /api/vdp/extract-vertex',
+                mainVdpExtract: 'POST /api/vdp/extract-main',
+                socialMetadata: 'POST /api/extract-social-metadata',
                 metrics: 'GET /metrics (T3 integration)',
                 health: 'GET /api/health'
             },

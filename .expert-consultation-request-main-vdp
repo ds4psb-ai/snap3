@@ -1,0 +1,181 @@
+# 🚨 재귀개선 전문가 컨설팅 요청 - 메인 VDP 파이프라인 통합 최적화
+
+**Priority**: CRITICAL  
+**Type**: EXPERT_CONSULTATION_REQUEST  
+**Expert**: 재귀개선 전문가  
+**Focus**: 메인 VDP 통합 파이프라인 (AI Studio Builder 제약 고려)  
+**Timeline**: 즉시 분석 및 권장사항 필요  
+**Correlation-ID**: EXPERT-MAIN-VDP-INTEGRATION-001
+
+---
+
+## 🚨 **CRITICAL 제약사항: AI Studio Builder 기반**
+
+### **메인 VDP 추출기 기술 제약**
+- **기반**: Google AI Studio Builder 직접 복사본
+- **스키마 불변**: 기존 스키마 구조 절대 변경 금지
+- **API 민감성**: 조금만 변경해도 Gemini API 거부 발생
+- **과거 경험**: 스키마/룰 개선 시도 → API 오류 반복
+- **안전 원칙**: 기존 구조 그대로 유지, 통합 로직으로만 개선
+
+### **🚫 금지 사항**
+- ❌ 메인 VDP 스키마 구조 수정
+- ❌ Gemini API 프롬프트 개선 시도
+- ❌ AI Studio Builder 생성 로직 변경
+- ❌ GitHub VDP 호환성 구조 수정
+
+### **✅ 허용 사항**
+- ✅ 기존 출력 그대로 활용
+- ✅ 파이프라인 통합 로직 개선
+- ✅ 인제스터 UI 연동 최적화
+- ✅ 플랫폼별 입력 흐름 개선
+
+---
+
+## 🎯 **핵심 목표 (수정됨)**
+
+### **플랫폼별 통합 파이프라인 완성**
+- **YouTube**: URL → 100% 자동화 (완료)
+- **Instagram**: URL+영상+메타데이터 → 90%+ 자동화 (Cursor 구현 중)
+- **TikTok**: URL+영상+메타데이터 → 90%+ 자동화 (Cursor 구현 중)
+- **메인 VDP**: 기존 구조 유지한 채 파이프라인 연동
+
+### **플랫폼별 VDP 완전체 요구사항**
+```typescript
+interface CompleteVDP {
+  content_id: string;                    // 플랫폼별 고유 ID
+  metadata: {
+    platform: 'YouTube' | 'Instagram' | 'TikTok';
+    source_url: string;
+    video_origin: 'Real-Footage';
+    view_count: number;
+    like_count: number;
+    comment_count: number;
+    hashtags: string[];
+    top_comments: Comment[];
+    upload_date: string;
+    // 플랫폼별 추가 메타데이터
+  };
+  overall_analysis: {
+    scene_analysis: CompleteSceneBreakdown;
+    content_summary: ComprehensiveAnalysis;
+    audience_reaction: DetailedReactionAnalysis;
+    // GitHub VDP 호환 전체 구조
+  };
+}
+```
+
+---
+
+## 🏗️ **현재 메인 VDP 추출기 상태**
+
+### **서비스 위치 및 구조**
+- **경로**: `/Users/ted/snap3/services/vdp-extractor/`
+- **기반**: Gemini 2.5 Pro 
+- **출력**: GitHub VDP 호환 JSON
+- **상태**: 개발 완료, 수동 테스트 준비
+
+### **GitHub VDP 호환성**
+```json
+{
+  "content_id": "C000001",
+  "metadata": {
+    "comment_count": 7000,
+    "cta_types": ["product_recommendation"],
+    "hashtags": ["CarGadgets", "LifeHacks"],
+    "like_count": 80000,
+    "platform": "Instagram",
+    "video_origin": "Real-Footage"
+  },
+  "overall_analysis": {
+    "scene_analysis": "완전체 씬 분석",
+    "audience_reaction": "완전체 반응 분석",
+    "content_summary": "완전체 콘텐츠 요약"
+  }
+}
+```
+
+---
+
+## 🔍 **컨설팅 요청 사항**
+
+### **1순위: 파이프라인 통합 디버깅 예방**
+- **4-Terminal 흐름**: T1(8080) → T3(8082) → BigQuery 연동 오류 방지
+- **플랫폼별 입력**: YouTube(URL) + Instagram/TikTok(Cursor 메타데이터) 통합
+- **유기적 연동**: 터미널 간 데이터 전달 시 오류 예방
+
+### **2순위: 인제스터 UI 완전 자동화**
+- **YouTube**: URL 입력 → 메인 VDP → BigQuery (100%)
+- **Instagram**: Cursor 메타데이터 → 메인 VDP → BigQuery (90%+)
+- **TikTok**: Cursor 메타데이터 → 메인 VDP → BigQuery (90%+)
+
+### **3순위: AI Studio Builder 제약 내 최적화**
+- **기존 구조 유지**: 스키마/프롬프트 절대 변경 금지
+- **통합 로직**: 파이프라인 레벨에서만 성능 개선
+- **안전한 연동**: 기존 출력 그대로 활용한 최적화
+
+---
+
+## 📊 **현재 시스템 상황 (통합 파이프라인)**
+
+### **플랫폼별 현재 상황**
+```
+YouTube Shorts:
+  입력: URL만 입력 (완전 자동화)
+  처리: yt-dlp → 메인 VDP → BigQuery
+  상태: 100% 완성
+
+Instagram Reels:
+  입력: URL + 영상파일 + 메타데이터 (수동 입력 중)
+  처리: Cursor 메타데이터 추출기로 개선 중
+  상태: 50% → 90%+ 자동화 진행 중
+
+TikTok Videos:
+  입력: URL + 영상파일 + 메타데이터 (수동 입력 중)
+  처리: Cursor 메타데이터 추출기로 개선 중
+  상태: 50% → 90%+ 자동화 진행 중
+```
+
+### **AI Studio Builder 기반 메인 VDP 현황**
+- **구조 고정**: Google AI Studio Builder 직접 복사
+- **스키마 불변**: 과거 수정 시도 → Gemini API 거부
+- **GitHub VDP 호환**: 기존 출력 구조 완벽 유지
+- **품질**: Shot-by-Shot, Hook 분석, 멀티언어 지원
+
+---
+
+## 🚀 **요청하는 개선 전략**
+
+### **플랫폼 통합 파이프라인 시스템**
+1. **입력 통합**: Cursor 메타데이터 + 기존 YouTube 흐름
+2. **터미널 연동**: 4-Terminal 시스템 버그 예방
+3. **메인 VDP 활용**: AI Studio Builder 구조 그대로 유지
+4. **BigQuery 적재**: 완전 자동화된 최종 흐름
+
+### **AI Studio Builder 제약 고려 우선순위**
+- **구조 보존**: 기존 스키마/프롬프트 절대 변경 금지
+- **파이프라인 개선**: 통합 로직으로만 최적화
+- **디버깅 예방**: 터미널 간 유기적 흐름 안정화
+- **인제스터 UI**: 플랫폼별 입력 완전 자동화
+
+---
+
+## 📋 **성공 기준**
+
+### **정량적 목표**
+- **통합 파이프라인**: 플랫폼별 90%+ 자동화
+- **디버깅 감소**: 파이프라인 오류 < 5%
+- **처리 성공률**: BigQuery 적재 95%+
+- **터미널 동기화**: 4-Terminal 충돌 0%
+
+### **정성적 목표**  
+- AI Studio Builder 구조 완전 보존
+- 플랫폼별 통합 파이프라인 안정화
+- 인제스터 UI 완전 자동화
+
+---
+
+**🎯 목표**: AI Studio Builder 제약 고려한 통합 파이프라인 완성
+
+**Correlation-ID**: EXPERT-MAIN-VDP-INTEGRATION-001  
+**Status**: AI_STUDIO_CONSTRAINT_CONSULTATION_REQUEST
