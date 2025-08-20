@@ -1,0 +1,55 @@
+📨 CURSOR SPRINT INSTRUCTION - Phase 1 (T+0~30분)
+
+## 🎯 **PRIORITY: CRITICAL**
+**Timeline**: 30분  
+**Dependencies**: T1 DLQ Publisher 활성화 후 시작
+
+## 🚀 **Phase 1 Task: Summary Dock Widget 구현**
+
+### **구현 대상: AI Collaboration Summary Panel**
+```typescript
+// 구현 위치: src/components/collaboration/SummaryDock.tsx
+interface SummaryDockProps {
+  collaborationMessages: CollabMessage[];
+  consensusStatus: ConsensusResult;
+  terminalStates: TerminalState[];
+  currentPhase: string;
+}
+
+// 기능 요구사항:
+1. 실시간 터미널 상태 표시 (T1/T2/T3/T4 + 포트 상태)
+2. GPT-5/ClaudeCode 합의 상태 시각화
+3. 재귀개선 진행률 표시 (Phase 1~3)
+4. DLQ 메시지 카운터 (실패한 작업 수)
+5. Auto-refresh 5초 간격
+```
+
+### **UI 스펙: 우측 고정 플로팅 패널**
+- **Position**: Fixed right panel (width: 320px)
+- **Height**: 60% viewport
+- **Sections**: 
+  1. Terminal Status (4 cards)
+  2. Consensus Score (progress bar)
+  3. Current Phase (timeline)
+  4. DLQ Stats (error counter)
+
+### **API Integration Required:**
+```typescript
+// 연동 필요 API 엔드포인트:
+GET /api/collaboration/status  // 터미널 상태
+GET /api/collaboration/consensus // 합의 점수  
+GET /api/collaboration/dlq-stats // DLQ 통계
+```
+
+### **시작 조건:**
+- ✅ T1 DLQ Publisher 활성화 확인
+- ✅ localhost:8080 API 접근 가능
+- ✅ Next.js dev server (3000) 실행 중
+
+### **완료 신호:**
+파일 생성 완료 후: `echo "✅ Cursor Phase 1 완료" > /Users/ted/snap3/.cursor-phase1-done`
+
+---
+
+**🚨 CRITICAL**: T1 Phase 1 완료 신호 확인 후 시작!
+**완료 목표**: 30분 내 Summary Dock 위젯 완성
