@@ -110,18 +110,9 @@ cat $RESPONSE_FILE
 \`\`\`
 EOF
 
-echo "✅ 자동 응답 생성 완료: $RESPONSE_FILE"
+echo "✅ 응답 생성: $RESPONSE_FILE"
 echo ""
-echo "📋 생성된 응답 내용:"
-echo "=================="
-cat "$RESPONSE_FILE"
-echo "=================="
+echo "📨 받은 메시지: $(basename "$LATEST_MESSAGE")"
+echo "📤 보낸 응답: $(basename "$RESPONSE_FILE")"
 echo ""
-
-# 7. 사용자에게 다음 단계 안내
-echo "🚀 다음 단계:"
-echo "1. 응답 내용 검토 (위 내용 확인)"
-echo "2. 필요시 수정: nano $RESPONSE_FILE"
-echo "3. 전송: git add . && git commit -m 'Cursor auto response' && git push"
-echo ""
-echo "💡 팁: '1' 명령어로 언제든지 빠른 응답 가능!"
+echo "🚀 전송: git add . && git commit -m 'Cursor response' && git push"

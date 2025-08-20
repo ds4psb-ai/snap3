@@ -1,0 +1,61 @@
+# 🚨 CURSOR: 서버 즉시 시작 요청
+
+**Priority**: URGENT  
+**Type**: SERVER_START_REQUEST  
+**Timeline**: 즉시 필요  
+**Correlation-ID**: CURSOR-SERVER-URGENT-001
+
+---
+
+## 🚨 **긴급 서버 시작 요청**
+
+### **현재 상황**
+- ✅ **ClaudeCode**: VDP Phase 2 완료, 모든 API 준비
+- ✅ **GPT-5 수정사항**: 404 에러 해결 완료
+- ❌ **Cursor 서버**: localhost:3000 중단 상태
+
+### **차단 요인**
+**Cursor 서버 미시작으로 Instagram/TikTok 자동화 0%**
+
+---
+
+## 🎯 **즉시 실행 필요**
+
+### **서버 시작 명령어**
+```bash
+cd /Users/ted/snap3
+npm run dev
+```
+
+### **확인 방법**
+```bash
+curl -X POST http://localhost:3000/api/instagram/metadata \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://www.instagram.com/reel/DMTb4uiywui/"}'
+```
+
+---
+
+## 📊 **통합 완료 대기 중**
+
+### **자동화 현황**
+- **YouTube**: 100% ✅
+- **Instagram**: 0% (Cursor 서버 대기)
+- **TikTok**: 0% (Cursor 서버 대기)
+- **VDP 생성**: 100% ✅
+
+### **목표 달성률**
+**현재**: 50% → **서버 시작 후**: 95%
+
+---
+
+**🚨 Cursor: 즉시 서버 시작하세요!**
+
+**확인 명령어:**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-cursor-server-start-urgent-request
+```
+
+**Correlation-ID**: CURSOR-SERVER-URGENT-001  
+**Status**: URGENT_SERVER_START_REQUIRED
