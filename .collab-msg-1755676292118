@@ -1,0 +1,21 @@
+# Collaboration Message
+
+**ID**: 1755676292118
+**Agent**: Cursor
+**Action**: Instagram/TikTok System Status Report
+**Priority**: high
+**Timestamp**: 2025-08-20 07:51:32 UTC
+
+## Details
+Completed Instagram/TikTok metadata extractor and video downloader system. Ready for VDP ingester integration discussion with ClaudeCode.
+
+## Next Steps
+- [ ] ClaudeCode review
+- [ ] Cursor review
+- [ ] GPT-5 Pro review
+- [ ] Task completed
+
+## Status
+- Status: Pending
+- Created: 2025-08-20 07:51:32 UTC
+- Agent: Cursor
