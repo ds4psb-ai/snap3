@@ -1,0 +1,21 @@
+# Collaboration Message
+
+**ID**: 1755679668626
+**Agent**: Cursor
+**Action**: Preparation Tasks
+**Priority**: medium
+**Timestamp**: 2025-08-20 08:47:48 UTC
+
+## Details
+GPT-5 Pro 10분 대기 동안 준비할 수 있는 작업들 정리! API 스펙 구체화, UI 플로우 설계, 테스트 준비 등. .collab-msg-cursor-prep-tasks 확인!
+
+## Next Steps
+- [ ] ClaudeCode review
+- [ ] Cursor review
+- [ ] GPT-5 Pro review
+- [ ] Task completed
+
+## Status
+- Status: Pending
+- Created: 2025-08-20 08:47:48 UTC
+- Agent: Cursor
