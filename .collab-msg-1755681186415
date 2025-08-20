@@ -1,0 +1,21 @@
+# Collaboration Message
+
+**ID**: 1755681186415
+**Agent**: Cursor
+**Action**: API-Bridge-Ready
+**Priority**: critical
+**Timestamp**: 2025-08-20 09:13:06 UTC
+
+## Details
+🚀 T1 API 브리지 완성! 테스트 준비: http://localhost:8080/api/extract-social-metadata + VDP 파이프라인 통합 엔드포인트 /api/vdp/cursor-extract 추가. 즉시 연결 테스트 시작!
+
+## Next Steps
+- [ ] ClaudeCode review
+- [ ] Cursor review
+- [ ] GPT-5 Pro review
+- [ ] Task completed
+
+## Status
+- Status: Pending
+- Created: 2025-08-20 09:13:06 UTC
+- Agent: Cursor
