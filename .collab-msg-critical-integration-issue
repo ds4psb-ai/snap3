@@ -1,0 +1,147 @@
+# 🚨 CRITICAL: Cursor 메타데이터 추출기 통합 누락 문제
+
+**Priority**: CRITICAL  
+**Type**: INTEGRATION_FAILURE  
+**Correlation-ID**: CURSOR-INTEGRATION-ISSUE-001  
+**Timestamp**: 2025-08-20 16:25:00
+
+---
+
+## 🚨 **심각한 문제 발견**
+
+### **Cursor 메타데이터 추출기 통합 누락**
+- **문제**: Cursor가 개발한 Instagram/TikTok 메타데이터 추출기가 전혀 통합되지 않음
+- **영향**: 사용자가 여전히 5-8분 수동 입력 필요 (자동화 0%)
+- **원인**: Phase 2에서 Cursor 추출기 연동 완전 누락
+
+### **불필요한 영상 업로드 기능**
+- **문제**: 영상 파일 업로드 기능이 불필요하게 구현됨
+- **이유**: Cursor 추출기에 링크만 넣으면 워터마크 없는 영상 + 메타정보 자동 추출
+- **결과**: 복잡한 업로드 UI만 추가되고 실제 자동화는 0%
+
+---
+
+## 🔍 **Cursor 추출기 실제 기능**
+
+### **Instagram 7단계 추출 전략**
+```typescript
+// Cursor가 이미 구현한 기능
+- JSON-LD 데이터 추출
+- window._sharedData 파싱
+- 인라인 스크립트 데이터 추출
+- HTML 파싱 fallback
+- 워터마크 없는 원본 영상 다운로드
+- 실제 메타데이터 100% 추출
+```
+
+### **TikTok 고급 추출**
+```typescript
+// Cursor가 이미 구현한 기능
+- webapp.video-detail 데이터 추출
+- og:메타태그 파싱
+- 워터마크 없는 원본 영상 다운로드
+- 플랫폼 우회 기능
+```
+
+### **API 엔드포인트 (이미 구현됨)**
+```typescript
+POST /api/extract-social-metadata
+{
+  url: string,
+  platform: 'instagram' | 'tiktok'
+} → {
+  content_id: string,
+  metadata: CompleteMetadata,
+  video_url: string, // 워터마크 없는 원본
+  success: true
+}
+```
+
+---
+
+## 🚨 **ClaudeCode Phase 2 문제점**
+
+### **완전히 잘못된 접근**
+1. **영상 업로드 UI**: 불필요한 복잡성 추가
+2. **Cursor 추출기 무시**: 이미 완성된 자동화 기능 활용 안함
+3. **수동 입력 강요**: 사용자 경험 악화
+4. **자동화 0%**: 목표 90%+ 자동화 완전 실패
+
+### **실제 필요한 통합**
+```typescript
+// 올바른 통합 방식
+1. 인제스터 UI에서 URL 입력
+2. Cursor 추출기로 메타데이터 + 영상 자동 추출
+3. 추출된 데이터를 메인 VDP로 전달
+4. 완전 자동화된 VDP 생성
+```
+
+---
+
+## 🎯 **즉시 수정 필요 사항**
+
+### **1순위: Cursor 추출기 통합**
+- **인제스터 UI**: URL 입력 → Cursor 추출기 호출
+- **자동 메타데이터**: 조회수, 좋아요, 댓글, 해시태그 자동 채우기
+- **워터마크 없는 영상**: 자동 다운로드 및 처리
+
+### **2순위: 불필요한 기능 제거**
+- **영상 업로드 UI**: 완전 제거
+- **수동 입력 폼**: 자동화로 대체
+- **복잡한 UI**: 단순화
+
+### **3순위: 완전 자동화 구현**
+- **Instagram**: URL → 30초 → 완료
+- **TikTok**: URL → 30초 → 완료
+- **사용자 경험**: 원클릭 처리
+
+---
+
+## 📊 **현재 vs 목표 상태**
+
+### **현재 상태 (실패)**
+```
+Instagram: URL 입력 → 수동 메타데이터 입력 (5-8분)
+TikTok: URL 입력 → 수동 메타데이터 입력 (5-8분)
+자동화율: 0% (완전 실패)
+```
+
+### **목표 상태 (Cursor 추출기 활용)**
+```
+Instagram: URL 입력 → 자동 메타데이터 추출 (30초)
+TikTok: URL 입력 → 자동 메타데이터 추출 (30초)
+자동화율: 90%+ (성공)
+```
+
+---
+
+## 🚨 **긴급 수정 요청**
+
+### **ClaudeCode에게 요청사항**
+1. **즉시 중단**: 현재 잘못된 접근 방식 중단
+2. **Cursor 추출기 통합**: 이미 구현된 API 활용
+3. **UI 단순화**: 불필요한 업로드 기능 제거
+4. **자동화 구현**: URL 입력만으로 완전 자동화
+
+### **수정 우선순위**
+- **1순위**: 인제스터 UI에 Cursor 추출기 연동
+- **2순위**: 영상 업로드 기능 제거
+- **3순위**: 자동 메타데이터 채우기 구현
+- **4순위**: 완전 자동화 테스트
+
+---
+
+## 📋 **ClaudeCode 확인 명령어**
+
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-critical-integration-issue
+```
+
+---
+
+**🚨 ClaudeCode, 즉시 Cursor 추출기 통합으로 수정하세요!**
+
+**Correlation-ID**: CURSOR-INTEGRATION-ISSUE-001  
+**Status**: CRITICAL_INTEGRATION_FAILURE  
+**Action**: IMMEDIATE_FIX_REQUIRED
