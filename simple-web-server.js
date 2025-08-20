@@ -5,7 +5,7 @@ const { Storage } = require('@google-cloud/storage');
 const fetch = require('node-fetch');
 const multer = require('multer');
 const crypto = require('crypto');
-const LRU = require('lru-cache');
+const { LRUCache } = require('lru-cache');
 const { request } = require('undici');
 const https = require('https');
 const http = require('http');
@@ -55,9 +55,9 @@ function precompileSchemas() {
 }
 
 // LRU Cache for metadata responses (60-second TTL)
-const metadataCache = new LRU({
+const metadataCache = new LRUCache({
     max: 500,
-    maxAge: 60000 // 60 seconds
+    ttl: 60000 // 60 seconds
 });
 
 // HTTP Keep-Alive Agent Configuration (GPT-5 Optimization #1)
@@ -727,7 +727,7 @@ app.post('/api/extract-social-metadata', async (req, res) => {
         if (cachedResult) {
             structuredLog('performance', 'Cache hit for metadata extraction', {
                 cacheKey,
-                ttlRemaining: metadataCache.getRemainingTTL(cacheKey)
+                ttlRemaining: metadataCache.getRemainingTTL ? metadataCache.getRemainingTTL(cacheKey) : 'unknown'
             }, correlationId);
             
             return res.json({
