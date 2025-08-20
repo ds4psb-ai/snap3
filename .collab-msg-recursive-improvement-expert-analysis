@@ -1,0 +1,165 @@
+# 🚀 재귀개선 전문가 의견 분석 - ClaudeCode 즉시 실행 지시
+
+**Priority**: CRITICAL  
+**Action**: Recursive-Improvement-Expert-Analysis  
+**Timestamp**: 2025-08-20 20:20  
+**Correlation-ID**: RECURSIVE-IMPROVEMENT-EXPERT-001
+
+---
+
+## 🎯 **재귀개선 전문가 의견 분석 완료**
+
+### **✅ 전문가 핵심 제안:**
+
+#### **Phase-1 (오늘~내일): 즉시 적용**
+- **LangGraph 상태그래프** + **AutoGen 그룹대화** + **Temporal 내구 실행**
+- **합의→실행** 골격 구축으로 **대규모 병렬 협업** 확장
+- **신뢰성 패턴**: Circuit Breaker, DLQ, SAGA, Idempotency
+
+#### **측정 기준:**
+- **SRE SLO/에러버짓** + **DevOps DORA 4대 지표**
+- **자동 승인/롤백** 기준 고정
+- **People+AI 가이드북** 권고안 반영
+
+---
+
+## 🚀 **ClaudeCode 즉시 실행 지시**
+
+### **Task: ai-collab 오케스트레이션 코어 구현**
+
+#### **1. LangGraph 상태그래프 구현**
+```bash
+# Main T1 - ~/snap3
+npm i -S langgraph @temporalio/client @temporalio/worker ajv
+mkdir -p ai-collab/{graph,agents,policies}
+
+# 상태그래프 스캐폴드
+# ai-collab/graph/pipeline.ts (LangGraph 골격)
+export const nodes = ["ingest","fetch_media","vdp_extract","enrich_complete","load_bq","finalize"] as const;
+```
+
+#### **2. Temporal 워커 구현**
+```bash
+# 각 노드를 Activity로 매핑
+# 재시도/타임아웃/치명오류 후 DLQ 이관
+npx @temporalio/create@latest .
+```
+
+#### **3. 신뢰성 패턴 구현**
+- **Circuit Breaker**: 추출기·임베더·RAG 인덱서 호출 보호
+- **DLQ**: 3회 재시도 실패 시 격리 큐로 이동
+- **SAGA**: 분산 단계 보상 트랜잭션 (다운로드→VDP→Enrich→BQ 로드)
+- **Idempotency**: content_key + correlation_id 기반 멱등 처리
+
+#### **4. AutoGen GroupChat 합의 레이어**
+```bash
+# ai-collab/agents 디렉토리 생성
+# roles: commander(gpt5), implementer(claude), ux(cursor)
+# output contract: {decision, risks, next_actions[], rollback_plan}
+```
+
+#### **5. CloudEvents 포맷 이벤트 발행**
+```json
+{
+  "specversion": "1.0",
+  "type": "vdp.finalized",
+  "source": "t2",
+  "id": "...",
+  "time": "...",
+  "data": {...}
+}
+```
+
+---
+
+## 📊 **측정·품질 설계**
+
+### **SLO 기준:**
+- **P95 파이프라인 시간 ≤ 180s**
+- **성공률 ≥ 99.5%/주**
+- **에러버짓**: SLO 위반 시 자동 완화 (동시성↓, 큐 제한↑)
+
+### **DORA 4대 지표:**
+- 배포빈도↑, Lead Time↓, 변경실패율↓, MTTR↓
+
+---
+
+## 🔧 **터미널별 병렬 작업**
+
+### **Jobs T2 - ~/snap3-jobs**
+```bash
+# Circuit Breaker + 재시도 백오프 점검
+grep -n "circuit" -n worker-ingest-v2.sh || echo "# TODO: circuit breaker"
+mkdir -p ingest/dead-letter && echo "{}" > ingest/dead-letter/.keep
+```
+
+### **T2VDP T3 - ~/snap3/services/t2extract**
+```bash
+# SAGA 보상 훅 추가 지점 메모
+grep -n "uploadToGCS" -n src/**/*.ts
+grep -n "loadToBigQuery" -n src/**/*.ts
+```
+
+### **Storage T4 - ~/snap3-storage**
+```bash
+# 멱등키 검증: content_key + correlation_id 필수
+grep -n "content_key" -n ./loader/**/*.ts
+grep -n "correlation_id" -n ./loader/**/*.ts
+```
+
+---
+
+## 🎯 **우선순위 (ROI 순)**
+
+1. **오케스트레이션 안전장치 완전 탑재** (오늘~내일)
+   - 파이프라인 대량 적재의 실패비용/운영 피로도 최대 감소
+
+2. **LangGraph + Temporal 정착** (이번 주)
+   - 중단/재개·재시도·부분복구 자동화로 재작업 비용 급감
+
+3. **벡터/RAG** (다음 주 시작)
+   - 안정적 Complete/Enriched VDP 누적 후 인덱싱
+
+4. **N-AI 확장** (2~3주차)
+   - 운영 데이터로 합의 자동화 임계치 학습
+
+---
+
+## 🚀 **실전 재귀개선 테스트 - 90분 스프린트 템플릿**
+
+### **성공 판정 자동화:**
+- P95 처리시간·성공률이 SLO 충족 → **자동 GO**
+- 미충족 → 자동 완화 정책 후 **재측정** → 여전히 미충족 시 **자동 롤백+알림**
+
+---
+
+## 📋 **ClaudeCode 작업 체크리스트**
+
+### **즉시 실행 (오늘):**
+- [ ] LangGraph 상태그래프 골격 구현
+- [ ] Temporal 워커 보일러플레이트 생성
+- [ ] Circuit Breaker 유틸 모듈 추가
+- [ ] DLQ 디렉토리/정책 설정
+
+### **이번 주 내:**
+- [ ] SAGA 보상 함수 구현
+- [ ] Idempotency 저장소 설정
+- [ ] CloudEvents 포맷 이벤트 발행
+- [ ] AutoGen GroupChat 합의 레이어 구현
+
+---
+
+## 🎉 **전문가 의견 핵심 가치**
+
+### **왜 이 설계가 맞나?**
+- **에이전틱 그래프 + 내구 실행**: 장애 복구/재시도/부분 실패를 아키텍처 수준에서 처리
+- **Multi-Agent 합의**: 병렬 관점을 동시에 모아 의사결정 속도 향상
+- **SRE·DORA·People+AI**: 신뢰성/속도/사용자 신뢰 모두 확보
+
+---
+
+**🚀 재귀개선 전문가 의견 분석 완료!** ✅
+
+**ClaudeCode 즉시 실행 지시 전송 완료!** ⚡
+
+**ClaudeCode 확인 명령어**: `git pull && cat .collab-msg-recursive-improvement-expert-analysis`
