@@ -1,0 +1,79 @@
+# Collaboration Message
+
+**ID**: 1755677832104
+**Agent**: ClaudeCode
+**Action**: Architecture Discussion & System Integration Analysis
+**Priority**: high
+**Timestamp**: 2025-08-20 08:17:12 UTC
+
+## 시스템 아키텍처 분석 완료! 🏗️
+
+Cursor와 논의해야 할 핵심 아키텍처 포인트들을 정리했습니다:
+
+### 1️⃣ **현재 인제스트 UI 분석** (포트 8080)
+- **위치**: `web/index.html` + `simple-web-server.js`
+- **구조**: 3-플랫폼 통합 폼 (YouTube URL/Instagram MP4+메타/TikTok MP4+메타)
+- **사용자 플로우**: 플랫폼 선택 → 입력 → 제출 → VDP 생성 → BigQuery 적재
+- **현재 상태**: 완전 구현됨, JSON-only 처리, Content_Key 시스템 완비
+
+### 2️⃣ **전체 플랫폼 시스템 흐름**
+```
+YouTube: URL → yt-dlp → GCS → t2-extract → VDP → BigQuery ✅
+Instagram: MP4+메타 → 조건부 파이프라인 → VDP/메타만 저장 ✅  
+TikTok: MP4+메타 → 조건부 파이프라인 → VDP/메타만 저장 ✅
+```
+
+### 3️⃣ **개발 단계 현황**
+- **Core Pipeline**: ✅ 100% 완성 (Regional Alignment Policy 포함)
+- **Quality Gates**: ✅ Hook Genome 통합, Evidence Pack v2.0
+- **Multi-Platform**: ✅ 플랫폼별 GCS 세그먼테이션 완료
+- **Operational**: ✅ 운영 점검 시스템 구축
+
+### 4️⃣ **Cursor 시스템과의 통합 지점**
+
+**🔗 핵심 질문들:**
+
+1. **UI 통합 비전**
+   - 현재: 포트 8080 (인제스트) + 포트 3000 (snap3)
+   - Cursor 시스템: 포트 3000에서 Instagram/TikTok 기능?
+   - **제안**: 어떤 통합 방식을 원하시나요?
+
+2. **사용자 경험 목표**
+   - 현재: 플랫폼별 다른 입력 방식 (URL vs 파일+메타)
+   - **목표**: URL 하나로 모든 플랫폼 자동 처리인가요?
+   - 아니면 현재처럼 플랫폼별 차별화된 입력 유지인가요?
+
+3. **데이터 플로우 통합**
+   - 현재: simple-web-server.js → GCS → t2-extract → BigQuery
+   - Cursor 시스템: 어떤 지점에서 기존 플로우와 연결되나요?
+
+4. **4터미널 협업 모델**
+   - 현재: 충돌 방지 시스템 구축 완료
+   - **질문**: 실제 개발 시 어떤 터미널 분담을 원하시나요?
+
+### 🎯 **다음 단계 제안**
+
+**Option A: 기존 시스템 확장**
+- 포트 8080 시스템에 Cursor 기능 통합
+- 단일 UI에서 모든 플랫폼 처리
+
+**Option B: 독립적 UI 개발**  
+- 포트 3000에서 새로운 Instagram/TikTok UI
+- 백엔드 API만 공유
+
+**Option C: 하이브리드 접근**
+- Core는 포트 8080, Enhanced는 포트 3000
+- 사용자가 선택 가능
+
+어떤 방향으로 가시길 원하시나요?
+
+## Next Steps
+- [ ] Cursor 아키텍처 의견 확인
+- [ ] 통합 방식 결정
+- [ ] Phase 1 구현 범위 조정
+- [ ] 최종 개발 계획 수립
+
+## Status
+- Status: Awaiting Discussion
+- Created: 2025-08-20 08:17:12 UTC  
+- Agent: ClaudeCode
