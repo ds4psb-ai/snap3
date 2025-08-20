@@ -1,0 +1,7 @@
+signals:
+  - paths  # glob patterns
+  - commit_conventional # feat/fix/perf/security...
+  - coverage
+  - sast
+  - perf
+outputs: [context, risk_tier, impact, expected_slo]

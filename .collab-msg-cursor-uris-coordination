@@ -1,0 +1,61 @@
+# Cursor - URIS UI Coordination Dashboard
+
+## Context
+Universal Recursive Improvement System (URIS) Phase A implementation - you handle the UI coordination layer and real-time agent status visualization.
+
+## Your Mission
+Create a real-time URIS coordination dashboard that shows agent collaboration status and routing decisions.
+
+## Tasks
+1. **Create URIS Dashboard Component**
+   ```tsx
+   // src/components/universal/URISCoordinator.tsx
+   // Real-time agent status display
+   // Routing decision visualization
+   // Consensus progress tracking
+   ```
+
+2. **Agent Status Monitor**
+   ```tsx
+   // src/components/universal/AgentStatusGrid.tsx
+   // T1/T2/T3/T4 terminal status
+   // ClaudeCode/GPT-5/Cursor coordination
+   // Live collaboration metrics
+   ```
+
+3. **Routing Visualization**
+   ```tsx
+   // src/components/universal/RoutingFlowChart.tsx
+   // Context detection → routing → consensus flow
+   // Real-time decision paths
+   // Performance metrics overlay
+   ```
+
+4. **Integration Points**
+   - Extend existing UniversalSystemStatus.tsx
+   - Connect to T3 metrics endpoint
+   - Live WebSocket for real-time updates
+
+## API Integration
+- Connect to `/api/uris/status` endpoint
+- Real-time metrics from T3 terminal
+- Agent Router decision logs
+
+## Expected Deliverables
+- URIS coordination dashboard
+- Real-time agent monitoring
+- Routing decision visualization
+- Performance metrics display
+
+## Timeline: T+0~30분
+완료 시 인제스터 UI에 URIS 대시보드 통합 완료
+
+## Command to Check This Message
+```bash
+cd /Users/ted/snap3 && cat .collab-msg-cursor-uris-coordination
+```
+
+## Notes
+- Focus on real-time collaboration visualization
+- Integrate with existing system status components
+- Prepare for Phase B testing integration

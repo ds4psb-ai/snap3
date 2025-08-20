@@ -1,0 +1,10 @@
+consensus:
+  proceed: 0.80
+  modify_low: 0.60
+  modify_high: 0.80
+  reject: 0.60
+risk_overrides:
+  high_impact_proceed: 0.85
+adaptation:
+  # 학습 루프가 가중치를 조정할 수 있는 범위
+  weight_bounds: {min: 0.1, max: 0.8}

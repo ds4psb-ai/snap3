@@ -1,0 +1,17 @@
+{
+  "context": "backend",
+  "files": [
+    ".collab-msg-cursor-expert-uris-analysis",
+    ".recursive-hybrid.log",
+    "CURSOR_CONTEXT.md",
+    "HEAD_SUMMARY.md",
+    "services/t2-extract/circuit-breaker-metrics.csv",
+    "services/t2-extract/circuit-breaker-metrics.json",
+    "services/t2-extract/metrics-monitor.log",
+    "services/t2-extract/p95-monitor.log",
+    "services/t2-extract/p95-results.json",
+    "services/t2-extract/response-times.log",
+    "services/t2-extract/t3-circuit-breaker-live.json",
+    ""
+  ]
+}

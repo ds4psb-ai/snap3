@@ -1,0 +1,295 @@
+# URIS Dashboard Configuration
+# Real-time monitoring dashboard for Universal Recursive Improvement System
+# Integrated with T3 Circuit Breaker infrastructure
+
+version: "1.0"
+last_updated: "2025-08-20T13:27:40Z"
+
+# Dashboard Layout Configuration
+dashboard:
+  title: "URIS Agent Router - Performance Dashboard"
+  subtitle: "Universal Recursive Improvement System Monitoring"
+  refresh_interval_seconds: 30
+  theme: "dark"
+  timezone: "UTC"
+  
+  # Data Sources Integration
+  data_sources:
+    t3_circuit_breaker:
+      type: "json_file"
+      path: "../../../services/t2-extract/t3-circuit-breaker-live.json"
+      refresh_interval_seconds: 5
+      description: "T3 Circuit Breaker real-time metrics"
+      
+    p95_performance:
+      type: "json_file" 
+      path: "../../../services/t2-extract/p95-results.json"
+      refresh_interval_seconds: 15
+      description: "P95 response time measurements"
+      
+    uris_metrics:
+      type: "json_file"
+      path: "./uris-metrics-live.json"
+      refresh_interval_seconds: 30
+      description: "URIS-specific agent router metrics"
+      
+    slo_dashboard:
+      type: "json_file"
+      path: "./uris-slo-dashboard.json"
+      refresh_interval_seconds: 30
+      description: "SLO compliance and alerts"
+
+# Dashboard Panels Layout (4x3 grid)
+panels:
+  # Row 1: Core Performance Metrics
+  - id: "routing_performance_overview"
+    title: "URIS Routing Performance"
+    type: "stat_panel"
+    position: {x: 0, y: 0, w: 4, h: 2}
+    data_source: "p95_performance"
+    metrics:
+      - name: "P95 Latency"
+        field: "metrics.p95_response_time_ms"
+        unit: "ms"
+        color_thresholds:
+          green: {min: 0, max: 40}
+          yellow: {min: 40, max: 50}
+          red: {min: 50, max: 1000}
+        target: 50
+        
+      - name: "P50 Latency" 
+        field: "metrics.p50_response_time_ms"
+        unit: "ms"
+        color_thresholds:
+          green: {min: 0, max: 25}
+          yellow: {min: 25, max: 35}
+          red: {min: 35, max: 1000}
+          
+      - name: "Avg Latency"
+        field: "metrics.avg_response_time_ms"
+        unit: "ms"
+        color_thresholds:
+          green: {min: 0, max: 30}
+          yellow: {min: 30, max: 40}
+          red: {min: 40, max: 1000}
+
+  # Row 1: SLO Compliance Status  
+  - id: "slo_compliance_status"
+    title: "SLO Compliance Dashboard"
+    type: "slo_panel"
+    position: {x: 4, y: 0, w: 4, h: 2}
+    data_source: "slo_dashboard"
+    slo_indicators:
+      - name: "Routing Latency"
+        field: "slo_status.slo_checks.routing_latency.status"
+        target_field: "slo_status.slo_checks.routing_latency.target_value"
+        current_field: "slo_status.slo_checks.routing_latency.current_value"
+        
+      - name: "Context Accuracy"
+        field: "slo_status.slo_checks.context_detection.status"
+        target_field: "slo_status.slo_checks.context_detection.target_value"
+        current_field: "slo_status.slo_checks.context_detection.current_value"
+        unit: "%"
+        
+      - name: "Consensus Rate"
+        field: "slo_status.slo_checks.consensus_success.status" 
+        target_field: "slo_status.slo_checks.consensus_success.target_value"
+        current_field: "slo_status.slo_checks.consensus_success.current_value"
+        unit: "%"
+
+  # Row 2: Circuit Breaker Integration
+  - id: "t3_circuit_breaker_status"
+    title: "T3 Circuit Breaker Integration"
+    type: "circuit_breaker_panel"
+    position: {x: 0, y: 2, w: 6, h: 3}
+    data_source: "t3_circuit_breaker"
+    breakers:
+      - name: "T1-API"
+        state_field: "t1_api_breaker.state"
+        success_rate_field: "t1_api_breaker.successRate"
+        avg_response_field: "t1_api_breaker.avgResponseTime"
+        p95_response_field: "t1_api_breaker.p95ResponseTime"
+        uptime_field: "t1_api_breaker.uptime"
+        total_requests_field: "t1_api_breaker.totalRequests"
+        
+      - name: "VERTEX-API"
+        state_field: "vertex_api_breaker.state"
+        success_rate_field: "vertex_api_breaker.successRate" 
+        avg_response_field: "vertex_api_breaker.avgResponseTime"
+        p95_response_field: "vertex_api_breaker.p95ResponseTime"
+        uptime_field: "vertex_api_breaker.uptime"
+        total_requests_field: "vertex_api_breaker.totalRequests"
+
+  # Row 2: Active Alerts Panel
+  - id: "active_alerts"
+    title: "Active URIS Alerts"
+    type: "alerts_panel"
+    position: {x: 6, y: 2, w: 2, h: 3}
+    data_source: "slo_dashboard"
+    alerts_field: "active_alerts"
+    max_alerts_displayed: 10
+    alert_levels:
+      CRITICAL: {color: "#FF0000", icon: "🚨"}
+      WARNING: {color: "#FFA500", icon: "⚠️"}
+      INFO: {color: "#0080FF", icon: "ℹ️"}
+
+  # Row 3: Performance Trend Analysis
+  - id: "performance_trends"
+    title: "URIS Performance Trends (15min)"
+    type: "time_series_panel"
+    position: {x: 0, y: 5, w: 8, h: 3}
+    data_source: "multiple"
+    time_range: "15m"
+    series:
+      - name: "P95 Latency"
+        data_source: "p95_performance"
+        field: "metrics.p95_response_time_ms"
+        color: "#00FF00"
+        unit: "ms"
+        
+      - name: "T1 Response Time"
+        data_source: "t3_circuit_breaker"
+        field: "t1_api_breaker.avgResponseTime"
+        color: "#0080FF" 
+        unit: "ms"
+        transform: "remove_ms_suffix"
+        
+      - name: "Vertex Response Time"
+        data_source: "t3_circuit_breaker"
+        field: "vertex_api_breaker.avgResponseTime"
+        color: "#FF8000"
+        unit: "ms"
+        transform: "remove_ms_suffix"
+
+# Alert Visualization Configuration
+alerts:
+  notification_banner:
+    enabled: true
+    position: "top"
+    max_height: "100px"
+    auto_hide_seconds: 10
+    
+  alert_history:
+    enabled: true
+    max_history: 50
+    retention_hours: 24
+    
+  sound_notifications:
+    enabled: false
+    critical_sound: "alarm.wav"
+    warning_sound: "notification.wav"
+
+# Dashboard Actions & Controls
+controls:
+  time_range_selector:
+    enabled: true
+    options: ["5m", "15m", "1h", "6h", "24h"]
+    default: "15m"
+    
+  auto_refresh_toggle:
+    enabled: true
+    default: true
+    
+  export_options:
+    pdf_export: true
+    json_export: true
+    csv_metrics_export: true
+    
+  theme_toggle:
+    enabled: true
+    options: ["light", "dark", "auto"]
+    default: "dark"
+
+# Performance Optimization
+performance:
+  lazy_loading: true
+  data_caching_seconds: 30
+  max_concurrent_requests: 5
+  request_timeout_seconds: 10
+  
+  client_side_filtering: true
+  real_time_updates: true
+  websocket_connection: false  # File-based for now
+
+# Integration Settings
+integrations:
+  t3_circuit_breaker:
+    status_mapping:
+      CLOSED: {color: "#00FF00", label: "Healthy"}
+      OPEN: {color: "#FF0000", label: "Failed"}
+      HALF_OPEN: {color: "#FFA500", label: "Recovering"}
+      UNKNOWN: {color: "#808080", label: "Unknown"}
+      
+  slo_status_mapping:
+    PASS: {color: "#00FF00", icon: "✅"}
+    WARN: {color: "#FFA500", icon: "⚠️"}  
+    FAIL: {color: "#FF0000", icon: "❌"}
+    UNKNOWN: {color: "#808080", icon: "❓"}
+
+# Custom CSS & Styling
+styling:
+  custom_css: |
+    .uris-dashboard {
+      font-family: 'Monaco', 'Menlo', monospace;
+    }
+    .slo-indicator.pass {
+      background: linear-gradient(135deg, #00ff00, #00cc00);
+    }
+    .slo-indicator.warn {
+      background: linear-gradient(135deg, #ffa500, #ff8c00);
+    }
+    .slo-indicator.fail {
+      background: linear-gradient(135deg, #ff0000, #cc0000);
+    }
+    .circuit-breaker.closed {
+      border-left: 4px solid #00ff00;
+    }
+    .circuit-breaker.open {
+      border-left: 4px solid #ff0000;
+      animation: pulse 2s infinite;
+    }
+    
+  color_palette:
+    primary: "#0080FF"
+    secondary: "#FFA500"
+    success: "#00FF00"
+    warning: "#FFA500"
+    error: "#FF0000"
+    info: "#0080FF"
+    background_dark: "#1a1a1a"
+    text_light: "#ffffff"
+
+# Accessibility Settings
+accessibility:
+  high_contrast_mode: false
+  screen_reader_support: true
+  keyboard_navigation: true
+  reduced_motion: false
+  font_size_scaling: 1.0
+
+# Development & Debug Settings  
+development:
+  debug_mode: false
+  mock_data_enabled: false
+  performance_profiling: false
+  console_logging: true
+  
+# Footer Information
+footer:
+  show_footer: true
+  content: "URIS Agent Router Dashboard | T3 Integration Active | Last Updated: {timestamp}"
+  links:
+    - text: "SLO Documentation"
+      url: "./slo-targets.yaml"
+    - text: "T3 Circuit Breaker"
+      url: "../../../services/t2-extract/"
+    - text: "Performance Reports"
+      url: "./reports/"
+
+# Version & Metadata
+metadata:
+  version: "1.0"
+  created_date: "2025-08-20"
+  author: "T3-URIS-Integration"
+  description: "Real-time dashboard for URIS Agent Router performance monitoring with T3 Circuit Breaker integration"
+  tags: ["uris", "monitoring", "slo", "circuit-breaker", "performance"]

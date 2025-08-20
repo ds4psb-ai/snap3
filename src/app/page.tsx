@@ -1,11 +1,13 @@
 'use client';
-
 import SummaryDock from '@/components/SummaryDock';
 import PerformanceDashboard from '@/components/PerformanceDashboard';
 import PlatformWizard from '@/components/platform/PlatformWizard';
 import SchemaValidator from '@/components/SchemaValidator';
 import LogStream from '@/components/LogStream';
 import UniversalSystemStatus from '@/components/universal/UniversalSystemStatus';
+import URISCoordinator from '@/components/universal/URISCoordinator';
+import AgentStatusGrid from '@/components/universal/AgentStatusGrid';
+import RoutingFlowChart from '@/components/universal/RoutingFlowChart';
 
 export default function HomePage() {
   const handleMetadataExtracted = (metadata: any) => {
@@ -27,6 +29,25 @@ export default function HomePage() {
         
         <div className="mb-8">
           <UniversalSystemStatus />
+        </div>
+
+        {/* URIS Dashboard 섹션 */}
+        <div className="mb-8">
+          <div className="flex items-center space-x-2 mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">URIS Coordination</h2>
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
+              Phase A
+            </span>
+          </div>
+          <URISCoordinator />
+        </div>
+
+        <div className="mb-8">
+          <AgentStatusGrid />
+        </div>
+
+        <div className="mb-8">
+          <RoutingFlowChart />
         </div>
         
         <div className="mb-8">

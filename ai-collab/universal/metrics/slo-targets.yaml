@@ -1,0 +1,202 @@
+# URIS SLO Targets Configuration
+# Universal Recursive Improvement System - Service Level Objectives
+# Integration with T3 Circuit Breaker monitoring infrastructure
+
+version: "1.0"
+last_updated: "2025-08-20T13:27:00Z"
+
+# Core SLO Targets (as specified in requirements)
+slo_targets:
+  routing_performance:
+    p95_latency_ms:
+      target: 50
+      warning_threshold: 45    # 90% of target
+      critical_threshold: 40   # 80% of target
+      description: "URIS Agent Router P95 response time must be under 50ms"
+      measurement_window: "15m"
+      
+    p99_latency_ms:
+      target: 100
+      warning_threshold: 90
+      critical_threshold: 80
+      description: "URIS Agent Router P99 response time for outlier detection"
+      measurement_window: "15m"
+
+  context_detection:
+    accuracy_percentage:
+      target: 90.0
+      warning_threshold: 85.0
+      critical_threshold: 80.0
+      description: "Context detection accuracy for intelligent routing"
+      measurement_window: "1h"
+      
+    context_diversity:
+      min_contexts_per_hour: 5
+      description: "Minimum number of different contexts processed per hour"
+      measurement_window: "1h"
+
+  consensus_coordination:
+    success_rate_percentage:
+      target: 95.0
+      warning_threshold: 90.0
+      critical_threshold: 85.0
+      description: "Agent consensus achievement rate"
+      measurement_window: "1h"
+      
+    coordination_latency_ms:
+      target: 200
+      warning_threshold: 180
+      critical_threshold: 150
+      description: "Time to achieve consensus between agents"
+      measurement_window: "15m"
+
+# Integration with T3 Circuit Breaker System
+t3_integration:
+  circuit_breaker_uptime:
+    target_percentage: 99.0
+    warning_threshold: 95.0
+    critical_threshold: 90.0
+    description: "Circuit breaker system availability"
+    measurement_window: "24h"
+    
+  t1_api_performance:
+    inherit_from_existing: true
+    p95_target_ms: 10
+    success_rate_target: 100.0
+    description: "T1 API performance alignment with URIS requirements"
+    
+  vertex_api_resilience:
+    acceptable_failure_rate: 35.0  # Based on observed 65% success rate
+    recovery_time_target_s: 120
+    description: "Vertex API resilience and recovery patterns"
+
+# Alert Configuration
+alerting:
+  notification_channels:
+    console:
+      enabled: true
+      levels: ["CRITICAL", "WARNING", "INFO"]
+      
+    dashboard:
+      enabled: true
+      file_path: "./uris-slo-dashboard.json"
+      update_interval_s: 30
+      
+    # Future integrations
+    slack:
+      enabled: false
+      webhook_url: ""
+      channels: ["#uris-alerts", "#sre-alerts"]
+      
+    pagerduty:
+      enabled: false
+      service_key: ""
+      escalation_policy: "URIS-SLO-Violations"
+
+  alert_rules:
+    routing_latency_spike:
+      condition: "p95_latency_ms > slo_targets.routing_performance.p95_latency_ms.critical_threshold"
+      severity: "CRITICAL"
+      description: "URIS routing latency exceeded critical threshold"
+      cooldown_minutes: 5
+      
+    context_accuracy_degradation:
+      condition: "accuracy_percentage < slo_targets.context_detection.accuracy_percentage.warning_threshold"
+      severity: "WARNING"
+      description: "Context detection accuracy below acceptable levels"
+      cooldown_minutes: 15
+      
+    consensus_failure_pattern:
+      condition: "success_rate_percentage < slo_targets.consensus_coordination.success_rate_percentage.critical_threshold"
+      severity: "CRITICAL"
+      description: "Agent consensus failures indicate system instability"
+      cooldown_minutes: 10
+      
+    circuit_breaker_instability:
+      condition: "state != 'CLOSED' AND duration_minutes > 5"
+      severity: "WARNING"
+      description: "Circuit breaker not in stable CLOSED state"
+      cooldown_minutes: 5
+
+# Monitoring Windows & Data Retention
+monitoring:
+  check_intervals:
+    real_time_s: 30
+    trend_analysis_m: 15
+    slo_evaluation_h: 1
+    
+  data_retention:
+    metrics_days: 30
+    alerts_days: 90
+    reports_days: 365
+    
+  performance_budgets:
+    error_budget_percentage: 1.0  # 99% availability allows 1% error budget
+    burn_rate_thresholds:
+      fast: 0.1    # 10x normal burn rate
+      medium: 0.05 # 5x normal burn rate
+      slow: 0.02   # 2x normal burn rate
+
+# Reporting Configuration
+reporting:
+  slo_reports:
+    daily_summary:
+      enabled: true
+      time: "09:00"
+      timezone: "UTC"
+      
+    weekly_analysis:
+      enabled: true
+      day: "monday"
+      time: "08:00"
+      timezone: "UTC"
+      include_trends: true
+      
+    monthly_review:
+      enabled: true
+      day: 1
+      time: "10:00"
+      timezone: "UTC"
+      include_capacity_planning: true
+
+# Experimental Features
+experimental:
+  predictive_alerting:
+    enabled: false
+    ml_model: "trend_analysis"
+    prediction_window_minutes: 30
+    
+  adaptive_thresholds:
+    enabled: false
+    learning_period_days: 7
+    adjustment_factor: 0.1
+    
+  cross_system_correlation:
+    enabled: true
+    correlation_systems: ["t3-circuit-breaker", "p95-monitor"]
+    correlation_window_minutes: 5
+
+# Environment-Specific Overrides
+environments:
+  development:
+    slo_targets:
+      routing_performance:
+        p95_latency_ms:
+          target: 100  # Relaxed for dev environment
+          
+  staging:
+    slo_targets:
+      routing_performance:
+        p95_latency_ms:
+          target: 75   # Moderate for staging
+          
+  production:
+    # Use default values (50ms P95, 90% accuracy, 95% consensus)
+    slo_targets: {}
+
+# Version History
+version_history:
+  - version: "1.0"
+    date: "2025-08-20"
+    changes: "Initial URIS SLO configuration with T3 integration"
+    author: "T3-URIS-Implementation"

@@ -1,0 +1,127 @@
+# GPT-5 전문가 컨설팅 요청: 경량 디버깅 예방 및 재귀개선 시스템
+
+## 🎯 컨설팅 요청 배경
+
+**문제 상황**: 현재 VDP 파이프라인에서 Vertex API Circuit Breaker가 OPEN 상태 (65.47% 성공률)가 되는 등 디버깅 이슈가 발생하고 있습니다.
+
+**현재 시스템 상태**:
+```
+T1-API: CLOSED (100% 성공률, 4.84ms 응답시간) ✅
+Vertex-API: OPEN (65.47% 성공률, 496ms 응답시간) ❌
+System Uptime: 6736초 (약 1.8시간)
+```
+
+**Cursor의 중요한 지적**: "너무 무거워지고 복잡해지는 것을 예방하는 아주 가벼운 고도화"가 필요
+
+## 🚨 핵심 질문
+
+1. **디버깅 예방**: 어떻게 버그가 생기기 전에 미리 감지하고 예방할 수 있을까?
+2. **신속 디버깅**: 문제 발생 시 어떻게 5분 내로 근본 원인을 찾고 해결할 수 있을까?
+3. **경량화**: 어떻게 시스템 복잡도를 증가시키지 않으면서 디버깅 능력을 향상시킬 수 있을까?
+
+## 🔍 현재 문제 패턴 분석
+
+### 관찰된 문제점들:
+- **Vertex API 불안정**: 496ms 응답시간, 65% 성공률
+- **Circuit Breaker 패턴**: 실패 임계값 도달 시 OPEN 상태
+- **성능 변동성**: Response times.log에서 20-338ms 범위의 큰 변동
+- **메모리 사용량**: 44MB RSS, 안정적이지만 최적화 여지 있음
+
+### 예상되는 근본 원인들:
+1. **Network Latency**: us-central1 region 간 통신 지연
+2. **Quota Limits**: Vertex AI API 할당량 제한
+3. **Connection Pooling**: Keep-Alive 최적화 부족
+4. **Error Cascading**: 실패가 연쇄적으로 전파
+
+## 💡 제안하는 경량 재귀개선 방향
+
+### 1. **Lightweight Predictive Monitoring** (10줄 이하)
+```javascript
+// 단순한 패턴 감지로 문제 예측
+const healthScore = (successRate * 0.6) + (responseTime < 100 ? 0.4 : 0);
+if (healthScore < 0.7) triggerPreventiveAction();
+```
+
+### 2. **5-Minute Debug Trail** (파일 3개 이하)
+```yaml
+debug_trail:
+  - timestamp: "13:25:55"
+  - event: "vertex_api_failure_count_6"
+  - context: "circuit_breaker_open"
+  - action: "investigate_quota_limit"
+```
+
+### 3. **Self-Healing Patterns** (설정 기반)
+```yaml
+auto_recovery:
+  vertex_timeout: {action: "retry_with_backoff", max_attempts: 3}
+  quota_exceeded: {action: "switch_to_fallback_region", duration: "5min"}
+```
+
+## 🎯 구체적 컨설팅 요청
+
+### 질문 1: 경량 예방 시스템
+**Q**: 현재 Circuit Breaker가 사후 대응인데, 어떻게 **5줄 이하 코드**로 문제를 미리 감지할 수 있을까요?
+
+**현재 상태**: 실패 6회 후 Circuit Breaker OPEN
+**목표**: 실패 3회에서 예방적 조치 시작
+
+### 질문 2: 신속 근본원인 분석
+**Q**: Vertex API 65% 성공률의 근본 원인을 **5분 내**에 찾는 방법은?
+
+**현재 도구들**:
+- response-times.log (성능 데이터)
+- circuit-breaker metrics (상태 데이터)
+- GCP 로그 (인프라 데이터)
+
+### 질문 3: 재귀개선 통합
+**Q**: 현재 URIS 시스템에 디버깅 기능을 어떻게 **비침습적으로** 통합할 수 있을까요?
+
+**제약 조건**:
+- 기존 Agent Router 코드 < 20줄 추가
+- 새 파일 < 3개
+- 설정 기반 활성화/비활성화
+
+## 🚀 기대하는 전문가 답변 형태
+
+### 1. **Lightweight Debug Prevention Blueprint**
+- 3-5줄 코드 패턴
+- 설정 파일 기반 임계값
+- 자동 예방 조치 시나리오
+
+### 2. **5-Minute RCA Framework**
+- 단계별 체크리스트 (1-2-3 순서)
+- 자동화 가능한 진단 스크립트
+- 빠른 해결책 템플릿
+
+### 3. **URIS Integration Strategy**
+- 기존 시스템과의 최소 충돌 방식
+- 플러그인 형태 디버깅 모듈
+- 점진적 활성화 방법
+
+## 📊 현재 시스템 컨텍스트
+
+**VDP Pipeline Architecture**:
+- T1 (Main): Ingest UI + API Gateway
+- T2 (Jobs): Worker 성능 최적화  
+- T3 (VDP): Extract + 메트릭 수집
+- T4 (Storage): 스키마 + 헬스체크
+- Cursor: Frontend UI + 사용자 경험
+
+**성능 목표**:
+- P95 < 50ms (현재: 37ms ✅)
+- 성공률 > 95% (Vertex: 65% ❌)
+- 시스템 안정성 > 99% (현재: 양호)
+
+**재귀개선 철학**: "문제를 해결하는 과정이 문제 해결 능력을 향상시킨다"
+
+## ⚡ 긴급성
+
+Vertex API 문제로 인해 VDP 생성 파이프라인이 불안정한 상태입니다. 빠르고 가벼운 해결책이 필요합니다.
+
+---
+
+**Correlation ID**: DEBUG-ENHANCEMENT-2025-08-20-1326  
+**우선순위**: HIGH  
+**예상 컨설팅 시간**: 10-15분  
+**구현 목표**: 30분 내 경량 디버깅 시스템 통합

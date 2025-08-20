@@ -122,6 +122,79 @@ class UniversalAgentRouter {
     
     // 정규화
     const total = Object.values(weights).reduce((sum, w) => sum + w, 0);
+    if (total > 0) {
+      for (const agent of Object.keys(weights)) {
+        weights[agent] /= total;
+      }
+    }
+    
+    return weights;
+  }
+
+  private calculateConsensusScore(weights: Record<string, number>, sloData: any): number {
+    let score = 0.7; // 기본 점수
+    
+    // SLO 상태 반영
+    if (sloData.t1_api_breaker?.state === 'CLOSED') score += 0.1;
+    if (sloData.vertex_api_breaker?.state === 'CLOSED') score += 0.05;
+    
+    // 시스템 건강도 반영
+    if (sloData.system_uptime > 3600) score += 0.05; // 1시간 이상 안정 운영
+    
+    // 가중치 집중도 반영 (분산이 낮을수록 합의 강함)
+    const entropy = -Object.values(weights).reduce((sum, w) => w > 0 ? sum + w * Math.log(w) : sum, 0);
+    const maxEntropy = Math.log(Object.keys(weights).length);
+    score += (1 - entropy / maxEntropy) * 0.1;
+    
+    return Math.min(score, 1.0);
+  }
+
+  private generateRecommendations(context: string, score: number, sloData: any): string[] {
+    const recommendations: string[] = [];
+    
+    if (score < 0.8) {
+      recommendations.push('합의 점수가 낮습니다. 에이전트 협업 검토 필요');
+    }
+    
+    if (sloData.t1_api_breaker?.state !== 'CLOSED') {
+      recommendations.push('T1 API Circuit Breaker 상태 확인 필요');
+    }
+    
+    if (sloData.vertex_api_breaker?.state !== 'CLOSED') {
+      recommendations.push('Vertex API 안정성 문제. 대체 처리 고려');
+    }
+    
+    if (context === 'frontend') {
+      recommendations.push('Frontend 컨텍스트: Cursor 주도 개발 권장');
+    } else if (context === 'backend') {
+      recommendations.push('Backend 컨텍스트: ClaudeCode 주도 개발 권장');
+    } else if (context === 'performance') {
+      recommendations.push('Performance 컨텍스트: T2/T3 터미널 협업 권장');
+    }
+    
+    return recommendations;
+  }
+
+  private async checkSLOStatus(): Promise<any> {
+    try {
+      const response = await fetch('http://localhost:8080/api/circuit-breaker/status');
+      return await response.json();
+    } catch {
+      return { state: { state: 'UNKNOWN' }, performance_metrics: {} };
+    }
+  }
+
+  private calculateDynamicWeights(baseWeights: Record<string, number>, context: string): Record<string, number> {
+    const weights = { ...baseWeights };
+    
+    // 최근 성과 기반 조정
+    for (const agent of Object.keys(weights)) {
+      const successRate = this.recentSuccess[`${agent}_${context}`] || 1.0;
+      weights[agent] *= successRate;
+    }
+    
+    // 정규화
+    const total = Object.values(weights).reduce((sum, w) => sum + w, 0);
     for (const agent of Object.keys(weights)) {
       weights[agent] /= total;
     }

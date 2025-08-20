@@ -1,0 +1,4 @@
+reliability: {circuit_breaker: true, backoff: jitter, dlq: true, saga: true}
+observability: {opentelemetry: true, tracecontext: true}
+slos: {enforce: true, policy: error_budget}
+dora: {collect: true}

@@ -1,0 +1,60 @@
+# T2 Terminal - URIS DLQ Implementation
+
+## Context
+Universal Recursive Improvement System (URIS) Phase A implementation - your component focuses on Dead Letter Queue and failure handling for the Agent Router system.
+
+## Your Mission
+Implement DLQ system for failed routing decisions and consensus failures.
+
+## Tasks
+1. **Create DLQ Infrastructure**
+   ```bash
+   mkdir -p ai-collab/universal/dlq/{failed-routes,poison-queue,recovery}
+   ```
+
+2. **Implement DLQ Handler**
+   ```typescript
+   // ai-collab/universal/dlq/dlq-handler.ts
+   export class DLQHandler {
+     async handleFailedRoute(decision: FailedDecision) {
+       // Store failed routing decisions
+       // Implement exponential backoff
+       // Track failure patterns
+     }
+     
+     async handlePoisonMessage(message: PoisonMessage) {
+       // Quarantine problematic requests
+       // Alert on poison queue growth
+     }
+   }
+   ```
+
+3. **Create Recovery Scripts**
+   ```bash
+   # scripts/dlq-recovery.ts
+   # Monitor failed routes and attempt recovery
+   # Generate failure pattern reports
+   ```
+
+4. **Test DLQ System**
+   - Create test failures
+   - Verify quarantine logic
+   - Test recovery mechanisms
+
+## Configuration Files to Create
+- `ai-collab/universal/dlq/config.yaml` (failure thresholds, retry policies)
+- `ai-collab/universal/dlq/recovery-rules.yaml` (auto-recovery conditions)
+
+## Expected Deliverables
+- DLQ handler implementation
+- Recovery automation scripts
+- Test suite for failure scenarios
+- Configuration files
+
+## Timeline: T+0~20분
+완료 시 `.collab-msg-t2-complete` 파일로 결과 보고
+
+## Notes
+- Focus on resilience and automated recovery
+- Integrate with existing circuit breaker patterns
+- Use established correlation ID system

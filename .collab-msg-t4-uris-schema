@@ -1,0 +1,68 @@
+# T4 Terminal - URIS Schema & Health Gates
+
+## Context
+Universal Recursive Improvement System (URIS) Phase A implementation - your component focuses on schema validation and health gates for Agent Router system.
+
+## Your Mission
+Implement comprehensive schema validation and health check system for URIS.
+
+## Tasks
+1. **Create URIS Schema Validation**
+   ```bash
+   mkdir -p ai-collab/universal/schemas
+   ```
+
+2. **Implement Schema Validator**
+   ```typescript
+   // ai-collab/universal/schemas/uris-validator.ts
+   export class URISSchemaValidator {
+     async validateDecisionRequest(request: DecisionRequest): Promise<ValidationResult> {
+       // Validate routing requests
+       // Check context format
+       // Verify correlation IDs
+     }
+     
+     async validateConsensusResponse(response: ConsensusResponse): Promise<ValidationResult> {
+       // Validate agent responses
+       // Check score ranges
+       // Verify response format
+     }
+   }
+   ```
+
+3. **Health Gate System**
+   ```typescript
+   // ai-collab/universal/health/gates.ts
+   export class URISHealthGates {
+     async checkAgentHealth(): Promise<HealthStatus> {
+       // Monitor agent availability
+       // Check response times
+       // Validate consensus accuracy
+     }
+   }
+   ```
+
+4. **Schema Definitions**
+   ```json
+   // ai-collab/universal/schemas/decision-request.schema.json
+   // ai-collab/universal/schemas/consensus-response.schema.json
+   // ai-collab/universal/schemas/health-status.schema.json
+   ```
+
+## Configuration Files to Create
+- `ai-collab/universal/schemas/validation-rules.yaml`
+- `ai-collab/universal/health/gate-thresholds.yaml`
+
+## Expected Deliverables
+- Complete schema validation system
+- Health gate monitoring
+- Validation rule configuration
+- Schema definition files
+
+## Timeline: T+0~20분
+완료 시 `.collab-msg-t4-complete` 파일로 결과 보고
+
+## Notes
+- Integrate with existing VDP schema patterns
+- Use AJV for JSON validation consistency
+- Focus on early failure detection

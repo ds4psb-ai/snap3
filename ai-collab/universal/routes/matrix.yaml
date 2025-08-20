@@ -1,0 +1,5 @@
+frontend:  {cursor: 0.6, claudecode: 0.3, gpt5: 0.1}
+backend:   {claudecode: 0.5, terminals: 0.4, gpt5: 0.1}
+devops:    {gpt5: 0.4, claudecode: 0.4, terminals: 0.2}
+security:  {gpt5: 0.5, claudecode: 0.4, cursor: 0.1}
+performance: {t2_t3: 0.6, claudecode: 0.3, gpt5: 0.1}

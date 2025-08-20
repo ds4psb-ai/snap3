@@ -1,0 +1,68 @@
+# T3 Terminal - URIS Metrics & Monitoring
+
+## Context
+Universal Recursive Improvement System (URIS) Phase A implementation - your component focuses on metrics collection and P95 monitoring for Agent Router performance.
+
+## Your Mission
+Implement comprehensive metrics system for URIS Agent Router with SLO monitoring.
+
+## Tasks
+1. **Extend Current Metrics System**
+   - Enhance existing `t3-circuit-breaker-live.json` system
+   - Add URIS-specific metrics collection
+   - Integrate with P95 monitoring (current: 33ms P95, target: <50ms)
+
+2. **Create URIS Metrics Collector**
+   ```typescript
+   // ai-collab/universal/metrics/uris-collector.ts
+   export class URISMetricsCollector {
+     async recordRoutingDecision(context: string, decision: DecisionResult, duration: number) {
+       // Track routing performance by context
+       // Monitor consensus accuracy
+       // SLO compliance tracking
+     }
+     
+     async generateMetricsReport() {
+       // Generate P95/P99 routing latency
+       // Context detection accuracy
+       // Agent coordination success rate
+     }
+   }
+   ```
+
+3. **SLO Monitoring Integration**
+   ```bash
+   # scripts/uris-slo-monitor.ts
+   # Monitor URIS SLO targets:
+   # - Routing latency P95 < 50ms
+   # - Context detection accuracy > 90%
+   # - Consensus success rate > 95%
+   ```
+
+4. **Real-time Dashboard Data**
+   - Extend current circuit breaker monitoring
+   - Add URIS routing metrics
+   - Performance trend analysis
+
+## Configuration Files to Create
+- `ai-collab/universal/metrics/slo-targets.yaml`
+- `ai-collab/universal/metrics/dashboard-config.yaml`
+
+## Integration Points
+- Current T3 circuit breaker system (P95: 33ms ✅)
+- Response times log (2900+ samples)
+- Existing health monitoring
+
+## Expected Deliverables
+- URIS metrics collector
+- SLO monitoring scripts
+- Dashboard integration
+- Performance reports
+
+## Timeline: T+0~20분
+완료 시 `.collab-msg-t3-complete` 파일로 결과 보고
+
+## Notes
+- Leverage existing T3 monitoring infrastructure
+- Maintain current performance baselines
+- Focus on actionable SLO alerts
