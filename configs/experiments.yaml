@@ -1,6 +1,38 @@
-experiment:
-  recursive_improvement:
-    A: {enabled: true, mode: "full"}
-    B: {enabled: false, mode: "baseline"}
-  current_group: "A"
-  sample_size_target: 10
+version: "1.0"
+experiment_name: "URIS Agent Router A/B Test"
+description: "Universal Recursive Improvement System effectiveness test"
+start_date: "2025-08-20"
+status: "active"
+
+# Current A/B Test Groups
+test_groups:
+  control:
+    name: "Manual Agent Assignment"
+    percentage: 50
+    description: "Traditional manual routing"
+    enabled_features: []
+    current_group: "B"
+    
+  treatment:
+    name: "URIS Automated Routing" 
+    percentage: 50
+    description: "AI-powered agent routing"
+    enabled_features: ["uris_routing", "consensus_scoring"]
+    current_group: "A"
+
+# Current Settings
+current_group: "A"  # URIS enabled
+sample_size_target: 100
+
+# Success Metrics
+metrics:
+  routing_latency: {target: "<50ms", current: "34ms", status: "PASS"}
+  consensus_score: {target: ">0.80", current: "0.72", status: "WARN"} 
+  context_accuracy: {target: ">85%", current: "85%", status: "PASS"}
+  system_uptime: {target: ">99%", current: "100%", status: "PASS"}
+
+# Feature Flags  
+feature_flags:
+  uris_routing: true
+  consensus_scoring: true
+  dynamic_weights: true

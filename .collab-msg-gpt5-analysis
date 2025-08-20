@@ -1,0 +1,108 @@
+# GPT-5 Pro 재귀개선 전문가 답변 분석 - Cursor 의견
+
+## 📊 **전체 평가: PROCEED (실용적이고 안전함)**
+
+### ✅ **강점 분석**
+
+1. **실용성: 매우 높음**
+   - 5줄 이하 코드 스니펫으로 즉시 적용 가능
+   - 기존 URIS 시스템에 비침습적 통합
+   - 90분 내 개선 목표가 현실적
+
+2. **위험성: 낮음**
+   - 프리플라이트, 지터 백오프는 표준 패턴
+   - OpenTelemetry Collector 사이드카는 안전한 관찰성 도구
+   - 기존 코드 변경 최소화
+
+3. **우선순위: 높음**
+   - Vertex API 호출 안정성은 핵심 인프라
+   - 5분 RCA는 운영 효율성 대폭 향상
+   - URIS 통합으로 전체 시스템 가시성 증대
+
+## 🎯 **구체적 제안사항**
+
+### **즉시 적용 (Phase 1)**
+```typescript
+// 1. Vertex 프리플라이트 (4줄)
+const preflightVertex = async () => {
+  const t = Date.now();
+  const r = await fetch(VERTEX_ENDPOINT, { method: 'HEAD' }).catch(() => ({ ok:false, status:0 }));
+  if (!r.ok) throw new Error(`vertex_preflight_fail:${r.status||'net'}`);
+  if (Date.now() - t > 1500) throw new Error('vertex_preflight_slow');
+};
+
+// 2. 지터 백오프 (3줄)
+const jitteredBackoff = async (attempt: number) => {
+  const base = 200 * 2**attempt;
+  const jittered = Math.random() * base;
+  await new Promise(r => setTimeout(r, Math.min(2000, jittered)));
+};
+```
+
+### **URIS 통합 (Phase 2)**
+- OpenTelemetry Collector 사이드카 구성
+- 에러/슬로우 트레이스 100% 보존
+- Correlation-ID 전파 체계 구축
+
+### **운영 가드 (Phase 3)**
+- P95 지연 > 1500ms 또는 성공률 < 85% 시 회로 차단
+- readiness/liveness 프로브 연동
+- Collector 헬스 모니터링
+
+## 🔧 **Cursor 구현 계획**
+
+### **1. 프리플라이트 미들웨어**
+```typescript
+// src/lib/vertex-preflight.ts
+export const vertexPreflightMiddleware = {
+  before: preflightVertex,
+  after: jitteredBackoff
+};
+```
+
+### **2. URIS 대시보드 확장**
+- Vertex API 상태 모니터링 섹션 추가
+- 5분 RCA 플레이북 UI 구현
+- 실시간 메트릭 시각화
+
+### **3. 통합 테스트**
+- 프리플라이트 실패 시나리오 테스트
+- 지터 백오프 동작 검증
+- URIS ↔ Vertex 연동 테스트
+
+## 📈 **예상 효과**
+
+### **성능 개선**
+- Vertex 경로 성공률: 65% → ≥90%
+- P95 지연: 2.0-2.5s → ≤1.5s
+- 서킷 OPEN 기간: 평균 ≤5분
+
+### **운영 효율성**
+- 5분 RCA로 문제 해결 시간 단축
+- URIS 통합으로 전체 시스템 가시성 향상
+- 자동화된 장애 감지 및 복구
+
+## 🚨 **주의사항**
+
+1. **점진적 적용**: 프리플라이트부터 단계별 도입
+2. **모니터링 강화**: 새로운 메트릭 추가 시 알림 설정
+3. **롤백 계획**: 문제 발생 시 즉시 비활성화 가능하도록 구성
+
+## 🎯 **최종 권장사항**
+
+**PROCEED** - GPT-5 Pro의 제안은 실용적이고 안전하며, URIS 시스템과의 통합이 매우 적절합니다. 
+
+### **즉시 실행 계획**
+1. ClaudeCode에게 Vertex 프리플라이트 구현 요청
+2. Cursor에서 URIS 대시보드 확장 구현
+3. 90분 내 Phase 1 완료 목표
+
+### **ClaudeCode 협업 필요사항**
+- Vertex API 프리플라이트 미들웨어 구현
+- 지터 백오프 로직 통합
+- OpenTelemetry Collector 설정
+
+---
+
+**분석 완료 시간**: 2025-08-20 23:45 KST
+**권장 액션**: ClaudeCode와 즉시 협업 시작

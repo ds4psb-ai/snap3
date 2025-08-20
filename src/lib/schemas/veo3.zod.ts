@@ -71,3 +71,4 @@ export const VEO3_JOB_SCHEMA = z.object({
 export type Veo3Job = z.infer<typeof VEO3_JOB_SCHEMA>;
 
 
+

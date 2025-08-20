@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { UniversalAgentRouter } from '../../../ai-collab/agent-router';
+import { UniversalAgentRouter } from '../../../../ai-collab/agent-router';
 
 // URIS API Endpoint - Agent Router Coordination
 export async function POST(request: NextRequest) {

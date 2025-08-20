@@ -40,12 +40,30 @@ export PLATFORM_SEGMENTED_PATH=true
 
 ## 🔗 API Endpoints
 
-### Core APIs
+### Main Server APIs (localhost:8080)
 ```typescript
-POST /api/normalize-url          // URL → content_id extraction
-POST /api/vdp/extract-vertex     // Actual VDP processing (JSON-only)
-POST /api/extract-social-metadata // Cursor extractor integration (NEW)
-GET  /api/health                 // System status
+POST /api/normalize-url              // URL → content_id extraction  
+POST /api/submit                     // Main submission endpoint
+POST /api/vdp/extract-vertex         // VDP processing (주의: T3와 중복 엔드포인트)
+POST /api/extract-social-metadata    // Cursor extractor integration (NEW)
+POST /api/vdp/cursor-extract         // Cursor 기반 VDP 추출 (NEW)
+POST /api/upload-video               // File upload processing
+GET  /api/health                     // System status
+GET  /api/circuit-breaker/status     // Circuit breaker monitoring
+POST /api/circuit-breaker/reset      // Circuit breaker reset
+```
+
+### T3 VDP Service APIs (localhost:8082)
+```typescript  
+POST /api/vdp/extract-vertex         // Actual VDP processing (Vertex AI)
+POST /api/vdp/test-quality-gates     // Quality gate testing
+```
+
+### VDP Extractor Service APIs (독립 서비스)
+```typescript
+POST /api/vdp/extract               // GitHub VDP 호환 추출 (Gemini 기반)
+POST /api/vdp/batch                 // 배치 처리
+GET  /api/health                    // 서비스 상태
 ```
 
 ### Quality Gates
@@ -228,4 +246,5 @@ curl -s http://localhost:[port]/health && echo "Ready" || echo "대기"
 - **Edit Allowed**: `src/**`, `web/**`, `scripts/**`, `docs/**`
 - **Edit Forbidden**: `/internal/vdp_full/**`, unauthorized network calls
 - **Commit Rules**: All tests green + Evidence Pack + No VDP_FULL exposure
+
 

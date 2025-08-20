@@ -267,3 +267,4 @@ console.log('플래그 정보:', metadata);
 - [Trunk Based Development](https://trunkbaseddevelopment.com/)
 - [Progressive Delivery](https://launchdarkly.com/blog/what-is-progressive-delivery/)
 
+

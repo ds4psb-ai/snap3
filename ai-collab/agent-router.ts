@@ -32,9 +32,35 @@ class UniversalAgentRouter {
   private recentSuccess: Record<string, number> = {};
   
   constructor() {
-    const rulesPath = path.join(__dirname, '../configs/context-engine.rules.yaml');
-    const rulesContent = fs.readFileSync(rulesPath, 'utf8');
-    this.rules = yaml.load(rulesContent) as ContextRules;
+    try {
+      const rulesPath = path.join(process.cwd(), 'configs', 'context-engine.rules.yaml');
+      const rulesContent = fs.readFileSync(rulesPath, 'utf8');
+      this.rules = yaml.load(rulesContent) as ContextRules;
+    } catch (error) {
+      // 기본 설정으로 폴백
+      this.rules = {
+        version: 1,
+        signals: {
+          file_patterns: {
+            frontend: ["src/**/*.{tsx,jsx,css,scss}", "components/**"],
+            backend: ["src/app/api/**", "src/**/*.{ts,js}", "services/**"],
+            architecture: ["ai-collab/**", "docs/**"]
+          },
+          commit_conventions: { feat: {weight: 1.0}, fix: {weight: 0.8} },
+          code_complexity: { high_threshold: 0.7 }
+        },
+        routing: {
+          weights_by_context: {
+            frontend: {cursor: 0.6, claudecode: 0.3, gpt5: 0.1},
+            backend: {claudecode: 0.5, t1: 0.1, t2: 0.15, t3: 0.15, t4: 0.1},
+            architecture: {gpt5: 0.5, claudecode: 0.3, cursor: 0.1, t1: 0.1}
+          }
+        },
+        thresholds: {
+          consensus: { proceed: 0.80, modify: 0.60, reject: 0.60 }
+        }
+      };
+    }
   }
 
   detectContext(fileChanges: string[], commitMessage?: string): string {
@@ -46,9 +72,23 @@ class UniversalAgentRouter {
       
       for (const file of fileChanges) {
         for (const pattern of patterns) {
-          const regex = new RegExp(pattern.replace('**/', '.*').replace('*', '[^/]*'));
-          if (regex.test(file)) {
-            scores[context] += 1;
+          // 안전한 패턴 변환: **를 먼저 처리, 그다음 *를 처리
+          const safePattern = pattern
+            .replace(/\*\*/g, '.*')  // ** -> .*
+            .replace(/\*/g, '[^/]*') // * -> [^/]*
+            .replace(/\{([^}]+)\}/g, '($1)') // {a,b} -> (a|b)
+            .replace(/,/g, '|');  // , -> |
+          
+          try {
+            const regex = new RegExp(safePattern);
+            if (regex.test(file)) {
+              scores[context] += 1;
+            }
+          } catch (e) {
+            // 정규식 오류시 단순 문자열 포함 검사로 폴백
+            if (file.includes(pattern.replace(/[\*\{\}]/g, ''))) {
+              scores[context] += 0.5;
+            }
           }
         }
       }
@@ -175,66 +215,7 @@ class UniversalAgentRouter {
     return recommendations;
   }
 
-  private async checkSLOStatus(): Promise<any> {
-    try {
-      const response = await fetch('http://localhost:8080/api/circuit-breaker/status');
-      return await response.json();
-    } catch {
-      return { state: { state: 'UNKNOWN' }, performance_metrics: {} };
-    }
-  }
-
-  private calculateDynamicWeights(baseWeights: Record<string, number>, context: string): Record<string, number> {
-    const weights = { ...baseWeights };
-    
-    // 최근 성과 기반 조정
-    for (const agent of Object.keys(weights)) {
-      const successRate = this.recentSuccess[`${agent}_${context}`] || 1.0;
-      weights[agent] *= successRate;
-    }
-    
-    // 정규화
-    const total = Object.values(weights).reduce((sum, w) => sum + w, 0);
-    for (const agent of Object.keys(weights)) {
-      weights[agent] /= total;
-    }
-    
-    return weights;
-  }
-
-  private calculateConsensusScore(weights: Record<string, number>, sloData: any): number {
-    let score = 0.7; // 기본 점수
-    
-    // SLO 상태 반영
-    if (sloData.state?.state === 'CLOSED') score += 0.1;
-    if (sloData.performance_metrics?.success_rate === '100.00%') score += 0.1;
-    
-    // 가중치 분산도 반영 (집중도가 높을수록 점수 상승)
-    const entropy = -Object.values(weights).reduce((sum, w) => sum + w * Math.log(w), 0);
-    score += (1 - entropy / Math.log(Object.keys(weights).length)) * 0.1;
-    
-    return Math.min(score, 1.0);
-  }
-
-  private generateRecommendations(context: string, score: number, sloData: any): string[] {
-    const recommendations: string[] = [];
-    
-    if (score < 0.8) {
-      recommendations.push('합의 점수가 낮습니다. 에이전트 협업 검토 필요');
-    }
-    
-    if (sloData.state?.state !== 'CLOSED') {
-      recommendations.push('Circuit Breaker가 열린 상태입니다. 시스템 안정성 확인 필요');
-    }
-    
-    if (context === 'frontend') {
-      recommendations.push('Frontend 컨텍스트: Cursor 주도 개발 권장');
-    } else if (context === 'backend') {
-      recommendations.push('Backend 컨텍스트: ClaudeCode 주도 개발 권장');
-    }
-    
-    return recommendations;
-  }
 }
 
+export { UniversalAgentRouter };
 export const agentRouter = new UniversalAgentRouter();
