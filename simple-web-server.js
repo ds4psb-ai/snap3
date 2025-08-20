@@ -13,6 +13,9 @@ const http = require('http');
 const Ajv = require('ajv');
 const fs = require('fs');
 
+// T3 Metrics Integration (Performance Dashboard)
+const { httpLatency, vdpProcessingLatency, registry } = require('./libs/metrics.ts');
+
 // Import the URL normalizer (ES6 import in CommonJS using dynamic import)
 let normalizeSocialUrl;
 
@@ -594,6 +597,20 @@ const upload = multer({
 // Middleware
 app.use(cors());
 app.use(addCorrelationId);
+
+// T3 Metrics Collection Middleware
+app.use((req, res, next) => {
+    const start = Date.now();
+    res.on('finish', () => {
+        const duration = (Date.now() - start) / 1000;
+        httpLatency.observe(
+            { method: req.method, route: req.route?.path || req.path, status_code: res.statusCode },
+            duration
+        );
+    });
+    next();
+});
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -1573,12 +1590,24 @@ async function startServer() {
         });
     }
     
+    // T3 Metrics Endpoint for UI Dashboard
+    app.get('/metrics', async (req, res) => {
+        try {
+            const metrics = await registry.metrics();
+            res.set('Content-Type', registry.contentType);
+            res.end(metrics);
+        } catch (error) {
+            res.status(500).json({ error: 'Metrics collection failed' });
+        }
+    });
+
     app.listen(PORT, () => {
         structuredLog('success', 'VDP Enhanced Web Server started successfully', {
             serverUrl: `http://localhost:${PORT}`,
             endpoints: {
                 normalization: 'POST /api/normalize-url',
                 vdpExtract: 'POST /api/vdp/extract-vertex',
+                metrics: 'GET /metrics (T3 integration)',
                 health: 'GET /api/health'
             },
             features: {

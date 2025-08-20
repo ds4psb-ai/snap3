@@ -1,0 +1,146 @@
+# 🎯 Cursor - 인제스터 UI 성능 최적화 통합 작업
+
+**Priority**: HIGH  
+**Action**: Ingester-UI-Performance-Integration  
+**Timestamp**: 2025-08-20 20:05  
+**Correlation-ID**: CURSOR-UI-OPTIMIZATION-001
+
+---
+
+## 🚀 **즉시 구현: 성능 메트릭 대시보드 통합**
+
+### **✅ 목표:**
+T2/T3/T4 성과를 인제스터 UI(localhost:3000)에 실시간 통합
+
+### **구현 요청 사항:**
+
+#### **1. 실시간 성능 대시보드 (Priority: CRITICAL)**
+```typescript
+// src/components/PerformanceDashboard.tsx
+const PerformanceDashboard = () => {
+  const [metrics, setMetrics] = useState({
+    responseTime: '0ms',
+    throughput: '0 req/s', 
+    errorRate: '0%',
+    vdpProcessing: '0ms'
+  });
+
+  useEffect(() => {
+    // T3 메트릭 서버(8082) 연동
+    const fetchMetrics = async () => {
+      const response = await fetch('http://localhost:8082/metrics');
+      const data = await response.json();
+      setMetrics({
+        responseTime: data.http_request_duration_p95,
+        throughput: data.requests_per_second,
+        errorRate: data.error_rate_percentage,
+        vdpProcessing: data.vdp_processing_duration_p95
+      });
+    };
+    
+    const interval = setInterval(fetchMetrics, 5000); // 5초마다 업데이트
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+      <MetricCard label="응답시간" value={metrics.responseTime} target="<200ms" />
+      <MetricCard label="처리량" value={metrics.throughput} target=">10 req/s" />
+      <MetricCard label="에러율" value={metrics.errorRate} target="<1%" />
+      <MetricCard label="VDP 처리" value={metrics.vdpProcessing} target="<5s" />
+    </div>
+  );
+};
+```
+
+#### **2. 실시간 로그 스트림 위젯**
+```typescript
+// src/components/LogStream.tsx
+const LogStream = () => {
+  const [logs, setLogs] = useState([]);
+
+  useEffect(() => {
+    // T4 로그 스트림(8083) SSE 연동
+    const eventSource = new EventSource('http://localhost:8083/logs/stream');
+    eventSource.onmessage = (event) => {
+      const logEntry = JSON.parse(event.data);
+      setLogs(prev => [logEntry, ...prev].slice(0, 50)); // 최근 50개만
+    };
+    
+    return () => eventSource.close();
+  }, []);
+
+  return (
+    <div className="h-64 overflow-y-auto bg-black text-green-400 p-4 font-mono text-sm">
+      {logs.map((log, i) => (
+        <div key={i} className="mb-1">
+          <span className="text-gray-500">{log.timestamp}</span>
+          <span className={`ml-2 ${log.level === 'error' ? 'text-red-400' : 'text-green-400'}`}>
+            [{log.level}] {log.message}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+```
+
+#### **3. 메인 인제스터 페이지 통합**
+```typescript
+// src/app/page.tsx 수정
+export default function HomePage() {
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* 기존 SummaryDock */}
+      <SummaryDock />
+      
+      {/* NEW: 성능 대시보드 */}
+      <PerformanceDashboard />
+      
+      {/* 기존 PlatformWizard */}
+      <PlatformWizard />
+      
+      {/* NEW: 실시간 로그 */}
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-4">실시간 시스템 로그</h3>
+        <LogStream />
+      </div>
+      
+      {/* 기존 SchemaValidator */}
+      <SchemaValidator />
+    </div>
+  );
+}
+```
+
+---
+
+## 📊 **통합 목표**
+
+### **성능 가시성:**
+- **실시간 메트릭**: T3 Prometheus → UI 대시보드
+- **로그 스트림**: T4 구조화 로깅 → 실시간 표시
+- **벤치마크 결과**: T2 성능 측정 → UI 표시
+
+### **사용자 경험:**
+- **투명성**: 시스템 상태 실시간 확인
+- **신뢰성**: 성능 지표 기반 안심 사용
+- **디버깅**: 실시간 로그로 문제 즉시 파악
+
+---
+
+## 🎯 **구현 우선순위**
+
+1. **PerformanceDashboard** (20분) - T3 메트릭 연동
+2. **LogStream** (15분) - T4 로그 스트림 연동  
+3. **메인 페이지 통합** (10분) - 전체 레이아웃 완성
+
+**예상 완성 시간**: 45분
+
+---
+
+**🚀 즉시 시작: 성능 대시보드 + 로그 스트림 UI 통합!** ⚡
+
+**완료 후**: 통합 테스트 + GPT-5 Pro 최종 컨설팅 보고
+
+**Cursor 확인 명령어**: `cd /Users/ted/snap3 && cat .collab-msg-ingester-ui-optimization`
