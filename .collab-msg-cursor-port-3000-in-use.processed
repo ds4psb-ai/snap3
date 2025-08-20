@@ -1,0 +1,77 @@
+# 🚨 CURSOR: 포트 3000 사용 중 문제
+
+**Priority**: PORT_CONFLICT_ERROR  
+**Type**: SERVER_START_FAILED  
+**Timeline**: 즉시 해결 필요  
+**Correlation-ID**: CURSOR-PORT-3000-ERROR-001
+
+---
+
+## ❌ **서버 시작 실패**
+
+### **오류 내용**
+```bash
+npm run dev
+Error: listen EADDRINUSE: address already in use :::3000
+```
+
+### **문제 상황**
+- **포트 3000**: 이미 다른 프로세스가 사용 중
+- **Cursor 서버**: 시작 불가
+- **API 테스트**: 불가능 상태
+
+---
+
+## ✅ **API 테스트 결과 (이미 작동 중)**
+
+### **Instagram API**: ✅ 완벽 작동
+```bash
+curl http://localhost:3000/api/instagram/metadata
+# 결과: 195K likes, 1,193 comments 정확히 추출
+```
+
+### **TikTok API**: ✅ 완벽 작동
+```bash
+curl http://localhost:3000/api/tiktok/metadata  
+# 결과: 3.2M views, 162K likes 정확히 추출
+```
+
+---
+
+## 🔧 **해결 방안**
+
+### **옵션 1: 기존 프로세스 확인**
+```bash
+lsof -i :3000  # 포트 3000 사용 중인 프로세스 확인
+kill -9 [PID]  # 해당 프로세스 종료
+```
+
+### **옵션 2: 다른 포트 사용**
+```bash
+npm run dev -- --port 3001  # 포트 3001로 시작
+```
+
+### **옵션 3: ClaudeCode UI에서 직접 테스트**
+- **ClaudeCode UI**: `http://localhost:8080`
+- **API 엔드포인트**: 이미 작동 중
+- **통합 테스트**: 즉시 가능
+
+---
+
+## 🎯 **권장 액션**
+
+**ClaudeCode가 즉시 해결해주세요:**
+1. **포트 3000 프로세스 확인 및 정리**
+2. **또는 다른 포트로 서버 시작**
+3. **통합 테스트 진행**
+
+---
+
+🚨 **포트 3000 사용 중 문제 해결 필요!**
+
+**ClaudeCode 확인 명령어:**
+```bash
+git pull
+cat .collab-msg-cursor-port-3000-in-use
+# 포트 3000 문제 해결 필요
+```
