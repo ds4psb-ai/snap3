@@ -366,6 +366,14 @@ async function fetchInstagramComments(shortcode: string) {
           break;
         }
       }
+      
+      // 방법 6: Playwright 헤드리스 브라우저로 댓글 추출 시도
+      console.log('Playwright 헤드리스 브라우저로 댓글 추출 시도...');
+      const playwrightComments = await fetchInstagramCommentsPlaywright(shortcode);
+      if (playwrightComments.length > 0) {
+        console.log(`Playwright에서 ${playwrightComments.length}개의 댓글 추출 성공`);
+        return playwrightComments;
+      }
     }
     
   } catch (error) {
@@ -454,25 +462,33 @@ async function extractInstagramMetadata(url: string) {
         // 메타 태그 데이터 처리
         const metaData = scrapedData.data;
         
-        // description에서 좋아요 수와 댓글 수 추출
+        // description에서 좋아요 수와 댓글 수 추출 (개선된 버전)
         let actualLikeCount = 0;
         let actualCommentCount = 0;
+        let actualAuthor = '';
+        let actualUploadDate = '';
         let isVideo = false;
         
         if (metaData.description) {
-          const descMatch = metaData.description.match(/(\d+)K? likes?, (\d+) comments?/);
+          // "192K likes, 1,209 comments - hard.clipz - July 6, 2025" 패턴 파싱
+          const descMatch = metaData.description.match(/(\d+(?:\.\d+)?[KMB]?) likes?, (\d+(?:,\d+)?) comments? - ([^-]+) - ([^:]+):/);
           if (descMatch) {
             const likeStr = descMatch[1];
             const commentStr = descMatch[2];
+            actualAuthor = descMatch[3].trim();
+            actualUploadDate = descMatch[4].trim();
             
-            // K 단위 처리 (예: 11K -> 11000)
+            // K/M/B 단위 처리 (예: 192K -> 192000, 1.2M -> 1200000)
             if (likeStr.includes('K')) {
-              actualLikeCount = parseInt(likeStr.replace('K', '')) * 1000;
+              actualLikeCount = Math.round(parseFloat(likeStr.replace('K', '')) * 1000);
+            } else if (likeStr.includes('M')) {
+              actualLikeCount = Math.round(parseFloat(likeStr.replace('M', '')) * 1000000);
+            } else if (likeStr.includes('B')) {
+              actualLikeCount = Math.round(parseFloat(likeStr.replace('B', '')) * 1000000000);
             } else {
-              actualLikeCount = parseInt(likeStr) || 0;
+              actualLikeCount = parseInt(likeStr.replace(/,/g, '')) || 0;
             }
-            
-            actualCommentCount = parseInt(commentStr) || 0;
+            actualCommentCount = parseInt(commentStr.replace(/,/g, '')) || 0;
           }
           
           // URL에서 비디오 여부 확인 (reel/tv는 비디오)
@@ -485,10 +501,10 @@ async function extractInstagramMetadata(url: string) {
         metadata.metadata = {
           ...metadata.metadata,
           title: decodeHtmlEntitiesNode(metaData.title || ''),
-          upload_date: new Date().toISOString(),
+          upload_date: actualUploadDate ? new Date(actualUploadDate).toISOString() : new Date().toISOString(),
           author: {
-            username: metaData.author || 'unknown',
-            display_name: metaData.author || 'Unknown Author',
+            username: actualAuthor || metaData.author || 'unknown',
+            display_name: actualAuthor || metaData.author || 'Unknown Author',
             verified: false,
             followers: Math.floor(Math.random() * 1000000) + 10000,
           },
@@ -496,10 +512,10 @@ async function extractInstagramMetadata(url: string) {
           width: 1080,
           height: 1080,
           hashtags: extractHashtags(decodeHtmlEntitiesNode(metaData.description || '')),
-          view_count: viewCount,
-          like_count: actualLikeCount || parseInt(metaData.like_count) || Math.floor(Math.random() * 50000) + 500,
-          comment_count: actualCommentCount || parseInt(metaData.comment_count) || Math.floor(Math.random() * 1000) + 10,
-          share_count: Math.floor(Math.random() * 500) + 5,
+          view_count: null, // Instagram은 조회수를 공개하지 않음
+          like_count: actualLikeCount || parseInt(metaData.like_count) || 0,
+          comment_count: actualCommentCount || parseInt(metaData.comment_count) || 0,
+          share_count: null, // Instagram은 공유수를 공개하지 않음
           is_video: isVideo,
         };
 
@@ -710,6 +726,115 @@ function generateRealisticMockComments(commentCount: number) {
     like_count: Math.floor(Math.random() * 50) + (index < 3 ? 20 : 5),
     timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
   }));
+}
+
+// Playwright를 사용한 Instagram 댓글 추출 (최신 방법)
+async function fetchInstagramCommentsPlaywright(shortcode: string): Promise<any[]> {
+  try {
+    console.log('Playwright로 Instagram 댓글 추출 시도:', shortcode);
+    
+    // Playwright 동적 import (서버 사이드에서만 사용)
+    const { chromium } = await import('playwright');
+    
+    const browser = await chromium.launch({ 
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    
+    const page = await browser.newPage({
+      viewport: { width: 390, height: 844 }, // 모바일 뷰포트
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+    });
+
+    try {
+      // Instagram 페이지 로드
+      const pageUrl = `https://www.instagram.com/p/${shortcode}/`;
+      await page.goto(pageUrl, { 
+        waitUntil: 'networkidle',
+        timeout: 30000 
+      });
+
+      // 댓글 섹션까지 스크롤
+      await page.evaluate(() => {
+        window.scrollTo(0, window.innerHeight);
+      });
+
+      // '댓글 더보기' 버튼 클릭 (있는 경우)
+      try {
+        const loadMoreButton = await page.$('button:has-text("댓글 더보기"), button:has-text("Load more comments")');
+        if (loadMoreButton) {
+          await loadMoreButton.click();
+          await page.waitForTimeout(2000);
+        }
+      } catch (e) {
+        console.log('댓글 더보기 버튼 없음');
+      }
+
+      // window._sharedData에서 댓글 추출
+      const comments = await page.evaluate(() => {
+        try {
+          // Method 1: window._sharedData 파싱
+          if (window._sharedData && window._sharedData.entry_data) {
+            const postData = window._sharedData.entry_data.PostPage?.[0]?.graphql?.shortcode_media;
+            if (postData?.edge_media_to_parent_comment?.edges) {
+              return postData.edge_media_to_parent_comment.edges.map((edge: any) => ({
+                id: edge.node.id,
+                text: edge.node.text,
+                owner: {
+                  username: edge.node.owner.username,
+                  verified: edge.node.owner.is_verified
+                },
+                created_at: edge.node.created_at,
+                like_count: edge.node.edge_liked_by?.count || 0
+              }));
+            }
+          }
+
+          // Method 2: DOM에서 직접 댓글 추출
+          const commentElements = document.querySelectorAll('ul.XQXOT li.gElp9, article div[role="button"] span');
+          const extractedComments = [];
+
+          for (let i = 0; i < commentElements.length && i < 20; i++) {
+            const element = commentElements[i];
+            const text = element.textContent?.trim();
+            if (text && text.length > 3) {
+              extractedComments.push({
+                id: `comment_${i}`,
+                text: text,
+                owner: {
+                  username: `user_${i + 1}`,
+                  verified: false
+                },
+                created_at: Date.now() / 1000,
+                like_count: 0
+              });
+            }
+          }
+
+          return extractedComments;
+        } catch (error) {
+          console.error('Playwright 댓글 추출 오류:', error);
+          return [];
+        }
+      });
+
+      await browser.close();
+      
+      if (comments.length > 0) {
+        console.log(`Playwright에서 ${comments.length}개의 댓글 추출 성공`);
+        return comments;
+      }
+
+    } catch (error) {
+      console.error('Playwright 페이지 로드 오류:', error);
+      await browser.close();
+    }
+
+  } catch (error) {
+    console.error('Playwright 초기화 오류:', error);
+  }
+
+  return [];
 }
 
 export async function POST(request: NextRequest) {

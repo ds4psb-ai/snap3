@@ -1,46 +1,182 @@
-name: Summarize Commits
+name: Auto Context Summary
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      include_files:
+        description: 'Include changed files list'
+        required: false
+        default: 'true'
+        type: boolean
 
 jobs:
-  diff-summary:
+  context-summary:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 10  # 더 많은 히스토리 가져오기
 
-      - name: Generate commit diff summary
+      - name: Generate Enhanced Context Summary
+        id: summary
         run: |
-          bash scripts/generate_summary.sh > summary.md
-          echo >> summary.md
-          echo "Top patch lines:" >> summary.md
-          git diff ${{ github.sha }}^ ${{ github.sha }} --patch-with-stat | head -n 30 >> summary.md
+          echo "## 🎯 Context Summary for GPT-5 Pro" > context_summary.md
+          echo "" >> context_summary.md
+          
+          # 기본 정보
+          echo "**Event**: \`${{ github.event_name }}\`" >> context_summary.md
+          echo "**Branch**: \`${{ github.ref_name }}\`" >> context_summary.md
+          echo "**SHA**: \`${{ github.sha }}\`" >> context_summary.md
+          echo "**Timestamp**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> context_summary.md
+          echo "" >> context_summary.md
+          
+          # 최근 5커밋 요약 (기존 스크립트 활용)
+          echo "### 📋 Recent 5 Commits" >> context_summary.md
+          echo '```' >> context_summary.md
+          bash scripts/generate_summary.sh >> context_summary.md
+          echo '```' >> context_summary.md
+          echo "" >> context_summary.md
+          
+          # PR 정보 (PR인 경우)
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "### 🔀 Pull Request Info" >> context_summary.md
+            echo "**Title**: ${{ github.event.pull_request.title }}" >> context_summary.md
+            echo "**Author**: @${{ github.event.pull_request.user.login }}" >> context_summary.md
+            echo "**Target**: \`${{ github.event.pull_request.base.ref }}\` ← \`${{ github.event.pull_request.head.ref }}\`" >> context_summary.md
+            echo "" >> context_summary.md
+            
+            # PR 변경 통계
+            echo "### 📊 PR Changes" >> context_summary.md
+            echo '```' >> context_summary.md
+            git diff ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} --stat >> context_summary.md
+            echo '```' >> context_summary.md
+            echo "" >> context_summary.md
+          fi
+          
+          # 변경된 파일 목록 (최대 20개)
+          if [ "${{ inputs.include_files || 'true' }}" = "true" ]; then
+            echo "### 📁 Changed Files" >> context_summary.md
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | head -20 > changed_files.tmp
+            else
+              git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | head -20 > changed_files.tmp
+            fi
+            
+            if [ -s changed_files.tmp ]; then
+              echo '```' >> context_summary.md
+              cat changed_files.tmp >> context_summary.md
+              echo '```' >> context_summary.md
+            else
+              echo "*No files changed*" >> context_summary.md
+            fi
+            echo "" >> context_summary.md
+          fi
+          
+          # 주요 변경사항 (패치 미리보기)
+          echo "### 🔍 Key Changes Preview" >> context_summary.md
+          echo '```diff' >> context_summary.md
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git diff ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} --patch-with-stat | head -40 >> context_summary.md
+          else
+            git diff ${{ github.sha }}^ ${{ github.sha }} --patch-with-stat | head -40 >> context_summary.md
+          fi
+          echo '```' >> context_summary.md
+          echo "" >> context_summary.md
+          
+          # GPT-5 Quick Start 가이드 (삼각편대 통합)
+          echo "### 🚀 GPT-5 Triangular Workflow" >> context_summary.md
+          echo "#### For GPT-5 Pro (HEAD):" >> context_summary.md
+          echo "1. **Copy this entire comment** to new GPT-5 chat" >> context_summary.md
+          echo "2. **Add**: \`Use this context for ClaudeCode ↔ Cursor triangular collaboration\`" >> context_summary.md
+          echo "3. **Reference**: [Triangular Workflow Guide](https://github.com/${{ github.repository }}/blob/main/docs/GPT5_CLAUDECODE_CURSOR_TRIANGULAR_WORKFLOW.md)" >> context_summary.md
+          echo "" >> context_summary.md
+          echo "#### For ClaudeCode (main):" >> context_summary.md
+          echo "- Use terminal commands above for project status" >> context_summary.md
+          echo "- Focus on backend services and data processing" >> context_summary.md
+          echo "- Generate context updates with \`scripts/generate_summary.sh\`" >> context_summary.md
+          echo "" >> context_summary.md
+          echo "#### For Cursor (sub):" >> context_summary.md
+          echo "- Handle frontend development and UI components" >> context_summary.md
+          echo "- Run \`npm run dev\` for Next.js development server" >> context_summary.md
+          echo "- Use \`node simple-web-server.js\` for ingester UI (port 8080)" >> context_summary.md
+          echo "- Test with Instagram/TikTok metadata extractor at \`/instagram-extractor\`" >> context_summary.md
+          echo "" >> context_summary.md
+          
+          # 터미널 상태 힌트 (ClaudeCode + Cursor 통합)
+          echo "### 🖥️ Terminal Status Hints" >> context_summary.md
+          echo "#### ClaudeCode Terminals:" >> context_summary.md
+          echo "- **Main T1**: \`cd ~/snap3 && scripts/generate_summary.sh\`" >> context_summary.md
+          echo "- **Jobs T2**: \`cd ~/snap3-jobs && ./worker-ingest-v2.sh --health\`" >> context_summary.md
+          echo "- **T2VDP T3**: \`cd ~/snap3/services/t2-extract && ./run-all-checks.sh\`" >> context_summary.md
+          echo "- **Storage T4**: \`cd ~/snap3-storage && ./scripts/quick-validation.sh\`" >> context_summary.md
+          echo "" >> context_summary.md
+          echo "#### Cursor Integration:" >> context_summary.md
+          echo "- **Development Server**: \`npm run dev\` (port 3000)" >> context_summary.md
+          echo "- **Simple Web Server**: \`node simple-web-server.js\` (port 8080)" >> context_summary.md
+          echo "- **Health Check**: \`curl http://localhost:8080/api/health\`" >> context_summary.md
+          echo "- **Test Suite**: \`npm test\` or \`npm run test:ci\`" >> context_summary.md
+          echo "" >> context_summary.md
+          
+          # 링크 모음
+          echo "### 🔗 Quick Links" >> context_summary.md
+          echo "- [Repository](https://github.com/${{ github.repository }})" >> context_summary.md
+          echo "- [Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})" >> context_summary.md
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "- [Pull Request](https://github.com/${{ github.repository }}/pull/${{ github.event.pull_request.number }})" >> context_summary.md
+          fi
+          echo "- [Actions](https://github.com/${{ github.repository }}/actions)" >> context_summary.md
+          
+          # 멘션 추가 (최종 정리)
+          echo "" >> context_summary.md
+          echo "---" >> context_summary.md
+          echo "*🤖 Auto-generated by GitHub Actions • [View Workflow](https://github.com/${{ github.repository }}/blob/main/.github/workflows/summarize-commits.yml)*" >> context_summary.md
 
-      # PR이면 PR 코멘트(이미 있으면 업데이트)
-      - name: Create/Update PR comment
-        if: ${{ github.event_name == 'pull_request' }}
+      # PR에 컨텍스트 요약 코멘트 생성/업데이트
+      - name: Create/Update PR Context Comment
+        if: github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
-          body-path: summary.md
+          body-path: context_summary.md
+          comment-author: 'github-actions[bot]'
+          comment-author-exclude: ''
 
-      # main으로 직접 push면 해당 커밋에 코멘트
-      - name: Comment on commit (push to main)
-        if: ${{ github.event_name == 'push' }}
+      # main 브랜치 push시 커밋에 컨텍스트 코멘트
+      - name: Comment on Main Branch Commit  
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const body = fs.readFileSync('summary.md', 'utf8');
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body
-            });
+            const body = fs.readFileSync('context_summary.md', 'utf8');
+            
+            try {
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body: body
+              });
+              console.log('✅ Commit comment created successfully');
+            } catch (error) {
+              console.log('⚠️ Failed to create commit comment:', error.message);
+            }
+
+      # Artifact로 컨텍스트 요약 저장 (다운로드 가능)
+      - name: Upload Context Summary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: context-summary-${{ github.sha }}
+          path: context_summary.md
+          retention-days: 30
