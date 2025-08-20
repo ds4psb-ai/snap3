@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-20T17:36:38.860Z",
+  "timestamp": "2025-08-20T17:41:48.927Z",
   "t1_api_breaker": {
     "name": "T1-API",
     "state": "CLOSED",
@@ -8,32 +8,32 @@
     "failureThreshold": 3,
     "successThreshold": 2,
     "successRate": "100.00%",
-    "avgResponseTime": "3.17ms",
+    "avgResponseTime": "3.14ms",
     "p95ResponseTime": "6ms",
-    "totalRequests": 1451,
-    "uptime": "21764.7s",
+    "totalRequests": 1472,
+    "uptime": "22074.7s",
     "lastStateChange": "2025-08-20T11:33:54.194Z"
   },
   "vertex_api_breaker": {
     "name": "VERTEX-API",
     "state": "CLOSED",
-    "failureCount": 0,
+    "failureCount": 4,
     "successCount": 0,
     "failureThreshold": 5,
     "successThreshold": 3,
-    "successRate": "69.82%",
-    "avgResponseTime": "503.83ms",
+    "successRate": "70.06%",
+    "avgResponseTime": "504.72ms",
     "p95ResponseTime": "942ms",
-    "totalRequests": 941,
-    "uptime": "57.6s",
+    "totalRequests": 962,
+    "uptime": "367.6s",
     "lastStateChange": "2025-08-20T17:35:41.278Z"
   },
-  "system_uptime": 21764.642703583,
+  "system_uptime": 22074.704279583,
   "memory_usage": {
-    "rss": 45809664,
+    "rss": 46415872,
     "heapTotal": 10829824,
-    "heapUsed": 8927064,
-    "external": 1948553,
-    "arrayBuffers": 18635
+    "heapUsed": 9195208,
+    "external": 1947092,
+    "arrayBuffers": 19122
   }
 }
