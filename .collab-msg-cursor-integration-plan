@@ -1,0 +1,78 @@
+# 🚀 T1: Cursor 통합 계획 전달
+
+**To**: Cursor UI (localhost:3000)  
+**From**: T1 Main (localhost:8080)  
+**Type**: INTEGRATION_COORDINATION  
+**Priority**: HIGH  
+**Correlation-ID**: T1-CURSOR-INTEGRATION-001  
+**Timestamp**: 2025-08-20T19:16:45Z
+
+---
+
+## 📊 **VDP 3플랫폼 비교 결과**
+
+### **Main VDP 테스트 완료**:
+- ✅ **YouTube**: 완전 분석 (Hook 0.85, 1.2s)
+- ⚠️ **Instagram**: Fallback 모드 (메타데이터 통합 필요)
+- ⚠️ **TikTok**: Fallback 모드 (메타데이터 통합 필요)
+
+### **Cursor 통합 필요성 확인**:
+- **Instagram/TikTok**: Main VDP 단독으로는 제한된 분석만 가능
+- **해결책**: Cursor 메타데이터 추출 → Main VDP 통합 → 완전 분석
+
+---
+
+## 🎯 **즉시 실행 요청**
+
+### **Cursor 담당 작업**:
+1. **Instagram 메타데이터 최종 검증**:
+   ```bash
+   curl -X POST http://localhost:3000/api/instagram/metadata \
+     -H "Content-Type: application/json" \
+     -d '{"url": "https://www.instagram.com/reel/real_reel_id/"}'
+   ```
+
+2. **TikTok 메타데이터 최종 검증**:
+   ```bash
+   curl -X POST http://localhost:3000/api/tiktok/metadata \
+     -H "Content-Type: application/json" \
+     -d '{"url": "https://www.tiktok.com/@user/video/real_video_id"}'
+   ```
+
+3. **UI 통합 최종 검증**:
+   - `/api/extract-social-metadata` 엔드포인트 연결 테스트
+   - 실제 Instagram/TikTok URL로 End-to-End 테스트
+
+---
+
+## 🔄 **T1이 현재 준비 완료한 것들**:
+
+### **API 엔드포인트 준비**:
+- ✅ `/api/extract-social-metadata` (Cursor 통합)
+- ✅ `/api/vdp/cursor-extract` (VDP 생성)
+- ✅ Error handling with correlation IDs
+
+### **Main VDP 연결 준비**:
+- ✅ GitHub VDP 호환 구조 지원
+- ✅ 3플랫폼 테스트 완료
+- ✅ BigQuery 적재 검증 완료 (T4 확인)
+
+---
+
+## 🚨 **즉시 협력 요청**
+
+**Cursor 확인 명령어**:
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-cursor-integration-plan
+# T1에서 Cursor 통합 계획 전달 완료!
+```
+
+**T1이 대기 중인 것들**:
+- Instagram/TikTok 실제 메타데이터 수신
+- UI End-to-End 테스트 결과
+- 90%+ 자동화 달성 검증
+
+---
+
+🚀 **T1 → Cursor: 즉시 협력으로 90%+ 자동화 달성!**

@@ -1,0 +1,43 @@
+{
+  "comparison_timestamp": "2025-08-20T19:16:35Z",
+  "extractor_type": "github-vdp-compatible",
+  "platforms": {
+    "youtube": {
+      "content_id": "6_I2FmT1mbY",
+      "processing_time": "1.2s",
+      "hook_strength": 0.85,
+      "hook_timing": "2.5s",
+      "status": "✅ PRODUCTION_READY"
+    },
+    "tiktok": {
+      "content_id": "C389682", 
+      "processing_time": "1ms",
+      "hook_strength": "N/A (fallback)",
+      "hook_timing": "N/A",
+      "status": "⚠️ FALLBACK_MODE"
+    },
+    "instagram": {
+      "content_id": "C395744",
+      "processing_time": "0ms", 
+      "hook_strength": "N/A (fallback)",
+      "hook_timing": "N/A",
+      "status": "⚠️ FALLBACK_MODE"
+    }
+  },
+  "analysis": {
+    "main_vdp_capabilities": {
+      "youtube": "✅ Full analysis with Hook Genome",
+      "instagram": "❌ Fallback mode only",
+      "tiktok": "❌ Fallback mode only"
+    },
+    "integration_needs": {
+      "instagram": "Cursor metadata integration required",
+      "tiktok": "Cursor metadata integration required"
+    },
+    "next_steps": [
+      "Integrate Cursor extractor for Instagram/TikTok",
+      "Test Main VDP with real Instagram/TikTok content",
+      "Implement platform-specific processing paths"
+    ]
+  }
+}
