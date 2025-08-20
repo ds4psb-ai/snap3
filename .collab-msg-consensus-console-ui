@@ -1,0 +1,157 @@
+# 🎯 Cursor - 합의 콘솔 UI 구현 지시
+
+**Priority**: CRITICAL  
+**Action**: Consensus-Console-UI-Implementation  
+**Timestamp**: 2025-08-20 20:25  
+**Correlation-ID**: CURSOR-CONSENSUS-CONSOLE-001
+
+---
+
+## 🚀 **즉시 구현: /ops/consensus-console 페이지**
+
+### **✅ 목표: People+AI 가이드북 준수 합의 UI**
+
+#### **구현 요청:**
+
+### **1. 에이전트 제안 카드 시스템**
+```typescript
+// src/app/ops/consensus-console/page.tsx
+const ConsensusConsole = () => {
+  const [agents, setAgents] = useState([
+    { role: 'commander', name: 'GPT-5 Pro', confidence: 0.95, proposal: '', risks: [] },
+    { role: 'implementer', name: 'ClaudeCode', confidence: 0.90, proposal: '', risks: [] },
+    { role: 'ux', name: 'Cursor', confidence: 0.88, proposal: '', risks: [] }
+  ]);
+
+  return (
+    <div className="grid grid-cols-2 gap-6 p-6">
+      {/* 좌측: 에이전트별 제안/근거/확신도 */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold">에이전트 제안</h2>
+        {agents.map(agent => (
+          <AgentProposalCard 
+            key={agent.name}
+            agent={agent}
+            onUpdate={(updated) => updateAgent(agent.name, updated)}
+          />
+        ))}
+      </div>
+      
+      {/* 우측: 합성결론 + 리스크 + 롤백 버튼 */}
+      <div className="space-y-4">
+        <ConsensusResult proposals={agents} />
+        <SLOGauge />
+        <ActionButtons />
+      </div>
+    </div>
+  );
+};
+```
+
+### **2. SLO/에러버짓 게이지**
+```typescript
+// src/components/SLOGauge.tsx
+const SLOGauge = () => {
+  const [sloStatus, setSloStatus] = useState({
+    pipeline_time_p95: { current: 120, target: 180, unit: 's' },
+    success_rate: { current: 99.7, target: 99.5, unit: '%' },
+    error_budget: { remaining: 85, total: 100, unit: '%' }
+  });
+
+  return (
+    <div className="bg-white p-4 rounded-lg shadow">
+      <h3 className="font-semibold mb-4">SLO 상태</h3>
+      <div className="space-y-3">
+        {Object.entries(sloStatus).map(([key, metric]) => (
+          <SLOMetric key={key} name={key} metric={metric} />
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+### **3. DORA 4지표 트렌드**
+```typescript
+// src/components/DORAMetrics.tsx
+const DORAMetrics = () => {
+  const metrics = [
+    { name: '배포 빈도', value: '2.3/일', trend: '+15%' },
+    { name: 'Lead Time', value: '45분', trend: '-50%' },
+    { name: '변경실패율', value: '0.5%', trend: '-80%' },
+    { name: 'MTTR', value: '12분', trend: '-60%' }
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      {metrics.map(metric => (
+        <DORAMetricCard key={metric.name} metric={metric} />
+      ))}
+    </div>
+  );
+};
+```
+
+### **4. 실행 로그 타임라인 (CloudEvents)**
+```typescript
+// src/components/ExecutionTimeline.tsx
+const ExecutionTimeline = () => {
+  const [events, setEvents] = useState([]);
+
+  // CloudEvents 1.0 포맷 SSE 연동
+  useEffect(() => {
+    const eventSource = new EventSource('http://localhost:8080/events/stream');
+    eventSource.onmessage = (event) => {
+      const cloudEvent = JSON.parse(event.data);
+      if (cloudEvent.type.startsWith('vdp.')) {
+        setEvents(prev => [cloudEvent, ...prev].slice(0, 100));
+      }
+    };
+    return () => eventSource.close();
+  }, []);
+
+  return (
+    <div className="bg-gray-50 p-4 rounded-lg">
+      <h3 className="font-semibold mb-4">실행 타임라인</h3>
+      <div className="space-y-2 max-h-64 overflow-y-auto">
+        {events.map(event => (
+          <CloudEventCard key={event.id} event={event} />
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+---
+
+## 🛡️ **People+AI 가이드북 준수**
+
+### **설명가능성:**
+- 각 에이전트의 **제안 근거** 명시
+- **확신도** 수치화 표시
+- **한계/불확실성** 명확히 표기
+
+### **제어가능성:**
+- **롤백 버튼** 항상 접근 가능
+- **재시도 버튼** 수동 제어
+- **자동 실행 취소** 권한
+
+---
+
+## 📊 **예상 구현 시간**
+
+1. **AgentProposalCard + ConsensusResult** (25분)
+2. **SLOGauge + DORAMetrics** (20분)
+3. **ExecutionTimeline + CloudEvents** (15분)
+4. **메인 페이지 통합** (10분)
+
+**총 예상 시간**: 70분
+
+---
+
+**🎯 재귀개선 범용화 Phase-1 UI 구현 시작!** ⚡
+
+**완료 후**: GPT-5 Pro 전문가 의견 실행 완료 보고
+
+**Cursor 확인 명령어**: `cd /Users/ted/snap3 && cat .collab-msg-consensus-console-ui`
