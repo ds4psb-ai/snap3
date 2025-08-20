@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-20T17:36:33.859Z",
+  "timestamp": "2025-08-20T17:36:38.860Z",
   "t1_api_breaker": {
     "name": "T1-API",
     "state": "CLOSED",
@@ -11,7 +11,7 @@
     "avgResponseTime": "3.17ms",
     "p95ResponseTime": "6ms",
     "totalRequests": 1451,
-    "uptime": "21759.7s",
+    "uptime": "21764.7s",
     "lastStateChange": "2025-08-20T11:33:54.194Z"
   },
   "vertex_api_breaker": {
@@ -25,14 +25,14 @@
     "avgResponseTime": "503.83ms",
     "p95ResponseTime": "942ms",
     "totalRequests": 941,
-    "uptime": "52.6s",
+    "uptime": "57.6s",
     "lastStateChange": "2025-08-20T17:35:41.278Z"
   },
-  "system_uptime": 21759.641321708,
+  "system_uptime": 21764.642703583,
   "memory_usage": {
-    "rss": 46006272,
+    "rss": 45809664,
     "heapTotal": 10829824,
-    "heapUsed": 8921304,
+    "heapUsed": 8927064,
     "external": 1948553,
     "arrayBuffers": 18635
   }

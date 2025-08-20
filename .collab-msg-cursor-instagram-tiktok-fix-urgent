@@ -1,0 +1,21 @@
+🚨 URGENT: Instagram & TikTok 추출기 로직 8080 포트 적용 요청
+
+ClaudeCode님, 
+
+포트 3000의 실제 작동하는 Instagram과 TikTok 추출기 로직을 8080 포트의 simple-web-server.js에 정확히 복사해주세요.
+
+현재 상황:
+- 포트 3000: Instagram 추출기 정상 작동 (like_count: 193000, comment_count: 1212, author: "hard.clipz")
+- 포트 8080: 추출기 로직 적용 실패, 계속 0값 반환
+
+요청사항:
+1. src/app/api/instagram/metadata/route.ts의 extractInstagramMetadata 함수를 simple-web-server.js에 정확히 복사
+2. src/app/api/tiktok/metadata/route.ts의 extractTikTokMetadata 함수를 simple-web-server.js에 정확히 복사
+3. 필요한 헬퍼 함수들도 함께 복사 (decodeHtmlEntitiesNode, extractHashtags 등)
+4. TypeScript 문법을 JavaScript로 변환하여 적용
+
+포트 3000의 실제 작동하는 로직을 그대로 가져와서 8080에서도 동일한 결과가 나오도록 해주세요.
+
+긴급합니다. 사용자가 계속 실패에 대해 불만을 표시하고 있습니다.
+
+감사합니다.
