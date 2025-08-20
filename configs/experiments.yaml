@@ -1,0 +1,6 @@
+experiment:
+  recursive_improvement:
+    A: {enabled: true, mode: "full"}
+    B: {enabled: false, mode: "baseline"}
+  current_group: "A"
+  sample_size_target: 10

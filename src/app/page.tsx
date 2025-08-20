@@ -5,6 +5,7 @@ import PerformanceDashboard from '@/components/PerformanceDashboard';
 import PlatformWizard from '@/components/platform/PlatformWizard';
 import SchemaValidator from '@/components/SchemaValidator';
 import LogStream from '@/components/LogStream';
+import UniversalSystemStatus from '@/components/universal/UniversalSystemStatus';
 
 export default function HomePage() {
   const handleMetadataExtracted = (metadata: any) => {
@@ -22,6 +23,10 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <PerformanceDashboard />
+        </div>
+        
+        <div className="mb-8">
+          <UniversalSystemStatus />
         </div>
         
         <div className="mb-8">

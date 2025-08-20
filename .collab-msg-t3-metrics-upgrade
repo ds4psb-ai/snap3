@@ -1,0 +1,95 @@
+# 📨 T3 - 메트릭 시스템 범용 확장
+
+**Priority**: CRITICAL  
+**Action**: Universal-Metrics-Upgrade  
+**Correlation-ID**: T3-METRICS-UPGRADE-001  
+**Timeline**: T+0~15분 병렬 실행
+
+---
+
+## 🎯 **T3 VDP Terminal 명령어 (즉시 실행)**
+
+### **현재 상태 확인**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+
+# 1. 현재 실행 중인 프로세스 확인
+ps aux | grep -E "(circuit-breaker|p95)" | grep -v grep
+echo "✅ 현재 백그라운드 프로세스 상태 확인 완료"
+
+# 2. 현재 SLO 상태 확인
+curl -s http://localhost:8080/api/circuit-breaker/status | jq '{
+    slo_status: (.performance_metrics.success_rate | rtrimstr("%") | tonumber > 90),
+    p95_within_slo: (.performance_metrics.avg_response_time | rtrimstr("ms") | tonumber < 500),
+    consensus_ready: (.state.state == "CLOSED")
+}'
+```
+
+### **Phase 1: 범용 메트릭 확장**
+```bash
+# 3. 범용 메트릭 수집기 생성
+cat > universal-metrics-collector.sh <<'BASH'
+#!/bin/bash
+# 범용 재귀개선을 위한 확장 메트릭 수집기
+set -euo pipefail
+
+CORRELATION_ID="T3-UNIVERSAL-$(date +%s)"
+METRICS_DIR="../../../logs/universal"
+mkdir -p "$METRICS_DIR"
+
+collect_universal_metrics() {
+    local context="$1"
+    local timestamp=$(date +%s)
+    
+    # Circuit Breaker 상태
+    cb_status=$(curl -s http://localhost:8080/api/circuit-breaker/status 2>/dev/null || echo '{}')
+    
+    # P95 메트릭
+    p95_data=$(cat p95-results.json 2>/dev/null || echo '{}')
+    
+    # 통합 메트릭 생성
+    jq -n \
+        --arg ts "$timestamp" \
+        --arg ctx "$context" \
+        --arg corr "$CORRELATION_ID" \
+        --argjson cb "$cb_status" \
+        --argjson p95 "$p95_data" \
+        '{
+            timestamp: $ts,
+            context: $ctx,
+            correlation_id: $corr,
+            circuit_breaker: $cb,
+            p95_metrics: $p95,
+            collection_time: (now | todate)
+        }' >> "$METRICS_DIR/universal-metrics-$(date +%Y%m%d).jsonl"
+}
+
+# 메트릭 수집 실행
+collect_universal_metrics "architecture"
+echo "✅ [T3] 범용 메트릭 수집 완료"
+BASH
+
+chmod +x universal-metrics-collector.sh
+
+# 4. 운영 상태 점검
+./operational-check.sh 2>/dev/null || echo "🔍 operational-check.sh 실행 확인"
+```
+
+### **Phase 1 완료 신호**
+```bash
+# T3 범용 준비 완료 표시
+touch .t3-universal-ready
+echo "T3-UNIVERSAL-METRICS-UPGRADE-COMPLETE-$(date +%s)" > .t3-universal-ready
+
+# 현재 성능 요약
+echo "📊 [T3] 현재 성능 상태:"
+curl -s http://localhost:8080/api/circuit-breaker/status | jq '{
+    state: .state.state,
+    success_rate: .performance_metrics.success_rate,
+    avg_response: .performance_metrics.avg_response_time
+}'
+```
+
+---
+
+**T3 실행 명령어**: `cd /Users/ted/snap3/services/t2-extract && cat ../../.collab-msg-t3-metrics-upgrade`

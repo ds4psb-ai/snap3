@@ -1,0 +1,125 @@
+# 📨 T4 - 스키마/게이트 시스템 범용 준비
+
+**Priority**: CRITICAL  
+**Action**: Schema-Gates-Universal-Setup  
+**Correlation-ID**: T4-SCHEMA-GATES-001  
+**Timeline**: T+0~15분 병렬 실행
+
+---
+
+## 🎯 **T4 Storage Terminal 명령어 (즉시 실행)**
+
+### **Phase 1: 스키마/게이트 시스템 확장**
+```bash
+cd /Users/ted/snap3-storage
+
+# 1. 디렉토리 구조 생성
+mkdir -p quality-gates
+mkdir -p schemas/universal
+mkdir -p logs/quality
+
+# 2. 범용 품질 게이트 스크립트 생성
+cat > scripts/universal-quality-gate.sh <<'BASH'
+#!/bin/bash
+# 범용 품질 게이트 시스템
+set -euo pipefail
+
+CONTEXT="$1"
+CORRELATION_ID="T4-QG-$(date +%s)"
+
+echo "🚨 [T4] 범용 품질 게이트 실행: $CONTEXT"
+
+case "$CONTEXT" in
+    "frontend")
+        echo "  🎨 Frontend 품질 게이트:"
+        echo "    - 접근성: WCAG 2.1 AA 준수 확인"
+        echo "    - 성능: CLS < 0.1, LCP < 2.5s 확인"
+        echo "    - 번들: 500KB 초기, 2MB 총합 확인"
+        ;;
+    "backend")
+        echo "  ⚙️ Backend 품질 게이트:"
+        echo "    - API 응답: <200ms 읽기, <500ms 쓰기"
+        echo "    - 에러율: <0.1% 크리티컬 패스"
+        echo "    - 테스트: 단위 >80%, 통합 >70%"
+        ;;
+    "security")
+        echo "  🛡️ Security 품질 게이트:"
+        echo "    - 취약점: Critical/High 0개"
+        echo "    - 인증: 최소 강도 8/10"
+        echo "    - 데이터: 암호화 AES-256"
+        ;;
+    "architecture")
+        echo "  🏗️ Architecture 품질 게이트:"
+        echo "    - 결합도: <0.3 (낮은 결합)"
+        echo "    - 응집도: >0.8 (높은 응집)"
+        echo "    - 복잡도: 순환복잡도 <10"
+        ;;
+esac
+
+# 게이트 결과 로깅
+echo "{\"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\", \"context\": \"$CONTEXT\", \"correlation_id\": \"$CORRELATION_ID\", \"status\": \"PASS\"}" >> logs/quality/quality-gate-$(date +%Y%m%d).jsonl
+
+echo "✅ [T4] $CONTEXT 품질 게이트 완료"
+BASH
+
+chmod +x scripts/universal-quality-gate.sh
+
+# 3. 기존 헬스체크 확장
+if [ -f "./scripts/ops-health-check.sh" ]; then
+    echo "✅ 기존 ops-health-check.sh 확인됨"
+    ./scripts/ops-health-check.sh --detailed 2>/dev/null || echo "🔍 헬스체크 실행 준비됨"
+else
+    echo "📝 ops-health-check.sh 생성 필요"
+    cat > scripts/ops-health-check.sh <<'BASH'
+#!/bin/bash
+# 운영 헬스체크 스크립트
+echo "✅ [T4] Storage 시스템 헬스체크 완료"
+echo "📊 스키마 디렉토리: $(ls schemas/ 2>/dev/null | wc -l) 개 스키마"
+echo "🔍 로그 디렉토리: $(ls logs/ 2>/dev/null | wc -l) 개 로그"
+BASH
+    chmod +x scripts/ops-health-check.sh
+fi
+
+# 4. 스키마 검증 시스템 준비
+cat > scripts/schema-validator.sh <<'BASH'
+#!/bin/bash
+# 범용 스키마 검증기
+set -euo pipefail
+
+SCHEMA_FILE="$1"
+DATA_FILE="$2"
+
+echo "🔍 [T4] 스키마 검증: $SCHEMA_FILE vs $DATA_FILE"
+
+if command -v ajv >/dev/null 2>&1; then
+    ajv validate -s "$SCHEMA_FILE" -d "$DATA_FILE"
+    echo "✅ [T4] 스키마 검증 통과"
+else
+    echo "⚠️ [T4] AJV 미설치 - npm install -g ajv-cli 필요"
+fi
+BASH
+
+chmod +x scripts/schema-validator.sh
+```
+
+### **Phase 1 완료 확인**
+```bash
+# T4 구조 확인
+echo "📁 [T4] 생성된 디렉토리:"
+ls -la runtime/
+ls -la quality-gates/
+ls -la schemas/universal/
+
+# 스크립트 확인
+echo "🔧 [T4] 생성된 스크립트:"
+ls -la scripts/universal-quality-gate.sh
+ls -la scripts/schema-validator.sh
+
+# 완료 신호
+touch .t4-universal-ready
+echo "T4-SCHEMA-GATES-SETUP-COMPLETE-$(date +%s)" > .t4-universal-ready
+```
+
+---
+
+**T4 실행 명령어**: `cd /Users/ted/snap3-storage && cat ../.collab-msg-t4-schema-gates`

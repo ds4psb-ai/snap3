@@ -1,0 +1,11 @@
+slo:
+  p95_ms: 500
+  error_budget:
+    window: 30m
+    burn_alert: 2.0
+  success_rate_min: 90.0
+quality_gates:
+  code_quality: {complexity_max: 10, coverage_min: 80}
+  security: {vulnerability_max: 0, auth_strength_min: 8}
+  ux: {accessibility_min: 90, performance_min: 85}
+  architecture: {coupling_max: 0.3, cohesion_min: 0.8}

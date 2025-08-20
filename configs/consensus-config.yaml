@@ -1,0 +1,7 @@
+thresholds:
+  proceed: 0.80
+  modify: 0.60
+  reject: 0.60
+weights_policy: dynamic
+slo_integration: true
+experiment_mode: true

@@ -1,0 +1,91 @@
+# 🚨 GPT-5 재귀개선 전문가 - 에스컬레이션 준비
+
+**Priority**: EXPERT-CONSULTATION  
+**Action**: Expert-Escalation-Ready  
+**Correlation-ID**: GPT5-EXPERT-ESCALATION-001  
+**Trigger**: 진행 중 복잡도/위험도 급상승시 즉시 활성화
+
+---
+
+## 🎯 **에스컬레이션 트리거 조건**
+
+### **자동 트리거 상황**
+1. **합의 점수 < 0.6**: 에이전트 간 심각한 의견 불일치
+2. **Circuit Breaker OPEN**: 시스템 안정성 임계값 초과
+3. **구현 복잡도 > 0.8**: 예상보다 높은 기술적 복잡도
+4. **SLO 에러버짓 소진 > 50%**: 품질 게이트 연속 실패
+
+### **수동 트리거 상황**
+- **ClaudeCode 판단**: 전문가 조언 필요한 아키텍처 결정
+- **사용자 요청**: 진행 상황 검토 및 방향성 조정
+- **예상 외 이슈**: 계획에 없던 기술적 장애물 발견
+
+---
+
+## 📋 **컨설팅 요청 템플릿 (즉시 활성화 가능)**
+
+### **상황 보고 포맷**
+```yaml
+ESCALATION_TYPE: [CONSENSUS_FAILURE | SYSTEM_INSTABILITY | HIGH_COMPLEXITY | SLO_BREACH]
+CURRENT_STATE:
+  - phase: "Phase 2 - Agent Router 구현 중"
+  - consensus_score: [현재 점수]
+  - circuit_breaker_state: [CLOSED/OPEN/HALF_OPEN]
+  - active_agents: [T1, T2, T3, T4, Cursor]
+BLOCKING_ISSUE:
+  - description: [구체적 문제 설명]
+  - impact: [시스템/품질/일정에 미치는 영향]
+  - attempted_solutions: [시도한 해결책들]
+EXPERT_REQUEST:
+  - specific_question: [전문가에게 묻고 싶은 구체적 질문]
+  - decision_options: [가능한 선택지들]
+  - timeline_impact: [결정이 일정에 미치는 영향]
+```
+
+### **컨설팅 문서 자동 생성 스크립트**
+```bash
+generate_expert_consultation() {
+    local escalation_type="$1"
+    local issue_description="$2"
+    
+    cat > .collab-msg-gpt5-expert-consultation-$(date +%s) <<EOF
+# 🚨 GPT-5 재귀개선 전문가 - 긴급 컨설팅 요청
+
+**Priority**: EXPERT-ESCALATION
+**Type**: $escalation_type
+**Timeline**: 즉시 전문가 조언 필요
+
+## 🔥 **긴급 상황**
+$issue_description
+
+## 📊 **현재 시스템 상태**
+$(curl -s http://localhost:8080/api/circuit-breaker/status | jq)
+
+## ❓ **전문가 의견 요청**
+범용 재귀개선 시스템 구축 중 예상치 못한 문제 발생.
+즉시 전문가 조언이 필요한 상황입니다.
+
+**ClaudeCode**: 작업 일시 중단, 전문가 응답 대기 중...
+EOF
+
+    echo "🚨 전문가 컨설팅 요청 생성: .collab-msg-gpt5-expert-consultation-$(date +%s)"
+}
+```
+
+---
+
+## ⚡ **모니터링 상태**
+
+### **실시간 감시 지표**
+- **합의 점수**: 실시간 계산 및 임계값 모니터링
+- **시스템 안정성**: Circuit Breaker 상태 추적
+- **구현 진행률**: Phase별 완료도 측정
+- **품질 게이트**: SLO/DORA 지표 연속 체크
+
+### **에스컬레이션 준비 상태**: ✅ **READY**
+
+**사용자 모니터링**: 진행 과정에서 문제 발생시 즉시 전문가 컨설팅 요청 준비 완료
+
+---
+
+**GPT-5 전문가 에스컬레이션 활성화 대기 중...**

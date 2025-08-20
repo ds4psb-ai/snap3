@@ -1,0 +1,45 @@
+version: 1
+signals:
+  file_patterns:
+    frontend:
+      - "src/**/*.{tsx,jsx,css,scss}"
+      - "components/**"
+    backend:
+      - "src/app/api/**"
+      - "src/**/*.{ts,js}"
+      - "services/**"
+    devops:
+      - ".github/workflows/**"
+      - "infra/**"
+      - "docker/**"
+      - "**/*.{yaml,yml}"
+    security:
+      - "auth/**"
+      - "**/*security*"
+    performance:
+      - "benchmark/**"
+      - "scripts/**"
+    architecture:
+      - "ai-collab/**"
+      - "docs/ADR/**"
+  commit_conventions:
+    feat: {weight: 1.0}
+    fix: {weight: 0.8}
+    perf: {weight: 1.0}
+    refactor: {weight: 0.6}
+    chore: {weight: 0.3}
+  code_complexity:
+    high_threshold: 0.7
+routing:
+  weights_by_context:
+    frontend: {cursor: 0.6, claudecode: 0.3, gpt5: 0.1}
+    backend: {claudecode: 0.5, t1: 0.1, t2: 0.15, t3: 0.15, t4: 0.1}
+    devops: {claudecode: 0.4, gpt5: 0.4, t1: 0.2}
+    security: {gpt5: 0.5, claudecode: 0.3, t1: 0.2}
+    performance: {t2: 0.3, t3: 0.3, claudecode: 0.3, gpt5: 0.1}
+    architecture: {gpt5: 0.5, claudecode: 0.3, cursor: 0.1, t1: 0.1}
+thresholds:
+  consensus:
+    proceed: 0.80
+    modify: 0.60
+    reject: 0.60

@@ -1,0 +1,141 @@
+# 📨 T1 - 범용 재귀개선 시스템 MVP 구축 명령
+
+**Priority**: CRITICAL  
+**Action**: Universal-Recursive-System-MVP-Setup  
+**Correlation-ID**: T1-UNIVERSAL-MVP-001  
+**Timeline**: T+0~15분 즉시 실행
+
+---
+
+## 🎯 **T1 Main Terminal 명령어 (즉시 실행)**
+
+### **Phase 1: 디렉토리 및 설정 파일 생성**
+```bash
+cd /Users/ted/snap3
+
+# 1. 설정 디렉토리 생성
+mkdir -p configs
+mkdir -p ai-collab
+mkdir -p docs/ADR
+
+# 2. Context Engine 규칙 배포
+cat > configs/context-engine.rules.yaml <<'YAML'
+version: 1
+signals:
+  file_patterns:
+    frontend:
+      - "src/**/*.{tsx,jsx,css,scss}"
+      - "components/**"
+    backend:
+      - "src/app/api/**"
+      - "src/**/*.{ts,js}"
+      - "services/**"
+    devops:
+      - ".github/workflows/**"
+      - "infra/**"
+      - "docker/**"
+      - "**/*.{yaml,yml}"
+    security:
+      - "auth/**"
+      - "**/*security*"
+    performance:
+      - "benchmark/**"
+      - "scripts/**"
+    architecture:
+      - "ai-collab/**"
+      - "docs/ADR/**"
+  commit_conventions:
+    feat: {weight: 1.0}
+    fix: {weight: 0.8}
+    perf: {weight: 1.0}
+    refactor: {weight: 0.6}
+    chore: {weight: 0.3}
+  code_complexity:
+    high_threshold: 0.7
+routing:
+  weights_by_context:
+    frontend: {cursor: 0.6, claudecode: 0.3, gpt5: 0.1}
+    backend: {claudecode: 0.5, t1: 0.1, t2: 0.15, t3: 0.15, t4: 0.1}
+    devops: {claudecode: 0.4, gpt5: 0.4, t1: 0.2}
+    security: {gpt5: 0.5, claudecode: 0.3, t1: 0.2}
+    performance: {t2: 0.3, t3: 0.3, claudecode: 0.3, gpt5: 0.1}
+    architecture: {gpt5: 0.5, claudecode: 0.3, cursor: 0.1, t1: 0.1}
+thresholds:
+  consensus:
+    proceed: 0.80
+    modify: 0.60
+    reject: 0.60
+YAML
+
+# 3. 합의 시스템 설정 업데이트
+cat > configs/consensus-config.yaml <<'YAML'
+thresholds:
+  proceed: 0.80
+  modify: 0.60
+  reject: 0.60
+weights_policy: dynamic
+slo_integration: true
+experiment_mode: true
+YAML
+
+# 4. SLO 가드 설정
+cat > configs/slo-guard.yaml <<'YAML'
+slo:
+  p95_ms: 500
+  error_budget:
+    window: 30m
+    burn_alert: 2.0
+  success_rate_min: 90.0
+quality_gates:
+  code_quality: {complexity_max: 10, coverage_min: 80}
+  security: {vulnerability_max: 0, auth_strength_min: 8}
+  ux: {accessibility_min: 90, performance_min: 85}
+  architecture: {coupling_max: 0.3, cohesion_min: 0.8}
+YAML
+
+# 5. ADR 문서 생성
+cat > docs/ADR/ADR-0001.md <<'MARKDOWN'
+# ADR-0001: Universal Recursive Improvement System MVP
+
+**Date**: 2025-08-20  
+**Status**: In Progress  
+**Context**: Transition from ingester-specific to universal recursive improvement
+
+## Decision
+Implement universal 6-Agent recursive improvement system with:
+- Context Detection Engine (UCDE)
+- Dynamic Agent Orchestration Matrix (DAOM)  
+- Multi-Dimensional Quality Gates (MDQG)
+
+## Consequences
+- All platform development work benefits from automated improvement
+- SRE SLO + DORA metrics provide objective quality measurement
+- Circuit Breaker + Saga patterns ensure system stability
+MARKDOWN
+
+# 6. 실험 설정 파일
+cat > configs/experiments.yaml <<'YAML'
+experiment:
+  recursive_improvement:
+    A: {enabled: true, mode: "full"}
+    B: {enabled: false, mode: "baseline"}
+  current_group: "A"
+  sample_size_target: 10
+YAML
+```
+
+### **Phase 1 완료 확인**
+```bash
+# 설정 파일 확인
+ls -la configs/
+ls -la docs/ADR/
+
+# 파일 내용 검증
+echo "✅ Context Engine Rules:" && head -5 configs/context-engine.rules.yaml
+echo "✅ Consensus Config:" && cat configs/consensus-config.yaml
+echo "✅ SLO Guard:" && head -10 configs/slo-guard.yaml
+```
+
+---
+
+**T1 실행 명령어**: `cd /Users/ted/snap3 && cat .collab-msg-t1-universal-setup`

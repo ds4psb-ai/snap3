@@ -1,0 +1,128 @@
+# 📨 T2 - DLQ/포이즌 큐 + 벤치마크 시스템 준비
+
+**Priority**: CRITICAL  
+**Action**: DLQ-Poison-Queue-Setup  
+**Correlation-ID**: T2-DLQ-SETUP-001  
+**Timeline**: T+0~15분 병렬 실행
+
+---
+
+## 🎯 **T2 Jobs Terminal 명령어 (즉시 실행)**
+
+### **Phase 1: DLQ/포이즌 큐 인프라 준비**
+```bash
+cd /Users/ted/snap3-jobs
+
+# 1. DLQ/포이즌 큐 디렉토리 생성
+mkdir -p runtime/dlq
+mkdir -p runtime/poison
+mkdir -p benchmark/universal
+mkdir -p logs/universal
+
+# 2. DLQ 처리 스크립트 생성
+cat > scripts/dlq-processor.sh <<'BASH'
+#!/bin/bash
+# DLQ (Dead Letter Queue) 처리기
+set -euo pipefail
+
+DLQ_DIR="runtime/dlq"
+POISON_DIR="runtime/poison" 
+MAX_RETRIES=3
+
+process_dlq() {
+    local file="$1"
+    local retry_count=$(jq -r '.retry_count // 0' "$file")
+    
+    if [ "$retry_count" -lt "$MAX_RETRIES" ]; then
+        echo "🔄 DLQ 재시도: $file (시도 ${retry_count}/${MAX_RETRIES})"
+        # 재시도 로직
+        jq --arg count "$((retry_count + 1))" '.retry_count = ($count | tonumber)' "$file" > "$file.tmp"
+        mv "$file.tmp" "$file"
+    else
+        echo "☠️ 포이즌 큐 이동: $file"
+        mv "$file" "$POISON_DIR/"
+    fi
+}
+
+# DLQ 파일들 처리
+for file in "$DLQ_DIR"/*.json; do
+    [ -f "$file" ] && process_dlq "$file"
+done
+BASH
+
+chmod +x scripts/dlq-processor.sh
+
+# 3. 벤치마크 스크립트 업데이트
+cat > scripts/benchmark-batch.sh <<'BASH'
+#!/bin/bash
+# 범용 벤치마크 배치 스크립트
+set -euo pipefail
+
+GROUP="${1:-A}"
+COUNT="${2:-10}"
+CONTEXT="${3:-backend}"
+
+echo "🧪 [T2] 벤치마크 실행: Group $GROUP, Count $COUNT, Context $CONTEXT"
+
+RESULTS_DIR="benchmark/universal"
+mkdir -p "$RESULTS_DIR"
+
+CORRELATION_ID="T2-BENCH-$GROUP-$(date +%s)"
+CSV_FILE="$RESULTS_DIR/benchmark-$GROUP-$CONTEXT-$(date +%Y%m%d_%H%M%S).csv"
+
+# CSV 헤더
+echo "test_id,group,context,http_code,duration_ms,success,correlation_id" > "$CSV_FILE"
+
+for i in $(seq 1 "$COUNT"); do
+    TEST_ID="$GROUP-$CONTEXT-$i"
+    
+    start_time=$(python3 -c "import time; print(int(time.time() * 1000))")
+    
+    # 실제 API 호출
+    response=$(curl -s -w "%{http_code}" \
+        -X POST \
+        -H "Content-Type: application/json" \
+        -H "X-Correlation-ID: $CORRELATION_ID-$i" \
+        -d '{"test": true, "context": "'$CONTEXT'", "group": "'$GROUP'"}' \
+        "http://localhost:8080/api/extract-social-metadata" \
+        2>/dev/null || echo "000")
+    
+    end_time=$(python3 -c "import time; print(int(time.time() * 1000))")
+    duration=$((end_time - start_time))
+    
+    # 성공 여부 판정
+    if [[ "$response" =~ ^2[0-9][0-9]$ ]]; then
+        success="true"
+    else
+        success="false"
+    fi
+    
+    # 결과 기록
+    echo "$TEST_ID,$GROUP,$CONTEXT,$response,$duration,$success,$CORRELATION_ID-$i" >> "$CSV_FILE"
+    
+    echo "  Test $i/$COUNT: $response (${duration}ms)"
+    sleep 0.1
+done
+
+echo "✅ [T2] 벤치마크 완료: $CSV_FILE"
+BASH
+
+chmod +x scripts/benchmark-batch.sh
+
+# 4. 실험 스위치 확인
+echo "✅ T2 DLQ/벤치마크 인프라 준비 완료"
+echo "📊 생성된 구조:"
+ls -la runtime/
+ls -la scripts/benchmark-batch.sh scripts/dlq-processor.sh
+```
+
+### **Phase 1 완료 신호**
+```bash
+# T2 준비 완료 표시
+touch .t2-universal-ready
+echo "T2-UNIVERSAL-SETUP-COMPLETE-$(date +%s)" > .t2-universal-ready
+```
+
+---
+
+**T2 실행 명령어**: `cd /Users/ted/snap3-jobs && cat .collab-msg-t2-dlq-setup`
