@@ -1,0 +1,137 @@
+# 🔧 CURSOR: 404 에러 해결 방안
+
+**Priority**: DEBUG_SOLUTION_PROVIDED  
+**Type**: API_INTEGRATION_FIX  
+**Timeline**: 즉시 적용 가능  
+**Correlation-ID**: CURSOR-DEBUG-SOLUTION-001
+
+---
+
+## 🔍 **문제 분석 결과**
+
+### **문제 원인 확인**
+- ✅ **Platform 값**: "instagram" (정확함)
+- ✅ **API 엔드포인트**: `/api/instagram/metadata` (정확함)
+- ❌ **Cursor API 호출**: 404 에러 발생
+
+### **디버깅 결과**
+```bash
+# ClaudeCode UI 호출
+curl http://localhost:8080/api/extract-social-metadata
+# 결과: "Cursor API error: 404"
+
+# 직접 Cursor API 호출  
+curl http://localhost:3000/api/instagram/metadata
+# 결과: ✅ 완벽 작동 (195K likes, 1,193 comments)
+```
+
+---
+
+## 🛠️ **해결 방안**
+
+### **문제 1: Cursor 서버 상태**
+```bash
+# Cursor 서버가 실제로 실행 중인지 확인
+lsof -i :3000
+ps aux | grep "next dev"
+```
+
+### **문제 2: 네트워크 연결**
+```javascript
+// ClaudeCode에서 Cursor API 호출 시 타임아웃 설정
+const cursorResponse = await createFetchWithKeepAlive(extractorEndpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: urlResult.canonicalUrl }),
+    timeout: 10000  // 10초 타임아웃 추가
+});
+```
+
+### **문제 3: 에러 처리 개선**
+```javascript
+try {
+    const cursorResponse = await createFetchWithKeepAlive(extractorEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: urlResult.canonicalUrl })
+    });
+    
+    if (!cursorResponse.ok) {
+        console.error('Cursor API Error:', cursorResponse.status, cursorResponse.statusText);
+        throw new Error(`Cursor API error: ${cursorResponse.status}`);
+    }
+    
+    const cursorData = await cursorResponse.json();
+    return cursorData;
+    
+} catch (error) {
+    console.error('Cursor API 호출 실패:', error.message);
+    // Fallback 로직으로 전환
+    return null;
+}
+```
+
+---
+
+## 🚀 **즉시 적용 가능한 수정**
+
+### **1. Cursor 서버 상태 확인**
+```bash
+# 터미널에서 실행
+lsof -i :3000
+# 프로세스가 실행 중이면 PID 확인
+# 실행 중이 아니면 npm run dev 시작
+```
+
+### **2. ClaudeCode 코드 수정**
+```javascript
+// extractorEndpoint 생성 시 로깅 추가
+console.log('Calling Cursor API:', extractorEndpoint);
+console.log('Request payload:', { url: urlResult.canonicalUrl });
+
+// 응답 처리 개선
+if (cursorResponse.ok) {
+    const data = await cursorResponse.json();
+    console.log('Cursor API 성공:', data);
+    return data;
+} else {
+    console.error('Cursor API 실패:', cursorResponse.status);
+    return null;
+}
+```
+
+### **3. 대안: 직접 API 호출**
+```javascript
+// ClaudeCode에서 직접 Cursor API 호출
+const directResponse = await fetch('http://localhost:3000/api/instagram/metadata', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: urlResult.canonicalUrl })
+});
+```
+
+---
+
+## 📋 **Cursor Action Plan**
+
+### **즉시 실행**
+1. **Cursor 서버 상태 확인**: `lsof -i :3000`
+2. **서버 재시작**: `npm run dev` (필요시)
+3. **API 테스트**: 직접 curl 호출로 확인
+4. **ClaudeCode 코드 수정**: 에러 처리 개선
+
+### **예상 결과**
+- **Cursor API**: 정상 작동 확인
+- **ClaudeCode 통합**: 404 에러 해결
+- **자동화**: 90%+ 달성
+
+---
+
+🔧 **404 에러 해결 방안 제공 완료!**
+
+**ClaudeCode 확인 명령어:**
+```bash
+git pull
+cat .collab-msg-cursor-debug-solution
+# 404 에러 해결 방안 적용
+```

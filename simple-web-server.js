@@ -1234,20 +1234,29 @@ app.post('/api/extract-social-metadata', async (req, res) => {
         
         // ACTIVE: Cursor API Bridge Integration  
         structuredLog('info', 'Initiating Cursor API bridge call', {
-            targetUrl: platform === 'instagram' ? 'http://localhost:3000/api/instagram/metadata' : 'http://localhost:3000/api/tiktok/metadata',
-            platform: urlResult.platform,
-            contentId: urlResult.id
+            inputPlatform: platform,
+            urlResultPlatform: urlResult.platform,
+            contentId: urlResult.id,
+            canonicalUrl: urlResult.canonicalUrl
         }, correlationId);
         
         let extractionResponse;
         
         try {
-            // Call Cursor's platform-specific extraction API
-            const extractorEndpoint = platform === 'instagram' 
+            // Fix: Use input platform (not urlResult.platform) for endpoint selection
+            const normalizedPlatform = platform.toLowerCase();
+            const extractorEndpoint = normalizedPlatform === 'instagram' 
                 ? 'http://localhost:3000/api/instagram/metadata'
                 : 'http://localhost:3000/api/tiktok/metadata';
                 
-            const cursorResponse = await createFetchWithKeepAlive(extractorEndpoint, {
+            structuredLog('info', 'Cursor API call details', {
+                normalizedPlatform,
+                extractorEndpoint,
+                requestUrl: urlResult.canonicalUrl
+            }, correlationId);
+                
+            // Direct fetch to Cursor API (bypass createFetchWithKeepAlive)
+            const cursorResponse = await fetch(extractorEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1255,8 +1264,7 @@ app.post('/api/extract-social-metadata', async (req, res) => {
                 },
                 body: JSON.stringify({
                     url: urlResult.canonicalUrl
-                }),
-                timeout: 30000 // 30 second timeout
+                })
             });
             
             if (!cursorResponse.ok) {
