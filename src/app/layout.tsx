@@ -1,3 +1,5 @@
+'use client';
+
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
@@ -22,7 +24,7 @@ export default function RootLayout({
     defaultOptions: {
       queries: {
         staleTime: 5 * 60 * 1000, // 5분
-        cacheTime: 10 * 60 * 1000, // 10분
+        gcTime: 10 * 60 * 1000, // 10분
         retry: 3,
         retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
       }
