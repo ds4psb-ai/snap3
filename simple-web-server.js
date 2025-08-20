@@ -1870,6 +1870,102 @@ async function startServer() {
         });
     }
     
+    // Main VDP Extractor Integration (Phase 2)
+    app.post('/api/vdp/extract-main', async (req, res) => {
+        const startTime = Date.now();
+        const correlationId = req.correlationId;
+        
+        structuredLog('info', 'Main VDP extractor integration initiated', {
+            endpoint: '/api/vdp/extract-main',
+            platform: req.body.platform,
+            url: req.body.url?.substring(0, 50) + '...',
+            extractor: 'services/vdp-extractor (Gemini 2.5 Pro)'
+        }, correlationId);
+        
+        try {
+            const { url, platform, content_id, metadata = {} } = req.body;
+            
+            // Validation
+            if (!url || !platform) {
+                return res.status(400).json({
+                    error: 'REQUIRED_FIELDS_MISSING',
+                    message: 'url and platform fields are required',
+                    correlationId
+                });
+            }
+            
+            // Call main VDP extractor on port 3005
+            const vdpResponse = await fetch('http://localhost:3005/api/vdp/extract', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Correlation-ID': correlationId
+                },
+                body: JSON.stringify({
+                    url,
+                    platform,
+                    content_id: content_id || 'undefined'
+                })
+            });
+            
+            if (!vdpResponse.ok) {
+                throw new Error(`VDP extractor error: ${vdpResponse.status}`);
+            }
+            
+            const vdpResult = await vdpResponse.json();
+            
+            // GitHub VDP compatible format
+            const githubVdpJson = {
+                content_key: `${platform}:${content_id || vdpResult.content_id}`,
+                extractor_type: 'main_gemini',
+                github_vdp_compatible: true,
+                processing_info: {
+                    correlation_id: correlationId,
+                    processing_time_ms: Date.now() - startTime,
+                    extractor_service: 'services/vdp-extractor',
+                    ai_studio_builder: true
+                },
+                vdp_data: vdpResult.vdp_data,
+                metadata: {
+                    ...vdpResult.vdp_data?.metadata,
+                    ...metadata
+                }
+            };
+            
+            // Save to GCS for GitHub compatibility
+            const fileName = `${content_id || 'undefined'}_main_${Date.now()}.json`;
+            const gcsUri = `gs://tough-variety-raw-central1/vdp/processed/${platform}/${fileName}`;
+            
+            structuredLog('success', 'Main VDP extraction completed', {
+                gcsUri,
+                contentKey: githubVdpJson.content_key,
+                extractorType: githubVdpJson.extractor_type,
+                aiStudioBuilder: githubVdpJson.processing_info.ai_studio_builder,
+                totalProcessingTimeMs: githubVdpJson.processing_info.processing_time_ms
+            }, correlationId);
+            
+            res.json({
+                success: true,
+                github_vdp_json: githubVdpJson,
+                gcs_uri: gcsUri,
+                correlationId
+            });
+            
+        } catch (error) {
+            structuredLog('error', 'Main VDP extraction failed', {
+                error: error.message,
+                processingTimeMs: Date.now() - startTime
+            }, correlationId);
+            
+            res.status(500).json({
+                success: false,
+                error: 'MAIN_VDP_EXTRACTION_FAILED',
+                message: error.message,
+                correlationId
+            });
+        }
+    });
+
     // T3 Metrics Endpoint for UI Dashboard
     app.get('/metrics', async (req, res) => {
         try {

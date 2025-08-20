@@ -109,6 +109,37 @@
                         </div>
                     </fieldset>
 
+                    <!-- VDP Extractor Selection (Phase 2) -->
+                    <fieldset class="extractor-selector" role="radiogroup" aria-labelledby="extractor-legend">
+                        <legend id="extractor-legend" class="extractor-selector__legend">
+                            VDP 추출기 선택
+                        </legend>
+                        
+                        <div class="extractor-options">
+                            <div class="extractor-option">
+                                <input type="radio" id="main-extractor" name="vdp_extractor" value="main" checked>
+                                <label for="main-extractor" class="extractor-option__label">
+                                    <span class="extractor-icon">🧠</span>
+                                    <span class="extractor-info">
+                                        <span class="extractor-name">Main Extractor</span>
+                                        <span class="extractor-desc">Gemini 2.5 Pro | GitHub VDP 호환</span>
+                                    </span>
+                                </label>
+                            </div>
+                            
+                            <div class="extractor-option">
+                                <input type="radio" id="sub-extractor" name="vdp_extractor" value="sub">
+                                <label for="sub-extractor" class="extractor-option__label">
+                                    <span class="extractor-icon">⚡</span>
+                                    <span class="extractor-info">
+                                        <span class="extractor-name">Sub Extractor</span>
+                                        <span class="extractor-desc">Vertex AI | Hook Genome 전문</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
+
                     <!-- Content Input Forms -->
                     <div class="content-input">
                         
@@ -338,6 +369,40 @@
                             <h3 class="section-title">📝 Content Summary</h3>
                             <div id="content-summary" class="content-summary">
                                 <!-- Summary will be populated -->
+                            </div>
+                        </div>
+
+                        <!-- GitHub VDP Compatible JSON Display (Phase 2) -->
+                        <div id="github-vdp-section" class="vdp-section" style="display: none;">
+                            <h3 class="section-title">
+                                <span class="section-icon">🔗</span>
+                                GitHub VDP 호환 JSON
+                                <span class="github-badge">GitHub Compatible</span>
+                            </h3>
+                            <div class="github-vdp-container">
+                                <div class="github-vdp-header">
+                                    <div class="github-vdp-meta">
+                                        <span id="github-content-key" class="content-key">-</span>
+                                        <span id="github-extractor-type" class="extractor-type">-</span>
+                                    </div>
+                                    <button type="button" id="copy-github-json-btn" class="copy-btn">
+                                        <span class="copy-icon">📋</span>
+                                        <span class="copy-text">JSON 복사</span>
+                                    </button>
+                                </div>
+                                <div id="github-vdp-json-display" class="json-display">
+                                    <!-- GitHub VDP JSON will be displayed here -->
+                                </div>
+                                <div class="github-vdp-actions">
+                                    <button type="button" id="download-github-json-btn" class="export-btn">
+                                        <span class="btn-icon">💾</span>
+                                        <span class="btn-text">GitHub JSON 다운로드</span>
+                                    </button>
+                                    <button type="button" id="view-gcs-link-btn" class="export-btn export-btn--secondary">
+                                        <span class="btn-icon">☁️</span>
+                                        <span class="btn-text">GCS 링크 보기</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
