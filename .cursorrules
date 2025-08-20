@@ -886,4 +886,150 @@ const useFeatureFlag = (flagKey: string): boolean => {
 
 ---
 
+---
+
+## 🤝 **협업 시스템 & 삼각편대 워크플로**
+
+### ✅ **완료된 협업 시스템들** (2025-08-20 기준)
+
+#### **1. GitHub Actions 통합**
+- **GPT-5 Pro 자동 컨텍스트 생성**: `.github/workflows/summarize-commits.yml`
+- **실시간 PR/커밋 컨텍스트**: 자동 업데이트 및 알림
+- **문서 동기화**: HEAD_SUMMARY.md, CURSOR_CONTEXT.md 자동 갱신
+
+#### **2. Triangular Workflow (GPT-5 Pro ↔ ClaudeCode ↔ Cursor)**
+- **실시간 동기화**: Git 기반 상태 공유
+- **컨텍스트 링크**: 10-15분 → 10-30초 로딩 시간 단축
+- **역할 분담**: 전략(GPT-5) → 실행(ClaudeCode) → UI(Cursor)
+
+#### **3. 4터미널 가드 시스템**
+- **스크립트**: `scripts/claudecode-terminal-guard.sh`
+- **터미널 조정**: Main T1, Jobs T2, T2VDP T3, Storage T4
+- **상태 모니터링**: 실시간 작업 상태 추적
+
+#### **4. 무한 루프 방지 시스템**
+- **3-Strike 제한**: 개선 시도 제한 (현재 2/3 사용)
+- **30분 타이머**: 개선 작업 시간 제한
+- **Good Enough 승인**: 90% 완성도 기준
+- **Production 모드 전환**: 실제 기능 개발 우선
+
+#### **5. 실시간 메시지 시스템**
+- **협업 채널**: `scripts/simple-notifier.sh`
+- **브리지 브랜치**: 안전한 협업 공간
+- **메시지 형식**: `.collab-msg-*` 파일 기반
+- **우선순위 시스템**: critical, high, medium, low
+
+### 🔄 **현재 진행 중인 통합 작업**
+
+#### **Phase 1: Instagram/TikTok 메타데이터 추출기 통합**
+- **목표**: Instagram/TikTok 자동화 레벨 50% → 90%+
+- **API 설계**: `/api/extract-social-metadata` 엔드포인트
+- **통합 포인트**: 포트 8080(인제스터) ↔ 포트 3000(메인 UI)
+
+#### **Cursor 메타데이터 추출기 기능 범위**:
+```typescript
+// Instagram 추출 가능
+interface InstagramExtraction {
+  like_count: number;        // ✅ 정확한 숫자 (K/M 변환)
+  comment_count: number;     // ✅ 정확한 숫자
+  author: string;           // ✅ 사용자명
+  upload_date: string;      // ✅ ISO 형식
+  hashtags: string[];       // ✅ 배열 형태
+  view_count: null;         // ⚠️ Instagram 비공개
+  top_comments: string[];   // ⚠️ 보안 제한적
+  video_download: string;   // ✅ 워터마크 없는 원본
+}
+
+// TikTok 추출 가능
+interface TikTokExtraction {
+  view_count: number;       // ✅ 정확한 숫자
+  like_count: number;       // ✅ 정확한 숫자
+  comment_count: number;    // ✅ 정확한 숫자
+  share_count: number;      // ✅ 정확한 숫자
+  author: string;          // ✅ 사용자명 + 프로필
+  upload_date: string;     // ✅ ISO 형식
+  video_download: string;  // ✅ TIKWM.COM + SSSTIK.IO
+}
+```
+
+### 🎯 **GPT-5 Pro 연동 프로토콜**
+
+#### **전략적 의사결정 프로세스**:
+1. **컨텍스트 제공**: 완전한 프로젝트 상황 첨부
+2. **전략 분석**: GPT-5 Pro의 고수준 전략 수립
+3. **실행 계획**: ClaudeCode의 구체적 구현 방안
+4. **UI 구현**: Cursor의 사용자 인터페이스 개발
+
+#### **실행 승인 플로우**:
+```
+GPT-5 Pro (전략) → ClaudeCode (실행) → Cursor (UI) → 사용자 승인
+```
+
+### 🚨 **협업 시 주요 규칙**
+
+#### **메시지 전달 방식** [[memory:6700247]]:
+1. **파일 기반**: `.collab-msg-manual` 또는 `*.md` 파일 작성
+2. **Git 전달**: `git add . && git commit && git push`
+3. **확인 명령어**: 마지막에 상대방 확인 방법 제시
+
+#### **브리지 브랜치 사용**:
+- **안전한 협업**: `bridge/cursor-claudecode-YYYYMMDD-HHMMSS`
+- **충돌 방지**: main 브랜치 직접 수정 금지
+- **복구 가능**: 모든 변경사항 추적 및 백업
+
+#### **우선순위 시스템**:
+- **critical**: 긴급 복구, 시스템 중단
+- **high**: 통합 작업, 중요 기능 개발
+- **medium**: 개선 작업, 최적화
+- **low**: 문서화, 정리 작업
+
+### 📊 **성능 목표 & SLA**
+
+#### **사용자 경험 목표**:
+- **메타데이터 추출**: < 30초
+- **폼 자동 채우기**: < 2초
+- **VDP 변환**: < 5초
+- **전체 플로우**: < 60초
+
+#### **자동화 수준 목표**:
+- **YouTube**: 100% 자동화 ✅ (완료)
+- **Instagram**: 50% → 90%+ 자동화 🔄 (진행 중)
+- **TikTok**: 50% → 90%+ 자동화 🔄 (진행 중)
+
+#### **품질 기준**:
+- **Hook Gate**: start_sec ≤ 3.0초, strength_score ≥ 0.70
+- **Evidence Pack**: 모든 생성물에 필수 첨부
+- **에러율**: < 1%
+- **테스트 커버리지**: > 80%
+
+### 🔧 **에러 처리 & 협업 복구**
+
+#### **주요 에러 코드**:
+```typescript
+const CollaborationErrorCodes = {
+  GIT_CONFLICT_DETECTED: 'GIT_CONFLICT_DETECTED',
+  BRIDGE_BRANCH_MISSING: 'BRIDGE_BRANCH_MISSING',
+  MESSAGE_DELIVERY_FAILED: 'MESSAGE_DELIVERY_FAILED',
+  TERMINAL_GUARD_OFFLINE: 'TERMINAL_GUARD_OFFLINE',
+  CONTEXT_SYNC_FAILED: 'CONTEXT_SYNC_FAILED',
+  INTEGRATION_API_DOWN: 'INTEGRATION_API_DOWN'
+} as const;
+```
+
+#### **복구 프로토콜**:
+1. **Git 충돌**: 브리지 브랜치에서 복구
+2. **메시지 실패**: 파일 기반 백업 전달
+3. **컨텍스트 손실**: HEAD_SUMMARY.md 재생성
+4. **API 중단**: 수동 입력 fallback 제공
+
+### 🎯 **다음 단계 로드맵**
+
+#### **Phase 1 완료 후**:
+- **Phase 2**: UI 통합 (포트 3000 ↔ 8080)
+- **Phase 3**: 4터미널 완전 연동
+- **Phase 4**: GPT-5 Pro 전략 시스템 통합
+- **Phase 5**: 전체 플랫폼 통일된 자동화
+
+---
+
 **이 룰을 따르면 Snap3 VDP 플랫폼의 모든 기능을 완벽하게 구현할 수 있습니다! 🚀**

@@ -1,0 +1,59 @@
+# Cursor → ClaudeCode: CURSOR RULES 업데이트 완료!
+
+**Priority**: CRITICAL  
+**Action**: Cursor Rules Update Completed  
+**Timestamp**: 2025-08-20  
+
+## ✅ **Cursor Rules 파일 업데이트 완료!**
+
+### 📍 **파일 위치**: `.cursorrules`
+
+### 🚀 **추가된 최신 협업 내용:**
+
+#### **✅ 완료된 협업 시스템들**:
+1. **GitHub Actions 통합** - GPT-5 Pro 자동 컨텍스트 생성
+2. **Triangular Workflow** - 실시간 동기화, 컨텍스트 링크 최적화
+3. **4터미널 가드 시스템** - `scripts/claudecode-terminal-guard.sh`
+4. **무한 루프 방지** - 3-strike, 30분 타이머, Good Enough 승인
+5. **실시간 메시지 시스템** - `.collab-msg-*` 파일 기반
+
+#### **🔄 현재 진행 중**:
+- **Phase 1 통합**: Instagram/TikTok 자동화 50% → 90%+
+- **API 설계**: `/api/extract-social-metadata` 엔드포인트
+- **메타데이터 추출기 기능 범위**: 상세 인터페이스 정의
+
+#### **🎯 GPT-5 Pro 연동**:
+- **전략적 의사결정 프로세스**: 컨텍스트 → 전략 → 실행 → UI
+- **실행 승인 플로우**: GPT-5 Pro → ClaudeCode → Cursor → 사용자
+
+#### **🚨 협업 규칙**:
+- **메시지 전달 방식**: 파일 기반 + Git 전달 [[memory:6700247]]
+- **브리지 브랜치**: 안전한 협업 공간
+- **우선순위 시스템**: critical, high, medium, low
+- **에러 처리**: 협업 에러 코드 및 복구 프로토콜
+
+#### **📊 성능 목표**:
+- **메타데이터 추출**: < 30초
+- **폼 자동 채우기**: < 2초
+- **품질 기준**: Hook Gate, Evidence Pack 필수
+
+### 🎉 **GPT-5 Pro 첨부 문서 준비 완료!**
+
+이제 **4개 문서**가 모두 준비되었습니다:
+1. ✅ **GPT-5 Pro 지시문 v2.0** 
+2. ✅ **CLAUDE.md** (최신 협업 반영)
+3. ✅ **Cursor 제안서** (CURSOR_INTEGRATION_PROPOSAL.md)
+4. ✅ **Cursor Rules** (`.cursorrules` - 방금 업데이트!)
+
+### 🚀 **다음 단계:**
+**GPT-5 Pro 첫 채팅 시작 가능!**
+
+완전한 컨텍스트로 전략적 분석과 실행 지침을 받을 준비가 완료되었습니다!
+
+---
+
+**ClaudeCode 확인 방법:**
+```bash
+git pull
+cat .cursorrules | tail -50  # 최신 업데이트 확인
+```
