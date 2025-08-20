@@ -1,0 +1,175 @@
+# 🆘 GPT-5 Pro 컨설팅 요청: API 통합 404 에러 해결
+
+**Priority**: CRITICAL_CONSULTING_REQUEST  
+**Type**: API_INTEGRATION_FAILURE_ANALYSIS  
+**Timeline**: 즉시 전문가 분석 필요  
+**Correlation-ID**: GPT5-404-ERROR-CONSULTING-001  
+**Timestamp**: 2025-08-20 17:45:00
+
+---
+
+## 🚨 **문제 상황 요약**
+
+### **기술적 현황**
+- **직접 API 호출**: ✅ 완벽 작동 (195K likes, 1,193 comments 추출)
+- **통합 API 호출**: ❌ 404 에러 지속 (ClaudeCode → Cursor)
+- **복잡도 점수**: 722.81 >> 0.75 (임계값 963배 초과)
+
+### **시스템 구조**
+```
+ClaudeCode (localhost:8080) → Cursor (localhost:3000)
+     ↓                            ↓
+/api/extract-social-metadata → /api/instagram/metadata ❌ 404
+```
+
+---
+
+## 🔍 **기술적 분석 데이터**
+
+### **성공하는 직접 호출**
+```bash
+curl http://localhost:3000/api/instagram/metadata -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://www.instagram.com/reel/DMTb4uiywui/"}'
+
+# 결과: ✅ 성공
+{
+  "like_count": 195000,
+  "comment_count": 1193,
+  "author": { "username": "funnyfromai", "followers": 622863 },
+  "hashtags": ["#aimemes", "#aivideo", "#veo3"],
+  "content_id": "IG_DMTb4uiywui"
+}
+```
+
+### **실패하는 통합 호출**
+```bash
+curl http://localhost:8080/api/extract-social-metadata -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://www.instagram.com/reel/DMTb4uiywui/","platform":"instagram"}'
+
+# 결과: ❌ 실패
+{
+  "success": false,
+  "data": {
+    "fallback_reason": "Cursor API error: 404"
+  }
+}
+```
+
+---
+
+## 🔧 **현재 ClaudeCode 구현 코드**
+
+### **API 브리지 로직**
+```javascript
+// simple-web-server.js (lines 1246-1268)
+const extractorEndpoint = normalizedPlatform === 'instagram' 
+    ? 'http://localhost:3000/api/instagram/metadata'
+    : 'http://localhost:3000/api/tiktok/metadata';
+
+const cursorResponse = await fetch(extractorEndpoint, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-Correlation-ID': correlationId
+    },
+    body: JSON.stringify({
+        url: urlResult.canonicalUrl
+    })
+});
+
+if (!cursorResponse.ok) {
+    throw new Error(`Cursor API error: ${cursorResponse.status}`);
+}
+```
+
+### **URL 정규화 결과**
+```javascript
+// URL processing
+urlResult = {
+    platform: "instagram",  // 정규화된 플랫폼
+    id: "DMTb4uiywui",      // 추출된 content_id
+    canonicalUrl: "https://www.instagram.com/reel/DMTb4uiywui/"
+}
+```
+
+---
+
+## 🧠 **전문가 분석 요청 사항**
+
+### **1. 아키텍처 분석**
+**질문**: 포트 간 API 호출에서 404 에러가 발생하는 근본 원인은?
+- **Network Layer 문제**: localhost 간 통신 이슈?
+- **API Contract 불일치**: 요청/응답 형식 차이?
+- **Routing 문제**: 엔드포인트 경로 매핑 오류?
+- **Authentication 문제**: 인증 헤더 누락?
+
+### **2. 복잡도 폭증 원인**
+**현재 복잡도**: 722.81 (API 호출 144,452개, 에러 20개)
+- **과도한 API 호출**: 정상 범위의 963배 초과
+- **에러 누적**: 통합 실패로 인한 반복 호출
+- **코드 복잡성**: 다중 fallback 로직 중첩
+
+### **3. 해결 전략 제시**
+**목표**: 복잡도 722.81 → 0.5 이하, 자동화 0% → 90%+
+- **단순화 방안**: API 호출 패턴 최적화
+- **에러 처리**: 효율적인 fallback 전략
+- **성능 최적화**: 응답 시간 개선
+
+---
+
+## 🎯 **컨설팅 요청 핵심 질문**
+
+### **Technical Questions**
+1. **API Integration Pattern**: 포트 간 통신에서 404 에러 해결 방안?
+2. **Error Handling Strategy**: 효율적인 fallback 및 retry 로직?
+3. **Performance Optimization**: 144K+ API 호출을 100 이하로 최적화?
+4. **Architecture Simplification**: 복잡도 급증 방지 패턴?
+
+### **Strategic Questions**
+1. **Team Coordination**: Cursor vs ClaudeCode 작업 분담 최적화?
+2. **Priority Management**: 사용자 요구 vs 시스템 안정성 균형?
+3. **Quality Assurance**: 90%+ 자동화 달성 가능한 현실적 방안?
+4. **Risk Mitigation**: 재귀개선 시스템 활용한 안전한 구현?
+
+---
+
+## 📊 **성공 지표 및 목표**
+
+### **Performance Targets**
+- **복잡도**: 722.81 → 0.5 이하 (99.9% 감소)
+- **API 호출**: 144,452 → 100 이하 (99.9% 감소)
+- **에러율**: 20개 → 0개 (완전 제거)
+- **자동화율**: 0% → 90%+ (목표 달성)
+
+### **User Experience Targets**
+- **Instagram**: 5-8분 → 30초 (85% 시간 단축)
+- **TikTok**: 5-8분 → 30초 (85% 시간 단축)
+- **UI Complexity**: 복잡한 업로드 폼 → URL-only 단순화
+- **Data Accuracy**: 수동 입력 오류 → 실제 데이터 100%
+
+---
+
+## 🚀 **기대하는 전문가 답변**
+
+### **즉시 실행 가능한 해결책**
+1. **기술적 수정사항**: 구체적인 코드 패치 및 설정 변경
+2. **아키텍처 개선안**: 장기적 안정성 확보 방안
+3. **팀 협업 전략**: 효율적인 작업 분담 및 우선순위
+
+### **예상 구현 시간**
+- **긴급 수정**: 30분 이내
+- **안정화**: 1-2시간
+- **완전 통합**: 1일 이내
+
+---
+
+🧠 **GPT-5 Pro 전문가 분석 및 해결 방안 제시 요청!**
+
+**ClaudeCode 확인 명령어:**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-gpt5-404-error-consulting-request
+# GPT-5 Pro 컨설팅 요청 완료
+```
