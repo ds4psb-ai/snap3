@@ -1,0 +1,177 @@
+# 📊 T2 Terminal (Jobs/8081) - Phase 2B 상세 명령어
+
+**의존성**: T1 완료 신호 `.t1-phase2a-done` 확인 필수  
+**실행 방식**: ⚡ 병렬 실행 가능 (T3와 동시)  
+**작업 시간**: 15분 예상
+
+---
+
+## 🔍 **사전 준비 (필수)**
+
+### **Step 1: T1 완료 신호 확인**
+```bash
+cd /Users/ted/snap3
+
+# T1 완료 신호 대기
+while [ ! -f .t1-phase2a-done ]; do
+  echo "⏳ T1 Circuit Breaker 완료 대기 중..."
+  sleep 3
+done
+
+echo "✅ T1 준비 완료 - T2 Circuit Breaker 테스트 시작"
+```
+
+### **Step 2: T2 디렉토리 확인**
+```bash
+cd /Users/ted/snap3-jobs
+
+# 디렉토리 확인
+pwd  # /Users/ted/snap3-jobs 확인 필수
+
+# T2 포트 확인 (8081 사용 중이어야 함)
+lsof -i :8081 && echo "✅ T2 서버 실행 중" || echo "❌ T2 서버 없음 - 시작 필요"
+```
+
+---
+
+## 📊 **Circuit Breaker 성능 테스트 (메인 작업)**
+
+### **Step 3: Circuit Breaker 기능 테스트**
+```bash
+cd /Users/ted/snap3-jobs
+
+# Circuit Breaker 상태 확인
+echo "🔍 [T2] Circuit Breaker 초기 상태 확인"
+curl -s http://localhost:8080/api/circuit-breaker/status | jq '{
+  state: .state.state,
+  failureCount: .state.failureCount,
+  retryAttempts: .state.retryAttempts,
+  backoffEnabled: .exponential_backoff.enabled
+}'
+
+echo "✅ [T2] Circuit Breaker 상태 확인 완료"
+```
+
+### **Step 4: 실패 시나리오 테스트 (30회)**
+```bash
+cd /Users/ted/snap3-jobs
+
+echo "⚡ [T2] Circuit Breaker 실패 시나리오 테스트 시작 (30회)"
+
+# 실패 테스트 스크립트 생성
+cat > circuit-breaker-failure-test.sh << 'EOF'
+#!/bin/bash
+
+echo "📊 Circuit Breaker 실패 테스트 시작"
+echo "🎯 목표: 30회 실패 → OPEN 상태 트리거"
+
+TOTAL_TESTS=30
+FAILURE_COUNT=0
+SUCCESS_COUNT=0
+
+for i in $(seq 1 $TOTAL_TESTS); do
+    echo "🔄 Test $i/$TOTAL_TESTS"
+    
+    # 의도적 실패 API 호출 (잘못된 데이터)
+    RESPONSE=$(curl -s -w "%{http_code}" -X POST \
+        http://localhost:8080/api/vdp/extract-vertex \
+        -H "Content-Type: application/json" \
+        -H "x-correlation-id: TEST-FAILURE-$i" \
+        -d '{
+            "gcsUri": "gs://invalid-bucket/invalid-file.mp4",
+            "meta": {"platform": "invalid", "language": "invalid"}
+        }' 2>/dev/null)
+    
+    HTTP_CODE="${RESPONSE: -3}"
+    
+    if [ "$HTTP_CODE" -eq 500 ] || [ "$HTTP_CODE" -eq 400 ]; then
+        FAILURE_COUNT=$((FAILURE_COUNT + 1))
+        echo "❌ Test $i: FAILED (HTTP $HTTP_CODE)"
+    else
+        SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+        echo "✅ Test $i: PASSED (HTTP $HTTP_CODE)"
+    fi
+    
+    # Circuit Breaker 상태 중간 체크 (5회마다)
+    if [ $((i % 5)) -eq 0 ]; then
+        echo "📊 중간 체크 ($i/$TOTAL_TESTS):"
+        curl -s http://localhost:8080/api/circuit-breaker/status | jq '{
+            state: .state.state,
+            failures: .state.failureCount,
+            retries: .state.retryAttempts
+        }'
+        echo "---"
+    fi
+    
+    # 요청 간격 (100ms)
+    sleep 0.1
+done
+
+echo "📊 최종 테스트 결과:"
+echo "총 테스트: $TOTAL_TESTS"
+echo "실패: $FAILURE_COUNT"
+echo "성공: $SUCCESS_COUNT"
+echo "실패율: $((FAILURE_COUNT * 100 / TOTAL_TESTS))%"
+
+# 최종 Circuit Breaker 상태
+echo "🔍 최종 Circuit Breaker 상태:"
+curl -s http://localhost:8080/api/circuit-breaker/status | jq '.'
+
+EOF
+
+chmod +x circuit-breaker-failure-test.sh
+```
+
+### **Step 5: 실패 테스트 실행**
+```bash
+cd /Users/ted/snap3-jobs
+
+# 백그라운드로 테스트 실행
+echo "🚀 [T2] Circuit Breaker 실패 테스트 시작 (백그라운드)"
+./circuit-breaker-failure-test.sh > circuit-breaker-test-results.log 2>&1 &
+
+# 테스트 PID 저장
+TEST_PID=$!
+echo "📊 테스트 PID: $TEST_PID" > .t2-test-pid
+
+echo "✅ [T2] Circuit Breaker 테스트 백그라운드 실행 시작"
+```
+
+---
+
+## 📈 **실시간 모니터링**
+
+### **Step 6: 테스트 진행률 모니터링**
+```bash
+cd /Users/ted/snap3-jobs
+
+# 실시간 로그 모니터링 (별도 창에서)
+echo "📊 [T2] 실시간 테스트 진행률 모니터링"
+tail -f circuit-breaker-test-results.log | grep -E "(Test [0-9]+|Circuit Breaker|최종|OPEN|CLOSED)"
+
+# 또는 요약 상태만 보기
+watch -n 2 'curl -s http://localhost:8080/api/circuit-breaker/status | jq "{state: .state.state, failures: .state.failureCount, retries: .state.retryAttempts}"'
+```
+
+### **Step 7: 완료 신호 생성**
+```bash
+cd /Users/ted/snap3-jobs
+
+# 테스트 완료 대기 (백그라운드 프로세스 종료까지)
+while kill -0 $(cat .t2-test-pid) 2>/dev/null; do
+    echo "⏳ [T2] Circuit Breaker 테스트 진행 중..."
+    sleep 5
+done
+
+# 테스트 결과 요약
+echo "📊 [T2] Circuit Breaker 테스트 완료 - 결과 요약:"
+tail -n 10 circuit-breaker-test-results.log
+
+# T2 완료 신호
+echo "✅ T2 Circuit Breaker 성능 테스트 완료" > /Users/ted/snap3/.t2-phase2b-done
+echo "✅ [T2] Phase 2B 완료 - T3와 병렬 진행 완료"
+```
+
+---
+
+**🎯 T2 실행 명령어**: `cd /Users/ted/snap3-jobs && cat /Users/ted/snap3/.t2-phase2b-commands`

@@ -1,0 +1,316 @@
+# 📈 T3 Terminal (VDP/8082) - Phase 2B 상세 명령어
+
+**의존성**: T1 완료 신호 `.t1-phase2a-done` 확인 필수  
+**실행 방식**: ⚡ 병렬 실행 가능 (T2와 동시)  
+**작업 시간**: 15분 예상
+
+---
+
+## 🔍 **사전 준비 (필수)**
+
+### **Step 1: T1 완료 신호 확인**
+```bash
+cd /Users/ted/snap3
+
+# T1 완료 신호 확인
+ls .t1-phase2a-done && echo "✅ T1 준비됨 - T3 메트릭 수집 시작" || echo "⏳ T1 대기 중"
+```
+
+### **Step 2: T3 디렉토리 확인**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+
+# 디렉토리 확인
+pwd  # /Users/ted/snap3/services/t2-extract 확인 필수
+
+# T3 포트 확인 (8082 사용 중이어야 함)
+lsof -i :8082 && echo "✅ T3 서버 실행 중" || echo "❌ T3 서버 없음 - 시작 필요"
+```
+
+---
+
+## 📊 **실시간 메트릭 수집 (메인 작업)**
+
+### **Step 3: T1 Circuit Breaker 메트릭 연동**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+
+echo "📈 [T3] T1 Circuit Breaker 실시간 메트릭 수집 시작"
+
+# Circuit Breaker 상태 모니터링 스크립트 생성
+cat > circuit-breaker-metrics-monitor.sh << 'EOF'
+#!/bin/bash
+
+echo "📊 Circuit Breaker 실시간 메트릭 수집 시작"
+echo "🔗 Target: T1 localhost:8080/api/circuit-breaker/status"
+
+METRICS_FILE="circuit-breaker-metrics.json"
+INTERVAL=5  # 5초 간격
+
+# 메트릭 수집 헤더
+echo "timestamp,state,failure_count,retry_attempts,success_rate,avg_response_time" > circuit-breaker-metrics.csv
+
+echo "📈 실시간 메트릭 수집 시작 (5초 간격)"
+
+while true; do
+    TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+    
+    # T1 Circuit Breaker API 호출
+    RESPONSE=$(curl -s http://localhost:8080/api/circuit-breaker/status 2>/dev/null)
+    
+    if [ $? -eq 0 ] && [ -n "$RESPONSE" ]; then
+        # JSON 파싱
+        STATE=$(echo "$RESPONSE" | jq -r '.state.state // "UNKNOWN"')
+        FAILURE_COUNT=$(echo "$RESPONSE" | jq -r '.state.failureCount // 0')
+        RETRY_ATTEMPTS=$(echo "$RESPONSE" | jq -r '.state.retryAttempts // 0')
+        SUCCESS_RATE=$(echo "$RESPONSE" | jq -r '.performance_metrics.success_rate // "0%"')
+        AVG_RESPONSE=$(echo "$RESPONSE" | jq -r '.performance_metrics.avg_response_time // "0ms"')
+        
+        # CSV 로그
+        echo "$TIMESTAMP,$STATE,$FAILURE_COUNT,$RETRY_ATTEMPTS,$SUCCESS_RATE,$AVG_RESPONSE" >> circuit-breaker-metrics.csv
+        
+        # 실시간 콘솔 출력
+        echo "[$TIMESTAMP] State: $STATE | Failures: $FAILURE_COUNT | Retries: $RETRY_ATTEMPTS | Success: $SUCCESS_RATE"
+        
+        # 상태 변화 감지
+        if [ "$STATE" = "OPEN" ]; then
+            echo "🚨 [T3] Circuit Breaker OPEN 상태 감지! 알림 전송"
+            echo "$(date): CIRCUIT_BREAKER_OPEN,$FAILURE_COUNT,$RETRY_ATTEMPTS" >> circuit-breaker-alerts.log
+        elif [ "$STATE" = "HALF_OPEN" ]; then
+            echo "⚠️ [T3] Circuit Breaker HALF_OPEN 상태 - 복구 시도 중"
+        fi
+        
+        # JSON 메트릭 저장 (마지막 상태)
+        echo "$RESPONSE" > "$METRICS_FILE"
+        
+    else
+        echo "❌ [T3] T1 Circuit Breaker API 응답 없음"
+        echo "$TIMESTAMP,ERROR,0,0,0%,0ms" >> circuit-breaker-metrics.csv
+    fi
+    
+    sleep $INTERVAL
+done
+EOF
+
+chmod +x circuit-breaker-metrics-monitor.sh
+```
+
+### **Step 4: 백그라운드 메트릭 수집 시작**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+
+# 백그라운드로 메트릭 수집 시작
+echo "🚀 [T3] Circuit Breaker 메트릭 수집 백그라운드 시작"
+./circuit-breaker-metrics-monitor.sh > metrics-monitor.log 2>&1 &
+
+# 메트릭 수집 PID 저장
+METRICS_PID=$!
+echo "$METRICS_PID" > .t3-metrics-pid
+
+echo "✅ [T3] 메트릭 수집 시작 - PID: $METRICS_PID"
+```
+
+### **Step 5: P95 응답시간 실시간 계산**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+
+# P95 응답시간 계산 스크립트 생성
+cat > p95-calculator.sh << 'EOF'
+#!/bin/bash
+
+echo "📊 P95 응답시간 실시간 계산 시작"
+
+RESPONSE_TIMES_FILE="response-times.log"
+P95_RESULTS_FILE="p95-results.json"
+
+while true; do
+    # T1 API 응답시간 측정 (10회)
+    echo "⏱️ API 응답시간 측정 중..."
+    
+    for i in {1..10}; do
+        START_TIME=$(date +%s%3N)  # 밀리초
+        
+        curl -s http://localhost:8080/api/health > /dev/null 2>&1
+        
+        END_TIME=$(date +%s%3N)
+        RESPONSE_TIME=$((END_TIME - START_TIME))
+        
+        echo "$RESPONSE_TIME" >> "$RESPONSE_TIMES_FILE"
+        echo "[$i/10] 응답시간: ${RESPONSE_TIME}ms"
+        
+        sleep 0.5
+    done
+    
+    # P95 계산 (최근 100개 데이터)
+    if [ -f "$RESPONSE_TIMES_FILE" ]; then
+        P95_VALUE=$(tail -n 100 "$RESPONSE_TIMES_FILE" | sort -n | awk 'BEGIN{c=0} {arr[c]=$1; c++} END{print arr[int(c*0.95)]}')
+        P50_VALUE=$(tail -n 100 "$RESPONSE_TIMES_FILE" | sort -n | awk 'BEGIN{c=0} {arr[c]=$1; c++} END{print arr[int(c*0.50)]}')
+        AVG_VALUE=$(tail -n 100 "$RESPONSE_TIMES_FILE" | awk '{sum+=$1} END{print int(sum/NR)}')
+        
+        echo "📊 [T3] P95: ${P95_VALUE}ms | P50: ${P50_VALUE}ms | AVG: ${AVG_VALUE}ms"
+        
+        # JSON 결과 저장
+        cat > "$P95_RESULTS_FILE" << JSON_EOF
+{
+    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+    "metrics": {
+        "p95_response_time_ms": $P95_VALUE,
+        "p50_response_time_ms": $P50_VALUE,
+        "avg_response_time_ms": $AVG_VALUE,
+        "sample_count": 100
+    },
+    "target": {
+        "p95_threshold": 500,
+        "status": "$( [ $P95_VALUE -lt 500 ] && echo "PASS" || echo "FAIL" )"
+    }
+}
+JSON_EOF
+        
+        # 성능 임계값 체크
+        if [ "$P95_VALUE" -gt 500 ]; then
+            echo "⚠️ [T3] P95 응답시간 임계값 초과: ${P95_VALUE}ms > 500ms"
+        fi
+    fi
+    
+    sleep 10
+done
+EOF
+
+chmod +x p95-calculator.sh
+```
+
+### **Step 6: P95 계산 백그라운드 실행**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+
+# P95 계산 백그라운드 시작
+echo "📊 [T3] P95 응답시간 계산 백그라운드 시작"
+./p95-calculator.sh > p95-monitor.log 2>&1 &
+
+# P95 계산 PID 저장
+P95_PID=$!
+echo "$P95_PID" > .t3-p95-pid
+
+echo "✅ [T3] P95 계산 시작 - PID: $P95_PID"
+```
+
+---
+
+## 📊 **실시간 상태 모니터링**
+
+### **Step 7: 종합 상태 대시보드**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+
+echo "📊 [T3] 실시간 Circuit Breaker + P95 대시보드"
+
+# 실시간 상태 출력 (30초간)
+for i in {1..6}; do
+    echo "====== T3 상태 리포트 [$i/6] ======"
+    echo "🕐 $(date)"
+    
+    # Circuit Breaker 상태
+    echo "🔄 Circuit Breaker:"
+    curl -s http://localhost:8080/api/circuit-breaker/status | jq '{
+        state: .state.state,
+        failures: .state.failureCount,
+        success_rate: .performance_metrics.success_rate
+    }' 2>/dev/null || echo "❌ API 응답 없음"
+    
+    # P95 최신 결과
+    echo "📊 P95 메트릭:"
+    if [ -f p95-results.json ]; then
+        cat p95-results.json | jq '.metrics'
+    else
+        echo "⏳ P95 데이터 수집 중..."
+    fi
+    
+    # 프로세스 상태
+    echo "⚙️ 백그라운드 프로세스:"
+    echo "메트릭 수집: $(kill -0 $(cat .t3-metrics-pid 2>/dev/null) 2>/dev/null && echo "실행중" || echo "중단됨")"
+    echo "P95 계산: $(kill -0 $(cat .t3-p95-pid 2>/dev/null) 2>/dev/null && echo "실행중" || echo "중단됨")"
+    
+    echo "---"
+    sleep 5
+done
+
+echo "✅ [T3] 30초 모니터링 완료"
+```
+
+---
+
+## ✅ **T3 완료 조건 및 신호**
+
+### **Step 8: 완료 검증 및 신호 생성**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+
+echo "🔍 [T3] Phase 2B 완료 조건 검증"
+
+# 메트릭 수집 상태 확인
+if kill -0 $(cat .t3-metrics-pid 2>/dev/null) 2>/dev/null; then
+    echo "✅ 메트릭 수집 프로세스 정상 실행 중"
+else
+    echo "❌ 메트릭 수집 프로세스 중단됨"
+fi
+
+# P95 계산 상태 확인
+if kill -0 $(cat .t3-p95-pid 2>/dev/null) 2>/dev/null; then
+    echo "✅ P95 계산 프로세스 정상 실행 중"
+else
+    echo "❌ P95 계산 프로세스 중단됨"
+fi
+
+# 데이터 파일 확인
+ls -la circuit-breaker-metrics.csv p95-results.json 2>/dev/null && echo "✅ 메트릭 데이터 수집 완료" || echo "⏳ 데이터 수집 진행 중"
+
+# T3 완료 신호 생성
+echo "✅ T3 Circuit Breaker 메트릭 수집 완료" > /Users/ted/snap3/.t3-phase2b-done
+echo "✅ [T3] Phase 2B 완료 - 실시간 메트릭 수집 활성화됨"
+```
+
+---
+
+## 📊 **메트릭 결과 요약**
+
+### **Step 9: 수집된 데이터 요약**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+
+echo "📈 [T3] Phase 2B 메트릭 수집 결과 요약"
+
+# Circuit Breaker 메트릭 요약
+echo "🔄 Circuit Breaker 메트릭:"
+if [ -f circuit-breaker-metrics.csv ]; then
+    echo "총 수집 레코드: $(wc -l < circuit-breaker-metrics.csv)"
+    echo "최신 상태: $(tail -n 1 circuit-breaker-metrics.csv | cut -d, -f2)"
+    echo "최대 실패 수: $(tail -n +2 circuit-breaker-metrics.csv | cut -d, -f3 | sort -nr | head -n 1)"
+fi
+
+# P95 메트릭 요약
+echo "📊 P95 응답시간 메트릭:"
+if [ -f p95-results.json ]; then
+    cat p95-results.json | jq '{
+        p95_ms: .metrics.p95_response_time_ms,
+        avg_ms: .metrics.avg_response_time_ms,
+        status: .target.status,
+        threshold: .target.p95_threshold
+    }'
+fi
+
+# T1과 연동 상태 확인
+echo "🔗 T1 연동 상태:"
+curl -s http://localhost:8080/api/circuit-breaker/status | jq '{
+    t1_server: "연결됨",
+    circuit_state: .state.state,
+    exponential_backoff: .exponential_backoff.enabled
+}' 2>/dev/null || echo "❌ T1 연동 실패"
+
+echo "✅ [T3] 메트릭 수집 요약 완료"
+```
+
+---
+
+**🎯 T3 실행 명령어**: `cd /Users/ted/snap3/services/t2-extract && cat /Users/ted/snap3/.t3-phase2b-commands`
+
+**📊 실시간 모니터링**: `watch -n 5 'curl -s http://localhost:8080/api/circuit-breaker/status | jq .state'`
