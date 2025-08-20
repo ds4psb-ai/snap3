@@ -1243,24 +1243,23 @@ app.post('/api/extract-social-metadata', async (req, res) => {
         let extractionResponse;
         
         try {
-            // Fix: Use input platform (not urlResult.platform) for endpoint selection
+            // GPT-5 Recommended Fix: Direct API pattern
             const normalizedPlatform = platform.toLowerCase();
-            const extractorEndpoint = normalizedPlatform === 'instagram' 
-                ? 'http://localhost:3000/api/instagram/metadata'
-                : 'http://localhost:3000/api/tiktok/metadata';
-                
-            structuredLog('info', 'Cursor API call details', {
+            const cursorBaseUrl = 'http://localhost:3000';
+            
+            structuredLog('info', 'GPT-5 recommended API integration', {
                 normalizedPlatform,
-                extractorEndpoint,
+                cursorBaseUrl,
                 requestUrl: urlResult.canonicalUrl
             }, correlationId);
                 
-            // Direct fetch to Cursor API (bypass createFetchWithKeepAlive)
-            const cursorResponse = await fetch(extractorEndpoint, {
+            // GPT-5 solution: Unified API call pattern
+            const cursorResponse = await fetch(`${cursorBaseUrl}/api/${normalizedPlatform}/metadata`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Correlation-ID': correlationId
+                    'X-Correlation-ID': correlationId,
+                    'User-Agent': 'ClaudeCode-Integration/1.0'
                 },
                 body: JSON.stringify({
                     url: urlResult.canonicalUrl

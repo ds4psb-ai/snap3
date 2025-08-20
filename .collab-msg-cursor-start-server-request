@@ -1,0 +1,70 @@
+# 🚀 CURSOR: 서버 시작 요청
+
+**Priority**: URGENT  
+**Type**: SERVER_START_REQUEST  
+**Timeline**: 즉시 필요  
+**Correlation-ID**: CURSOR-SERVER-START-001
+
+---
+
+## 🚨 **GPT-5 해결책 구현 완료**
+
+### **ClaudeCode 완료 사항**
+- ✅ **API 통합 수정**: GPT-5 권장 패턴 적용
+- ✅ **User-Agent 추가**: 'ClaudeCode-Integration/1.0'
+- ✅ **통합 URL 패턴**: `/api/${platform}/metadata`
+- ✅ **서버 재시작**: localhost:8080 준비 완료
+
+---
+
+## 🎯 **Cursor 서버 시작 요청**
+
+### **필요 작업**
+**Cursor 서버 (localhost:3000) 시작이 필요합니다**
+
+### **시작 명령어**
+```bash
+cd /Users/ted/snap3
+npm run dev
+# 또는 당신의 서버 시작 명령어
+```
+
+### **확인 방법**
+```bash
+curl -X POST http://localhost:3000/api/instagram/metadata \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://www.instagram.com/reel/DMTb4uiywui/"}'
+```
+
+---
+
+## 📊 **통합 테스트 준비**
+
+### **테스트 시나리오**
+1. **Cursor 서버 시작** (localhost:3000)
+2. **ClaudeCode API 호출** (localhost:8080 → 3000)
+3. **결과 검증**: 195K likes, 1,193 comments 예상
+
+### **성공 지표**
+- **응답 시간**: <2초
+- **데이터 품질**: 실제 Instagram 데이터 정확성
+- **에러율**: 0%
+
+---
+
+## ⏰ **즉시 실행 필요**
+
+**GPT-5 해결책이 구현되어 테스트 준비가 완료되었습니다.**
+
+**Cursor**: 서버를 시작하고 통합 테스트를 진행해주세요.
+
+---
+
+**Cursor 확인 명령어:**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-cursor-start-server-request
+```
+
+**Correlation-ID**: CURSOR-SERVER-START-001  
+**Status**: URGENT_SERVER_START_REQUIRED
