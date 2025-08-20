@@ -1,0 +1,385 @@
+name: Create Pinned Context
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'scripts/**'
+      - 'docs/**'
+      - '.github/**'
+      - '*.md'
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force update pinned context'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  create-pinned-context:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      discussions: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+
+      - name: Generate Comprehensive Context
+        run: |
+          echo "# 🎯 VDP Pipeline - 삼각편대 영구 컨텍스트" > pinned_context.md
+          echo "" >> pinned_context.md
+          echo "**📅 Last Updated**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> pinned_context.md
+          echo "**🔄 Auto-Updated**: Every main branch push" >> pinned_context.md
+          echo "**📌 Purpose**: 영구적인 프로젝트 컨텍스트 - GPT-5 Pro ↔ ClaudeCode ↔ Cursor 삼각편대" >> pinned_context.md
+          echo "" >> pinned_context.md
+          
+          # 핵심 프로젝트 정보
+          echo "## 🏠 프로젝트 개요" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 📋 기본 정보" >> pinned_context.md
+          echo "- **프로젝트**: VDP RAW Generation Pipeline" >> pinned_context.md
+          echo "- **목적**: YouTube, Instagram, TikTok 콘텐츠 → VDP(Video Data Package) 생성" >> pinned_context.md
+          echo "- **아키텍처**: 4터미널 + 2UI + Platform-segmented GCS" >> pinned_context.md
+          echo "- **핵심 버킷**: \`tough-variety-raw-central1\` (us-central1)" >> pinned_context.md
+          echo "- **Working Directory**: \`~/snap3\`" >> pinned_context.md
+          echo "" >> pinned_context.md
+          
+          # 최근 5커밋 요약
+          echo "### 📋 최근 변경사항" >> pinned_context.md
+          echo '```' >> pinned_context.md
+          bash scripts/generate_summary.sh >> pinned_context.md
+          echo '```' >> pinned_context.md
+          echo "" >> pinned_context.md
+          
+          # 삼각편대 역할 분담
+          echo "## 🎯 삼각편대 역할 분담" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 🧠 GPT-5 Pro (HEAD 코치)" >> pinned_context.md
+          echo "- **역할**: 전략 수립, 의사결정, 작업 조율" >> pinned_context.md
+          echo "- **방법**: 이 컨텍스트 전체를 새 채팅에 복사 → \`Use this for triangular collaboration\`" >> pinned_context.md
+          echo "- **워크플로우**: [삼각편대 가이드](https://github.com/${{ github.repository }}/blob/main/docs/GPT5_CLAUDECODE_CURSOR_TRIANGULAR_WORKFLOW.md)" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### ⚙️ ClaudeCode (MAIN 구현)" >> pinned_context.md
+          echo "- **역할**: 백엔드 서비스, API, 데이터 처리, 4터미널 운영" >> pinned_context.md
+          echo "- **특화**: VDP 추출, GCS 처리, BigQuery 적재, 워커 시스템" >> pinned_context.md
+          echo "- **터미널**: Main T1(~/snap3), Jobs T2(~/snap3-jobs), T2VDP T3(~/snap3/services/t2-extract), Storage T4(~/snap3-storage)" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 🎨 Cursor (SUB 구현)" >> pinned_context.md
+          echo "- **역할**: 프론트엔드, UI/UX, 컴포넌트, 클라이언트 로직" >> pinned_context.md
+          echo "- **특화**: Next.js 개발, shadcn-ui, Instagram/TikTok 메타데이터 추출기" >> pinned_context.md
+          echo "- **서버**: npm run dev (3000), node simple-web-server.js (8080)" >> pinned_context.md
+          echo "" >> pinned_context.md
+          
+          # 핵심 시스템 상태
+          echo "## 🖥️ 시스템 구조 & 상태" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 🌐 UI 서버 (2개)" >> pinned_context.md
+          echo "- **인제스트 UI**: http://localhost:8080 (\`node simple-web-server.js\`)" >> pinned_context.md
+          echo "  - 용도: YouTube/Instagram/TikTok URL 입력 및 처리" >> pinned_context.md
+          echo "  - API: POST /api/vdp/extract-vertex, POST /api/normalize-url" >> pinned_context.md
+          echo "- **메인 UI**: http://localhost:3000 (\`npm run dev\`)" >> pinned_context.md
+          echo "  - 용도: 비디오 생성 파이프라인, Instagram 추출기" >> pinned_context.md
+          echo "  - 특별 기능: /instagram-extractor (Production Ready)" >> pinned_context.md
+          echo "" >> pinned_context.md
+          
+          # 환경변수 상태
+          echo "### ⚙️ 핵심 환경변수" >> pinned_context.md
+          echo '```bash' >> pinned_context.md
+          echo "PROJECT_ID=\"tough-variety-466003-c5\"" >> pinned_context.md
+          echo "REGION=\"us-central1\"" >> pinned_context.md
+          echo "RAW_BUCKET=\"tough-variety-raw-central1\"" >> pinned_context.md
+          echo "PLATFORM_SEGMENTED_PATH=true" >> pinned_context.md
+          echo '```' >> pinned_context.md
+          echo "" >> pinned_context.md
+          
+          # 최근 완성 기능
+          echo "## ✅ 최근 완성 기능 (Production Ready)" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 1. Instagram & TikTok 메타데이터 추출기" >> pinned_context.md
+          echo "- **위치**: http://localhost:3000/instagram-extractor" >> pinned_context.md
+          echo "- **기능**: 7단계 추출 전략, 실제 데이터 100%, 워터마크 없는 다운로드" >> pinned_context.md
+          echo "- **API**: /api/instagram/metadata, /api/tiktok/metadata" >> pinned_context.md
+          echo "- **문서**: [완전한 기술 문서](https://github.com/${{ github.repository }}/blob/main/INSTAGRAM_TIKTOK_METADATA_EXTRACTOR.md)" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 2. GPT-5↔ClaudeCode↔Cursor 삼각편대 워크플로우" >> pinned_context.md
+          echo "- **GitHub Actions**: 자동 컨텍스트 생성 (PR/커밋마다)" >> pinned_context.md
+          echo "- **로컬 스크립트**: generate_summary.sh, generate_cursor_context.sh" >> pinned_context.md
+          echo "- **문서**: [워크플로우 가이드](https://github.com/${{ github.repository }}/blob/main/docs/GPT5_CLAUDECODE_CURSOR_TRIANGULAR_WORKFLOW.md)" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 3. VDP RAW Generation Pipeline" >> pinned_context.md
+          echo "- **플랫폼**: YouTube(자동), Instagram(조건부), TikTok(조건부)" >> pinned_context.md
+          echo "- **처리**: URL → content_id → VDP RAW + Hook Genome → BigQuery 적재" >> pinned_context.md
+          echo "- **검증**: AJV 스키마, Hook gates (≤3s, ≥0.70), Evidence Pack v2.0" >> pinned_context.md
+          echo "" >> pinned_context.md
+          
+          # 즉시 시작 가능한 작업들
+          echo "## 🚀 즉시 시작 가능한 작업들" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 🎯 우선순위 1: Instagram/TikTok 추출기 VDP 통합" >> pinned_context.md
+          echo "- **목표**: 인제스트 UI에서 URL 입력 시 자동으로 메타데이터 추출해서 폼 채우기" >> pinned_context.md
+          echo "- **대상 파일**: web/scripts/url-auto-fill.js + 새로운 통합 로직" >> pinned_context.md
+          echo "- **예상 효과**: 사용자 입력 시간 80% 단축" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 🎯 우선순위 2: UI/UX 통합 개선" >> pinned_context.md
+          echo "- **목표**: 2개 UI(3000/8080) 간 일관성 있는 디자인" >> pinned_context.md
+          echo "- **대상**: shadcn-ui 컴포넌트 표준화, 반응형 디자인" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 🎯 우선순위 3: 성능 최적화" >> pinned_context.md
+          echo "- **목표**: 메타데이터 추출 속도 개선, 캐싱 시스템" >> pinned_context.md
+          echo "- **대상**: API 응답 시간, 클라이언트 사이드 최적화" >> pinned_context.md
+          echo "" >> pinned_context.md
+          
+          # 터미널 명령어 참고
+          echo "## 🖥️ 핵심 명령어 참고" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### ClaudeCode 터미널 명령어" >> pinned_context.md
+          echo '```bash' >> pinned_context.md
+          echo "# Main T1 (~/snap3)" >> pinned_context.md
+          echo "cd ~/snap3 && scripts/generate_summary.sh" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "# Jobs T2 (~/snap3-jobs)" >> pinned_context.md
+          echo "cd ~/snap3-jobs && ./worker-ingest-v2.sh --health" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "# T2VDP T3 (~/snap3/services/t2-extract)" >> pinned_context.md
+          echo "cd ~/snap3/services/t2-extract && ./run-all-checks.sh" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "# Storage T4 (~/snap3-storage)" >> pinned_context.md
+          echo "cd ~/snap3-storage && ./scripts/quick-validation.sh" >> pinned_context.md
+          echo '```' >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### Cursor 명령어" >> pinned_context.md
+          echo '```bash' >> pinned_context.md
+          echo "# 메인 UI 개발 서버" >> pinned_context.md
+          echo "npm run dev  # http://localhost:3000" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "# 인제스트 UI 서버" >> pinned_context.md
+          echo "node simple-web-server.js  # http://localhost:8080" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "# 테스트 및 검증" >> pinned_context.md
+          echo "npm test" >> pinned_context.md
+          echo "curl http://localhost:8080/api/health" >> pinned_context.md
+          echo "curl http://localhost:3000/api/instagram/metadata" >> pinned_context.md
+          echo '```' >> pinned_context.md
+          echo "" >> pinned_context.md
+          
+          # 컨텍스트 업데이트 가이드
+          echo "## 🔄 컨텍스트 업데이트 가이드" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 자동 업데이트" >> pinned_context.md
+          echo "- **트리거**: main 브랜치 push, PR 생성" >> pinned_context.md
+          echo "- **결과**: 이 이슈가 자동으로 업데이트됨" >> pinned_context.md
+          echo "- **확인**: [Actions 탭](https://github.com/${{ github.repository }}/actions)" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 수동 업데이트" >> pinned_context.md
+          echo '```bash' >> pinned_context.md
+          echo "# ClaudeCode 컨텍스트" >> pinned_context.md
+          echo "./scripts/generate_summary.sh" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "# Cursor 컨텍스트" >> pinned_context.md
+          echo "./scripts/generate_cursor_context.sh --include-files" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "# GPT-5 Pro 컨텍스트" >> pinned_context.md
+          echo "./scripts/generate_context_for_gpt5.sh --include-files --include-diff" >> pinned_context.md
+          echo '```' >> pinned_context.md
+          echo "" >> pinned_context.md
+          
+          # 중요 제약사항
+          echo "## 🚨 중요 제약사항 (절대 준수)" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 인프라 정책" >> pinned_context.md
+          echo "- **버킷**: tough-variety-raw-central1 ONLY (다른 버킷 사용 금지)" >> pinned_context.md
+          echo "- **리전**: us-central1 통일 (cross-region 금지)" >> pinned_context.md
+          echo "- **플랫폼 세그먼트**: gs://bucket/raw/vdp/{platform}/ 구조 필수" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### API 정책" >> pinned_context.md
+          echo "- **JSON-only**: FormData/multipart 완전 금지" >> pinned_context.md
+          echo "- **Content_ID**: 모든 인제스트 요청에 필수" >> pinned_context.md
+          echo "- **Content_Key**: platform:content_id 형식으로 글로벌 유니크" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### UI 구분" >> pinned_context.md
+          echo "- **8080 = 인제스트 UI**: YouTube/Instagram/TikTok 입력 처리" >> pinned_context.md
+          echo "- **3000 = 메인 UI**: 비디오 생성 파이프라인 + 메타데이터 추출기" >> pinned_context.md
+          echo "" >> pinned_context.md
+          
+          # 링크 모음
+          echo "## 🔗 핵심 링크 모음" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 📚 문서" >> pinned_context.md
+          echo "- [삼각편대 워크플로우](https://github.com/${{ github.repository }}/blob/main/docs/GPT5_CLAUDECODE_CURSOR_TRIANGULAR_WORKFLOW.md)" >> pinned_context.md
+          echo "- [Cursor 통합 가이드](https://github.com/${{ github.repository }}/blob/main/docs/CURSOR_TRIANGULAR_INTEGRATION.md)" >> pinned_context.md
+          echo "- [컨텍스트 시스템 가이드](https://github.com/${{ github.repository }}/blob/main/docs/CONTEXT_SYSTEM_GUIDE.md)" >> pinned_context.md
+          echo "- [Instagram/TikTok 추출기](https://github.com/${{ github.repository }}/blob/main/INSTAGRAM_TIKTOK_METADATA_EXTRACTOR.md)" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "### 🔧 개발" >> pinned_context.md
+          echo "- [Repository](https://github.com/${{ github.repository }})" >> pinned_context.md
+          echo "- [Latest Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})" >> pinned_context.md
+          echo "- [Actions](https://github.com/${{ github.repository }}/actions)" >> pinned_context.md
+          echo "- [Issues](https://github.com/${{ github.repository }}/issues)" >> pinned_context.md
+          echo "" >> pinned_context.md
+          
+          # 푸터
+          echo "---" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "**🎯 사용법**: 이 이슈 전체를 새로운 GPT-5 Pro 채팅에 복사 → \`Use this context for ClaudeCode ↔ Cursor triangular collaboration\` 추가 → 즉시 삼각편대 협업 시작!" >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "**🔄 자동 업데이트**: main 브랜치 변경마다 자동으로 이 컨텍스트가 갱신됩니다." >> pinned_context.md
+          echo "" >> pinned_context.md
+          echo "*🤖 Auto-generated by [Create Pinned Context Workflow](https://github.com/${{ github.repository }}/blob/main/.github/workflows/create-pinned-context.yml) • Last updated: $(date)*" >> pinned_context.md
+
+      - name: Find or Create Pinned Issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('pinned_context.md', 'utf8');
+            const title = '🎯 VDP Pipeline - 삼각편대 영구 컨텍스트';
+            
+            try {
+              // 기존 핀 이슈 찾기
+              const issues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: 'pinned-context,triangular-workflow',
+                state: 'open'
+              });
+              
+              let existingIssue = null;
+              for (const issue of issues.data) {
+                if (issue.title.includes('삼각편대 영구 컨텍스트')) {
+                  existingIssue = issue;
+                  break;
+                }
+              }
+              
+              if (existingIssue) {
+                // 기존 이슈 업데이트
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: existingIssue.number,
+                  title: title,
+                  body: body
+                });
+                
+                console.log(`✅ Updated existing pinned issue #${existingIssue.number}`);
+                console.log(`🔗 Issue URL: ${existingIssue.html_url}`);
+                
+                // Pin the issue (GitHub API doesn't have direct pin support, but we can add a label)
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: existingIssue.number,
+                  labels: ['📌 PINNED', 'triangular-workflow', 'context', 'GPT-5', 'ClaudeCode', 'Cursor']
+                });
+                
+                core.setOutput('issue_url', existingIssue.html_url);
+                core.setOutput('issue_number', existingIssue.number);
+                core.setOutput('action', 'updated');
+                
+              } else {
+                // 새 이슈 생성
+                const newIssue = await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: title,
+                  body: body,
+                  labels: ['📌 PINNED', 'triangular-workflow', 'context', 'GPT-5', 'ClaudeCode', 'Cursor']
+                });
+                
+                console.log(`✅ Created new pinned issue #${newIssue.data.number}`);
+                console.log(`🔗 Issue URL: ${newIssue.data.html_url}`);
+                
+                core.setOutput('issue_url', newIssue.data.html_url);
+                core.setOutput('issue_number', newIssue.data.number);
+                core.setOutput('action', 'created');
+              }
+              
+            } catch (error) {
+              console.log('❌ Failed to create/update pinned issue:', error.message);
+              throw error;
+            }
+
+      - name: Create Cursor Quick Access Comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = '${{ steps.create-pinned-issue.outputs.issue_number }}' || 
+                               core.getInput('issue_number');
+            
+            if (!issueNumber) {
+              console.log('⚠️ No issue number available, skipping comment creation');
+              return;
+            }
+            
+            const cursorQuickStart = `## 🚀 Cursor Quick Start
+
+### 즉시 시작하기
+1. **이 이슈 전체를 Cursor 채팅에 복사**
+2. **추가 메시지**: \`Cursor, 삼각편대에 합류하여 프론트엔드 개발을 담당해주세요\`
+3. **확인**: 아래 명령어들이 정상 작동하는지 테스트
+
+### 🖥️ Cursor 전용 명령어
+\`\`\`bash
+# 개발 서버 시작
+npm run dev  # http://localhost:3000
+
+# 인제스트 UI 시작  
+node simple-web-server.js  # http://localhost:8080
+
+# Instagram 추출기 테스트
+open http://localhost:3000/instagram-extractor
+
+# 헬스 체크
+curl http://localhost:8080/api/health
+\`\`\`
+
+### 🎯 Cursor 우선 작업
+- **Instagram/TikTok 추출기 VDP 통합**
+- **UI/UX 일관성 개선**
+- **shadcn-ui 컴포넌트 최적화**
+
+---
+*🤖 Auto-generated Cursor quick start guide*`;
+
+            try {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: parseInt(issueNumber),
+                body: cursorQuickStart
+              });
+              
+              console.log('✅ Added Cursor quick start comment');
+              
+            } catch (error) {
+              console.log('⚠️ Failed to add Cursor comment:', error.message);
+            }
+
+      - name: Upload Pinned Context Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pinned-context-${{ github.sha }}
+          path: pinned_context.md
+          retention-days: 90
+
+      - name: Summary
+        run: |
+          echo "✅ Pinned Context System Ready!"
+          echo ""
+          echo "🔗 Issue URL: ${{ steps.create-pinned-issue.outputs.issue_url }}"
+          echo "📌 Issue Number: #${{ steps.create-pinned-issue.outputs.issue_number }}"
+          echo "🎯 Action: ${{ steps.create-pinned-issue.outputs.action }}"
+          echo ""
+          echo "📋 Usage:"
+          echo "1. Share issue URL with team members"
+          echo "2. Copy entire issue content to new GPT-5 chat"
+          echo "3. Add: 'Use this context for triangular collaboration'"
+          echo "4. Start collaborating immediately!"
