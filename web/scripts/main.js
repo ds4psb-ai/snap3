@@ -1570,11 +1570,23 @@ async function extractInstagramMetadata() {
         const result = await response.json();
         
         if (response.ok && result.success) {
-            // Auto-fill hidden metadata fields (Cursor handles all metadata extraction)
+            // Auto-fill hidden metadata fields (store for submission)
+            window.instagramMetadata = {
+                title: result.data.title,
+                view_count: result.data.view_count,
+                like_count: result.data.like_count,
+                comment_count: result.data.comment_count,
+                share_count: result.data.share_count,
+                hashtags: result.data.hashtags,
+                upload_date: result.data.upload_date,
+                author: result.data.author,
+                followers: result.data.followers
+            };
+            
             statusDiv.innerHTML = `
                 <div class="status-success">
                     ✅ 메타데이터 자동 추출 완료!<br>
-                    <small>👁 ${result.data.view_count || 0} 조회 | ❤️ ${result.data.like_count || 0} 좋아요 | 💬 ${result.data.comment_count || 0} 댓글</small>
+                    <small>👁 ${result.data.view_count || 0} 조회 | ❤️ ${result.data.like_count || 0} 좋아요 | 💬 ${result.data.comment_count || 0} 댓글 | 👤 ${result.data.author}</small>
                 </div>
             `;
         } else {
@@ -1619,11 +1631,23 @@ async function extractTikTokMetadata() {
         const result = await response.json();
         
         if (response.ok && result.success) {
-            // Auto-fill hidden metadata fields (Cursor handles all metadata extraction)
+            // Auto-fill hidden metadata fields (store for submission)
+            window.tiktokMetadata = {
+                title: result.data.title,
+                view_count: result.data.view_count,
+                like_count: result.data.like_count,
+                comment_count: result.data.comment_count,
+                share_count: result.data.share_count,
+                hashtags: result.data.hashtags,
+                upload_date: result.data.upload_date,
+                author: result.data.author,
+                duration: result.data.duration
+            };
+            
             statusDiv.innerHTML = `
                 <div class="status-success">
                     ✅ 메타데이터 자동 추출 완료!<br>
-                    <small>👁 ${result.data.view_count || 0} 조회 | ❤️ ${result.data.like_count || 0} 좋아요 | 💬 ${result.data.comment_count || 0} 댓글</small>
+                    <small>👁 ${result.data.view_count || 0} 조회 | ❤️ ${result.data.like_count || 0} 좋아요 | 💬 ${result.data.comment_count || 0} 댓글 | 👤 ${result.data.author}</small>
                 </div>
             `;
         } else {

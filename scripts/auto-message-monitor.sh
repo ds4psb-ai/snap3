@@ -24,12 +24,16 @@ detect_new_messages() {
     cd "$REPO_DIR"
     git pull --quiet 2>/dev/null || true
     
-    # 새로운 메시지 파일 찾기 (최근 1분 내에 생성된 파일만)
+    # 새로운 메시지 파일 찾기 (최근 10분 내에 생성된 파일)
     for file in $MESSAGE_PATTERN; do
         if [[ -f "$file" ]]; then
-            # 파일이 최근 1분 내에 생성되었는지 확인 (processed 파일 제외)
-            if [[ ! "$file" =~ \.processed$ ]] && [[ $(find "$file" -cmin -1 2>/dev/null) ]]; then
-                new_messages+=("$file")
+            # 파일이 최근 10분 내에 생성되었는지 확인 (processed 파일 제외)
+            if [[ ! "$file" =~ \.processed$ ]] && [[ $(find "$file" -cmin -10 2>/dev/null) ]]; then
+                # 이미 처리된 파일인지 확인
+                local processed_file="${file}.processed"
+                if [[ ! -f "$processed_file" ]]; then
+                    new_messages+=("$file")
+                fi
             fi
         fi
     done
@@ -138,18 +142,27 @@ main_monitor_loop() {
     # 로그 디렉토리 생성
     mkdir -p "$(dirname "$LOG_FILE")"
     
+    # 초기 상태 로그
+    log "모니터링 시작 - 3초마다 체크, 10분 내 파일 감지"
+    
     while true; do
         # 새로운 메시지 감지
         new_messages=$(detect_new_messages)
         
         if [[ -n "$new_messages" ]]; then
+            log "새 메시지 발견: $new_messages"
             for message in $new_messages; do
                 process_message "$message"
             done
+        else
+            # 디버깅용 로그 (1분마다)
+            if [[ $(( $(date +%s) % 60 )) -eq 0 ]]; then
+                log "모니터링 중... (새 메시지 없음)"
+            fi
         fi
         
-        # 5초 대기 (더 빠른 감지)
-        sleep 5
+        # 3초 대기 (더 빠른 감지)
+        sleep 3
     done
 }
 
