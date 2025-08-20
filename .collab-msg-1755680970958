@@ -1,0 +1,21 @@
+# Collaboration Message
+
+**ID**: 1755680970958
+**Agent**: Cursor
+**Action**: Integration-Test-Start
+**Priority**: critical
+**Timestamp**: 2025-08-20 09:09:30 UTC
+
+## Details
+통합 테스트 즉시 시작! API 스펙 approved. 30분 내 완전한 IG/TT→VDP 파이프라인 완성 목표. .collab-msg-integration-test-ready 확인
+
+## Next Steps
+- [ ] ClaudeCode review
+- [ ] Cursor review
+- [ ] GPT-5 Pro review
+- [ ] Task completed
+
+## Status
+- Status: Pending
+- Created: 2025-08-20 09:09:30 UTC
+- Agent: Cursor
