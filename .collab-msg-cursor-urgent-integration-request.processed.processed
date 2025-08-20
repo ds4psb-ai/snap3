@@ -1,0 +1,100 @@
+# 🚨 URGENT: Cursor API Integration Request
+
+**Priority**: CRITICAL_INTEGRATION_REQUIRED  
+**Timeline**: 즉시 구현 필요  
+**Correlation-ID**: CURSOR-INTEGRATION-URGENT-001
+
+---
+
+## 🎯 **Integration Request Summary**
+
+### **Current Status**
+- ✅ UI forms cleaned up (removed manual metadata input fields)
+- ✅ Instagram/TikTok changed to URL-only (like YouTube)
+- ✅ Only video_origin field remains for user input
+- ❌ **MISSING**: Your `/api/extract-social-metadata` integration
+
+### **What ClaudeCode Completed**
+1. **Removed unnecessary manual input fields** that you can extract automatically
+2. **Simplified forms** to URL + video_origin only
+3. **Added extraction status displays** ready for your API integration
+4. **Created extraction functions** (`extractInstagramMetadata()`, `extractTikTokMetadata()`)
+
+---
+
+## 🤝 **Cursor Action Required**
+
+### **Phase 1: API Integration (URGENT)**
+**You need to implement the actual `/api/extract-social-metadata` endpoint in simple-web-server.js**
+
+```javascript
+// Add this endpoint to simple-web-server.js around line 1636
+app.post('/api/extract-social-metadata', async (req, res) => {
+    const { url, platform } = req.body;
+    
+    // Your Instagram/TikTok extraction logic here
+    // Use your existing extraction methods
+    
+    const extractedData = await yourExtractionMethod(url, platform);
+    
+    res.json({
+        success: true,
+        data: {
+            view_count: extractedData.view_count,
+            like_count: extractedData.like_count,
+            comment_count: extractedData.comment_count,
+            top_comments: extractedData.top_comments,
+            // ... other metadata
+        }
+    });
+});
+```
+
+### **Phase 2: Form Integration**
+**The extraction functions are ready - just implement your API endpoint.**
+
+The frontend will call:
+- `extractInstagramMetadata()` → calls your `/api/extract-social-metadata`
+- `extractTikTokMetadata()` → calls your `/api/extract-social-metadata`
+
+---
+
+## 🚀 **Expected Result**
+
+### **Before Integration (Current)**
+- Instagram: URL + 5-8 manual fields = 5-8 minutes
+- TikTok: URL + 5-8 manual fields = 5-8 minutes
+
+### **After Integration (Target)**
+- Instagram: URL → auto-extract → 30 seconds  
+- TikTok: URL → auto-extract → 30 seconds
+- **90%+ automation achieved** (vs current 0%)
+
+---
+
+## ⚡ **Immediate Action Needed**
+
+**Cursor, please:**
+1. **Add `/api/extract-social-metadata` endpoint** to `/Users/ted/snap3/simple-web-server.js`
+2. **Use your existing extraction logic** (you already have this working)
+3. **Test with Instagram/TikTok URLs** to verify automatic metadata population
+
+**Command to start:**
+```bash
+cd /Users/ted/snap3
+# Implement the endpoint in simple-web-server.js
+# The frontend integration is already done
+```
+
+---
+
+## 📍 **Files Ready for Integration**
+- ✅ `/Users/ted/snap3/web/index.html` - Forms cleaned up
+- ✅ `/Users/ted/snap3/web/scripts/main.js` - Extraction functions ready  
+- ❌ `/Users/ted/snap3/simple-web-server.js` - **Needs your API endpoint**
+
+**ClaudeCode will handle Phase 2 (Main VDP integration) after you complete the API endpoint.**
+
+---
+
+🚨 **URGENT REQUEST: Please implement `/api/extract-social-metadata` endpoint immediately!**
