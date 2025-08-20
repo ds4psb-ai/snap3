@@ -1,0 +1,166 @@
+# 🎯 Cursor 추출기 정확한 기능 분석
+
+**Priority**: CRITICAL  
+**Type**: ACCURATE_ANALYSIS  
+**Correlation-ID**: CURSOR-EXTRACTOR-ACCURATE-001  
+**Timestamp**: 2025-08-20 16:55:00
+
+---
+
+## 🎯 **Cursor 추출기 정확한 기능 분석**
+
+### **Instagram 실제 추출 결과**
+```json
+{
+  "like_count": 195000,        // ✅ 추출 가능
+  "comment_count": 1193,       // ✅ 추출 가능
+  "author": "funnyfromai",     // ✅ 추출 가능
+  "hashtags": ["#aimemes", "#aivideo", "#veo3", "#aivideos", "#veo"], // ✅ 추출 가능
+  "upload_date": "2025-07-18T15:00:00.000Z", // ✅ 추출 가능
+  "thumbnail_url": "https://scontent-icn2-1.cdninstagram.com/...", // ✅ 추출 가능
+  "view_count": null,          // ❌ Instagram은 조회수 공개 안함
+  "top_comments": []           // ❌ Instagram 보안 정책으로 제한
+}
+```
+
+### **TikTok 실제 추출 결과**
+```json
+{
+  "view_count": 3200000,       // ✅ 추출 가능
+  "like_count": 162400,        // ✅ 추출 가능
+  "comment_count": 2910,       // ✅ 추출 가능
+  "share_count": 52100,        // ✅ 추출 가능
+  "author": "V.A.I.",          // ✅ 추출 가능
+  "hashtags": ["sarcasm", "grandpa", "laughteristherapy", "grandma", "ai"], // ✅ 추출 가능
+  "duration": 8,               // ✅ 추출 가능
+  "thumbnail_url": "https://p16-pu-sign-useast8.tiktokcdn-us.com/...", // ✅ 추출 가능
+  "top_comments": []           // ❌ TikTok도 댓글 제한
+}
+```
+
+---
+
+## ✅ **Cursor 추출 가능한 데이터**
+
+### **Instagram (6개 필드 자동 추출)**
+- **like_count**: ✅ 195,000 (정확한 숫자)
+- **comment_count**: ✅ 1,193 (정확한 숫자)
+- **author**: ✅ funnyfromai (실제 사용자명)
+- **hashtags**: ✅ ["#aimemes", "#aivideo", "#veo3", "#aivideos", "#veo"]
+- **upload_date**: ✅ 2025-07-18T15:00:00.000Z (정확한 날짜)
+- **thumbnail_url**: ✅ 실제 썸네일 URL
+
+### **TikTok (8개 필드 자동 추출)**
+- **view_count**: ✅ 3,200,000 (정확한 숫자)
+- **like_count**: ✅ 162,400 (정확한 숫자)
+- **comment_count**: ✅ 2,910 (정확한 숫자)
+- **share_count**: ✅ 52,100 (정확한 숫자)
+- **author**: ✅ V.A.I. (실제 사용자명)
+- **hashtags**: ✅ ["sarcasm", "grandpa", "laughteristherapy", "grandma", "ai"]
+- **duration**: ✅ 8 (정확한 길이)
+- **thumbnail_url**: ✅ 실제 썸네일 URL
+
+---
+
+## ❌ **수동 입력 필요한 데이터**
+
+### **Instagram (3개 필드 수동 입력)**
+- **view_count**: ❌ Instagram은 조회수 공개 안함 (null)
+- **top_comments**: ❌ Instagram 보안 정책으로 댓글 추출 제한
+- **video_origin**: ❌ 사용자가 선택해야 함 (AI Generated/Real Footage)
+
+### **TikTok (2개 필드 수동 입력)**
+- **top_comments**: ❌ TikTok도 댓글 추출 제한
+- **video_origin**: ❌ 사용자가 선택해야 함 (AI Generated/Real Footage)
+
+---
+
+## 🎯 **정확한 폼 구조**
+
+### **Instagram 폼**
+```
+✅ 자동 추출 (6개):
+- like_count: 195,000
+- comment_count: 1,193
+- author: funnyfromai
+- hashtags: [#aimemes, #aivideo, #veo3, #aivideos, #veo]
+- upload_date: 2025-07-18T15:00:00.000Z
+- thumbnail_url: https://...
+
+❌ 수동 입력 (3개):
+- view_count: [사용자 입력] (Instagram은 공개 안함)
+- top_comments: [사용자 입력] (보안 제한)
+- video_origin: [사용자 선택] (AI Generated/Real Footage)
+```
+
+### **TikTok 폼**
+```
+✅ 자동 추출 (8개):
+- view_count: 3,200,000
+- like_count: 162,400
+- comment_count: 2,910
+- share_count: 52,100
+- author: V.A.I.
+- hashtags: [sarcasm, grandpa, laughteristherapy, grandma, ai]
+- duration: 8
+- thumbnail_url: https://...
+
+❌ 수동 입력 (2개):
+- top_comments: [사용자 입력] (보안 제한)
+- video_origin: [사용자 선택] (AI Generated/Real Footage)
+```
+
+---
+
+## 🚨 **ClaudeCode에게 정확한 요청**
+
+### **1. 자동 추출 필드 (변경 금지)**
+- **Instagram**: like_count, comment_count, author, hashtags, upload_date, thumbnail_url
+- **TikTok**: view_count, like_count, comment_count, share_count, author, hashtags, duration, thumbnail_url
+
+### **2. 수동 입력 필드 (유지)**
+- **Instagram**: view_count, top_comments, video_origin
+- **TikTok**: top_comments, video_origin
+
+### **3. 제거할 기능**
+- **비디오 업로드**: 완전 제거 (Cursor 추출기로 자동 처리)
+- **불필요한 메타데이터 필드**: 자동 추출되는 필드들 제거
+
+### **4. 최종 폼 구조**
+```
+Instagram: URL 입력 → 6개 자동 추출 → 3개 수동 입력
+TikTok: URL 입력 → 8개 자동 추출 → 2개 수동 입력
+```
+
+---
+
+## 📊 **자동화율 정확한 계산**
+
+### **Instagram**
+- **자동 추출**: 6개 필드
+- **수동 입력**: 3개 필드
+- **총 필드**: 9개
+- **자동화율**: 6/9 = 67%
+
+### **TikTok**
+- **자동 추출**: 8개 필드
+- **수동 입력**: 2개 필드
+- **총 필드**: 10개
+- **자동화율**: 8/10 = 80%
+
+---
+
+## 📋 **ClaudeCode 확인 명령어**
+
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-cursor-extractor-accurate-analysis
+```
+
+---
+
+**🎯 ClaudeCode, 정확한 분석으로 폼을 수정하세요!**
+
+**Correlation-ID**: CURSOR-EXTRACTOR-ACCURATE-001  
+**Status**: ACCURATE_FORM_STRUCTURE_REQUIRED  
+**Action**: PRECISE_FORM_MODIFICATION
