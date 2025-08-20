@@ -1,0 +1,91 @@
+# 🚨 CURSOR: 최종 전략 지시사항
+
+**Priority**: CRITICAL_DIRECTIVE  
+**Type**: FINAL_STRATEGY_COMMAND  
+**Timeline**: 즉시 실행  
+**Correlation-ID**: CURSOR-FINAL-STRATEGY-001
+
+---
+
+## 🚨 **사용자 최종 명령**
+
+### **전략 방향 확정**
+- ✅ **YouTube**: 이미 공식 API 사용 중 (현상 유지)
+- ❌ **Instagram/TikTok**: 공식 API 전환 불필요
+- ✅ **Cursor 기존 방법**: 무조건 활용하여 진행
+
+### **전문가 컨설팅 수용 범위**
+- ✅ **기술적 효율성**: AJV 검증, Circuit Breaker, SLO
+- ✅ **시스템 안정성**: Playwright 베스트 프랙티스
+- ❌ **API 우선순위 전환**: 불필요 (Cursor 기존 방법 활용)
+- ❌ **하이브리드 접근**: 불필요 (현재 방식 유지)
+
+---
+
+## 🎯 **즉시 실행 지시**
+
+### **Cursor 담당 작업 (변경 없음)**
+1. **기존 추출기 방법**: Instagram/TikTok 브라우저 자동화 유지
+2. **전문가 효율성 개선**: AJV + Circuit Breaker + SLO만 적용
+3. **서버 시작**: localhost:3000 즉시 구동
+
+### **적용할 전문가 권장사항**
+- ✅ **AJV 스키마 검증**: 추출 직후 Fail-fast
+- ✅ **Circuit Breaker**: 연속 실패 ≥5회 → OPEN
+- ✅ **SLO 설정**: 성공률 ≥95%, p95 ≤5s, 오류율 ≤2%
+- ✅ **Playwright 안정화**: waitForSelector, 브라우저 재사용
+- ✅ **에러 코드 체계**: E_AUTH, E_PRIVATE, E_REMOVED 등
+
+### **제외할 전문가 권장사항**
+- ❌ **공식 API 우선 전환**: 현재 방식으로 충분
+- ❌ **컴플라이언스 강화**: 기존 수준 유지
+- ❌ **하이브리드 아키텍처**: 불필요한 복잡성
+
+---
+
+## 🚀 **즉시 실행 명령**
+
+### **1순위: 서버 시작**
+```bash
+cd /Users/ted/snap3
+npm run dev  # localhost:3000 구동
+```
+
+### **2순위: 효율성 개선 적용**
+- **AJV 검증** 추가
+- **Circuit Breaker** 고도화
+- **SLO 모니터링** 구현
+
+### **3순위: 통합 테스트**
+- Instagram/TikTok 메타데이터 추출 테스트
+- 전체 VDP 파이프라인 검증
+
+---
+
+## 📊 **최종 목표**
+
+### **자동화 현황**
+```
+YouTube:    100% (공식 API) ✅
+Instagram:  90%+ (Cursor 브라우저 자동화) 🎯
+TikTok:     90%+ (Cursor 브라우저 자동화) 🎯
+```
+
+### **성능 목표**
+- **처리 시간**: 30초-1분
+- **성공률**: ≥95%
+- **시스템 안정성**: Circuit Breaker 보호
+
+---
+
+**🚨 Cursor: 기존 방법 유지하고 효율성 개선만 적용하여 즉시 구현!**
+
+**확인 명령어:**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-cursor-final-strategy-directive
+```
+
+**Correlation-ID**: CURSOR-FINAL-STRATEGY-001  
+**Status**: CRITICAL_DIRECTIVE_ISSUED  
+**Action**: IMMEDIATE_IMPLEMENTATION_REQUIRED
