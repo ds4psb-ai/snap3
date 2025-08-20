@@ -331,7 +331,7 @@ export default function SummaryDock({
 
         {/* 새로고침 상태 */}
         <div className="text-xs text-gray-500 text-center">
-          Auto-refresh every 5s | Last: {lastRefresh.toLocaleTimeString()}
+          Auto-refresh every 30s | Last: {lastRefresh.toLocaleTimeString()}
         </div>
       </div>
     </div>
