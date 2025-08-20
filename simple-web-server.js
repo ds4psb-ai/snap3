@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const { Storage } = require('@google-cloud/storage');
+const { PubSub } = require('@google-cloud/pubsub');
 const fetch = require('node-fetch');
 const multer = require('multer');
 const crypto = require('crypto');
@@ -15,9 +16,77 @@ const fs = require('fs');
 // Import the URL normalizer (ES6 import in CommonJS using dynamic import)
 let normalizeSocialUrl;
 
-// AJV Schema Precompilation (GPT-5 Optimization #2)
+// DLQ Publisher Configuration (Recursive Improvement #1)
+const pubsub = new PubSub({
+    projectId: 'tough-variety-466003-c5'
+});
+const DLQ_TOPIC = 'vdp-failed-processing';
+
+// AJV Schema Precompilation (GPT-5 Optimization #2) + DLQ Gate
 const ajv = new Ajv({ strict: true, allErrors: true });
 let validateVDPSchema, validateMetadataSchema;
+
+// DLQ Publisher Function (Recursive Improvement #1)
+async function publishToDLQ(failedData, errorDetails, correlationId) {
+    try {
+        const dlqMessage = {
+            correlation_id: correlationId,
+            timestamp: new Date().toISOString(),
+            error_type: errorDetails.code,
+            error_message: errorDetails.message,
+            failed_data: failedData,
+            retry_count: failedData.retry_count || 0,
+            platform: failedData.platform,
+            content_id: failedData.content_id,
+            content_key: failedData.content_key || `${failedData.platform}:${failedData.content_id}`
+        };
+        
+        await pubsub.topic(DLQ_TOPIC).publishMessage({
+            data: Buffer.from(JSON.stringify(dlqMessage))
+        });
+        
+        structuredLog('success', 'Failed request published to DLQ', {
+            contentKey: dlqMessage.content_key,
+            errorType: errorDetails.code,
+            retryCount: dlqMessage.retry_count,
+            dlqTopic: DLQ_TOPIC
+        }, correlationId);
+        
+        return true;
+    } catch (error) {
+        structuredLog('error', 'DLQ publishing failed', {
+            error: error.message,
+            contentKey: failedData.content_key,
+            fallbackAction: 'LOCAL_FAILED_FILE'
+        }, correlationId);
+        return false;
+    }
+}
+
+// AJV Schema Gate Function (Recursive Improvement #1)
+function validateWithSchemaGate(data, schemaType, correlationId) {
+    const validator = schemaType === 'vdp' ? validateVDPSchema : validateMetadataSchema;
+    
+    if (!validator) {
+        structuredLog('warning', 'Schema validator not available - validation skipped', {
+            schemaType,
+            validationStatus: 'SKIPPED'
+        }, correlationId);
+        return { valid: true, errors: [], skipped: true };
+    }
+    
+    const valid = validator(data);
+    const errors = validator.errors || [];
+    
+    structuredLog(valid ? 'success' : 'error', `Schema validation ${valid ? 'passed' : 'failed'}`, {
+        schemaType,
+        valid,
+        errorCount: errors.length,
+        validationDetails: errors.slice(0, 3) // First 3 errors only
+    }, correlationId);
+    
+    return { valid, errors, skipped: false };
+}
 
 // Load and precompile schemas at boot time
 function precompileSchemas() {
@@ -47,6 +116,7 @@ function precompileSchemas() {
         };
         validateMetadataSchema = ajv.compile(metadataSchema);
         console.log('✅ Metadata schema precompiled successfully');
+        console.log('✅ DLQ Publisher initialized for topic:', DLQ_TOPIC);
         
     } catch (error) {
         console.error('❌ Schema precompilation failed:', error);
@@ -589,13 +659,26 @@ app.post('/api/vdp/extract-vertex', async (req, res) => {
             top_comments: comments
         };
         
-        // AJV Precompiled Schema Validation
-        if (validateMetadataSchema && !validateMetadataSchema(ingestRequest.metadata)) {
-            structuredLog('warning', 'Metadata validation failed (non-blocking)', {
-                validationErrors: validateMetadataSchema.errors,
-                platform,
-                contentId: content_id
-            }, correlationId);
+        // AJV Schema Gate with DLQ Integration (Recursive Improvement #1)
+        const metadataValidation = validateWithSchemaGate(ingestRequest.metadata, 'metadata', correlationId);
+        
+        if (!metadataValidation.valid && !metadataValidation.skipped) {
+            // Schema validation failed - publish to DLQ
+            const errorDetails = {
+                code: 'INVALID_SCHEMA_METADATA',
+                message: 'Metadata schema validation failed',
+                validation_errors: metadataValidation.errors
+            };
+            
+            await publishToDLQ(ingestRequest, errorDetails, correlationId);
+            
+            return res.status(400).json({
+                error: 'INVALID_SCHEMA_METADATA',
+                message: 'Metadata validation failed - published to DLQ',
+                validation_errors: metadataValidation.errors,
+                dlq_status: 'PUBLISHED',
+                correlationId
+            });
         }
         
         if (platform === 'tiktok') {

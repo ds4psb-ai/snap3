@@ -1,0 +1,68 @@
+# 🚀 90분 재귀개선 Sprint 시작 - Cursor 작업
+
+**Priority**: CRITICAL  
+**Action**: Sprint-T0-30min-SummaryDock-Implementation  
+**Timestamp**: 2025-08-20 19:25  
+**Correlation-ID**: SPRINT-CURSOR-T0-001
+
+## 🎯 **T+0~30분 Cursor 담당 작업**
+
+### **✅ 즉시 구현: SummaryDock 요약 패널 고정 위젯**
+
+#### **구현 파일:**
+```typescript
+// src/components/SummaryDock.tsx
+const SummaryDock = () => {
+  const [summary, setSummary] = useState('');
+  
+  useEffect(() => {
+    // scripts/generate_summary.sh 출력물 자동 fetch
+    fetch('/api/summary/latest')
+      .then(res => res.json())
+      .then(data => setSummary(data.content));
+  }, []);
+  
+  return (
+    <div className="fixed top-0 left-0 w-full bg-blue-50 p-2 z-50">
+      <h3>📋 프로젝트 현황</h3>
+      <div className="text-sm">{summary}</div>
+    </div>
+  );
+};
+```
+
+#### **API 엔드포인트:**
+```typescript
+// src/app/api/summary/latest/route.ts
+export async function GET() {
+  // scripts/generate_summary.sh 출력 읽기
+  const summaryContent = await readSummaryFile();
+  
+  return Response.json({
+    content: summaryContent,
+    updated_at: new Date().toISOString()
+  });
+}
+```
+
+## 🤝 **병렬 작업 상황**
+
+### **ClaudeCode (동시 진행 중):**
+- ✅ DLQ 퍼블리셔 구현 중
+- ✅ AJV 스키마 게이트 구현 중
+- 📍 simple-web-server.js 수정 중
+
+### **Cursor 목표 (30분 내):**
+- 📋 SummaryDock 컴포넌트 생성
+- 🔗 API 엔드포인트 연결
+- 🎨 상단 고정 위젯 스타일링
+
+## 🎯 **다음 단계 (T+30~60분) 미리보기**
+- **ClaudeCode**: Circuit Breaker + 지수 백오프
+- **Cursor**: PlatformWizard 인제스트 마법사
+
+---
+
+**🚀 Cursor 즉시 시작 요청: SummaryDock 구현!** ⚡
+
+**Cursor 명령어**: `cd /Users/ted/snap3 && cat .collab-msg-sprint-start-cursor`
