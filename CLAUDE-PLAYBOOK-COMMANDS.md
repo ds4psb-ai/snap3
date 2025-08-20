@@ -138,3 +138,4 @@
 ---
 *이 Playbook은 최종화된 API 및 스키마 세트와 완전히 정렬됨; deprecated 경로 제거, 크레딧/빌링 동작 (Flux Kontext 이미지 생성 포함) 통합, 8초 스토리보드 우선 워크플로우 end-to-end 잠금.*
 
+

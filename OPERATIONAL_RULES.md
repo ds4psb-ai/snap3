@@ -16,7 +16,7 @@ export RAW_BUCKET="tough-variety-raw-central1"
 ```
 
 #### 검증 규칙
-- ✅ **RAW_BUCKET 동적 설정**: `process.env.RAW_BUCKET || 'tough-variety-raw'`
+- ✅ **RAW_BUCKET 동적 설정**: `process.env.RAW_BUCKET || 'tough-variety-raw-central1'`
 - ✅ **리전 정렬 검증**: startup 시 environment validation 수행
 - ✅ **플랫폼 경로 분리**: `gs://{bucket}/ingest/requests/{platform}/`
 
@@ -71,7 +71,7 @@ structuredLog('info', 'Server startup initiated', {
         jsonOnlyProcessing: true,
         platformSegmentation: true,
         contentKeyEnforcement: true,
-        regionalAlignment: RAW_BUCKET !== 'tough-variety-raw'
+        regionalAlignment: RAW_BUCKET === 'tough-variety-raw-central1'
     }
 });
 ```

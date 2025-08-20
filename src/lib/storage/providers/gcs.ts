@@ -50,6 +50,21 @@ export class GCSProvider implements StorageProvider {
     }
   }
 
+  async writeFile(path: string, content: string | Buffer): Promise<boolean> {
+    try {
+      const file = this.storage.bucket(this.bucketName).file(path);
+      await file.save(content, {
+        metadata: {
+          contentType: 'application/json',
+        },
+      });
+      return true;
+    } catch (error) {
+      console.error('GCS writeFile error:', error);
+      return false;
+    }
+  }
+
   async deleteFile(path: string): Promise<boolean> {
     try {
       await this.storage.bucket(this.bucketName).file(path).delete();

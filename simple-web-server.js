@@ -14,7 +14,22 @@ const storage = new Storage({
     projectId: 'tough-variety-466003-c5',
     keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS || undefined
 });
-const RAW_BUCKET = process.env.RAW_BUCKET || 'tough-variety-raw';
+
+// 🚨 CRITICAL: Bucket Policy Enforcement (2025-08-19)
+const ALLOWED_RAW_BUCKET = 'tough-variety-raw-central1'; // 단일 표준 버킷 - 절대 변경 금지
+const RAW_BUCKET = process.env.RAW_BUCKET || ALLOWED_RAW_BUCKET;
+
+// Bucket validation and enforcement
+if (RAW_BUCKET !== ALLOWED_RAW_BUCKET) {
+    console.error(`🚨 CRITICAL ERROR: Invalid RAW_BUCKET detected!`);
+    console.error(`Expected: ${ALLOWED_RAW_BUCKET}`);
+    console.error(`Actual: ${RAW_BUCKET}`);
+    console.error(`Source: ${process.env.RAW_BUCKET ? 'Environment Variable' : 'Default'}`);
+    console.error(`This violates Regional Alignment Policy. Server will not start.`);
+    process.exit(1);
+}
+
+console.log(`✅ Bucket validation passed: ${RAW_BUCKET}`);
 const GOLD_BUCKET = 'tough-variety-gold';
 
 // Enhanced Logging System
@@ -56,13 +71,21 @@ function addCorrelationId(req, res, next) {
 
 const app = express();
 
-// Remove multer - JSON only processing
-// const upload = multer({
-//     storage: multer.memoryStorage(),
-//     limits: {
-//         fileSize: 100 * 1024 * 1024 // 100MB limit
-//     }
-// });
+// Multer for file uploads (video files only for IG/TT)
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 100 * 1024 * 1024 // 100MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        // Accept video files only
+        if (file.mimetype.startsWith('video/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only video files are allowed'), false);
+        }
+    }
+});
 
 // Middleware
 app.use(cors());
@@ -354,7 +377,11 @@ app.post('/api/vdp/extract-vertex', async (req, res) => {
         outGcsUri: vdpOutputPath,
         ingest_type: 'link',
         created_at: nowISO,
-        correlationId              // Add correlation ID to request
+        correlationId,              // Add correlation ID to request
+        
+        // 실전 인제스트 필수 필드 (IG/TT)
+        ...(req.body.uploaded_gcs_uri && { uploaded_gcs_uri: req.body.uploaded_gcs_uri }),
+        ...(req.body.processing_options && { processing_options: req.body.processing_options })
     };
     
     // Add platform-specific metadata (Instagram/TikTok only - 댓글 내용만, 좋아요 제거)
@@ -393,6 +420,31 @@ app.post('/api/vdp/extract-vertex', async (req, res) => {
         // Store ingest request in GCS with platform-structured path
         const timestamp = Date.now();
         const fileName = `ingest/requests/${platform}/${content_id}_${timestamp}.json`;
+        
+        // 🚨 CRITICAL: Final bucket validation before GCS operation
+        if (RAW_BUCKET !== ALLOWED_RAW_BUCKET) {
+            structuredLog('error', 'CRITICAL: Bucket validation failed during GCS operation', {
+                expectedBucket: ALLOWED_RAW_BUCKET,
+                actualBucket: RAW_BUCKET,
+                errorCode: 'BUCKET_VALIDATION_FAILED',
+                fix: 'Restart server with correct RAW_BUCKET'
+            }, correlationId);
+            
+            return res.status(500).json({
+                error: 'BUCKET_VALIDATION_FAILED',
+                message: 'Invalid bucket configuration detected',
+                details: `Expected ${ALLOWED_RAW_BUCKET}, got ${RAW_BUCKET}`,
+                correlationId
+            });
+        }
+        
+        structuredLog('info', 'GCS operation initiated with validated bucket', {
+            bucket: RAW_BUCKET,
+            fileName,
+            platform,
+            contentId: content_id,
+            bucketValidation: 'PASSED'
+        }, correlationId);
         
         const bucket = storage.bucket(RAW_BUCKET);
         const file = bucket.file(fileName);
@@ -514,7 +566,110 @@ app.get('/api/test-jobs/:jobId', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 9001;
+// File Upload Endpoint for IG/TT Video Files
+app.post('/api/upload-video', upload.single('video_file'), async (req, res) => {
+    const startTime = Date.now();
+    const correlationId = req.correlationId;
+    
+    structuredLog('info', 'Video file upload request received', {
+        contentType: req.headers['content-type'],
+        platform: req.body.platform,
+        contentId: req.body.content_id
+    }, correlationId);
+    
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                error: 'FILE_MISSING',
+                message: '비디오 파일이 필요합니다',
+                correlationId
+            });
+        }
+        
+        const platform = req.body.platform;
+        const content_id = req.body.content_id;
+        
+        if (!platform || !content_id) {
+            return res.status(400).json({
+                error: 'REQUIRED_FIELDS_MISSING',
+                message: 'platform과 content_id가 필요합니다',
+                correlationId
+            });
+        }
+        
+        if (platform !== 'instagram' && platform !== 'tiktok') {
+            return res.status(400).json({
+                error: 'INVALID_PLATFORM',
+                message: '파일 업로드는 Instagram과 TikTok만 지원됩니다',
+                correlationId
+            });
+        }
+        
+        // Generate GCS file path
+        const timestamp = Date.now();
+        const fileExtension = req.file.originalname.split('.').pop() || 'mp4';
+        const fileName = `uploads/${platform}/${content_id}_${timestamp}.${fileExtension}`;
+        const gcsUri = `gs://${RAW_BUCKET}/${fileName}`;
+        
+        // Upload to GCS
+        const bucket = storage.bucket(RAW_BUCKET);
+        const file = bucket.file(fileName);
+        
+        await file.save(req.file.buffer, {
+            metadata: {
+                contentType: req.file.mimetype,
+                metadata: {
+                    'vdp-platform': platform,
+                    'vdp-content-id': content_id,
+                    'vdp-upload-type': 'video',
+                    'vdp-correlation-id': correlationId,
+                    'original-filename': req.file.originalname
+                }
+            }
+        });
+        
+        const processingTime = Date.now() - startTime;
+        
+        structuredLog('success', 'Video file uploaded to GCS successfully', {
+            gcsUri,
+            platform,
+            contentId: content_id,
+            fileSize: req.file.size,
+            fileName: req.file.originalname,
+            processingTimeMs: processingTime
+        }, correlationId);
+        
+        res.json({
+            success: true,
+            uploaded_gcs_uri: gcsUri,
+            file_size: req.file.size,
+            content_type: req.file.mimetype,
+            platform,
+            content_id,
+            correlationId
+        });
+        
+    } catch (error) {
+        const processingTime = Date.now() - startTime;
+        
+        structuredLog('error', 'Video file upload failed', {
+            error: error.message,
+            stack: error.stack,
+            platform: req.body.platform,
+            contentId: req.body.content_id,
+            processingTimeMs: processingTime
+        }, correlationId);
+        
+        res.status(500).json({
+            error: 'UPLOAD_FAILED',
+            message: '파일 업로드 중 오류가 발생했습니다',
+            details: error.message,
+            correlationId
+        });
+    }
+});
+
+const PORT = process.env.PORT || 8080;
 
 // Initialize server
 async function startServer() {
@@ -531,9 +686,9 @@ async function startServer() {
     });
     
     // Environment variable validation
-    if (RAW_BUCKET === 'tough-variety-raw') {
-        structuredLog('warning', 'Using default RAW_BUCKET - consider setting environment variable', {
-            defaultBucket: RAW_BUCKET,
+    if (RAW_BUCKET === 'tough-variety-raw-central1') {
+        structuredLog('info', 'Using standard RAW_BUCKET (Regional Alignment Policy compliant)', {
+            standardBucket: RAW_BUCKET,
             recommendedAction: 'Set RAW_BUCKET environment variable for region alignment',
             regionAlignment: 'us-central1 recommended for optimal performance'
         });
@@ -556,7 +711,7 @@ async function startServer() {
                 jsonOnlyProcessing: true,
                 platformSegmentation: true,
                 contentKeyEnforcement: true,
-                regionalAlignment: RAW_BUCKET !== 'tough-variety-raw'
+                regionalAlignment: RAW_BUCKET === 'tough-variety-raw-central1'
             }
         });
         

@@ -26,7 +26,7 @@ YouTube/Shorts URL → Download → Upload (GCS) → Extract (T2+Vertex) → Gol
 # Or manually set required variables:
 export GCP_PROJECT="tough-variety-466003-c5"
 export GCP_REGION="us-central1" 
-export RAW_BUCKET="tough-variety-raw"
+export RAW_BUCKET="tough-variety-raw-central1"
 export T2_URL="http://localhost:3001/api/v1/extract"
 export YOUTUBE_API_KEY="your-youtube-api-key"
 ```

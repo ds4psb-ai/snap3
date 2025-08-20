@@ -177,3 +177,4 @@ This rule auto-attaches when working on:
 - @scripts/vdp-to-gold-jsonl.sh
 - @scripts/test-quality-gates.sh
 - @vdp.schema.json
+

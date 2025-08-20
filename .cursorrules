@@ -1,0 +1,889 @@
+# 🚀 Snap3 VDP Platform - Comprehensive Cursor Rules
+
+## 🎯 프로젝트 개요
+**VDP (Video Data Package) RAW Generation Pipeline** - 멀티플랫폼 비디오 분석 및 AI 생성 플랫폼
+- **상태**: Production Ready (2025-08-19)
+- **아키텍처**: T1(UI/API) → T2(Worker) → T3(Processing) → BigQuery
+- **플랫폼**: YouTube Shorts, Instagram Reels, TikTok
+
+---
+
+## 🏗️ 핵심 아키텍처 규칙
+
+### MUST (필수 사항)
+- **VDP_FULL**: 내부 전용, 외부 노출 절대 금지
+- **Content_ID**: 모든 인제스트 요청에 필수, URL 정규화 선행
+- **Content_Key**: `platform:content_id` 형식으로 글로벌 유니크
+- **Platform-Segmented GCS**: `gs://bucket/ingest/requests/{platform}/`
+- **JSON-Only**: FormData/multipart 금지
+- **Correlation ID**: 모든 요청에 추적 ID (`req_timestamp_random`)
+- **VDP 필수 필드**: content_key, content_id, metadata, load_timestamp, load_date
+
+### NEVER (절대 금지)
+- **환경변수 검증 우회**: 필수 환경변수 없이 서버 시작
+- **Content_ID 누락**: content_id 없이 인제스트 처리
+- **FormData 허용**: JSON-only 정책 위반
+- **Platform 세그먼트 누락**: GCS 경로에서 플랫폼 생략
+- **잘못된 버킷**: `tough-variety-raw-central1` 이외 사용
+- **문서 불일치**: 잘못된 버킷 참조 허용
+- **API 엔드포인트 오류**: `/api/ingest` 대신 `/api/vdp/extract-vertex` 사용
+
+---
+
+## 🔧 기술 스택 & 라이브러리
+
+### 필수 라이브러리
+```typescript
+// Date & Time
+import { format, parseISO } from 'date-fns'
+
+// Pattern Matching
+import { match, P } from 'ts-pattern'
+
+// State Management
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { create } from 'zustand'
+
+// React Hooks
+import { useLocalStorage, useDebounce } from 'react-use'
+
+// Utilities
+import { pipe, map, filter } from 'es-toolkit'
+
+// Icons
+import { Upload, Download, Play, Pause } from 'lucide-react'
+
+// Validation
+import { z } from 'zod'
+
+// UI Components
+import { Button, Input, Dialog } from '@/components/ui'
+
+// Styling
+import { cn } from '@/lib/utils'
+```
+
+### 디렉토리 구조
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── api/               # API 엔드포인트
+│   ├── curator/           # 큐레이션 페이지
+│   ├── datasets/          # 데이터셋 페이지
+│   └── onboarding/        # 온보딩 페이지
+├── components/
+│   ├── ui/               # shadcn-ui 컴포넌트
+│   ├── curator/          # 큐레이션 관련 컴포넌트
+│   └── onboarding/       # 온보딩 관련 컴포넌트
+├── lib/
+│   ├── api/              # API 클라이언트
+│   ├── errors/           # 에러 처리
+│   ├── feature-flags/    # 기능 플래그
+│   ├── jobs/             # 작업 큐
+│   ├── schemas/          # Zod 스키마
+│   └── storage/          # 스토리지 관련
+└── hooks/                # 커스텀 훅
+```
+
+---
+
+## 🎯 API 엔드포인트 규칙
+
+### 핵심 엔드포인트
+```typescript
+// URL 정규화
+POST /api/normalize-url
+{
+  url: string
+}
+
+// VDP 인제스트 (실제 처리)
+POST /api/vdp/extract-vertex
+{
+  content_id: string,
+  uploaded_gcs_uri: string,
+  processing_options: {
+    force_full_pipeline: boolean,
+    audio_fingerprint: boolean,
+    brand_detection: boolean,
+    hook_genome_analysis: boolean
+  },
+  metadata: {
+    platform: "YouTube" | "Instagram" | "TikTok",
+    language: string,
+    video_origin: "Real-Footage" | "AI-Generated"
+  }
+}
+
+// 비디오 업로드 (Instagram/TikTok)
+POST /api/upload-video
+FormData: { video_file: File }
+
+// 작업 상태 확인
+GET /jobs/{id}
+
+// QA 검증
+POST /api/qa/validate
+
+// 내보내기
+GET /export/brief/{id}
+GET /export/json/{id}
+```
+
+### 🖥️ **인제스터 UI 서버**
+**중요**: 인제스터 UI 요청 시 반드시 `simple-web-server.js`의 8080 포트 사용
+
+```bash
+# 인제스터 UI 서버 실행
+node simple-web-server.js
+
+# 서버 URL
+http://localhost:8080
+
+# 주요 엔드포인트
+- POST /api/normalize-url     # URL 정규화
+- POST /api/vdp/extract-vertex # VDP 인제스트
+- GET /api/health             # 헬스 체크
+```
+
+**UI 접속 규칙**:
+- **인제스터 UI**: http://localhost:8080 (simple-web-server.js)
+- **메인 UI**: http://localhost:3000 (Next.js 앱)
+- **인제스터 요청 시**: 항상 8080 포트 우선 사용
+
+### 비디오 생성 파이프라인
+```typescript
+// Textboard 생성 (2-4씬, 8s)
+POST /snap3/turbo
+
+// Veo3 Prompt JSON (8s/16:9/720p|1080p)
+POST /compile/veo3
+
+// 비동기 미리보기 (202 + Location)
+POST /preview/veo
+```
+
+---
+
+## 🔒 보안 & 환경변수
+
+### 필수 환경변수
+```bash
+# GCP Configuration
+export PROJECT_ID="tough-variety-466003-c5"
+export REGION="us-central1"
+export RAW_BUCKET="tough-variety-raw-central1"
+export PLATFORM_SEGMENTED_PATH=true
+
+# Service URLs
+export T2_URL="https://t2-vdp-355516763169.us-central1.run.app"
+
+# Vertex AI
+export MODEL_NAME="gemini-2.5-pro"
+export MAX_OUTPUT_TOKENS="16384"
+
+# VDP Processing
+export FORCE_FILEDATA="1"
+export ASYNC_ENABLED="true"
+export EVIDENCE_MODE="true"
+export HOOK_MIN_STRENGTH="0.70"
+```
+
+### 보안 원칙
+- **Supabase RLS**: 모든 테넌트 테이블
+- **서명 URL**: 업로드/공유 전용
+- **서비스 키**: 서버 전용 (클라이언트 노출 금지)
+- **VDP_FULL**: 내부 전용, 외부 노출 금지
+
+---
+
+## 📊 VDP 스키마 규칙
+
+### 필수 필드 구조
+```typescript
+interface VDP {
+  content_id: string;           // C###### 형식
+  content_key: string;          // platform:content_id
+  metadata: {
+    platform: "instagram" | "tiktok" | "youtube_shorts";
+    view_count: number;
+    like_count: number;
+    comment_count: number;
+    share_count: number;
+    upload_date: string;        // ISO 8601
+    source_url: string;
+    video_origin: "Real-Footage" | "AI-Generated";
+    hashtags: string[];
+    cta_types: string[];
+    original_sound: boolean;
+  };
+  overall_analysis: {
+    hookGenome: {
+      start_sec: number;        // ≤3.0초
+      strength_score: number;   // ≥0.70
+      pattern_code: string;
+      delivery: string;
+      trigger_modalities: string[];
+    };
+    emotional_arc: string;
+    asr_transcript: string;
+    ocr_text: string;
+  };
+  scenes: Array<{
+    scene_id: string;
+    start_time: number;
+    end_time: number;
+    narrative_type: "Hook" | "Demonstration" | "Problem_Solution";
+    shot_details: {
+      camera_movement: string;
+      keyframes: string[];
+      composition: string;
+    };
+    style_analysis: {
+      lighting: string;
+      mood_palette: string;
+      edit_grammar: string;
+    };
+  }>;
+  product_mentions: ProductMention[];
+  service_mentions: ServiceMention[];
+  default_lang: string;
+  load_timestamp: string;       // RFC-3339 Z
+  load_date: string;           // YYYY-MM-DD
+}
+```
+
+---
+
+## 🎯 품질 게이트 규칙
+
+### Hook Gate 검증
+```typescript
+// 필수 조건
+const hookGateValidation = {
+  start_sec: (value: number) => value <= 3.0,
+  strength_score: (value: number) => value >= 0.70,
+  pattern_detection: (value: any) => !!value.hookGenome
+};
+
+// 검증 함수
+const validateHookGate = (vdp: VDP): boolean => {
+  const { hookGenome } = vdp.overall_analysis;
+  return hookGateValidation.start_sec(hookGenome.start_sec) &&
+         hookGateValidation.strength_score(hookGenome.strength_score) &&
+         hookGateValidation.pattern_detection(hookGenome);
+};
+```
+
+### 플랫폼별 요구사항
+```typescript
+const platformRequirements = {
+  reels: {
+    resolution: "≥720p",
+    framerate: "≥30fps"
+  },
+  tiktok: {
+    bitrate: "≥516kbps"
+  },
+  shorts: {
+    aspect_ratio: "16:9",
+    crop_proxy: "UI metadata only"
+  }
+};
+```
+
+---
+
+## 🔄 비동기 처리 패턴
+
+### 작업 큐 패턴
+```typescript
+// 작업 생성
+const createJob = async (data: JobData): Promise<JobResponse> => {
+  const response = await fetch('/api/jobs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  
+  if (response.status === 202) {
+    const location = response.headers.get('Location');
+    return { jobId: location?.split('/').pop(), status: 'accepted' };
+  }
+  
+  throw new Error('Job creation failed');
+};
+
+// 작업 상태 폴링
+const pollJobStatus = async (jobId: string): Promise<JobStatus> => {
+  const response = await fetch(`/api/jobs/${jobId}`);
+  const data = await response.json();
+  
+  if (data.status === 'completed') {
+    return data;
+  } else if (data.status === 'failed') {
+    throw new Error(data.error);
+  }
+  
+  // Retry-After 헤더 확인
+  const retryAfter = response.headers.get('Retry-After');
+  await new Promise(resolve => setTimeout(resolve, parseInt(retryAfter || '5000')));
+  
+  return pollJobStatus(jobId);
+};
+```
+
+---
+
+## 🎨 UI/UX 규칙
+
+### 컴포넌트 패턴
+```typescript
+// 클라이언트 컴포넌트 필수
+'use client';
+
+// 상태 관리 패턴
+const useUploadState = () => {
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState<Record<string, number>>({});
+  
+  return { files, uploading, progress, setFiles, setUploading, setProgress };
+};
+
+// 폼 검증 패턴
+const uploadSchema = z.object({
+  platform: z.enum(['youtube', 'instagram', 'tiktok']),
+  url: z.string().url().optional(),
+  file: z.instanceof(File).optional(),
+  processing_options: z.object({
+    force_full_pipeline: z.boolean(),
+    audio_fingerprint: z.boolean(),
+    brand_detection: z.boolean()
+  })
+});
+
+// 에러 처리 패턴
+const handleError = (error: unknown) => {
+  if (error instanceof z.ZodError) {
+    return { type: 'validation', errors: error.errors };
+  }
+  if (error instanceof Error) {
+    return { type: 'runtime', message: error.message };
+  }
+  return { type: 'unknown', message: '알 수 없는 오류가 발생했습니다.' };
+};
+```
+
+### 접근성 규칙
+```typescript
+// ARIA 라벨 필수
+<Button aria-label="업로드 시작" onClick={handleUpload}>
+  <Upload className="w-4 h-4" />
+</Button>
+
+// 키보드 네비게이션
+<div role="tablist" aria-label="플랫폼 선택">
+  <button role="tab" aria-selected={selected === 'youtube'}>
+    YouTube
+  </button>
+</div>
+
+// 색상 대비 검증
+const contrastCheck = (foreground: string, background: string) => {
+  // WCAG 2.1 AA 기준 (4.5:1)
+  return calculateContrastRatio(foreground, background) >= 4.5;
+};
+```
+
+---
+
+## 🧪 테스트 규칙
+
+### 테스트 구조
+```typescript
+// 단위 테스트
+describe('VDP Validation', () => {
+  it('should validate hook gate requirements', () => {
+    const vdp = createMockVDP({ start_sec: 2.5, strength_score: 0.8 });
+    expect(validateHookGate(vdp)).toBe(true);
+  });
+  
+  it('should reject invalid hook timing', () => {
+    const vdp = createMockVDP({ start_sec: 5.0, strength_score: 0.8 });
+    expect(validateHookGate(vdp)).toBe(false);
+  });
+});
+
+// 통합 테스트
+describe('API Integration', () => {
+  it('should process upload request end-to-end', async () => {
+    const response = await request(app)
+      .post('/api/vdp/extract-vertex')
+      .send(validRequestData);
+    
+    expect(response.status).toBe(202);
+    expect(response.headers.location).toMatch(/\/jobs\/\w+/);
+  });
+});
+
+// 계약 테스트
+describe('OpenAPI Contract', () => {
+  it('should match OpenAPI specification', () => {
+    const spec = loadOpenAPISpec();
+    const endpoint = spec.paths['/api/vdp/extract-vertex'];
+    expect(endpoint.post).toBeDefined();
+  });
+});
+```
+
+---
+
+## 🚀 배포 & 운영 규칙
+
+### CI/CD 파이프라인
+```yaml
+# GitHub Actions
+name: Deploy
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm ci
+      - run: npm run test:contracts
+      - run: npm run ci:all
+      - run: npm run guards
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run build
+      - run: npm run deploy
+```
+
+### 운영 점검
+```bash
+# 전체 시스템 검증
+npm run ops:test
+
+# 플랫폼별 테스트
+npm run ops:youtube
+npm run ops:instagram
+npm run ops:tiktok
+
+# 헬스 체크
+npm run ops:health
+```
+
+---
+
+## 📝 코딩 스타일 규칙
+
+### TypeScript 규칙
+```typescript
+// 타입 정의
+type Platform = 'youtube' | 'instagram' | 'tiktok';
+type VideoOrigin = 'Real-Footage' | 'AI-Generated';
+type JobStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
+// 인터페이스 정의
+interface UploadRequest {
+  content_id: string;
+  platform: Platform;
+  processing_options: ProcessingOptions;
+  metadata: Metadata;
+}
+
+// 유니온 타입 활용
+type ValidationResult = 
+  | { valid: true; data: VDP }
+  | { valid: false; errors: ValidationError[] };
+
+// 제네릭 활용
+interface ApiResponse<T> {
+  data: T;
+  status: 'success' | 'error';
+  message?: string;
+}
+```
+
+### 함수형 프로그래밍
+```typescript
+// 순수 함수
+const validateVDP = (vdp: VDP): ValidationResult => {
+  const errors: ValidationError[] = [];
+  
+  if (!vdp.content_id) {
+    errors.push({ field: 'content_id', message: '필수 필드입니다.' });
+  }
+  
+  return errors.length === 0 
+    ? { valid: true, data: vdp }
+    : { valid: false, errors };
+};
+
+// 파이프라인 패턴
+const processVDP = pipe(
+  validateVDP,
+  map(transformVDP),
+  filter(qualityGate),
+  map(uploadToGCS)
+);
+
+// 커링 패턴
+const createPlatformValidator = (platform: Platform) => 
+  (vdp: VDP): boolean => vdp.metadata.platform === platform;
+```
+
+---
+
+## 🎯 성능 최적화 규칙
+
+### React 최적화
+```typescript
+// 메모이제이션
+const MemoizedComponent = memo(({ data }: Props) => {
+  return <div>{data.map(item => <Item key={item.id} {...item} />)}</div>;
+});
+
+// 커스텀 훅 최적화
+const useDebouncedSearch = (query: string, delay: number = 300) => {
+  const debouncedQuery = useDebounce(query, delay);
+  
+  return useQuery({
+    queryKey: ['search', debouncedQuery],
+    queryFn: () => searchAPI(debouncedQuery),
+    enabled: debouncedQuery.length > 0
+  });
+};
+
+// 가상화 (대용량 리스트)
+import { FixedSizeList as List } from 'react-window';
+
+const VirtualizedList = ({ items }: { items: VDP[] }) => (
+  <List
+    height={400}
+    itemCount={items.length}
+    itemSize={50}
+    itemData={items}
+  >
+    {({ index, style, data }) => (
+      <div style={style}>
+        <VDPItem vdp={data[index]} />
+      </div>
+    )}
+  </List>
+);
+```
+
+### API 최적화
+```typescript
+// 배치 처리
+const batchUpload = async (files: File[]): Promise<UploadResult[]> => {
+  const chunks = chunk(files, 5); // 5개씩 배치
+  const results: UploadResult[] = [];
+  
+  for (const chunk of chunks) {
+    const chunkResults = await Promise.all(
+      chunk.map(file => uploadFile(file))
+    );
+    results.push(...chunkResults);
+  }
+  
+  return results;
+};
+
+// 캐싱 전략
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5분
+      cacheTime: 10 * 60 * 1000, // 10분
+      retry: 3,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
+    }
+  }
+});
+```
+
+---
+
+## 🚨 에러 처리 규칙
+
+### RFC 9457 Problem Details
+```typescript
+interface ProblemDetails {
+  type: string;
+  title: string;
+  status: number;
+  detail?: string;
+  instance?: string;
+  errors?: ValidationError[];
+}
+
+const createProblemDetails = (
+  type: string,
+  title: string,
+  status: number,
+  detail?: string
+): ProblemDetails => ({
+  type: `https://api.snap3.com/problems/${type}`,
+  title,
+  status,
+  detail,
+  instance: new Date().toISOString()
+});
+
+// 에러 응답
+const errorResponse = (req: Request, error: Error): Response => {
+  const problem = createProblemDetails(
+    'validation-error',
+    'Validation Failed',
+    400,
+    error.message
+  );
+  
+  return new Response(JSON.stringify(problem), {
+    status: 400,
+    headers: {
+      'Content-Type': 'application/problem+json',
+      'Content-Language': 'ko'
+    }
+  });
+};
+```
+
+### 에러 코드 정의
+```typescript
+const ErrorCodes = {
+  CONTENT_ID_MISSING: 'CONTENT_ID_MISSING',
+  PLATFORM_MISSING: 'PLATFORM_MISSING',
+  FORMDATA_MULTIPART_DETECTED: 'FORMDATA_MULTIPART_DETECTED',
+  PLATFORM_SEGMENTATION_MISSING: 'PLATFORM_SEGMENTATION_MISSING',
+  BUCKET_VALIDATION_FAILED: 'BUCKET_VALIDATION_FAILED',
+  HOOK_GATE_FAILED: 'HOOK_GATE_FAILED',
+  SCHEMA_VALIDATION_FAILED: 'SCHEMA_VALIDATION_FAILED'
+} as const;
+```
+
+---
+
+## 📊 모니터링 & 로깅 규칙
+
+### 구조화된 로깅
+```typescript
+interface LogEntry {
+  timestamp: string;
+  level: 'info' | 'warn' | 'error';
+  message: string;
+  correlationId: string;
+  metadata: Record<string, any>;
+}
+
+const logger = {
+  info: (message: string, metadata: Record<string, any> = {}) => {
+    console.log(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level: 'info',
+      message,
+      correlationId: getCorrelationId(),
+      metadata
+    }));
+  },
+  
+  error: (message: string, error: Error, metadata: Record<string, any> = {}) => {
+    console.error(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level: 'error',
+      message,
+      correlationId: getCorrelationId(),
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      },
+      metadata
+    }));
+  }
+};
+```
+
+### 메트릭 수집
+```typescript
+const metrics = {
+  requestDuration: new Histogram({
+    name: 'http_request_duration_seconds',
+    help: 'HTTP request duration in seconds',
+    labelNames: ['method', 'route', 'status']
+  }),
+  
+  vdpProcessingTime: new Histogram({
+    name: 'vdp_processing_duration_seconds',
+    help: 'VDP processing duration in seconds',
+    labelNames: ['platform', 'status']
+  }),
+  
+  hookGateSuccess: new Counter({
+    name: 'hook_gate_success_total',
+    help: 'Total successful hook gate validations',
+    labelNames: ['platform']
+  })
+};
+```
+
+---
+
+## 🎯 기능 플래그 규칙
+
+### 플래그 정의
+```typescript
+interface FeatureFlag {
+  key: string;
+  enabled: boolean;
+  description: string;
+  rolloutPercentage: number;
+  environments: string[];
+  userGroups?: string[];
+  expiresAt?: Date;
+  value?: any;
+}
+
+const featureFlags = {
+  'new-upload-ui': {
+    key: 'new-upload-ui',
+    enabled: true,
+    description: '새로운 업로드 UI',
+    rolloutPercentage: 50,
+    environments: ['development', 'staging']
+  },
+  
+  'advanced-analytics': {
+    key: 'advanced-analytics',
+    enabled: false,
+    description: '고급 분석 기능',
+    rolloutPercentage: 0,
+    environments: ['development']
+  }
+};
+```
+
+### 플래그 사용
+```typescript
+const useFeatureFlag = (flagKey: string): boolean => {
+  const { flags } = useFeatureFlags();
+  const flag = flags[flagKey];
+  
+  if (!flag) return false;
+  if (!flag.enabled) return false;
+  
+  // 사용자 그룹 체크
+  if (flag.userGroups && !hasUserGroup(flag.userGroups)) {
+    return false;
+  }
+  
+  // 만료일 체크
+  if (flag.expiresAt && new Date() > flag.expiresAt) {
+    return false;
+  }
+  
+  // 롤아웃 퍼센트 체크
+  return Math.random() * 100 < flag.rolloutPercentage;
+};
+```
+
+---
+
+## 🚀 최종 체크리스트
+
+### 개발 시작 전
+- [ ] 환경변수 설정 확인
+- [ ] API 엔드포인트 문서 확인
+- [ ] VDP 스키마 검토
+- [ ] 품질 게이트 요구사항 확인
+- [ ] 인제스터 UI 서버 실행 확인 (node simple-web-server.js)
+
+### UI 서버 구분
+- [ ] **인제스터 UI**: http://localhost:8080 (simple-web-server.js)
+- [ ] **메인 UI**: http://localhost:3000 (Next.js 앱)
+- [ ] **인제스터 요청 시**: 항상 8080 포트 우선 사용
+
+### 코드 작성 시
+- [ ] TypeScript 타입 정의
+- [ ] Zod 스키마 검증
+- [ ] 에러 처리 구현
+- [ ] 로깅 추가
+- [ ] 테스트 작성
+
+### 배포 전
+- [ ] 모든 테스트 통과
+- [ ] 스키마 검증 통과
+- [ ] 품질 게이트 통과
+- [ ] 보안 검사 통과
+- [ ] 성능 테스트 통과
+
+### 운영 중
+- [ ] 모니터링 대시보드 확인
+- [ ] 에러 로그 검토
+- [ ] 성능 메트릭 확인
+- [ ] 사용자 피드백 수집
+
+---
+
+## 📚 참고 자료
+
+### 핵심 문서
+- `CLAUDE.md` - 프로젝트 기본 설정 및 아키텍처
+- `OPERATIONAL_RULES.md` - 운영 규칙 및 정책
+- `QUALITY_GATES_COMPLETE.md` - 품질 게이트 구현
+- `PRODUCTION_READY.md` - 프로덕션 준비 상태
+
+### 🖥️ **UI 서버 구분**
+- **인제스터 UI**: `simple-web-server.js` (포트 8080)
+  - URL 정규화, VDP 인제스트, 파일 업로드
+  - 실행: `node simple-web-server.js`
+  - 접속: http://localhost:8080
+- **메인 UI**: Next.js 앱 (포트 3000)
+  - 큐레이션, 데이터셋, 온보딩
+  - 실행: `npm run dev`
+  - 접속: http://localhost:3000
+
+### API 문서
+- `openapi/openapi.yaml` - OpenAPI 3.1 스펙
+- `schemas/` - JSON 스키마 정의
+- `src/lib/schemas/` - Zod 스키마
+
+### 테스트
+- `src/__tests__/` - 테스트 파일
+- `scripts/test-*.sh` - 통합 테스트 스크립트
+
+---
+
+## 🎯 **UI 서버 구분 규칙**
+
+### **인제스터 UI 요청 시**
+- **서버**: `simple-web-server.js` (포트 8080)
+- **URL**: http://localhost:8080
+- **실행 명령**: `node simple-web-server.js`
+- **주요 기능**: URL 정규화, VDP 인제스트, 파일 업로드
+
+### **메인 UI 요청 시**
+- **서버**: Next.js 앱 (포트 3000)
+- **URL**: http://localhost:3000
+- **실행 명령**: `npm run dev`
+- **주요 기능**: 큐레이션, 데이터셋, 온보딩
+
+### **중요 규칙**
+- **인제스터 UI 요청**: 항상 8080 포트 우선 사용
+- **메인 UI 요청**: 3000 포트 사용
+- **혼동 방지**: 명확한 서버 구분 필수
+
+---
+
+**이 룰을 따르면 Snap3 VDP 플랫폼의 모든 기능을 완벽하게 구현할 수 있습니다! 🚀**

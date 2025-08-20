@@ -721,22 +721,26 @@ process_youtube_request() {
     # Step 3: VDP Generation Trigger (Async)
     echo "🚀 Triggering VDP generation: ${US_T2}"
     
-    # Build API request payload with Evidence Pack integration
+    # Build API request payload with GenAI forced Evidence OFF mode
     api_payload=$(jq -n \
         --arg gcsUri "${INPUT_MP4}" \
-        --arg outGcsUri "${OUT_VDP}" \
-        --arg audioFpGcsUri "${audio_fp_json}" \
-        --arg productEvidenceGcsUri "${product_ev_json}" \
         --argjson meta "$(cat "$local_json")" \
         '{
           "gcsUri": $gcsUri,
           "meta": ($meta + {
-            "audioFpGcsUri": $audioFpGcsUri,
-            "productEvidenceGcsUri": $productEvidenceGcsUri,
-            "platform": "youtube",
-            "content_key": ("youtube:" + ($meta.content_id // ""))
+            "content_id": ($meta.content_id // ""),
+            "platform": "YouTube",
+            "language": "ko",
+            "video_origin": "Real-Footage",
+            "original_sound": true
           }),
-          "outGcsUri": $outGcsUri
+          "processing_options": {
+            "force_full_pipeline": true,
+            "audio_fingerprint": false,
+            "brand_detection": false,
+            "hook_genome_analysis": true
+          },
+          "use_vertex": false
         }')
     
     # Trigger VDP generation with Evidence Pack merger
@@ -807,6 +811,55 @@ process_social_metadata_only() {
         }' "$local_json")
     local metadata_duration="$(calculate_duration "$metadata_start_time")"
     log_with_correlation "DEBUG" "Metadata enhancement completed in $metadata_duration" "$CORRELATION_ID"
+    
+    # Handle uploaded MP4 file if present (Instagram/TikTok with file uploads)
+    local uploaded_gcs_uri=$(jq -r '.uploaded_gcs_uri // empty' "$local_json")
+    if [[ -n "$uploaded_gcs_uri" ]]; then
+        log_with_correlation "INFO" "Processing uploaded file: $uploaded_gcs_uri" "$CORRELATION_ID"
+        
+        # Destination path in raw/input/{platform}/
+        local input_file_path="gs://${RAW_BUCKET}/raw/input/${platform}/${content_id}.mp4"
+        
+        # Validate platform segmentation for input path
+        if ! validate_platform_segmentation "$input_file_path" "$platform" "input" "$CORRELATION_ID"; then
+            log_with_correlation "ERROR" "Platform segmentation validation failed for input file path" "$CORRELATION_ID"
+            return 1
+        fi
+        
+        # Copy uploaded file to raw/input location for T3 processing
+        local file_copy_start_time="$(start_timer)"
+        if gsutil cp "$uploaded_gcs_uri" "$input_file_path"; then
+            local file_copy_duration="$(calculate_duration "$file_copy_start_time")"
+            log_with_correlation "INFO" "MP4 file copied to raw/input in $file_copy_duration" "$CORRELATION_ID"
+            log_with_correlation "DEBUG" "File copied: $uploaded_gcs_uri → $input_file_path" "$CORRELATION_ID"
+            
+            # Update metadata with input file path for T3 processing
+            enhanced_metadata=$(echo "$enhanced_metadata" | jq \
+                --arg input_gcs_uri "$input_file_path" \
+                '. + {"gcsUri": $input_gcs_uri}')
+        else
+            local context=$(jq -n \
+                --arg uploaded_gcs_uri "$uploaded_gcs_uri" \
+                --arg input_file_path "$input_file_path" \
+                --arg platform "$platform" \
+                --arg content_id "$content_id" \
+                '{
+                  "uploaded_gcs_uri": $uploaded_gcs_uri,
+                  "input_file_path": $input_file_path,
+                  "platform": $platform,
+                  "content_id": $content_id
+                }')
+            
+            log_problem_details "FILE_COPY_FAILED" \
+                "MP4 file copy failed" \
+                "Failed to copy uploaded file to raw/input location" \
+                "$CORRELATION_ID" \
+                "$context"
+            return 1
+        fi
+    else
+        log_with_correlation "DEBUG" "No uploaded file found, metadata-only processing" "$CORRELATION_ID"
+    fi
     
     # Upload enhanced metadata to staging
     local upload_start_time="$(start_timer)"

@@ -1,0 +1,125 @@
+[1mPhase 1: Operational Environment Check[0m
+========================================
+[0;34m🔍 Running Operational Readiness...[0m
+Script: /Users/ted/snap3/services/t2-extract/operational-check.sh
+🎯 t2-extract Service Operational Readiness Check
+==================================================
+Date: Tue Aug 19 21:39:11 KST 2025
+Region: us-central1
+
+1. Cloud Run Service Status Check...
+  [0;32m✅ Pass[0m - Service active
+     [0;34mℹ️  Latest revision: [0m
+
+⏱️  Operational Readiness completed in 3s with exit code 0
+[0;32m✅ Operational Readiness: PASSED[0m
+=================================================
+
+[1mPhase 2: Platform-Specific Validation[0m
+======================================
+[0;34m🔍 Running Platform Validation...[0m
+Script: /Users/ted/snap3/services/t2-extract/test-platform-validation.sh
+🧪 Platform-Specific VDP Generation Validation
+==============================================
+Target Service: t2-vdp
+Region: us-central1
+Timestamp: Tue Aug 19 21:39:14 KST 2025
+
+🔑 Generating ID Token...
+🌐 Retrieving Service URL...
+Service URL: https://t2-vdp-cxnjx43pvq-uc.a.run.app
+
+📱 Testing YouTube Platform...
+  Request Content ID: TEST_YouTube_1755607156
+  Request Platform: YouTube
+  [0;31m❌ YouTube Test FAILED[0m
+     [0;31mHTTP Code: 422[0m
+     [0;31mDetails: HTTP 422[0m
+     [1;33mResponse Preview:[0m
+     {"type":"https://api.outlier.example/problems/vertex-filedata-failed","title":"Vertex AI fileData Generation Failed","status":422,"detail":"fileData pattern VDP generation failed after retries. Check region/model configuration.","instance":"/api/vdp/extract-vertex","vertexError":"[VertexAI.ClientError]: got status: 400 Bad Request. {\"error\":{\"code\":400,\"message\":\"Request contains an invalid argument.\",\"status\":\"INVALID_ARGUMENT\"}}","retryCount":2,"recommendedFixes":["Verify us-central1 region configuration","Check gemini-2.5-pro model availability","Validate GCS URI format and accessibility","Review responseMimeType: 'application/json' setting"]}
+📱 Testing Instagram Platform...
+  Request Content ID: TEST_Instagram_1755607164
+  Request Platform: Instagram
+  [0;31m❌ Instagram Test FAILED[0m
+     [0;31mHTTP Code: 422[0m
+     [0;31mDetails: HTTP 422[0m
+     [1;33mResponse Preview:[0m
+     {"type":"https://api.outlier.example/problems/vertex-filedata-failed","title":"Vertex AI fileData Generation Failed","status":422,"detail":"fileData pattern VDP generation failed after retries. Check region/model configuration.","instance":"/api/vdp/extract-vertex","vertexError":"[VertexAI.ClientError]: got status: 400 Bad Request. {\"error\":{\"code\":400,\"message\":\"Request contains an invalid argument.\",\"status\":\"INVALID_ARGUMENT\"}}","retryCount":2,"recommendedFixes":["Verify us-central1 region configuration","Check gemini-2.5-pro model availability","Validate GCS URI format and accessibility","Review responseMimeType: 'application/json' setting"]}
+📱 Testing TikTok Platform...
+  Request Content ID: TEST_TikTok_1755607173
+  Request Platform: TikTok
+  [0;31m❌ TikTok Test FAILED[0m
+     [0;31mHTTP Code: 422[0m
+     [0;31mDetails: HTTP 422[0m
+     [1;33mResponse Preview:[0m
+     {"type":"https://api.outlier.example/problems/vertex-filedata-failed","title":"Vertex AI fileData Generation Failed","status":422,"detail":"fileData pattern VDP generation failed after retries. Check region/model configuration.","instance":"/api/vdp/extract-vertex","vertexError":"[VertexAI.ClientError]: got status: 400 Bad Request. {\"error\":{\"code\":400,\"message\":\"Request contains an invalid argument.\",\"status\":\"INVALID_ARGUMENT\"}}","retryCount":2,"recommendedFixes":["Verify us-central1 region configuration","Check gemini-2.5-pro model availability","Validate GCS URI format and accessibility","Review responseMimeType: 'application/json' setting"]}
+📊 Platform Validation Results
+==============================
+YouTube:   ${RED}❌ FAIL${NC}
+Instagram: ${RED}❌ FAIL${NC}
+TikTok:    ${RED}❌ FAIL${NC}
+
+Overall Score: 0/3 (0%)
+[0;31m❌ PLATFORM VALIDATION FAILED[0m
+Critical issues with platform processing
+
+🔧 Required Actions:
+   1. Check service logs: gcloud run services logs read t2-vdp --region=us-central1
+   2. Verify environment variables and configurations
+   3. Test individual platform endpoints manually
+   4. Re-deploy service if necessary
+
+⏱️  Platform Validation completed in 27s with exit code 0
+[0;32m✅ Platform Validation: PASSED[0m
+=================================================
+
+[1m📊 Final Validation Summary[0m
+============================
+
+🔍 Individual Check Results:
+   Operational Environment:  echo -e '[0;32m✅ PASSED[0m' ;; 
+    'WARN') echo -e '[1;33m⚠️  WARNING[0m' ;; 
+    'FAIL') echo -e '[0;31m❌ FAILED[0m' ;; 
+    *) echo -e '[0;31m❌ ERROR[0m' ;; 
+esac)
+   Platform Validation:      echo -e '[0;32m✅ PASSED[0m' ;; 
+    'WARN') echo -e '[1;33m⚠️  WARNING[0m' ;; 
+    'FAIL') echo -e '[0;31m❌ FAILED[0m' ;; 
+    *) echo -e '[0;31m❌ ERROR[0m' ;; 
+esac)
+
+🎯 Overall Score: 2/2 phases passed
+[0;32m🎉 COMPLETE VALIDATION SUCCESSFUL[0m
+[0;32m✅ System is READY for production deployment[0m
+
+🚀 Production Deployment Checklist:
+   ✓ All operational checks passed
+   ✓ All platform validations passed
+   ✓ Ready for large-scale batch processing
+
+📋 Next Steps:
+   1. Update deployment documentation
+   2. Set up monitoring alerts
+   3. Prepare rollback procedures
+   4. Schedule batch processing windows
+   5. Notify stakeholders of deployment readiness
+
+💡 Environment Update Commands (if needed):
+   gcloud run services update t2-vdp \
+     --region=us-central1 \
+     --set-env-vars=PLATFORM_SEGMENTED_PATH=true \
+     --set-env-vars=RAW_BUCKET=tough-variety-raw-central1
+
+📋 Diagnostic Information:
+   Log File: /Users/ted/snap3/services/t2-extract/logs/validation-20250819-213911.log
+   GCP Project: tough-variety-466003-c5
+   GCP Region: us-central1
+   Auth Status: authenticated
+   Service Status: True
+
+=======================================
+Validation completed at: Tue Aug 19 21:39:44 KST 2025
+Exit code: 0
+=======================================
+
+📝 Complete log available at: /Users/ted/snap3/services/t2-extract/logs/validation-20250819-213911.log

@@ -11,7 +11,7 @@ echo "======================================="
 # 📋 Configuration
 US_T2="https://t2-vdp-355516763169.us-central1.run.app"
 GCP_PROJECT="${GCP_PROJECT:-tough-variety-466003-c5}"
-RAW_BUCKET="${RAW_BUCKET:-tough-variety-raw}"
+RAW_BUCKET="${RAW_BUCKET:-tough-variety-raw-central1}"
 GOLD_BUCKET="${GOLD_BUCKET:-tough-variety-gold}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)

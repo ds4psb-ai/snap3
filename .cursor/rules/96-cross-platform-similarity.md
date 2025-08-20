@@ -105,3 +105,4 @@ This rule auto-attaches when working on:
 - @scripts/cross-platform-similarity.sh
 - @SIMILARITY_DETECTION.md
 - @QUALITY_GATES_COMPLETE.md
+

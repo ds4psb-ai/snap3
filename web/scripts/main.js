@@ -5,7 +5,7 @@
 
 class VDPProcessor {
     constructor() {
-        this.apiBase = 'http://localhost:9001'; // Local proxy to VDP server
+        this.apiBase = 'http://localhost:8080'; // Ingest UI server
         this.testMode = false; // Disable test mode - use real VDP processing
         this.currentJob = null;
         this.progressInterval = null;
@@ -326,15 +326,61 @@ class VDPProcessor {
         }
         
         // Build JSON payload instead of FormData
+        // Explicitly get source_url from the correct platform tab
+        let source_url = '';
+        if (platform === 'youtube') {
+            source_url = document.getElementById('youtube-url')?.value || '';
+        } else if (platform === 'instagram') {
+            source_url = document.getElementById('instagram-source-url')?.value || '';
+        } else if (platform === 'tiktok') {
+            source_url = document.getElementById('tiktok-source-url')?.value || '';
+        }
+        
         const jsonPayload = {
             platform,
             content_id,
             content_key,
-            source_url: formData.get('source_url'),
+            source_url: source_url.trim(),
             canonical_url: formData.get('canonical_url'),
-            video_origin: formData.get('video_origin') || 'unknown',
-            language: formData.get('language') || 'ko'
+            video_origin: formData.get('video_origin') || 'ai_generated',
+            language: 'ko' // Default language since language fields were removed
         };
+
+        // Add Instagram/TikTok specific fields for full pipeline processing
+        if (platform === 'instagram' || platform === 'tiktok') {
+            // Check if user uploaded video file - indicates intention for full pipeline
+            const videoFile = formData.get('video_file');
+            const hasVideoFile = videoFile && videoFile.size > 0;
+            
+            if (hasVideoFile) {
+                // Upload file to GCS first
+                this.updateProgress(10, '비디오 파일을 업로드하고 있습니다...', []);
+                
+                const uploadedGcsUri = await this.uploadVideoFile(videoFile, platform, content_id);
+                
+                // Force full pipeline when video file is uploaded  
+                jsonPayload.processing_options = {
+                    force_full_pipeline: true,
+                    audio_fingerprint: true,
+                    brand_detection: true,
+                    hook_genome_analysis: true
+                };
+                
+                // Set actual uploaded GCS URI (필수 필드)
+                jsonPayload.uploaded_gcs_uri = uploadedGcsUri;
+                
+                this.updateProgress(25, '파일 업로드 완료, 인제스트 요청을 처리하고 있습니다...', []);
+            } else {
+                // Metadata-only processing (force_full_pipeline still recommended for testing)
+                jsonPayload.processing_options = {
+                    force_full_pipeline: true, // 테스트 초반엔 강제 권장
+                    audio_fingerprint: false,
+                    brand_detection: false,
+                    hook_genome_analysis: false
+                };
+                // uploaded_gcs_uri는 파일이 없으면 생략
+            }
+        }
         
         // Log JSON payload construction
         if (window.logger) {
@@ -343,8 +389,15 @@ class VDPProcessor {
                 platform,
                 contentKey: content_key,
                 submissionType: 'JSON_ONLY',
-                platformSpecificPath: `gs://tough-variety-raw/ingest/requests/${platform}/`,
-                formDataReplacement: 'COMPLETE'
+                platformSpecificPath: `gs://tough-variety-raw-central1/ingest/requests/${platform}/`,
+                formDataReplacement: 'COMPLETE',
+                // Enhanced logging for IG/TT conditional pipeline
+                ...(platform === 'instagram' || platform === 'tiktok' ? {
+                    forceFullPipeline: jsonPayload.force_full_pipeline,
+                    uploadedGcsUri: jsonPayload.uploaded_gcs_uri || 'NOT_SET',
+                    processingOptions: jsonPayload.processing_options,
+                    conditionalPipelineMode: jsonPayload.force_full_pipeline ? 'FULL_PROCESSING' : 'METADATA_ONLY'
+                } : {})
             });
         }
         
@@ -1119,6 +1172,70 @@ class VDPProcessor {
                 button.textContent = originalText;
                 button.style.background = '#3b82f6';
             }, 2000);
+        }
+    }
+    
+    // Upload video file to GCS for IG/TT processing (실전 인제스트 필수)
+    async uploadVideoFile(videoFile, platform, content_id) {
+        try {
+            if (window.logger) {
+                window.logger.info('Initiating video file upload for real ingest', {
+                    correlationId: this.correlationId,
+                    platform,
+                    contentId: content_id,
+                    fileName: videoFile.name,
+                    fileSize: videoFile.size,
+                    uploadType: 'REAL_GCS_UPLOAD'
+                });
+            }
+            
+            // Create FormData for file upload
+            const uploadFormData = new FormData();
+            uploadFormData.append('video_file', videoFile);
+            uploadFormData.append('platform', platform);
+            uploadFormData.append('content_id', content_id);
+            
+            // Upload to GCS via server endpoint
+            const response = await fetch(`${this.apiBase}/api/upload-video`, {
+                method: 'POST',
+                headers: {
+                    'X-Correlation-ID': this.correlationId
+                },
+                body: uploadFormData
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'File upload failed');
+            }
+            
+            const result = await response.json();
+            
+            if (window.logger) {
+                window.logger.success('Video file uploaded to GCS successfully', {
+                    correlationId: this.correlationId,
+                    uploadedGcsUri: result.uploaded_gcs_uri,
+                    fileSize: result.file_size,
+                    contentType: result.content_type,
+                    platform: result.platform,
+                    realIngestReady: true
+                });
+            }
+            
+            return result.uploaded_gcs_uri;
+            
+        } catch (error) {
+            if (window.logger) {
+                window.logger.error('Video file upload failed', {
+                    correlationId: this.correlationId,
+                    error: error.message,
+                    platform,
+                    contentId: content_id,
+                    uploadStage: 'GCS_UPLOAD'
+                });
+            }
+            
+            throw new Error(`파일 업로드 실패: ${error.message}`);
         }
     }
 }

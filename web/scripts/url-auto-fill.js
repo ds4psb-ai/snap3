@@ -75,8 +75,8 @@ class URLAutoFillManager {
             // Show loading state
             this.showLoadingState(currentPlatform);
 
-            // Call the normalize endpoint
-            const response = await fetch('/api/normalize-url', {
+            // Call the normalize endpoint on ingest server
+            const response = await fetch('http://localhost:8080/api/normalize-url', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -113,6 +113,7 @@ class URLAutoFillManager {
             this.hideLoadingState(currentPlatform);
 
         } catch (error) {
+            console.error('❌ URL normalization error:', error);
             window.logger.reportError(error, 'URL auto-fill');
             this.showError(error.message, currentPlatform);
             this.hideLoadingState(currentPlatform);

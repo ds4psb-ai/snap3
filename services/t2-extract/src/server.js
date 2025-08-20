@@ -10,6 +10,9 @@ import { VDPStreamingGenerator } from "./vdp-streaming-generator.js";
 import { saveJsonToGcs } from "./utils/gcs.js";
 import { enforceVdpStandards } from "./utils/vdp-standards.js";
 import { normalizeSocialUrl } from "./utils/url-normalizer.js";
+import { IntegratedGenAIVDP } from "./integrated-genai-vdp.js";
+import { VertexAIVDP } from "./vertex-ai-vdp.js";
+import { rateLimiter, RateLimitError } from "./lib/rateLimiter.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -311,6 +314,23 @@ const vertex = new VertexAI({
   project: PROJECT_ID, 
   location: LOCATION  // us-central1 고정 (global 사용 금지)
 });
+
+// 2) 듀얼 엔진 초기화 (Integrated GenAI + Vertex AI)
+let integratedGenAIVdp, vertexAIVdp;
+
+try {
+  integratedGenAIVdp = new IntegratedGenAIVDP();
+  console.log('✅ [IntegratedGenAIVDP] Generator initialized successfully');
+} catch (error) {
+  console.error('❌ [IntegratedGenAIVDP] Initialization failed:', error.message);
+}
+
+try {
+  vertexAIVdp = new VertexAIVDP();
+  console.log('✅ [VertexAI VDP] Backup generator initialized successfully');
+} catch (error) {
+  console.error('❌ [VertexAI VDP] Initialization failed:', error.message);
+}
 
 // VDP JSON Schema for Structured Output (cleaned for Vertex AI)
 const rawSchema = JSON.parse(fs.readFileSync(SCHEMA_PATH, "utf8"));
@@ -1090,113 +1110,130 @@ Return a complete VDP 2.0 JSON structure.`;
     
     console.log(`[Dynamic VDP] 🎯 Mode ${mode} (${duration || 'unknown'}s) targets: ${dynamicTargets.minScenes} scenes, ${dynamicTargets.minShots} shots, ${dynamicTargets.minShots * dynamicTargets.minKfPerShot} keyframes, hook≤${(dynamicTargets.hookStartMaxFactor * (duration || 3)).toFixed(1)}s`);
 
-    // 3) fileData 패턴으로 Vertex AI 호출 (INVALID_ARGUMENT 해결)
-    console.log(`[VDP fileData] 🎯 Starting fileData pattern generation for: ${gcsUri}`);
+    // 3) 듀얼 엔진 VDP 생성 (Engine selection with use_vertex flag)
+    console.log(`[Dual Engine VDP] 🚀 Starting VDP generation for: ${gcsUri}`);
+    
+    // Enhanced engine routing logic with explicit use_vertex flag handling
+    const useVertexFlag = req.body?.use_vertex === true;
+    console.log(`[Dual Engine VDP] 🎯 Engine preference: ${useVertexFlag ? 'Vertex AI (structured)' : 'IntegratedGenAI (primary)'}`);
+    console.log(`[Dual Engine VDP] 🔧 use_vertex flag: ${req.body?.use_vertex} → ${useVertexFlag ? 'VERTEX_FIRST' : 'INTEGRATED_FIRST'}`);
     
     let vdp = null;
-    let retryCount = 0;
-    const maxRetries = 2;
+    let engineErrors = [];
+    let enginesAttempted = [];
+    let primaryError = null;
     
-    while (!vdp && retryCount <= maxRetries) {
-      const isRetry = retryCount > 0;
-      console.log(`[VDP fileData] ${isRetry ? `Retry ${retryCount}` : 'Initial attempt'} for: ${gcsUri}`);
-      
+    // Engine selection logic: honor use_vertex flag & clean fallback
+    if (useVertexFlag) {
+      // Vertex AI 우선 경로 (Structured Output)
       try {
-        // Create fresh model for each request (안정성 향상)
-        const model = createModel();
-        console.log(`[DEBUG] Fresh model created for request: ${typeof model}`);
+        console.log(`[Dual Engine] 🎯 Primary: Vertex AI with structured output`);
         
-        // fileData 패턴으로 비디오 입력 (텍스트 기반 입력 대신)
-        const request = {
-          contents: [{
-            role: "user",
-            parts: [
-              { fileData: { fileUri: gcsUri, mimeType: "video/mp4" } }, // camelCase
-              { text: vdp20EnhancedPrompt }                              // 분석 지시 프롬프트
-            ]
-          }]
-        };
+        // Rate limiting check before API call
+        await rateLimiter.checkRate('vertex-ai');
         
-        console.log(`[DEBUG] fileData API request structure: fileUri=${gcsUri}, mimeType=video/mp4`);
+        enginesAttempted.push('vertex-ai');
+        vdp = await vertexAIVdp.generate(gcsUri, normalizedMeta, correlationId);
+        console.log(`[Dual Engine] ✅ Vertex AI generation successful`);
+      } catch (vertexError) {
+        // Handle rate limit errors immediately
+        if (vertexError instanceof RateLimitError) {
+          console.warn(`[Rate Limiter] 🚨 Vertex AI rate limited, returning 429`);
+          return res.status(429).json(vertexError.toJSON());
+        }
         
-        // Vertex AI 호출 with fileData pattern
-        const result = await model.generateContent(request);
+        primaryError = vertexError;
+        engineErrors.push({ engine: 'vertex-ai', error: vertexError.message });
+        console.warn(`[Dual Engine] ⚠️ Vertex AI failed, falling back to IntegratedGenAI: ${vertexError.message}`);
         
-        // Response 텍스트 추출 (JSON 강제 출력 처리)
-        const raw = result?.response?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-        
-        console.log(`[VDP fileData] 📄 Response received: ${raw.length} chars`);
-        
-        // JSON 파싱 (Enhanced strict extraction)
+        // Fallback to IntegratedGenAI
         try {
-          vdp = extractJsonStrict(raw);
-        } catch (e) {
-          // 로깅 확장: 문제 구간 요약
-          console.error("[JSON-Parse] fail len=%d msg=%s", raw.length, e.message);
-          throw e;
+          console.log(`[Dual Engine] 🔄 Fallback: IntegratedGenAI`);
+          
+          // Rate limiting check before fallback API call
+          await rateLimiter.checkRate('integrated-genai');
+          
+          enginesAttempted.push('integrated-genai');
+          vdp = await integratedGenAIVdp.generate(gcsUri, normalizedMeta, correlationId);
+          console.log(`[Dual Engine] ✅ IntegratedGenAI fallback successful`);
+        } catch (integratedError) {
+          // Handle rate limit errors immediately
+          if (integratedError instanceof RateLimitError) {
+            console.warn(`[Rate Limiter] 🚨 IntegratedGenAI rate limited, returning 429`);
+            return res.status(429).json(integratedError.toJSON());
+          }
+          
+          engineErrors.push({ engine: 'integrated-genai', error: integratedError.message });
+          console.error(`[Dual Engine] ❌ Both engines failed`);
+        }
+      }
+    } else {
+      // IntegratedGenAI 우선 경로 (기본값)
+      try {
+        console.log(`[Dual Engine] 🎯 Primary: IntegratedGenAI`);
+        
+        // Rate limiting check before API call
+        await rateLimiter.checkRate('integrated-genai');
+        
+        enginesAttempted.push('integrated-genai');
+        vdp = await integratedGenAIVdp.generate(gcsUri, normalizedMeta, correlationId);
+        console.log(`[Dual Engine] ✅ IntegratedGenAI generation successful`);
+      } catch (integratedError) {
+        // Handle rate limit errors immediately
+        if (integratedError instanceof RateLimitError) {
+          console.warn(`[Rate Limiter] 🚨 IntegratedGenAI rate limited, returning 429`);
+          return res.status(429).json(integratedError.toJSON());
         }
         
-        console.log(`[VDP fileData] ✅ Generation complete for: ${vdp.content_id || 'unknown'}`);
-        break;
+        primaryError = integratedError;
+        engineErrors.push({ engine: 'integrated-genai', error: integratedError.message });
+        console.warn(`[Dual Engine] ⚠️ IntegratedGenAI failed, falling back to Vertex AI: ${integratedError.message}`);
         
-      } catch (vertexErr) {
-        // Vertex AI 에러 분류 및 재시도 사유 로깅
-        const errorMsg = vertexErr?.message || 'Unknown error';
-        const statusCode = vertexErr?.response?.status;
-        let retryReason = 'unknown';
-        let shouldRetry = retryCount < maxRetries;
-        
-        // 에러 유형별 분류
-        if (errorMsg.includes('INVALID_ARGUMENT')) {
-          retryReason = 'invalid_argument_filedata';
-        } else if (errorMsg.includes('timeout') || errorMsg.includes('TIMEOUT')) {
-          retryReason = 'timeout';
-        } else if (errorMsg.includes('socket') || errorMsg.includes('ECONNRESET')) {
-          retryReason = 'network_connection';
-        } else if (statusCode === 429) {
-          retryReason = 'rate_limit';
-          shouldRetry = false; // Rate limit은 재시도하지 않음
-        } else if (statusCode === 503 || statusCode === 502) {
-          retryReason = 'service_unavailable';
-        } else if (errorMsg.includes('quota') || errorMsg.includes('QUOTA')) {
-          retryReason = 'quota_exceeded';
-          shouldRetry = false; // Quota 초과는 재시도하지 않음
+        // Fallback to Vertex AI
+        try {
+          console.log(`[Dual Engine] 🔄 Fallback: Vertex AI with structured output`);
+          
+          // Rate limiting check before fallback API call
+          await rateLimiter.checkRate('vertex-ai');
+          
+          enginesAttempted.push('vertex-ai');
+          vdp = await vertexAIVdp.generate(gcsUri, normalizedMeta, correlationId);
+          console.log(`[Dual Engine] ✅ Vertex AI fallback successful`);
+        } catch (vertexError) {
+          // Handle rate limit errors immediately
+          if (vertexError instanceof RateLimitError) {
+            console.warn(`[Rate Limiter] 🚨 Vertex AI rate limited, returning 429`);
+            return res.status(429).json(vertexError.toJSON());
+          }
+          
+          engineErrors.push({ engine: 'vertex-ai', error: vertexError.message });
+          console.error(`[Dual Engine] ❌ Both engines failed`);
         }
-        
-        console.error("[Vertex ERROR]", vertexErr?.message);
-        console.log(`[Vertex Error Classification] error_type="${retryReason}", status_code=${statusCode}, retry_eligible=${shouldRetry}, retry_count=${retryCount}/${maxRetries}`);
-        
-        if (vertexErr?.response) {
-          console.error("status:", vertexErr.response.status);
-          console.error("data:", JSON.stringify(vertexErr.response.data || {}, null, 2));
-        }
-        
-        if (shouldRetry && retryCount < maxRetries) {
-          console.error(`[VDP fileData Error - Retry ${retryCount}] Reason: ${retryReason}, Message: ${vertexErr.message}`);
-          retryCount++;
-          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // 지수 백오프
-          continue;
-        }
-        
-        console.error("[VDP fileData Error - Final]", vertexErr.message);
-        
-        return res.status(422).json({ 
-          type: "https://api.outlier.example/problems/vertex-filedata-failed",
-          title: "Vertex AI fileData Generation Failed",
-          status: 422,
-          detail: "fileData pattern VDP generation failed after retries. Check region/model configuration.",
-          instance: `/api/vdp/extract-vertex`,
-          vertexError: vertexErr.message,
-          retryCount,
-          recommendedFixes: [
-            "Verify us-central1 region configuration",
-            "Check gemini-2.5-pro model availability",
-            "Validate GCS URI format and accessibility",
-            "Review responseMimeType: 'application/json' setting"
-          ]
-        });
       }
     }
+    
+    // If both engines failed, return detailed error
+    if (!vdp) {
+      console.error(`[Dual Engine Failure] Both VDP engines failed`);
+      return res.status(422).json({
+        type: "https://api.outlier.example/problems/dual-engine-vdp-failed",
+        title: "Dual Engine VDP Generation Failed",
+        status: 422,
+        detail: "Both VertexAI and IntegratedGenAI VDP engines failed. Check API configurations and VDP Clone Final compatibility.",
+        instance: "/api/vdp/extract-vertex",
+        engines_attempted: enginesAttempted,
+        engine_errors: engineErrors,
+        recommendedFixes: [
+          "Verify PROJECT_ID and LOCATION environment variables for VertexAI",
+          "Verify GEMINI_API_KEY environment variable for IntegratedGenAI",
+          "Check VDP Clone Final schema compatibility",
+          "Validate GCS URI format and accessibility",
+          "Review structured output response format"
+        ]
+      });
+    }
+    
+    console.log(`[Dual Engine VDP] ✅ Generation complete using ${vdp.processing_metadata?.engine || 'unknown'} engine`);
 
     // 5) VDP 2.0 metadata enrichment (using normalized meta)
     if (normalizedMeta.platform) {
@@ -1512,6 +1549,8 @@ app.get("/version", (req, res) => {
       LOCATION: LOCATION || "undefined", 
       RAW_BUCKET: envVars.RAW_BUCKET || "undefined",
       PLATFORM_SEGMENTED_PATH: envVars.PLATFORM_SEGMENTED_PATH || "undefined",
+      EVIDENCE_AUTOMERGE: process.env.EVIDENCE_AUTOMERGE || "undefined",
+      EVIDENCE_DEFAULT_ROOT: process.env.EVIDENCE_DEFAULT_ROOT || "undefined",
       NODE_ENV: process.env.NODE_ENV || "development"
     },
     runtime: {
@@ -1523,6 +1562,14 @@ app.get("/version", (req, res) => {
       hookMinStrength: HOOK_MIN,
       hookMaxStartSec: HOOK_MAX_S,
       densityScenes: DENSITY_SCENES_MIN
+    },
+    rateLimiter: {
+      stats: rateLimiter.getStats(),
+      environment: {
+        INTEGRATED_GENAI_RPS: process.env.INTEGRATED_GENAI_RPS || "10",
+        VERTEX_AI_RPS: process.env.VERTEX_AI_RPS || "8",
+        RATE_LIMITER_CAPACITY: process.env.RATE_LIMITER_CAPACITY || "20"
+      }
     }
   };
 

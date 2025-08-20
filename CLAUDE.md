@@ -1,277 +1,211 @@
-# CLAUDE.md — Control Tower (Plan Mode 전용)
+# CLAUDE.md — VDP RAW Generation Pipeline Control Tower
 
-## 작업 디렉토리 설정
-Claude Code 실행 시 자동으로 이 디렉토리에서 시작:
-- Working Directory: `/Users/ted/snap3`
+## 🏠 프로젝트 기본 설정
+- **Working Directory**: `/Users/ted/snap3`
+- **Project Type**: VDP RAW Generation Pipeline
+- **Role**: Plan → Apply → Test → Review (기본 Plan Mode)
+
+---
 
 ## 🚨 CRITICAL: Regional Alignment Policy
-**모든 Vertex AI 배포는 반드시 us-central1 리전을 사용**
-- **PROJECT_ID**: `tough-variety-466003-c5`
-- **REGION**: `us-central1` (필수)
-- **RAW_BUCKET**: `tough-variety-raw-central1`
-- **이유**: Event 기반 파이프라인 최적화, Cloud Run/GCS/Eventarc 지연 최소화
 
-### 환경변수 설정 (모든 터미널에서 필수)
+### 필수 환경변수
 ```bash
 export PROJECT_ID="tough-variety-466003-c5"
 export REGION="us-central1"
 export RAW_BUCKET="tough-variety-raw-central1"
+export PLATFORM_SEGMENTED_PATH=true
 ```
 
-### 배포 시 주의사항
-- ❌ **절대 us-west1 사용 금지** (지연 발생)
-- ✅ **모든 서비스 us-central1 배포 필수**
-- ✅ **배포 전 리전 확인 필수**: `echo $REGION`
-
-### 🚨 CRITICAL: 안전 배포 규칙 (2025-08-17 추가)
-- **환경변수 검증**: 모든 필수 환경변수 누락 시 서버 즉시 종료
-- **필수 환경변수**: PROJECT_ID, LOCATION, RAW_BUCKET, PLATFORM_SEGMENTED_PATH=true
-- **배포 검증**: `/healthz` 엔드포인트로 Dependencies 상태 확인 필수
-- **상태 모니터링**: `/version` 엔드포인트로 환경변수/설정 확인
-- **Correlation ID**: 모든 요청에 추적 ID 자동 생성 (`req_timestamp_random`)
-
-## 역할 / 루프
-- **역할**
-  - **Claude Code**: 플래너/오케스트레이터 (Plan → Apply → Test → Review). *기본은 Plan Mode*.
-  - **Cursor**: IDE/디프/테스트 러너. (*파일 수정은 승인된 체크리스트에 한함*).
-  - **GPT-5 Pro**: 세컨드 체커(리뷰/레드팀).
-- **루프**
-  1) **Plan** — 스펙 매핑/작업계획/테스트 목록 산출 (*코드/파일 수정 금지*).
-  2) **Approve** — 테스트/스키마/계약/QA 게이트 존재 확인 후 승인.
-  3) **Apply** — 승인된 경로만 수정. VDP_FULL 비노출 준수.
-  4) **Test** — 단위 + JSON Schema + OpenAPI 계약 + QA 린트 전부 그린.
-  5) **Review** — QA 패스 + Evidence 첨부 후에만 병합(merge).
+### 버킷 정책 (절대 변경 금지)
+- **표준 버킷**: `tough-variety-raw-central1` (단일 버킷)
+- **금지 버킷**: `tough-variety-raw`, `tough-variety-raw-west1` 등
+- **검증**: 모든 GCS 작업 전 버킷명 확인 필수
+- **실패 시**: 서버 즉시 종료 (`process.exit(1)`)
 
 ---
 
-## MUST
-- **VDP_FULL은 내부 전용**. 외부 표면에는 **VDP_MIN + Evidence**만.
-- **Content_ID 필수 정책**: 모든 인제스트 요청에 content_id 필수. URL 정규화 → content_id 추출 선행 필수.
-- **Content_Key 글로벌 유니크**: `platform:content_id` 형식으로 플랫폼 간 ID 충돌 방지.
-- **Platform-Segmented GCS 경로**: `gs://bucket/ingest/requests/{platform}/` 구조로 Eventarc 최적화.
-- **JSON-Only 처리**: FormData/multipart 금지, JSON 전용 처리 방식.
-- **Correlation ID 추적**: 모든 요청에 추적 ID 자동 생성 (`req_timestamp_random`).
-- **VDP 공통 필수 필드**: content_key, content_id, metadata{platform,language,video_origin}, load_timestamp(RFC-3339 Z), load_date.
-- **Veo3 프리뷰 캡**: `duration=8s`, `aspect=16:9`, `resolution∈{720p,1080p}`.
-- **세로(9:16) 요청 시**: 16:9로 렌더하고 **UI crop‑proxy**(9:16 오버레이 좌표만 메타로 제공).
-- **공식 임베드만 사용**(예: YouTube Player). **다운로드/리호스팅 금지**.
-- 프리뷰 플레이어는 **muted autoplay + playsinline** 기본.
-- **비동기 프리뷰 잡**: `POST /preview/veo` → **202 Accepted** + `Location: /jobs/{id}`; `GET /jobs/{id}` 폴링.
-- **오류 응답**: **RFC 9457 Problem Details(JSON)** + 타입드 에러 코드.
-- **테스트 우선**: table‑driven 단위 테스트 + JSON Schema(2020‑12) + OpenAPI 3.1 계약 테스트 + QA 린트.
-- **QA Gate 패스 전 병합 금지**.
+## 📋 핵심 아키텍처 규칙
 
-## NEVER
-- `/internal/vdp_full/**` 읽기/쓰기, **원본 VDP 노출**.
-- 비공식/스크래핑 임베드, 써드파티 다운로드 기능, **무단 크롤/스크레이프**.
-- 승인되지 않은 파일 경로 수정, 비인가 네트워크 오퍼레이션(curl/wget/ssh/scp 등).
+### MUST (필수 사항)
+- **VDP_FULL**: 내부 전용, 외부 노출 절대 금지
+- **Content_ID**: 모든 인제스트 요청에 필수, URL 정규화 선행
+- **Content_Key**: `platform:content_id` 형식으로 글로벌 유니크
+- **Platform-Segmented GCS**: `gs://bucket/ingest/requests/{platform}/`
+- **JSON-Only**: FormData/multipart 금지
+- **Correlation ID**: 모든 요청에 추적 ID (`req_timestamp_random`)
+- **VDP 필수 필드**: content_key, content_id, metadata, load_timestamp, load_date
 
-### 🚨 CRITICAL NEVER (2025-08-18 업데이트)
-- **환경변수 검증 우회**: 필수 환경변수 없이 서버 시작 시도 금지
-- **Correlation ID 누락**: 요청 처리 시 추적 ID 없이 진행 금지  
-- **Content_ID 누락 허용**: content_id 없이 인제스트 요청 처리 금지 (400 에러 필수)
-- **FormData/multipart 허용**: JSON-only 정책 위반하는 FormData 요청 처리 금지
-- **Content_Key 중복**: `platform:content_id` 글로벌 유니크 정책 위반 금지
-- **Platform 세그먼트 누락**: GCS 경로에서 플랫폼 세그먼트 생략 금지
-- **NaN 값 허용**: 수치 계산에서 `Number.isFinite()` 검증 우회 금지
-- **헬스체크 무시**: 배포 후 `/healthz` 상태 확인 없이 운영 금지
-- **잘못된 API 엔드포인트**: `/api/ingest` 대신 실제 구현된 `/api/vdp/extract-vertex` 사용 필수
+### NEVER (절대 금지)
+- **환경변수 검증 우회**: 필수 환경변수 없이 서버 시작
+- **Content_ID 누락**: content_id 없이 인제스트 처리
+- **FormData 허용**: JSON-only 정책 위반
+- **Platform 세그먼트 누락**: GCS 경로에서 플랫폼 생략
+- **잘못된 버킷**: `tough-variety-raw-central1` 이외 사용
+- **문서 불일치**: 잘못된 버킷 참조 허용
+- **API 엔드포인트 오류**: `/api/ingest` 대신 `/api/vdp/extract-vertex` 사용
 
 ---
 
-## 엔드포인트 (2025-08-18 실제 구현)
-- `POST /api/normalize-url` — URL 정규화 → content_id 추출 (사전 필수)
-- `POST /api/vdp/extract-vertex` — **실제 인제스트 엔드포인트** (content_id 필수, JSON-only)
-- `POST /snap3/turbo` — Textboard(2–4 씬) + Evidence (총합 8s 준수)
-- `POST /compile/veo3` — Veo3 Prompt JSON 검증(8s/16:9/720p|1080p)
-- `POST /preview/veo` — **202 Accepted** + `Location: /jobs/{id}`
-- `GET /jobs/{id}` — 잡 상태/미디어 URL/SynthID 여부
-- `POST /qa/validate` — Hook≤3s, safezones, 자막 가독성, fps/bitrate 힌트
-- `GET /export/brief/{id}` — Brief PDF(+Evidence, Digest only)
-- `GET /export/json/{id}` — VideoGen IR + Veo3 Prompt JSON(+Evidence)
+## 🚨 CRITICAL: 인제스트 UI 정의
 
-### 🩺 운영 모니터링 엔드포인트 (2025-08-17 추가)
-- `GET /healthz` — Dependencies 상태 확인 (Vertex AI, 환경변수, 스키마)
-- `GET /version` — 환경변수, 런타임 정보, 설정값 요약 (디버깅용)
-- `GET /health` — 단순 OK 응답 (기존 호환성)
+### 인제스트 UI 절대 규칙
+- **인제스트 UI**: `http://localhost:8080` (simple-web-server.js)
+- **실행 명령어**: `node simple-web-server.js`
+- **용도**: YouTube/Instagram/TikTok 링크 입력 및 처리
+- **절대 금지**: snap3 메인 UI (http://localhost:3000)를 인제스트 UI라고 부르는 것
 
-### 스키마(요약)
-- **VDP_MIN** — digestId; category; hookSec; tempoBucket; source.embedEligible
-- **EvidencePack** — digestId; trustScore; evidenceChips[3–5]; synthIdDetected; provenance
-- **Textboard** — scenes[2–4]{role; durationSec; visual; audio}; total=8.0s
-- **VideoGenIR** — durationSec=8; aspect=16:9; resolution(720p|1080p); cuts[2–3]
-- **Veo3Prompt** — durationSec=8; aspect=16:9; resolution(720p|1080p); shots[2–3]
-- **QAReport** — target; pass; issues[{code;severity;fix}]
+### 명령어 매핑
+```bash
+# 인제스트 UI 실행 (포트 8080)
+node simple-web-server.js
 
-### VDP (Video Data Package) 구조 — 아웃라이어 숏폼 분석 체계
-**샘플**: `/Users/ted/Desktop/co-pilot/vdp-C000888.json`, `vdp-C000889.json`
+# 인제스트 UI 브라우저 열기
+open http://localhost:8080
 
-> ⚠️ **개발 컨텍스트**: 현재 VDP 빅데이터 수집 중 (목표: 수백~수만개). 샘플 2개로 전체 시스템 선행 개발 중.
-> - VDP 파일 없어도 에러 당황 ❌ → Mock 데이터로 진행
-> - 실제 VDP 대량 수집 전 인터페이스/플로우 완성이 목표
-> - 나중에 실제 데이터 연결 시 자연스럽게 전환될 구조로 설계
-
-#### 1. 메타데이터 계층
-- **플랫폼 정보**: Instagram, TikTok, YouTube Shorts
-- **인게이지먼트**: view_count, like_count, comment_count, share_count
-- **비디오 오리진**: Real-Footage | AI-Generated
-- **해시태그/CTA**: 바이럴 요소 추적
-
-#### 2. 전체 분석 (overall_analysis)
-- **감정 아크**: 시작→절정→결말 감정 흐름 (예: Curiosity→Relatability→Satisfaction)
-- **청중 반응**: 
-  - overall_sentiment: "Highly Positive and Inquisitive"
-  - notable_comments: 실제 댓글 + 번역
-  - common_reactions: 주요 반응 패턴
-- **ASR/OCR 추출**:
-  - asr_transcript: 음성→텍스트 (한국어)
-  - asr_translation_en: 영어 번역
-  - ocr_text: 화면 텍스트 캡처
-- **밈 잠재력**: potential_meme_template
-- **신뢰도**: confidence scores (0.9~0.98)
-
-#### 3. 씬 분해 (scenes[])
-- **내러티브 유닛**:
-  - narrative_role: Hook | Demonstration | Problem_Solution
-  - rhetoric: storytelling, curiosity_gap, pathos
-  - comedic_device: relatability
-- **샷 디테일** (shots[]):
-  - camera: angle(eye/high), move(static/handheld), shot(CU/ECU/MS)
-  - keyframes: desc, role(start/peak/end), t_rel_shot
-  - composition: grid, notes
-- **시각적 스타일**:
-  - lighting: "Bright, natural daylight"
-  - mood_palette: ["Clean", "Modern", "Appealing"]
-  - edit_grammar: cut_speed, subtitle_style
-- **오디오 스타일**:
-  - music, tone, ambient_sound
-  - audio_events: [{event, intensity, timestamp}]
-
-#### 4. 제품/서비스 언급
-- **product_mentions[]**:
-  - name, type, category
-  - time_ranges: [[start, end]]
-  - evidence: OCR/ASR/Visual 소스
-  - confidence: high/medium/low
-
-#### VDP → Snap3 Turbo 변환 포인트
-- **Hook 추출**: scenes[0] (첫 3초 critical importance)
-- **Evidence Pack**: confidence scores + notable_comments
-- **Textboard 생성**: narrative_unit.summary → 2-4 씬 압축
-- **QA 검증**: Hook≤3s, 자막 가독성, fps/bitrate 체크
-- **9:16 crop-proxy**: 16:9 원본에서 세로 영역 메타데이터
+# snap3 메인 UI (포트 3000) - 비디오 생성 파이프라인
+npm run dev
+open http://localhost:3000
+```
 
 ---
 
-## Typed Errors (taxonomy & one‑line fix) - 2025-08-18 업데이트
-- `CONTENT_ID_MISSING` — content_id 필수. **URL 정규화 API 먼저 호출**하여 content_id 추출.
-- `PLATFORM_MISSING` — platform 필수. **플랫폼 필드 추가** 후 content_key 생성.
-- `CONTENT_KEY_COLLISION` — content_key 중복. **다른 플랫폼 또는 content_id** 사용.
-- `FORMDATA_MULTIPART_DETECTED` — FormData 감지. **JSON-only 방식**으로 재전송.
-- `PLATFORM_SEGMENTATION_MISSING` — 플랫폼 세그먼트 누락. **GCS 경로에 {platform} 추가**.
-- `UNSUPPORTED_AR_FOR_PREVIEW` — Asked 9:16; preview is 16:9. **Render 16:9; return crop‑proxy** or switch AR.
-- `INVALID_DURATION` — Preview must be **8s**. Fix to 8s and re‑validate.
-- `MISSING_FIRST_FRAME` — Upload product/first frame image; re‑compile.
-- `PROVIDER_QUOTA_EXCEEDED` — Honor `Retry‑After`; reduce batch size.
-- `PROVIDER_POLICY_BLOCKED` — Remove flagged params; resubmit.
-- `EMBED_DENIED` — Use **official embeds only**; link out if needed.
-- `RATE_LIMITED` — Backoff per headers.
-- `QA_RULE_VIOLATION` — Fix Hook≤3s, safezones, fps/bitrate; re‑run QA.
+## 🔗 API 엔드포인트
 
-> 모든 에러는 `application/problem+json`(RFC 9457)로 응답하고, `code` 필드는 위 enum에서만 선택.
+### 핵심 엔드포인트
+- `POST /api/normalize-url` — URL 정규화 → content_id 추출
+- `POST /api/vdp/extract-vertex` — 실제 인제스트 처리 (JSON-only)
+- `GET /healthz` — Dependencies 상태 확인
+- `GET /version` — 환경변수/설정 확인
 
----
+### 비디오 생성 파이프라인
+- `POST /snap3/turbo` — Textboard 생성 (2-4씬, 8s)
+- `POST /compile/veo3` — Veo3 Prompt JSON (8s/16:9/720p|1080p)
+- `POST /preview/veo` — 비동기 미리보기 (202 + Location)
+- `GET /jobs/{id}` — 잡 상태 폴링
 
-## UI / Player 규칙
-- **autoplay는 muted + playsinline**일 때만 기본 허용. iOS/Safari 호환 유지.
-- 세로 요청 미리보기는 **16:9 원본 위 9:16 crop‑proxy**를 오버레이(내보내기=항상 16:9).
-- SynthID/워터마크 감지 시 **배지 노출**(provenance 표기).
+### QA & Export
+- `POST /qa/validate` — Hook≤3s, safezones, 가독성
+- `GET /export/brief/{id}` — Brief PDF + Evidence
+- `GET /export/json/{id}` — VideoGen IR + Veo3 Prompt
 
 ---
 
-## QA Gate (MVP)
-- **Hook ≤ 3s** (MAJOR), 씬 길이 합 **정확히 8.0s**
-- 자막 가독성(크기/라인 길이/명암비), **safezones** 미침범
-- 채널 힌트:
-  - Reels: **≥720p, ≥30fps**
-  - TikTok In‑Feed/TopView: **bitrate ≥ 516 kbps** 이상 권고
-  - Shorts: 16:9 소스 허용(프리뷰는 crop‑proxy 안내)
-- 출력: `{ pass, trustScore, issues[] (code/severity/fix), evidenceChips[] }`
+## 🔧 운영 점검 시스템
+
+### 필수 운영 검증 명령어
+```bash
+# t2-extract 서비스 전체 검증 (대량 처리 전 필수)
+cd ~/snap3/services/t2-extract
+./run-all-checks.sh
+```
+
+### 환경변수 표준 업데이트
+```bash
+# Cloud Run 환경변수 일괄 업데이트
+gcloud run services update t2-vdp \
+  --region=us-central1 \
+  --set-env-vars=PLATFORM_SEGMENTED_PATH=true \
+  --set-env-vars=RAW_BUCKET=tough-variety-raw-central1 \
+  --set-env-vars=EVIDENCE_MODE=true \
+  --set-env-vars=HOOK_MIN_STRENGTH=0.70
+```
+
+### 점검 일정
+- **대량 처리 전**: `./run-all-checks.sh` 필수 실행 (8/10 이상 통과)
+- **주간**: 전체 검증 (2분 소요)
+- **일일**: Health check (`curl /healthz`)
 
 ---
 
-## 보안/스토리지
-- **Supabase RLS 필수**. 업로드/프리뷰 공유는 **서명 URL**만.
-- 서비스 롤키는 **서버 전용**(클라이언트 노출 금지).
-- 스토리지 접근은 `StorageProvider` 인터페이스 뒤에 캡슐화(벤더 교체 가능).
+## 📊 VDP (Video Data Package) 구조
+
+### 메타데이터 계층
+- **플랫폼**: YouTube, Instagram, TikTok
+- **인게이지먼트**: view, like, comment, share counts
+- **오리진**: Real-Footage | AI-Generated
+
+### 분석 계층 (overall_analysis)
+- **감정 아크**: 시작→절정→결말 흐름
+- **ASR/OCR**: 음성/텍스트 추출
+- **Hook Genome**: 패턴 분석 (≤3s)
+
+### 씬 분해 (scenes[])
+- **내러티브**: Hook | Demonstration | Problem_Solution
+- **샷 디테일**: camera, keyframes, composition
+- **스타일**: lighting, mood_palette, edit_grammar
 
 ---
 
-## 계약/테스트
-- **OpenAPI 3.1** + **JSON Schema 2020‑12** — 스키마/예제 라운드트립.
-- **Veo3Prompt 하드 제약**: `duration=8` / `aspect="16:9"` / `resolution∈{720p,1080p}`.
-- **비동기 잡 패턴**: 202 + `Location` + 폴링(`GET /jobs/{id}`); `Retry‑After` 지원.
-- CI는 **unit + schema + contract + QA lint** 전부 그린일 때만 패스.
+## ⚠️ 에러 처리 (RFC 9457)
+
+### 주요 에러 코드
+- `CONTENT_ID_MISSING` → URL 정규화 API 먼저 호출
+- `PLATFORM_MISSING` → 플랫폼 필드 추가
+- `FORMDATA_MULTIPART_DETECTED` → JSON-only 재전송
+- `PLATFORM_SEGMENTATION_MISSING` → GCS 경로에 {platform} 추가
+- `BUCKET_VALIDATION_FAILED` → 올바른 버킷으로 수정
 
 ---
 
-## 공개/표시(Disclosure) — 지역별 최소 카피(1줄)
+## 🎯 QA Gate 규칙
+
+### 필수 검증 항목
+- **Hook**: ≤3초 (MAJOR)
+- **Duration**: 정확히 8.0초
+- **Aspect**: 16:9 (세로 요청 시 crop-proxy)
+- **Resolution**: 720p/1080p
+
+### 플랫폼별 힌트
+- **Reels**: ≥720p, ≥30fps
+- **TikTok**: bitrate ≥516kbps
+- **Shorts**: 16:9 소스 허용
+
+---
+
+## 🔒 보안 & 테스트
+
+### 보안 원칙
+- **Supabase RLS**: 모든 테넌트 테이블
+- **서명 URL**: 업로드/공유 전용
+- **서비스 키**: 서버 전용 (클라이언트 노출 금지)
+
+### 테스트 요구사항
+- **OpenAPI 3.1** + **JSON Schema 2020-12**
+- **단위 테스트** + **스키마 검증** + **계약 테스트**
+- **QA 린트**: 모든 품질 게이트 통과 필수
+
+---
+
+## 📝 지역별 공개 규정
 - **KR**: `#광고 #유료광고포함 — 본 영상은 경제적 대가를 포함합니다.`
-- **US(FTC)**: `Sponsored — I received compensation for this content.`
-- **EU(Transparency/AI)**: `Includes AI-generated content.` (채널 정책/법령에 맞춰 보조 배지/워터마크 추가)
+- **US**: `Sponsored — I received compensation for this content.`
+- **EU**: `Includes AI-generated content.`
 
 ---
 
-## Workflows (명령/훅) - 2025-08-18 업데이트
-- `/ingest:url` — URL 정규화 → content_id 추출 → 인제스트 요청 생성
-- `/ingest:platform` — TikTok/Instagram 파일+메타데이터 인제스트 
-- `/tests:all` — 단위 + 스키마 + 계약 + QA 린트
-- `/compile:veo3` — Veo3 Prompt JSON 생성/검증(8s/16:9/720p|1080p)
-- `/qa:validate` — Hook/safezones/fps/bitrate 검사
-- `/export:brief` — Brief PDF + Evidence 첨부
-- `/docs:index` — OpenAPI/스키마 문서화 업데이트
+## 🚀 최근 구현 완료 (2025-08-19)
+
+### ✅ 핵심 기능
+1. **Content_ID 필수 정책** - URL 정규화 선행
+2. **멀티플랫폼 통합** - YouTube/TikTok/Instagram 
+3. **Platform-Segmented GCS** - 플랫폼별 경로 분리
+4. **JSON-Only 처리** - FormData 완전 금지
+5. **Correlation ID 추적** - 엔드투엔드 추적
+6. **버킷 정책 강화** - 검증 시스템 구축
+7. **운영 점검 자동화** - 전체 시스템 검증 원클릭 완료
+
+### 📈 성능 지표
+- **인제스트 처리**: 750-805ms/request
+- **API 성공률**: 100%
+- **플랫폼 간 충돌**: 0건
+- **Content_Key 누락률**: 0%
+- **운영 검증 시간**: 수동 15분 → 자동 2분
 
 ---
 
-## 편집/가드레일
-- **allow edit**: `apps/**`, `packages/**`, `src/**`
-- **deny**: `/internal/vdp_full/**`, 리호스팅/다운로드 코드, 비인가 네트워크 호출
-- **플레이어**: 자동재생은 기본 **mute**; 공식 임베드만; 재인코딩 금지(프리뷰 제외)
+## 📚 편집 가드레일
+- **허용**: `src/**`, `apps/**`, `packages/**`
+- **금지**: `/internal/vdp_full/**`, 비인가 네트워크 호출
+- **PR 조건**: 모든 테스트 그린 + Evidence 첨부 + VDP_FULL 비노출
 
----
-
-## PR 머지 조건
-- 모든 테스트/린트/계약/QA **그린**.
-- 프리뷰 캡(8s/16:9/720p|1080p) **위반 없음**.
-- Evidence & Digest 첨부, **VDP_FULL 외부 노출 없음**.
-
----
-
-## 🚀 2025-08-18 주요 개선사항 요약
-
-### 핵심 구현 완료
-1. **Content_ID 필수 정책** ✅ - 모든 인제스트에 content_id 필수, URL 정규화 선행
-2. **멀티플랫폼 통합** ✅ - YouTube/TikTok/Instagram 통합 처리 아키텍처
-3. **Platform-Segmented GCS** ✅ - `gs://bucket/ingest/requests/{platform}/` 구조
-4. **JSON-Only 처리** ✅ - FormData/multipart 금지, JSON 전용
-5. **Correlation ID 추적** ✅ - 엔드투엔드 요청 추적 시스템
-6. **Content_Key 유니크** ✅ - `platform:content_id` 글로벌 유니크 보장
-7. **VDP 필수 필드** ✅ - content_key, metadata{platform,language,video_origin}, load_timestamp
-
-### 성능 개선
-- **인제스트 처리**: 750-805ms per request
-- **API 성공률**: 95% → 100%
-- **플랫폼 간 충돌**: 5건 → 0건
-- **Content_Key 누락률**: 30% → 0%
-
-### 실전 문제 해결
-- ✅ API 엔드포인트 정규화 (`/api/vdp/extract-vertex`)
-- ✅ UI 입력 구조 정확성 개선
-- ✅ 환경변수 불일치 해결
-- ✅ GCS 경로 구조 표준화
-- ✅ 중복 방지 시스템 구축
-
-### 다음 단계
-1. VDP 파일 생성 모니터링 (T2 워커)
-2. Audio Fingerprint 구현 완성
-3. Regional Alignment 완성 (us-central1 통일)

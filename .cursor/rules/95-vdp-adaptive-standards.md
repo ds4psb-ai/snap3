@@ -89,3 +89,4 @@ This rule auto-attaches when working on:
 - @vdp.schema.json
 - @scripts/validate-hook-gate.sh
 - @scripts/validate-vdp-schema.sh
+

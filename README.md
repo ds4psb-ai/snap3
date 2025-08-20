@@ -165,6 +165,39 @@ npm run worker
 npm run queue-ui
 ```
 
+### Operational Check System
+
+4. **Pre-bulk loading health check**:
+```bash
+npm run ops:test
+```
+
+5. **Daily system monitoring**:
+```bash
+npm run ops:health
+npm run ops:monitor
+```
+
+6. **Platform-specific testing**:
+```bash
+npm run ops:youtube
+npm run ops:instagram  
+npm run ops:tiktok
+```
+
+### Ingest UI (YouTube/Instagram/TikTok Link Processing)
+
+7. **Start ingest UI server**:
+```bash
+npm run ingest:ui
+```
+
+8. **Open ingest UI in browser**:
+```bash
+npm run ingest:open
+# Opens: http://localhost:8080
+```
+
 ## Usage
 
 ### Bulk File Upload
