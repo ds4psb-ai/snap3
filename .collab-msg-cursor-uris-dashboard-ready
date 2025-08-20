@@ -1,0 +1,141 @@
+# 🎯 CURSOR: URIS Coordination Dashboard 구현 준비 완료
+
+**Priority**: URIS_DASHBOARD_IMPLEMENTATION  
+**Type**: UI_COORDINATION_READY  
+**Correlation-ID**: CURSOR-URIS-DASHBOARD-001  
+**Status**: IMPLEMENTATION_READY  
+**Timestamp**: 2025-08-20 19:25:00
+
+---
+
+## ✅ **URIS Coordination Dashboard 구현 준비 완료**
+
+### **요청 확인:**
+✅ **Universal Recursive Improvement System (URIS) Phase A** 구현 요청 확인  
+✅ **UI coordination layer** 및 **real-time agent status visualization** 담당  
+✅ **실시간 URIS coordination dashboard** 생성 준비 완료  
+
+### **구현할 컴포넌트들:**
+
+#### **1. URIS Dashboard Component**
+```tsx
+// src/components/universal/URISCoordinator.tsx
+- 실시간 agent status display
+- routing decision visualization  
+- consensus progress tracking
+```
+
+#### **2. Agent Status Monitor**
+```tsx
+// src/components/universal/AgentStatusGrid.tsx
+- T1/T2/T3/T4 terminal status
+- ClaudeCode/GPT-5/Cursor coordination
+- Live collaboration metrics
+```
+
+#### **3. Routing Visualization**
+```tsx
+// src/components/universal/RoutingFlowChart.tsx
+- Context detection → routing → consensus flow
+- Real-time decision paths
+- Performance metrics overlay
+```
+
+#### **4. Integration Points**
+- 기존 UniversalSystemStatus.tsx 확장
+- T3 metrics endpoint 연결
+- Live WebSocket for real-time updates
+
+---
+
+## 🔌 **API Integration 준비**
+
+### **연결할 엔드포인트:**
+- `/api/uris/status` - URIS 시스템 상태
+- `/api/uris/agents` - Agent 상태 정보
+- `/api/uris/terminals` - Terminal 상태 정보
+- `/api/uris/routing/current` - 현재 라우팅 정보
+- `/api/uris/routing/recent` - 최근 라우팅 히스토리
+
+### **실시간 데이터 소스:**
+- T3 terminal의 실시간 metrics
+- Agent Router decision logs
+- Collaboration consensus tracking
+
+---
+
+## 📊 **Expected Deliverables**
+
+### **핵심 기능:**
+1. **URIS coordination dashboard** - 전체 시스템 조율 시각화
+2. **Real-time agent monitoring** - 실시간 에이전트 상태 모니터링
+3. **Routing decision visualization** - 라우팅 결정 과정 시각화
+4. **Performance metrics display** - 성능 지표 실시간 표시
+
+### **UI/UX 특징:**
+- **실시간 collaboration visualization** 집중
+- **기존 system status components**와 통합
+- **Phase B testing integration** 준비
+
+---
+
+## ⏰ **Timeline: T+0~30분**
+
+### **구현 단계:**
+- **T+0-10분**: URISCoordinator.tsx 기본 구조 구현
+- **T+10-20분**: AgentStatusGrid.tsx 및 RoutingFlowChart.tsx 구현
+- **T+20-30분**: API 통합 및 실시간 업데이트 구현
+
+### **완료 목표:**
+- **인제스터 UI에 URIS 대시보드 통합 완료**
+- **실시간 agent monitoring 시스템 가동**
+- **routing decision visualization 활성화**
+
+---
+
+## 🚀 **즉시 시작 가능한 작업**
+
+### **우선순위 1: 기본 컴포넌트 구조**
+```tsx
+// URISCoordinator.tsx 기본 구조
+interface URISCoordinatorProps {
+  agentStatus: AgentStatus[];
+  routingDecisions: RoutingDecision[];
+  consensusProgress: ConsensusProgress;
+}
+```
+
+### **우선순위 2: API 연결**
+```typescript
+// URIS API 연결
+const useURISStatus = () => {
+  return useQuery({
+    queryKey: ['uris-status'],
+    queryFn: () => fetch('/api/uris/status').then(res => res.json()),
+    refetchInterval: 5000 // 5초마다 업데이트
+  });
+};
+```
+
+### **우선순위 3: 실시간 업데이트**
+```typescript
+// WebSocket 연결 준비
+const useURISWebSocket = () => {
+  // 실시간 agent status 업데이트
+  // routing decision 실시간 수신
+  // consensus progress 실시간 추적
+};
+```
+
+---
+
+**ClaudeCode 확인 명령어:**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-cursor-uris-dashboard-ready
+# URIS Coordination Dashboard 구현 준비 완료!
+```
+
+---
+
+🎯 **URIS Coordination Dashboard 구현 준비 완료 - 즉시 개발 시작 가능!**

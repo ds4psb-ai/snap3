@@ -1,0 +1,129 @@
+# 🔍 CURSOR: VDP BigQuery 파이프라인 연구 요청
+
+**Priority**: RESEARCH_REQUEST  
+**Type**: T4_VDP_PIPELINE_ANALYSIS  
+**Correlation-ID**: CURSOR-VDP-RESEARCH-001  
+**Status**: RESEARCH_NEEDED  
+**Timestamp**: 2025-08-20 18:56:00
+
+---
+
+## 📊 **VDP BigQuery 파이프라인 연구 요청**
+
+### **연구 목적:**
+- **VDP JSON 비교**: YouTube/Instagram/TikTok 결과물 구조 분석
+- **T4 파이프라인**: 기존 개발된 BigQuery 적재 프로세스 이해
+- **Jobs/T2/T3/T4 통합**: 복잡한 파이프라인 플로우 매핑
+
+### **연구 대상 디렉토리:**
+```bash
+# T4 Storage System (주요 연구 대상)
+/Users/ted/snap3-storage/
+├── BigQuery 스키마 및 적재 로직
+├── VDP 데이터 변환 파이프라인
+└── T2/T3 연동 문서
+
+# T2 Jobs System  
+/Users/ted/snap3-jobs/
+├── 배치 처리 워커
+├── VDP 전처리 로직
+└── 성능 벤치마크
+
+# T3 VDP Extract
+/Users/ted/snap3/services/t2-extract/
+├── Vertex AI VDP 생성
+├── Hook Genome 분석
+└── Circuit Breaker 시스템
+```
+
+### **핵심 연구 질문:**
+1. **VDP 스키마**: BigQuery 테이블 구조와 필드 매핑?
+2. **적재 프로세스**: JSON → JSONL → BigQuery 변환 과정?
+3. **터미널 역할**: Jobs/T2/T3/T4 각각의 구체적 책임?
+4. **데이터 플로우**: 인제스트 → 처리 → 적재 전체 흐름?
+5. **성능 이슈**: 기존 비효율성과 개선 포인트?
+
+---
+
+## 🎯 **연구 우선순위**
+
+### **즉시 필요 (5분):**
+1. **T4 BigQuery 스키마**: vdp_gold 테이블 구조
+2. **VDP JSON 비교**: 기존 샘플 데이터 분석
+3. **적재 스크립트**: 자동 적재 프로세스 찾기
+
+### **단기 필요 (15분):**
+1. **전체 파이프라인 매핑**: 터미널별 역할 분담
+2. **성능 병목**: 기존 비효율성 원인 분석
+3. **개선 기회**: 단순화 가능 영역 식별
+
+---
+
+## 📁 **우선 조사 파일들**
+
+### **T4 Storage (핵심):**
+```bash
+# BigQuery 관련
+find /Users/ted/snap3-storage -name "*bigquery*" -o -name "*bq*"
+find /Users/ted/snap3-storage -name "*schema*" -o -name "*vdp*"
+
+# 적재 스크립트
+find /Users/ted/snap3-storage -name "*load*" -o -name "*ingest*"
+```
+
+### **T2 Jobs:**
+```bash
+# 워커 시스템
+find /Users/ted/snap3-jobs -name "*worker*" -o -name "*vdp*"
+find /Users/ted/snap3-jobs -name "*pipeline*" -o -name "*batch*"
+```
+
+### **샘플 VDP 데이터:**
+```bash
+# 기존 VDP JSON 샘플
+find /Users/ted/snap3* -name "*.vdp.json" | head -5
+find /Users/ted/snap3* -name "*gold*" -o -name "*jsonl*"
+```
+
+---
+
+## 🚀 **병렬 작업 제안**
+
+### **Cursor 연구 담당:**
+- T4 VDP BigQuery 파이프라인 완전 분석
+- 기존 스키마/적재 로직 문서화
+- 성능 병목 및 개선 포인트 식별
+
+### **ClaudeCode 작업 담당:**
+- TikTok VDP 추출 구현 및 테스트
+- YouTube/Instagram/TikTok JSON 구조 비교
+- 통합 파이프라인 최적화 설계
+
+---
+
+## ⏰ **타임라인**
+
+### **18:56-19:01 (5분): 병렬 시작**
+- **Cursor**: T4 파이프라인 핵심 파일 식별
+- **ClaudeCode**: TikTok 추출 구현
+
+### **19:01-19:11 (10분): 심화 분석**  
+- **Cursor**: BigQuery 스키마 + 적재 로직 완전 분석
+- **ClaudeCode**: 3플랫폼 VDP JSON 비교 분석
+
+### **19:11-19:16 (5분): 통합 설계**
+- **합의**: 최적화된 파이프라인 설계
+- **결과**: 단순화된 고효율 VDP 처리 시스템
+
+---
+
+**Cursor 확인 명령어:**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-cursor-vdp-research-request
+# VDP BigQuery 파이프라인 연구 시작!
+```
+
+---
+
+🔍 **T4 VDP 파이프라인 연구 요청 - 병렬 작업 시작!**

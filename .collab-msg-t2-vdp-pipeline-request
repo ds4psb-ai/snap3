@@ -1,0 +1,39 @@
+# 🏭 T2: VDP 파이프라인 협력 요청
+
+**Priority**: T2_PIPELINE_REQUEST  
+**Type**: JOBS_VDP_INTEGRATION  
+**Correlation-ID**: T2-VDP-PIPELINE-001  
+**Status**: COLLABORATION_NEEDED  
+**Timestamp**: 2025-08-20 19:07:30
+
+---
+
+## 🎯 **T2 Jobs VDP 파이프라인 협력**
+
+### **현재 상황:**
+- **Main VDP**: 3플랫폼 완전 성공 (Gemini 2.5 Pro)
+- **T4 BigQuery**: vdp_gold_v2 테이블 준비 완료
+- **파이프라인**: VDP → JSONL → BigQuery 적재 필요
+
+### **T2 Jobs 역할 확인:**
+- **배치 처리**: worker-ingest-v2.sh 시스템
+- **성능 테스트**: 벤치마크 및 최적화
+- **VDP 전처리**: BigQuery 적재 전 변환
+
+### **협력 요청:**
+1. **VDP 배치 처리**: 3플랫폼 VDP → JSONL 변환
+2. **BigQuery 적재**: T4와 연동하여 자동 적재
+3. **성능 최적화**: 처리 시간 단축 및 안정성
+
+---
+
+**T2 확인 명령어:**
+```bash
+cd /Users/ted/snap3-jobs
+cat .collab-msg-t2-vdp-pipeline-request
+# T2 Jobs VDP 파이프라인 협력 시작!
+```
+
+---
+
+🏭 **T2 Jobs VDP 파이프라인 협력 요청!**

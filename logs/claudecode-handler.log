@@ -59,3 +59,479 @@
 [2025-08-20T17:36:30.776Z] 📩 Processing 1 new messages
 [2025-08-20T17:36:30.776Z] 🔍 Analyzing: .collab-msg-cursor-recursive-system-reminder
 [2025-08-20T17:36:30.777Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-recursive-system-reminder
+[2025-08-20T17:36:54.786Z] 📩 Processing 1 new messages
+[2025-08-20T17:36:54.787Z] 🔍 Analyzing: .collab-msg-cursor-recursive-system-reminder
+[2025-08-20T17:36:54.787Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-recursive-system-reminder
+[2025-08-20T17:37:57.808Z] 📩 Processing 1 new messages
+[2025-08-20T17:37:57.808Z] 🔍 Analyzing: .collab-msg-auto-recursive-trigger.processed
+[2025-08-20T17:37:57.809Z] ✅ Auto-response generated: .auto-response-claudecode-auto-recursive-trigger.processed
+[2025-08-20T17:39:27.841Z] 📩 Processing 4 new messages
+[2025-08-20T17:39:27.842Z] 🔍 Analyzing: .collab-msg-cursor-debug-solution
+[2025-08-20T17:39:27.842Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-debug-solution
+[2025-08-20T17:39:27.843Z] 🔍 Analyzing: .collab-msg-cursor-port-3000-in-use
+[2025-08-20T17:39:27.843Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-port-3000-in-use
+[2025-08-20T17:39:27.843Z] 🔍 Analyzing: .collab-msg-cursor-recursive-system-reminder
+[2025-08-20T17:39:27.843Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-recursive-system-reminder
+[2025-08-20T17:39:27.844Z] 🔍 Analyzing: .collab-msg-cursor-waiting-for-claudecode
+[2025-08-20T17:39:27.844Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-waiting-for-claudecode
+[2025-08-20T17:40:03.857Z] 📩 Processing 9 new messages
+[2025-08-20T17:40:03.857Z] 🔍 Analyzing: .collab-msg-cursor-phase1-complete
+[2025-08-20T17:40:03.859Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-phase1-complete
+[2025-08-20T17:40:03.859Z] 🔍 Analyzing: .collab-msg-critical-integration-issue
+[2025-08-20T17:40:03.859Z] ✅ Auto-response generated: .auto-response-claudecode-critical-integration-issue
+[2025-08-20T17:40:03.859Z] 🔍 Analyzing: .collab-msg-cursor-extractor-accurate-analysis
+[2025-08-20T17:40:03.860Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-extractor-accurate-analysis
+[2025-08-20T17:40:03.860Z] 🔍 Analyzing: .collab-msg-cursor-extractor-analysis
+[2025-08-20T17:40:03.860Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-extractor-analysis
+[2025-08-20T17:40:03.860Z] 🔍 Analyzing: .collab-msg-cursor-extractor-final
+[2025-08-20T17:40:03.861Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-extractor-final
+[2025-08-20T17:40:03.861Z] 🔍 Analyzing: .collab-msg-cursor-debug-solution
+[2025-08-20T17:40:03.861Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-debug-solution
+[2025-08-20T17:40:03.861Z] 🔍 Analyzing: .collab-msg-cursor-recursive-system-reminder
+[2025-08-20T17:40:03.861Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-recursive-system-reminder
+[2025-08-20T17:40:03.862Z] 🔍 Analyzing: .collab-msg-cursor-port-3000-in-use
+[2025-08-20T17:40:03.863Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-port-3000-in-use
+[2025-08-20T17:40:03.864Z] 🔍 Analyzing: .collab-msg-cursor-waiting-for-claudecode
+[2025-08-20T17:40:03.864Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-waiting-for-claudecode
+[2025-08-20T17:40:06.856Z] 📩 Processing 4 new messages
+[2025-08-20T17:40:06.856Z] 🔍 Analyzing: .collab-msg-cursor-waiting-for-claudecode
+[2025-08-20T17:40:06.857Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-waiting-for-claudecode
+[2025-08-20T17:40:06.857Z] 🔍 Analyzing: .collab-msg-cursor-debug-solution
+[2025-08-20T17:40:06.857Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-debug-solution
+[2025-08-20T17:40:06.857Z] 🔍 Analyzing: .collab-msg-cursor-port-3000-in-use
+[2025-08-20T17:40:06.858Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-port-3000-in-use
+[2025-08-20T17:40:06.858Z] 🔍 Analyzing: .collab-msg-cursor-recursive-system-reminder
+[2025-08-20T17:40:06.858Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-recursive-system-reminder
+[2025-08-20T17:40:24.862Z] 📩 Processing 1 new messages
+[2025-08-20T17:40:24.862Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:40:24.863Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:41:45.887Z] 📩 Processing 1 new messages
+[2025-08-20T17:41:45.888Z] 🔍 Analyzing: .collab-msg-cursor-gpt5-analysis-response
+[2025-08-20T17:41:45.888Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-gpt5-analysis-response
+[2025-08-20T17:41:54.890Z] 📩 Processing 1 new messages
+[2025-08-20T17:41:54.890Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:41:54.891Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:42:00.893Z] 📩 Processing 1 new messages
+[2025-08-20T17:42:00.893Z] 🔍 Analyzing: .collab-msg-cursor-gpt5-analysis-response
+[2025-08-20T17:42:00.894Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-gpt5-analysis-response
+[2025-08-20T17:43:24.922Z] 📩 Processing 1 new messages
+[2025-08-20T17:43:24.922Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:43:24.922Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:44:54.953Z] 📩 Processing 1 new messages
+[2025-08-20T17:44:54.954Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:44:54.954Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:46:06.979Z] 📩 Processing 1 new messages
+[2025-08-20T17:46:06.979Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755711964
+[2025-08-20T17:46:06.979Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755711964
+[2025-08-20T17:46:24.984Z] 📩 Processing 1 new messages
+[2025-08-20T17:46:24.984Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:46:24.985Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:46:27.985Z] 📩 Processing 1 new messages
+[2025-08-20T17:46:27.985Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755711985
+[2025-08-20T17:46:27.986Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755711985
+[2025-08-20T17:46:42.990Z] 📩 Processing 1 new messages
+[2025-08-20T17:46:42.991Z] 🔍 Analyzing: .collab-msg-gpt5-404-error-consulting-request
+[2025-08-20T17:46:42.991Z] ✅ Auto-response generated: .auto-response-claudecode-gpt5-404-error-consulting-request
+[2025-08-20T17:47:03.998Z] 📩 Processing 1 new messages
+[2025-08-20T17:47:03.998Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755712022
+[2025-08-20T17:47:03.999Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755712022
+[2025-08-20T17:47:55.015Z] 📩 Processing 1 new messages
+[2025-08-20T17:47:55.016Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:47:55.017Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:49:16.043Z] 📩 Processing 1 new messages
+[2025-08-20T17:49:16.044Z] 🔍 Analyzing: .collab-msg-cursor-start-server-request
+[2025-08-20T17:49:16.045Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-start-server-request
+[2025-08-20T17:49:25.045Z] 📩 Processing 1 new messages
+[2025-08-20T17:49:25.046Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:49:25.046Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:49:43.053Z] 📩 Processing 1 new messages
+[2025-08-20T17:49:43.055Z] 🔍 Analyzing: .collab-msg-vdp-integration-decision-response
+[2025-08-20T17:49:43.055Z] ✅ Auto-response generated: .auto-response-claudecode-vdp-integration-decision-response
+[2025-08-20T17:50:07.060Z] 📩 Processing 1 new messages
+[2025-08-20T17:50:07.060Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755712206
+[2025-08-20T17:50:07.061Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755712206
+[2025-08-20T17:50:55.078Z] 📩 Processing 2 new messages
+[2025-08-20T17:50:55.080Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755712252
+[2025-08-20T17:50:55.080Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755712252
+[2025-08-20T17:50:55.080Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:50:55.081Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:52:25.108Z] 📩 Processing 1 new messages
+[2025-08-20T17:52:25.110Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:52:25.110Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:53:55.138Z] 📩 Processing 1 new messages
+[2025-08-20T17:53:55.139Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:53:55.140Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:53:58.139Z] 📩 Processing 1 new messages
+[2025-08-20T17:53:58.139Z] 🔍 Analyzing: .collab-msg-cursor-vdp-integration-complete
+[2025-08-20T17:53:58.140Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-vdp-integration-complete
+[2025-08-20T17:54:43.154Z] 📩 Processing 1 new messages
+[2025-08-20T17:54:43.154Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755712480
+[2025-08-20T17:54:43.155Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755712480
+[2025-08-20T17:55:16.166Z] 📩 Processing 1 new messages
+[2025-08-20T17:55:16.168Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755712515
+[2025-08-20T17:55:16.168Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755712515
+[2025-08-20T17:55:25.169Z] 📩 Processing 1 new messages
+[2025-08-20T17:55:25.169Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:55:25.170Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:56:13.185Z] 📩 Processing 1 new messages
+[2025-08-20T17:56:13.186Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755712571
+[2025-08-20T17:56:13.186Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755712571
+[2025-08-20T17:56:28.191Z] 📩 Processing 1 new messages
+[2025-08-20T17:56:28.192Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755712588
+[2025-08-20T17:56:28.193Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755712588
+[2025-08-20T17:56:43.293Z] 📩 Processing 1 new messages
+[2025-08-20T17:56:43.294Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755712600
+[2025-08-20T17:56:43.298Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755712600
+[2025-08-20T17:56:55.207Z] 📩 Processing 1 new messages
+[2025-08-20T17:56:55.207Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:56:55.209Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:58:22.237Z] 📩 Processing 1 new messages
+[2025-08-20T17:58:22.239Z] 🔍 Analyzing: .collab-msg-cursor-server-start-urgent-request
+[2025-08-20T17:58:22.239Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-server-start-urgent-request
+[2025-08-20T17:58:25.238Z] 📩 Processing 1 new messages
+[2025-08-20T17:58:25.239Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:58:25.239Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T17:59:16.256Z] 📩 Processing 1 new messages
+[2025-08-20T17:59:16.257Z] 🔍 Analyzing: .collab-msg-cursor-expert-analysis-discussion
+[2025-08-20T17:59:16.257Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-expert-analysis-discussion
+[2025-08-20T17:59:55.267Z] 📩 Processing 1 new messages
+[2025-08-20T17:59:55.267Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T17:59:55.268Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:00:01.269Z] 📩 Processing 1 new messages
+[2025-08-20T18:00:01.270Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755712798
+[2025-08-20T18:00:01.270Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755712798
+[2025-08-20T18:00:13.273Z] 📩 Processing 1 new messages
+[2025-08-20T18:00:13.273Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755712813
+[2025-08-20T18:00:13.274Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755712813
+[2025-08-20T18:01:25.299Z] 📩 Processing 1 new messages
+[2025-08-20T18:01:25.301Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:01:25.302Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:01:34.302Z] 📩 Processing 1 new messages
+[2025-08-20T18:01:34.303Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755712894
+[2025-08-20T18:01:34.303Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755712894
+[2025-08-20T18:02:22.320Z] 📩 Processing 1 new messages
+[2025-08-20T18:02:22.320Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755712942
+[2025-08-20T18:02:22.320Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755712942
+[2025-08-20T18:02:55.340Z] 📩 Processing 1 new messages
+[2025-08-20T18:02:55.340Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:02:55.341Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:04:07.357Z] 📩 Processing 1 new messages
+[2025-08-20T18:04:07.358Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755713046
+[2025-08-20T18:04:07.359Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755713046
+[2025-08-20T18:04:25.364Z] 📩 Processing 1 new messages
+[2025-08-20T18:04:25.365Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:04:25.365Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:05:43.389Z] 📩 Processing 1 new messages
+[2025-08-20T18:05:43.391Z] 🔍 Analyzing: .collab-msg-cursor-expert-analysis-response
+[2025-08-20T18:05:43.391Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-expert-analysis-response
+[2025-08-20T18:05:55.393Z] 📩 Processing 1 new messages
+[2025-08-20T18:05:55.393Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:05:55.394Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:06:04.396Z] 📩 Processing 1 new messages
+[2025-08-20T18:06:04.396Z] 🔍 Analyzing: .collab-msg-cursor-expert-analysis-response
+[2025-08-20T18:06:04.398Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-expert-analysis-response
+[2025-08-20T18:06:52.413Z] 📩 Processing 1 new messages
+[2025-08-20T18:06:52.414Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755713210
+[2025-08-20T18:06:52.414Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755713210
+[2025-08-20T18:07:25.423Z] 📩 Processing 1 new messages
+[2025-08-20T18:07:25.423Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:07:25.424Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:08:55.453Z] 📩 Processing 1 new messages
+[2025-08-20T18:08:55.454Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:08:55.454Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:09:31.467Z] 📩 Processing 1 new messages
+[2025-08-20T18:09:31.468Z] 🔍 Analyzing: .collab-msg-cursor-final-strategy-directive
+[2025-08-20T18:09:31.469Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-final-strategy-directive
+[2025-08-20T18:10:25.486Z] 📩 Processing 1 new messages
+[2025-08-20T18:10:25.486Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:10:25.486Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:10:55.496Z] 📩 Processing 1 new messages
+[2025-08-20T18:10:55.496Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755713454
+[2025-08-20T18:10:55.497Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755713454
+[2025-08-20T18:11:58.519Z] 📩 Processing 1 new messages
+[2025-08-20T18:11:58.520Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:11:58.520Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:12:22.527Z] 📩 Processing 1 new messages
+[2025-08-20T18:12:22.528Z] 🔍 Analyzing: .collab-msg-cursor-user-final-command
+[2025-08-20T18:12:22.529Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-user-final-command
+[2025-08-20T18:12:40.535Z] 📩 Processing 1 new messages
+[2025-08-20T18:12:40.535Z] 🔍 Analyzing: .collab-msg-cursor-general_response-1755713558
+[2025-08-20T18:12:40.536Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-general_response-1755713558
+[2025-08-20T18:12:49.538Z] 📩 Processing 1 new messages
+[2025-08-20T18:12:49.538Z] 🔍 Analyzing: .collab-msg-cursor-critical_response-1755713566
+[2025-08-20T18:12:49.538Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-critical_response-1755713566
+[2025-08-20T18:13:28.552Z] 📩 Processing 1 new messages
+[2025-08-20T18:13:28.553Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:13:28.554Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:14:22.571Z] 📩 Processing 1 new messages
+[2025-08-20T18:14:22.571Z] 🔍 Analyzing: .collab-msg-cursor-user-final-command-approval
+[2025-08-20T18:14:22.572Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-user-final-command-approval
+[2025-08-20T18:14:25.572Z] 📩 Processing 1 new messages
+[2025-08-20T18:14:25.573Z] 🔍 Analyzing: .collab-msg-cursor-user-final-command-approval
+[2025-08-20T18:14:25.573Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-user-final-command-approval
+[2025-08-20T18:14:46.581Z] 📩 Processing 1 new messages
+[2025-08-20T18:14:46.582Z] 🔍 Analyzing: .collab-msg-cursor-user-final-command-approval
+[2025-08-20T18:14:46.582Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-user-final-command-approval
+[2025-08-20T18:17:01.628Z] 📩 Processing 1 new messages
+[2025-08-20T18:17:01.629Z] 🔍 Analyzing: .collab-msg-claudecode-user-command-approval
+[2025-08-20T18:17:01.629Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-user-command-approval
+[2025-08-20T18:18:52.664Z] 📩 Processing 1 new messages
+[2025-08-20T18:18:52.666Z] 🔍 Analyzing: .collab-msg-claudecode-integration-success
+[2025-08-20T18:18:52.667Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-integration-success
+[2025-08-20T18:19:55.692Z] 📩 Processing 3 new messages
+[2025-08-20T18:19:55.695Z] 🔍 Analyzing: .collab-msg-cursor-phase1-complete
+[2025-08-20T18:19:55.696Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-phase1-complete
+[2025-08-20T18:19:55.696Z] 🔍 Analyzing: .collab-msg-critical-integration-issue
+[2025-08-20T18:19:55.697Z] ✅ Auto-response generated: .auto-response-claudecode-critical-integration-issue
+[2025-08-20T18:19:55.697Z] 🔍 Analyzing: .collab-msg-cursor-extractor-accurate-analysis
+[2025-08-20T18:19:55.697Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-extractor-accurate-analysis
+[2025-08-20T18:19:58.687Z] 📩 Processing 10 new messages
+[2025-08-20T18:19:58.688Z] 🔍 Analyzing: .collab-msg-cursor-extractor-analysis
+[2025-08-20T18:19:58.688Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-extractor-analysis
+[2025-08-20T18:19:58.688Z] 🔍 Analyzing: .collab-msg-cursor-extractor-final
+[2025-08-20T18:19:58.689Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-extractor-final
+[2025-08-20T18:19:58.689Z] 🔍 Analyzing: .collab-msg-cursor-waiting-for-claudecode
+[2025-08-20T18:19:58.689Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-waiting-for-claudecode
+[2025-08-20T18:19:58.689Z] 🔍 Analyzing: .collab-msg-cursor-port-3000-in-use
+[2025-08-20T18:19:58.689Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-port-3000-in-use
+[2025-08-20T18:19:58.690Z] 🔍 Analyzing: .collab-msg-cursor-debug-solution
+[2025-08-20T18:19:58.690Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-debug-solution
+[2025-08-20T18:19:58.690Z] 🔍 Analyzing: .collab-msg-cursor-recursive-system-reminder
+[2025-08-20T18:19:58.690Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-recursive-system-reminder
+[2025-08-20T18:19:58.691Z] 🔍 Analyzing: .collab-msg-cursor-gpt5-analysis-response
+[2025-08-20T18:19:58.691Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-gpt5-analysis-response
+[2025-08-20T18:19:58.691Z] 🔍 Analyzing: .collab-msg-cursor-expert-analysis-response
+[2025-08-20T18:19:58.691Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-expert-analysis-response
+[2025-08-20T18:19:58.691Z] 🔍 Analyzing: .collab-msg-cursor-user-final-command-approval
+[2025-08-20T18:19:58.692Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-user-final-command-approval
+[2025-08-20T18:19:58.692Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:19:58.692Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:20:04.688Z] 📩 Processing 7 new messages
+[2025-08-20T18:20:04.689Z] 🔍 Analyzing: .collab-msg-cursor-debug-solution
+[2025-08-20T18:20:04.690Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-debug-solution
+[2025-08-20T18:20:04.690Z] 🔍 Analyzing: .collab-msg-cursor-gpt5-analysis-response
+[2025-08-20T18:20:04.690Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-gpt5-analysis-response
+[2025-08-20T18:20:04.690Z] 🔍 Analyzing: .collab-msg-cursor-port-3000-in-use
+[2025-08-20T18:20:04.691Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-port-3000-in-use
+[2025-08-20T18:20:04.691Z] 🔍 Analyzing: .collab-msg-cursor-recursive-system-reminder
+[2025-08-20T18:20:04.691Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-recursive-system-reminder
+[2025-08-20T18:20:04.691Z] 🔍 Analyzing: .collab-msg-cursor-waiting-for-claudecode
+[2025-08-20T18:20:04.692Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-waiting-for-claudecode
+[2025-08-20T18:20:04.692Z] 🔍 Analyzing: .collab-msg-cursor-user-final-command-approval
+[2025-08-20T18:20:04.693Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-user-final-command-approval
+[2025-08-20T18:20:04.693Z] 🔍 Analyzing: .collab-msg-cursor-expert-analysis-response
+[2025-08-20T18:20:04.693Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-expert-analysis-response
+[2025-08-20T18:21:28.728Z] 📩 Processing 1 new messages
+[2025-08-20T18:21:28.730Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:21:28.730Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:24:01.783Z] 📩 Processing 1 new messages
+[2025-08-20T18:24:01.783Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:24:01.784Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:25:31.822Z] 📩 Processing 1 new messages
+[2025-08-20T18:25:31.823Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:25:31.823Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:27:01.856Z] 📩 Processing 1 new messages
+[2025-08-20T18:27:01.858Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:27:01.858Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:28:31.889Z] 📩 Processing 1 new messages
+[2025-08-20T18:28:31.891Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:28:31.891Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:30:01.921Z] 📩 Processing 1 new messages
+[2025-08-20T18:30:01.921Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:30:01.922Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:31:22.947Z] 📩 Processing 1 new messages
+[2025-08-20T18:31:22.948Z] 🔍 Analyzing: .collab-msg-claudecode-phase2-complete
+[2025-08-20T18:31:22.948Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-phase2-complete
+[2025-08-20T18:31:31.949Z] 📩 Processing 1 new messages
+[2025-08-20T18:31:31.950Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:31:31.951Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:31:40.953Z] 📩 Processing 1 new messages
+[2025-08-20T18:31:40.954Z] 🔍 Analyzing: .collab-msg-claudecode-phase2-complete
+[2025-08-20T18:31:40.954Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-phase2-complete
+[2025-08-20T18:32:25.969Z] 📩 Processing 1 new messages
+[2025-08-20T18:32:25.970Z] 🔍 Analyzing: .collab-msg-cursor-phase2-acknowledgment
+[2025-08-20T18:32:25.970Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-phase2-acknowledgment
+[2025-08-20T18:32:28.970Z] 📩 Processing 1 new messages
+[2025-08-20T18:32:28.970Z] 🔍 Analyzing: .collab-msg-cursor-phase2-acknowledgment
+[2025-08-20T18:32:28.971Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-phase2-acknowledgment
+[2025-08-20T18:32:40.973Z] 📩 Processing 1 new messages
+[2025-08-20T18:32:40.973Z] 🔍 Analyzing: .collab-msg-cursor-phase2-acknowledgment
+[2025-08-20T18:32:40.974Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-phase2-acknowledgment
+[2025-08-20T18:33:01.980Z] 📩 Processing 1 new messages
+[2025-08-20T18:33:01.980Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:33:01.980Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:33:28.989Z] 📩 Processing 1 new messages
+[2025-08-20T18:33:28.989Z] 🔍 Analyzing: .collab-msg-cursor-test-start-plan
+[2025-08-20T18:33:28.990Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-test-start-plan
+[2025-08-20T18:33:31.989Z] 📩 Processing 1 new messages
+[2025-08-20T18:33:31.990Z] 🔍 Analyzing: .collab-msg-cursor-test-start-plan
+[2025-08-20T18:33:31.990Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-test-start-plan
+[2025-08-20T18:37:08.080Z] 📩 Processing 1 new messages
+[2025-08-20T18:37:08.082Z] 🔍 Analyzing: .collab-msg-claudecode-testing-success
+[2025-08-20T18:37:08.083Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-testing-success
+[2025-08-20T18:37:29.077Z] 📩 Processing 1 new messages
+[2025-08-20T18:37:29.078Z] 🔍 Analyzing: .collab-msg-cursor-test-results
+[2025-08-20T18:37:29.079Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-test-results
+[2025-08-20T18:37:32.078Z] 📩 Processing 1 new messages
+[2025-08-20T18:37:32.078Z] 🔍 Analyzing: .collab-msg-cursor-test-results
+[2025-08-20T18:37:32.078Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-test-results
+[2025-08-20T18:37:56.082Z] 📩 Processing 1 new messages
+[2025-08-20T18:37:56.083Z] 🔍 Analyzing: .collab-msg-cursor-test-results
+[2025-08-20T18:37:56.084Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-test-results
+[2025-08-20T18:40:08.131Z] 📩 Processing 1 new messages
+[2025-08-20T18:40:08.132Z] 🔍 Analyzing: .collab-msg-claudecode-fixes-applied
+[2025-08-20T18:40:08.132Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-fixes-applied
+[2025-08-20T18:40:23.137Z] 📩 Processing 1 new messages
+[2025-08-20T18:40:23.138Z] 🔍 Analyzing: .collab-msg-cursor-recursive-improvement-request
+[2025-08-20T18:40:23.138Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-recursive-improvement-request
+[2025-08-20T18:40:44.143Z] 📩 Processing 1 new messages
+[2025-08-20T18:40:44.145Z] 🔍 Analyzing: .collab-msg-cursor-recursive-improvement-request
+[2025-08-20T18:40:44.145Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-recursive-improvement-request
+[2025-08-20T18:43:14.199Z] 📩 Processing 1 new messages
+[2025-08-20T18:43:14.200Z] 🔍 Analyzing: .collab-msg-auto-work-trigger
+[2025-08-20T18:43:14.201Z] ✅ Auto-response generated: .auto-response-claudecode-auto-work-trigger
+[2025-08-20T18:43:41.210Z] 📩 Processing 1 new messages
+[2025-08-20T18:43:41.211Z] 🔍 Analyzing: .collab-msg-claudecode-recursive-system-ready
+[2025-08-20T18:43:41.211Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-recursive-system-ready
+[2025-08-20T18:44:20.223Z] 📩 Processing 1 new messages
+[2025-08-20T18:44:20.224Z] 🔍 Analyzing: .collab-msg-auto-work-trigger
+[2025-08-20T18:44:20.224Z] ✅ Auto-response generated: .auto-response-claudecode-auto-work-trigger
+[2025-08-20T18:45:26.247Z] 📩 Processing 1 new messages
+[2025-08-20T18:45:26.248Z] 🔍 Analyzing: .collab-msg-auto-work-trigger
+[2025-08-20T18:45:26.248Z] ✅ Auto-response generated: .auto-response-claudecode-auto-work-trigger
+[2025-08-20T18:47:11.282Z] 📩 Processing 1 new messages
+[2025-08-20T18:47:11.283Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:47:11.283Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:47:35.291Z] 📩 Processing 1 new messages
+[2025-08-20T18:47:35.291Z] 🔍 Analyzing: .collab-msg-claudecode-recursive-integration-complete
+[2025-08-20T18:47:35.291Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-recursive-integration-complete
+[2025-08-20T18:48:41.315Z] 📩 Processing 1 new messages
+[2025-08-20T18:48:41.317Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:48:41.317Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:49:23.331Z] 📩 Processing 1 new messages
+[2025-08-20T18:49:23.331Z] 🔍 Analyzing: .collab-msg-cursor-task-progress-urgent
+[2025-08-20T18:49:23.332Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-task-progress-urgent
+[2025-08-20T18:49:47.339Z] 📩 Processing 1 new messages
+[2025-08-20T18:49:47.340Z] 🔍 Analyzing: .collab-msg-cursor-task-progress-urgent
+[2025-08-20T18:49:47.341Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-task-progress-urgent
+[2025-08-20T18:50:14.350Z] 📩 Processing 1 new messages
+[2025-08-20T18:50:14.351Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:50:14.351Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:50:32.356Z] 📩 Processing 1 new messages
+[2025-08-20T18:50:32.357Z] 🔍 Analyzing: .collab-msg-claudecode-phase2-execution-ready
+[2025-08-20T18:50:32.357Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-phase2-execution-ready
+[2025-08-20T18:54:44.386Z] 📩 Processing 1 new messages
+[2025-08-20T18:54:44.387Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:54:44.387Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:56:05.415Z] 📩 Processing 1 new messages
+[2025-08-20T18:56:05.416Z] 🔍 Analyzing: .collab-msg-claudecode-immediate-test-success
+[2025-08-20T18:56:05.417Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-immediate-test-success
+[2025-08-20T18:56:14.419Z] 📩 Processing 1 new messages
+[2025-08-20T18:56:14.419Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:56:14.420Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:57:44.449Z] 📩 Processing 1 new messages
+[2025-08-20T18:57:44.450Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:57:44.451Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:59:17.478Z] 📩 Processing 1 new messages
+[2025-08-20T18:59:17.479Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T18:59:17.480Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T18:59:50.490Z] 📩 Processing 1 new messages
+[2025-08-20T18:59:50.490Z] 🔍 Analyzing: .collab-msg-cursor-vdp-research-request
+[2025-08-20T18:59:50.490Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-vdp-research-request
+[2025-08-20T19:00:47.507Z] 📩 Processing 1 new messages
+[2025-08-20T19:00:47.508Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:00:47.509Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:02:17.537Z] 📩 Processing 1 new messages
+[2025-08-20T19:02:17.538Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:02:17.538Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:03:47.566Z] 📩 Processing 1 new messages
+[2025-08-20T19:03:47.567Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:03:47.568Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:05:17.595Z] 📩 Processing 1 new messages
+[2025-08-20T19:05:17.597Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:05:17.597Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:06:47.623Z] 📩 Processing 1 new messages
+[2025-08-20T19:06:47.625Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:06:47.625Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:07:26.636Z] 📩 Processing 1 new messages
+[2025-08-20T19:07:26.636Z] 🔍 Analyzing: .collab-msg-claudecode-vdp-complete-success
+[2025-08-20T19:07:26.637Z] ✅ Auto-response generated: .auto-response-claudecode-claudecode-vdp-complete-success
+[2025-08-20T19:08:17.652Z] 📩 Processing 1 new messages
+[2025-08-20T19:08:17.653Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:08:17.653Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:08:50.665Z] 📩 Processing 1 new messages
+[2025-08-20T19:08:50.666Z] 🔍 Analyzing: .collab-msg-t3-vertex-vdp-request
+[2025-08-20T19:08:50.666Z] ✅ Auto-response generated: .auto-response-claudecode-t3-vertex-vdp-request
+[2025-08-20T19:09:29.677Z] 📩 Processing 3 new messages
+[2025-08-20T19:09:29.678Z] 🔍 Analyzing: .collab-msg-t2-vdp-pipeline-request
+[2025-08-20T19:09:29.678Z] ✅ Auto-response generated: .auto-response-claudecode-t2-vdp-pipeline-request
+[2025-08-20T19:09:29.679Z] 🔍 Analyzing: .collab-msg-t4-bigquery-loader-request
+[2025-08-20T19:09:29.679Z] ✅ Auto-response generated: .auto-response-claudecode-t4-bigquery-loader-request
+[2025-08-20T19:09:29.679Z] 🔍 Analyzing: .collab-msg-cursor-final-coordination
+[2025-08-20T19:09:29.679Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-final-coordination
+[2025-08-20T19:09:47.684Z] 📩 Processing 1 new messages
+[2025-08-20T19:09:47.685Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:09:47.685Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:10:32.700Z] 📩 Processing 1 new messages
+[2025-08-20T19:10:32.701Z] 🔍 Analyzing: .collab-msg-t3-vertex-response
+[2025-08-20T19:10:32.701Z] ✅ Auto-response generated: .auto-response-claudecode-t3-vertex-response
+[2025-08-20T19:11:17.714Z] 📩 Processing 1 new messages
+[2025-08-20T19:11:17.715Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:11:17.715Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:12:14.732Z] 📩 Processing 1 new messages
+[2025-08-20T19:12:14.732Z] 🔍 Analyzing: .collab-msg-t1-system-status
+[2025-08-20T19:12:14.733Z] ✅ Auto-response generated: .auto-response-claudecode-t1-system-status
+[2025-08-20T19:12:17.733Z] 📩 Processing 1 new messages
+[2025-08-20T19:12:17.733Z] 🔍 Analyzing: .collab-msg-cursor-4terminal-execution-ready
+[2025-08-20T19:12:17.734Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-4terminal-execution-ready
+[2025-08-20T19:12:20.734Z] 📩 Processing 1 new messages
+[2025-08-20T19:12:20.734Z] 🔍 Analyzing: .collab-msg-cursor-4terminal-execution-ready
+[2025-08-20T19:12:20.735Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-4terminal-execution-ready
+[2025-08-20T19:12:32.739Z] 📩 Processing 1 new messages
+[2025-08-20T19:12:32.740Z] 🔍 Analyzing: .collab-msg-cursor-4terminal-execution-ready
+[2025-08-20T19:12:32.740Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-4terminal-execution-ready
+[2025-08-20T19:12:47.745Z] 📩 Processing 1 new messages
+[2025-08-20T19:12:47.745Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:12:47.746Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:14:17.742Z] 📩 Processing 1 new messages
+[2025-08-20T19:14:17.743Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:14:17.744Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:14:35.745Z] 📩 Processing 1 new messages
+[2025-08-20T19:14:35.745Z] 🔍 Analyzing: .collab-msg-t4-bigquery-complete
+[2025-08-20T19:14:35.746Z] ✅ Auto-response generated: .auto-response-claudecode-t4-bigquery-complete
+[2025-08-20T19:15:38.764Z] 📩 Processing 1 new messages
+[2025-08-20T19:15:38.765Z] 🔍 Analyzing: .collab-msg-t1-system-status-briefing
+[2025-08-20T19:15:38.765Z] ✅ Auto-response generated: .auto-response-claudecode-t1-system-status-briefing
+[2025-08-20T19:15:47.768Z] 📩 Processing 1 new messages
+[2025-08-20T19:15:47.768Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:15:47.769Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:16:23.779Z] 📩 Processing 1 new messages
+[2025-08-20T19:16:23.781Z] 🔍 Analyzing: .collab-msg-t1-response
+[2025-08-20T19:16:23.782Z] ✅ Auto-response generated: .auto-response-claudecode-t1-response
+[2025-08-20T19:17:17.803Z] 📩 Processing 1 new messages
+[2025-08-20T19:17:17.804Z] 🔍 Analyzing: .collab-msg-cursor-integration-plan
+[2025-08-20T19:17:17.804Z] ✅ Auto-response generated: .auto-response-claudecode-cursor-integration-plan
+[2025-08-20T19:17:20.802Z] 📩 Processing 1 new messages
+[2025-08-20T19:17:20.803Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:17:20.803Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:18:50.831Z] 📩 Processing 1 new messages
+[2025-08-20T19:18:50.831Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:18:50.831Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:19:47.850Z] 📩 Processing 1 new messages
+[2025-08-20T19:19:47.850Z] 🔍 Analyzing: .collab-msg-gpt5-consulting-urgent
+[2025-08-20T19:19:47.851Z] ✅ Auto-response generated: .auto-response-claudecode-gpt5-consulting-urgent
+[2025-08-20T19:20:20.860Z] 📩 Processing 1 new messages
+[2025-08-20T19:20:20.861Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:20:20.861Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:21:47.888Z] 📩 Processing 1 new messages
+[2025-08-20T19:21:47.890Z] 🔍 Analyzing: .collab-msg-gpt5-consulting-urgent
+[2025-08-20T19:21:47.890Z] ✅ Auto-response generated: .auto-response-claudecode-gpt5-consulting-urgent
+[2025-08-20T19:21:50.890Z] 📩 Processing 1 new messages
+[2025-08-20T19:21:50.891Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:21:50.891Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement
+[2025-08-20T19:22:05.895Z] 📩 Processing 1 new messages
+[2025-08-20T19:22:05.897Z] 🔍 Analyzing: .collab-msg-gpt5-consulting-urgent
+[2025-08-20T19:22:05.897Z] ✅ Auto-response generated: .auto-response-claudecode-gpt5-consulting-urgent
+[2025-08-20T19:23:20.951Z] 📩 Processing 1 new messages
+[2025-08-20T19:23:20.953Z] 🔍 Analyzing: .collab-msg-auto-quality-improvement
+[2025-08-20T19:23:20.953Z] ✅ Auto-response generated: .auto-response-claudecode-auto-quality-improvement

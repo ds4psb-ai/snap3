@@ -1204,6 +1204,170 @@ input[type="radio"] {
     background: #b91c1c;
 }
 
+/* VDP Extractor Selection (Phase 2) */
+.extractor-selector {
+    margin: 24px 0;
+    padding: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.extractor-selector__legend {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 16px;
+    padding: 0 8px;
+}
+
+.extractor-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.extractor-option {
+    position: relative;
+}
+
+.extractor-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.extractor-option__label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.extractor-option input:checked + .extractor-option__label {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.extractor-icon {
+    font-size: 1.5rem;
+}
+
+.extractor-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.extractor-name {
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 0.95rem;
+}
+
+.extractor-desc {
+    font-size: 0.8rem;
+    color: #d1d5db;
+}
+
+/* GitHub VDP JSON Display (Phase 2) */
+.github-vdp-container {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(100, 116, 139, 0.3);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.github-vdp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: rgba(30, 41, 59, 0.8);
+    border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+.github-vdp-meta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.content-key {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 0.875rem;
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.extractor-type {
+    font-size: 0.8rem;
+    background: rgba(168, 85, 247, 0.2);
+    color: #a855f7;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.github-badge {
+    font-size: 0.75rem;
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+.json-display {
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.json-code {
+    color: #e2e8f0;
+    background: transparent;
+    margin: 0;
+    padding: 16px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.github-vdp-actions {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(30, 41, 59, 0.4);
+    border-top: 1px solid rgba(100, 116, 139, 0.2);
+}
+
 /* Footer */
 .footer {
     background: rgba(255, 255, 255, 0.95);
@@ -1639,4 +1803,139 @@ input[type="radio"] {
     .copy-job-id-btn:hover {
         transform: none;
     }
+}
+
+/* Metadata Display Styles */
+.metadata-display {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 12px 0;
+}
+
+.metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.metadata-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.metadata-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metadata-item .form-input {
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    font-weight: 500;
+}
+
+.metadata-item .form-input:read-only {
+    background-color: #f9fafb;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+.metadata-item .form-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Extraction Status Styles */
+.extraction-status {
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.status-loading {
+    color: #059669;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-success {
+    color: #059669;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-error {
+    color: #dc2626;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-info {
+    color: #2563eb;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+/* Manual Input Field Styles */
+.metadata-item .form-input::placeholder {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.metadata-item .form-input:not(:read-only):hover {
+    border-color: #9ca3af;
+}
+
+/* Auto-filled vs Manual Input Visual Distinction */
+.metadata-item.auto-filled .form-input {
+    background-color: #f0fdf4;
+    border-color: #22c55e;
+}
+
+.metadata-item.manual-input .form-input {
+    background-color: #fef3c7;
+    border-color: #f59e0b;
+}
+
+/* Remove old extraction button styles */
+.url-extraction-container {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.extract-metadata-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.extract-metadata-btn:hover {
+    background: #2563eb;
+}
+
+.extract-metadata-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
 }

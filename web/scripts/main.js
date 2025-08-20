@@ -525,6 +525,13 @@ class VDPProcessor {
                 result = result.vdp;
             }
             
+            // Handle GitHub VDP compatible JSON response (Phase 2)
+            if (result.github_vdp_json && result.github_vdp_compatible !== false) {
+                this.displayGithubVdpJson(result.github_vdp_json, result.gcs_uri);
+                this.updateProgress(100, 'GitHub VDP JSON 생성 완료!', ['제출 완료', 'VDP 추출', 'GitHub 호환 JSON']);
+                return;
+            }
+            
             this.currentJob = result;
             this.updateProgress(10, '처리가 시작되었습니다...', ['제출 완료']);
             this.displayJobInfo(result);
@@ -621,6 +628,70 @@ class VDPProcessor {
     displayIngestJobInfo(job) {
         document.getElementById('progress-platform').textContent = (job.platform || 'UNKNOWN').toUpperCase();
         document.getElementById('progress-job-id').textContent = `Ingest ID: ${job.job_id}`;
+    }
+    
+    // GitHub VDP JSON Display (Phase 2)
+    displayGithubVdpJson(githubVdpJson, gcsUri) {
+        const resultsSection = document.getElementById('results-section');
+        const githubSection = document.getElementById('github-vdp-section');
+        
+        // Show GitHub VDP section
+        githubSection.style.display = 'block';
+        resultsSection.style.display = 'block';
+        
+        // Update meta information
+        document.getElementById('github-content-key').textContent = githubVdpJson.content_key || '-';
+        document.getElementById('github-extractor-type').textContent = githubVdpJson.extractor_type || 'unknown';
+        
+        // Display JSON with syntax highlighting
+        const jsonDisplay = document.getElementById('github-vdp-json-display');
+        jsonDisplay.innerHTML = `<pre><code class="json-code">${JSON.stringify(githubVdpJson, null, 2)}</code></pre>`;
+        
+        // Store for copy/download functions
+        this.currentGithubVdpJson = githubVdpJson;
+        this.currentGcsUri = gcsUri;
+        
+        // Setup event listeners for GitHub VDP actions
+        this.setupGithubVdpActions();
+        
+        window.logger?.success('GitHub VDP JSON displayed successfully', {
+            contentKey: githubVdpJson.content_key,
+            extractorType: githubVdpJson.extractor_type,
+            gcsUri: gcsUri,
+            processingTime: githubVdpJson.processing_info?.processing_time_ms
+        });
+    }
+    
+    setupGithubVdpActions() {
+        // Copy JSON button
+        document.getElementById('copy-github-json-btn').onclick = () => {
+            if (this.currentGithubVdpJson) {
+                navigator.clipboard.writeText(JSON.stringify(this.currentGithubVdpJson, null, 2));
+                window.logger?.info('GitHub VDP JSON copied to clipboard');
+            }
+        };
+        
+        // Download JSON button
+        document.getElementById('download-github-json-btn').onclick = () => {
+            if (this.currentGithubVdpJson) {
+                const blob = new Blob([JSON.stringify(this.currentGithubVdpJson, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `github-vdp-${this.currentGithubVdpJson.content_key?.replace(':', '-')}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                window.logger?.info('GitHub VDP JSON downloaded');
+            }
+        };
+        
+        // View GCS link button
+        document.getElementById('view-gcs-link-btn').onclick = () => {
+            if (this.currentGcsUri) {
+                alert(`GCS URI: ${this.currentGcsUri}`);
+                window.logger?.info('GCS URI displayed', { gcsUri: this.currentGcsUri });
+            }
+        };
     }
     
     showIngestCompleteMessage(job) {
@@ -1560,22 +1631,20 @@ function switchActionTab(tabName) {
     document.querySelector(`[data-content="${tabName}"]`).classList.add('tab-content--active');
 }
 
-// Cursor metadata extraction functions
-async function extractInstagramMetadata() {
+// Auto metadata extraction functions (triggered on URL input blur)
+async function autoExtractInstagramMetadata() {
     const urlInput = document.getElementById('instagram-source-url');
     const statusDiv = document.getElementById('instagram-extraction-status');
-    const extractBtn = document.querySelector('#instagram-form .extract-metadata-btn');
+    const metadataDisplay = document.getElementById('instagram-metadata-display');
     
     const url = urlInput.value.trim();
     if (!url) {
-        statusDiv.innerHTML = '<div class="status-error">❌ URL을 입력해주세요</div>';
+        statusDiv.innerHTML = '';
+        metadataDisplay.style.display = 'none';
         return;
     }
     
-    const originalText = extractBtn.textContent;
-    extractBtn.textContent = '🔄 추출 중...';
-    extractBtn.disabled = true;
-    statusDiv.innerHTML = '<div class="status-loading">🔄 메타데이터 추출 중...</div>';
+    statusDiv.innerHTML = '<div class="status-loading">🔄 메타데이터 자동 추출 중...</div>';
     
     try {
         const response = await fetch('/api/extract-social-metadata', {
@@ -1592,7 +1661,30 @@ async function extractInstagramMetadata() {
         const result = await response.json();
         
         if (response.ok && result.success) {
-            // Auto-fill hidden metadata fields (store for submission)
+            // Show metadata display for manual input
+            metadataDisplay.style.display = 'block';
+            
+            // Auto-fill fields if data is available (not 0 or null)
+            if (result.data.view_count && result.data.view_count > 0) {
+                document.getElementById('instagram-view-count').value = result.data.view_count;
+            }
+            if (result.data.like_count && result.data.like_count > 0) {
+                document.getElementById('instagram-like-count').value = result.data.like_count;
+            }
+            if (result.data.comment_count && result.data.comment_count > 0) {
+                document.getElementById('instagram-comment-count').value = result.data.comment_count;
+            }
+            if (result.data.author && result.data.author !== 'Unknown') {
+                document.getElementById('instagram-author').value = result.data.author;
+            }
+            if (result.data.hashtags && result.data.hashtags.length > 0) {
+                document.getElementById('instagram-hashtags').value = result.data.hashtags.join(' ');
+            }
+            if (result.data.upload_date) {
+                document.getElementById('instagram-upload-date').value = result.data.upload_date;
+            }
+            
+            // Store for submission
             window.instagramMetadata = {
                 title: result.data.title,
                 view_count: result.data.view_count,
@@ -1607,36 +1699,36 @@ async function extractInstagramMetadata() {
             
             statusDiv.innerHTML = `
                 <div class="status-success">
-                    ✅ 메타데이터 자동 추출 완료!<br>
-                    <small>👁 ${result.data.view_count || 0} 조회 | ❤️ ${result.data.like_count || 0} 좋아요 | 💬 ${result.data.comment_count || 0} 댓글 | 👤 ${result.data.author}</small>
+                    ✅ 메타데이터 추출 완료! 추출된 데이터가 자동으로 채워졌습니다.<br>
+                    <small>추출되지 않은 데이터는 수동으로 입력해주세요.</small>
                 </div>
             `;
         } else {
             throw new Error(result.detail || 'Instagram 메타데이터 추출 실패');
         }
     } catch (error) {
-        statusDiv.innerHTML = `<div class="status-error">❌ 추출 실패: ${error.message}</div>`;
-    } finally {
-        extractBtn.textContent = originalText;
-        extractBtn.disabled = false;
+        // Show metadata display even if extraction fails, so user can input manually
+        metadataDisplay.style.display = 'block';
+        statusDiv.innerHTML = `
+            <div class="status-error">❌ 자동 추출 실패: ${error.message}</div>
+            <div class="status-info">📝 수동으로 데이터를 입력해주세요.</div>
+        `;
     }
 }
 
-async function extractTikTokMetadata() {
+async function autoExtractTikTokMetadata() {
     const urlInput = document.getElementById('tiktok-source-url');
     const statusDiv = document.getElementById('tiktok-extraction-status');
-    const extractBtn = document.querySelector('#tiktok-form .extract-metadata-btn');
+    const metadataDisplay = document.getElementById('tiktok-metadata-display');
     
     const url = urlInput.value.trim();
     if (!url) {
-        statusDiv.innerHTML = '<div class="status-error">❌ URL을 입력해주세요</div>';
+        statusDiv.innerHTML = '';
+        metadataDisplay.style.display = 'none';
         return;
     }
     
-    const originalText = extractBtn.textContent;
-    extractBtn.textContent = '🔄 추출 중...';
-    extractBtn.disabled = true;
-    statusDiv.innerHTML = '<div class="status-loading">🔄 메타데이터 추출 중...</div>';
+    statusDiv.innerHTML = '<div class="status-loading">🔄 메타데이터 자동 추출 중...</div>';
     
     try {
         const response = await fetch('/api/extract-social-metadata', {
@@ -1653,7 +1745,33 @@ async function extractTikTokMetadata() {
         const result = await response.json();
         
         if (response.ok && result.success) {
-            // Auto-fill hidden metadata fields (store for submission)
+            // Show metadata display for manual input
+            metadataDisplay.style.display = 'block';
+            
+            // Auto-fill fields if data is available (not 0 or null)
+            if (result.data.view_count && result.data.view_count > 0) {
+                document.getElementById('tiktok-view-count').value = result.data.view_count;
+            }
+            if (result.data.like_count && result.data.like_count > 0) {
+                document.getElementById('tiktok-like-count').value = result.data.like_count;
+            }
+            if (result.data.comment_count && result.data.comment_count > 0) {
+                document.getElementById('tiktok-comment-count').value = result.data.comment_count;
+            }
+            if (result.data.share_count && result.data.share_count > 0) {
+                document.getElementById('tiktok-share-count').value = result.data.share_count;
+            }
+            if (result.data.author && result.data.author !== 'Unknown') {
+                document.getElementById('tiktok-author').value = result.data.author;
+            }
+            if (result.data.hashtags && result.data.hashtags.length > 0) {
+                document.getElementById('tiktok-hashtags').value = result.data.hashtags.join(' ');
+            }
+            if (result.data.upload_date) {
+                document.getElementById('tiktok-upload-date').value = result.data.upload_date;
+            }
+            
+            // Store for submission
             window.tiktokMetadata = {
                 title: result.data.title,
                 view_count: result.data.view_count,
@@ -1663,23 +1781,25 @@ async function extractTikTokMetadata() {
                 hashtags: result.data.hashtags,
                 upload_date: result.data.upload_date,
                 author: result.data.author,
-                duration: result.data.duration
+                followers: result.data.followers
             };
             
             statusDiv.innerHTML = `
                 <div class="status-success">
-                    ✅ 메타데이터 자동 추출 완료!<br>
-                    <small>👁 ${result.data.view_count || 0} 조회 | ❤️ ${result.data.like_count || 0} 좋아요 | 💬 ${result.data.comment_count || 0} 댓글 | 👤 ${result.data.author}</small>
+                    ✅ 메타데이터 추출 완료! 추출된 데이터가 자동으로 채워졌습니다.<br>
+                    <small>추출되지 않은 데이터는 수동으로 입력해주세요.</small>
                 </div>
             `;
         } else {
             throw new Error(result.detail || 'TikTok 메타데이터 추출 실패');
         }
     } catch (error) {
-        statusDiv.innerHTML = `<div class="status-error">❌ 추출 실패: ${error.message}</div>`;
-    } finally {
-        extractBtn.textContent = originalText;
-        extractBtn.disabled = false;
+        // Show metadata display even if extraction fails, so user can input manually
+        metadataDisplay.style.display = 'block';
+        statusDiv.innerHTML = `
+            <div class="status-error">❌ 자동 추출 실패: ${error.message}</div>
+            <div class="status-info">📝 수동으로 데이터를 입력해주세요.</div>
+        `;
     }
 }
 

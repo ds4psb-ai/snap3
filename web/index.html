@@ -109,6 +109,37 @@
                         </div>
                     </fieldset>
 
+                    <!-- VDP Extractor Selection (Phase 2) -->
+                    <fieldset class="extractor-selector" role="radiogroup" aria-labelledby="extractor-legend">
+                        <legend id="extractor-legend" class="extractor-selector__legend">
+                            VDP 추출기 선택
+                        </legend>
+                        
+                        <div class="extractor-options">
+                            <div class="extractor-option">
+                                <input type="radio" id="main-extractor" name="vdp_extractor" value="main" checked>
+                                <label for="main-extractor" class="extractor-option__label">
+                                    <span class="extractor-icon">🧠</span>
+                                    <span class="extractor-info">
+                                        <span class="extractor-name">Main Extractor</span>
+                                        <span class="extractor-desc">Gemini 2.5 Pro | GitHub VDP 호환</span>
+                                    </span>
+                                </label>
+                            </div>
+                            
+                            <div class="extractor-option">
+                                <input type="radio" id="sub-extractor" name="vdp_extractor" value="sub">
+                                <label for="sub-extractor" class="extractor-option__label">
+                                    <span class="extractor-icon">⚡</span>
+                                    <span class="extractor-info">
+                                        <span class="extractor-name">Sub Extractor</span>
+                                        <span class="extractor-desc">Vertex AI | Hook Genome 전문</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
+
                     <!-- Content Input Forms -->
                     <div class="content-input">
                         
@@ -157,21 +188,47 @@
                                     Instagram URL
                                     <span class="form-label__required" aria-label="필수">*</span>
                                 </label>
-                                <div class="url-extraction-container">
-                                    <input 
-                                        type="url" 
-                                        id="instagram-source-url" 
-                                        name="source_url"
-                                        class="form-input"
-                                        placeholder="https://instagram.com/p/EXAMPLE_ID"
-                                        required
-                                    >
-                                    <button type="button" class="extract-metadata-btn" onclick="extractInstagramMetadata()">
-                                        🤖 메타데이터 추출
-                                    </button>
-                                </div>
-                                <div class="form-help">URL을 입력한 후 '메타데이터 추출' 버튼을 클릭하면 자동으로 like_count, comment_count, author, hashtags가 채워집니다.</div>
+                                <input 
+                                    type="url" 
+                                    id="instagram-source-url" 
+                                    name="source_url"
+                                    class="form-input"
+                                    placeholder="https://instagram.com/p/EXAMPLE_ID"
+                                    required
+                                    onblur="autoExtractInstagramMetadata()"
+                                >
+                                <div class="form-help">URL을 입력하면 자동으로 추출 가능한 데이터가 채워집니다.</div>
                                 <div id="instagram-extraction-status" class="extraction-status"></div>
+                            </div>
+                            
+                            <!-- Auto-filled metadata display -->
+                            <div id="instagram-metadata-display" class="metadata-display" style="display: none;">
+                                <div class="metadata-grid">
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">조회수 (수동 입력)</label>
+                                        <input type="number" id="instagram-view-count" name="view_count" class="form-input" placeholder="조회수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">좋아요 (수동 입력)</label>
+                                        <input type="number" id="instagram-like-count" name="like_count" class="form-input" placeholder="좋아요 수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">댓글 (수동 입력)</label>
+                                        <input type="number" id="instagram-comment-count" name="comment_count" class="form-input" placeholder="댓글 수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">작성자 (수동 입력)</label>
+                                        <input type="text" id="instagram-author" name="author" class="form-input" placeholder="작성자를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">해시태그 (수동 입력)</label>
+                                        <input type="text" id="instagram-hashtags" name="hashtags" class="form-input" placeholder="#태그1 #태그2 #태그3">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">업로드 날짜 (수동 입력)</label>
+                                        <input type="date" id="instagram-upload-date" name="upload_date" class="form-input">
+                                    </div>
+                                </div>
                             </div>
                             
                             <!-- Video origin - only field user must provide -->
@@ -197,21 +254,51 @@
                                     TikTok URL
                                     <span class="form-label__required" aria-label="필수">*</span>
                                 </label>
-                                <div class="url-extraction-container">
-                                    <input 
-                                        type="url" 
-                                        id="tiktok-source-url" 
-                                        name="source_url"
-                                        class="form-input"
-                                        placeholder="https://tiktok.com/@user/video/1234567890"
-                                        required
-                                    >
-                                    <button type="button" class="extract-metadata-btn" onclick="extractTikTokMetadata()">
-                                        🤖 메타데이터 추출
-                                    </button>
-                                </div>
-                                <div class="form-help">URL을 입력한 후 '메타데이터 추출' 버튼을 클릭하면 자동으로 조회수, 좋아요, 댓글 등이 채워집니다.</div>
+                                <input 
+                                    type="url" 
+                                    id="tiktok-source-url" 
+                                    name="source_url"
+                                    class="form-input"
+                                    placeholder="https://tiktok.com/@user/video/1234567890"
+                                    required
+                                    onblur="autoExtractTikTokMetadata()"
+                                >
+                                <div class="form-help">URL을 입력하면 자동으로 추출 가능한 데이터가 채워집니다.</div>
                                 <div id="tiktok-extraction-status" class="extraction-status"></div>
+                            </div>
+                            
+                            <!-- Auto-filled metadata display -->
+                            <div id="tiktok-metadata-display" class="metadata-display" style="display: none;">
+                                <div class="metadata-grid">
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">조회수 (수동 입력)</label>
+                                        <input type="number" id="tiktok-view-count" name="view_count" class="form-input" placeholder="조회수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">좋아요 (수동 입력)</label>
+                                        <input type="number" id="tiktok-like-count" name="like_count" class="form-input" placeholder="좋아요 수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">댓글 (수동 입력)</label>
+                                        <input type="number" id="tiktok-comment-count" name="comment_count" class="form-input" placeholder="댓글 수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">공유 (수동 입력)</label>
+                                        <input type="number" id="tiktok-share-count" name="share_count" class="form-input" placeholder="공유 수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">작성자 (수동 입력)</label>
+                                        <input type="text" id="tiktok-author" name="author" class="form-input" placeholder="작성자를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">해시태그 (수동 입력)</label>
+                                        <input type="text" id="tiktok-hashtags" name="hashtags" class="form-input" placeholder="#태그1 #태그2 #태그3">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">업로드 날짜 (수동 입력)</label>
+                                        <input type="date" id="tiktok-upload-date" name="upload_date" class="form-input">
+                                    </div>
+                                </div>
                             </div>
                             
                             <!-- Video origin - only field user must provide -->
@@ -338,6 +425,40 @@
                             <h3 class="section-title">📝 Content Summary</h3>
                             <div id="content-summary" class="content-summary">
                                 <!-- Summary will be populated -->
+                            </div>
+                        </div>
+
+                        <!-- GitHub VDP Compatible JSON Display (Phase 2) -->
+                        <div id="github-vdp-section" class="vdp-section" style="display: none;">
+                            <h3 class="section-title">
+                                <span class="section-icon">🔗</span>
+                                GitHub VDP 호환 JSON
+                                <span class="github-badge">GitHub Compatible</span>
+                            </h3>
+                            <div class="github-vdp-container">
+                                <div class="github-vdp-header">
+                                    <div class="github-vdp-meta">
+                                        <span id="github-content-key" class="content-key">-</span>
+                                        <span id="github-extractor-type" class="extractor-type">-</span>
+                                    </div>
+                                    <button type="button" id="copy-github-json-btn" class="copy-btn">
+                                        <span class="copy-icon">📋</span>
+                                        <span class="copy-text">JSON 복사</span>
+                                    </button>
+                                </div>
+                                <div id="github-vdp-json-display" class="json-display">
+                                    <!-- GitHub VDP JSON will be displayed here -->
+                                </div>
+                                <div class="github-vdp-actions">
+                                    <button type="button" id="download-github-json-btn" class="export-btn">
+                                        <span class="btn-icon">💾</span>
+                                        <span class="btn-text">GitHub JSON 다운로드</span>
+                                    </button>
+                                    <button type="button" id="view-gcs-link-btn" class="export-btn export-btn--secondary">
+                                        <span class="btn-icon">☁️</span>
+                                        <span class="btn-text">GCS 링크 보기</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 

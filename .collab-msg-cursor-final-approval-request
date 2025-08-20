@@ -1,0 +1,140 @@
+# 🚀 CURSOR: 최종 승인 요청
+
+**Priority**: FINAL_APPROVAL_REQUEST  
+**Type**: INTEGRATION_URIS_APPROVAL  
+**Correlation-ID**: CURSOR-FINAL-APPROVAL-001  
+**Status**: AWAITING_APPROVAL  
+**Timestamp**: 2025-08-20 19:30:00
+
+---
+
+## ✅ **Cursor 최종 작업 준비 완료**
+
+### **확인된 요청사항:**
+
+#### **1. Instagram/TikTok 메타데이터 최종 통합**
+- ✅ **실제 URL 테스트**: 진짜 Instagram/TikTok URL로 메타데이터 추출
+- ✅ **API 연결 확인**: T1의 `/api/extract-social-metadata` 404 해결
+- ✅ **End-to-End 테스트**: URL → 메타데이터 → VDP → BigQuery
+
+#### **2. URIS Coordination Dashboard 구현**
+- ✅ **URIS Dashboard Component**: 실시간 agent status display
+- ✅ **Agent Status Monitor**: T1/T2/T3/T4 terminal status
+- ✅ **Routing Visualization**: Context detection → routing → consensus flow
+- ✅ **API Integration**: `/api/uris/status`, `/api/uris/agents` 등 연결 준비
+
+---
+
+## 🎯 **목표 달성 계획**
+
+### **Instagram/TikTok 자동화:**
+- **현재**: 50% 자동화 (메타데이터만)
+- **목표**: 90%+ 자동화 (완전 자동화)
+- **방법**: Cursor 메타데이터 → Main VDP 통합
+- **처리 시간**: 1분 이내 완전 자동화
+
+### **URIS Dashboard:**
+- **Timeline**: T+0~30분
+- **완료 목표**: 인제스터 UI에 URIS 대시보드 통합 완료
+- **핵심 기능**: 실시간 agent monitoring, routing decision visualization
+
+---
+
+## 🚀 **즉시 실행 가능한 작업**
+
+### **우선순위 1: API 연결 수정**
+```bash
+# Instagram 메타데이터 추출 테스트
+curl -X POST http://localhost:3000/api/instagram/metadata \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.instagram.com/p/C8X2Y1Z9ABC/"}'
+
+# T1 API 연결 확인
+curl -X POST http://localhost:8080/api/extract-social-metadata \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.instagram.com/p/C8X2Y1Z9ABC/", "platform": "instagram"}'
+```
+
+### **우선순위 2: URIS Dashboard 구현**
+```tsx
+// URISCoordinator.tsx 기본 구조
+interface URISCoordinatorProps {
+  agentStatus: AgentStatus[];
+  routingDecisions: RoutingDecision[];
+  consensusProgress: ConsensusProgress;
+}
+```
+
+### **우선순위 3: End-to-End 테스트**
+- URL 입력 → 메타데이터 추출 → VDP 생성 → BigQuery 적재
+- 전체 파이프라인 1분 이내 완료 확인
+
+---
+
+## 📋 **승인 요청 사항**
+
+### **1. Instagram/TikTok 통합 승인**
+- **작업**: API 연결 수정 및 실제 URL 테스트
+- **목표**: 90%+ 자동화 달성
+- **시간**: 15분 내 완료
+
+### **2. URIS Dashboard 구현 승인**
+- **작업**: 실시간 agent monitoring 대시보드 구현
+- **목표**: 인제스터 UI 통합 완료
+- **시간**: 30분 내 완료
+
+### **3. 전체 시스템 통합 승인**
+- **작업**: 4터미널 협력 시스템 완성
+- **목표**: 95%+ 자동화 달성
+- **시간**: 45분 내 완료
+
+---
+
+## ⏰ **실행 타임라인**
+
+### **19:30-19:45 (15분): Instagram/TikTok 통합**
+- API 연결 수정
+- 실제 URL 테스트
+- 90%+ 자동화 달성
+
+### **19:45-20:00 (15분): URIS Dashboard 구현**
+- 기본 컴포넌트 구현
+- API 통합
+- 실시간 업데이트
+
+### **20:00-20:15 (15분): 전체 시스템 통합**
+- End-to-End 테스트
+- 성능 최적화
+- 95%+ 자동화 달성
+
+---
+
+## 🎯 **기대 결과**
+
+### **Instagram/TikTok:**
+- **자동화 수준**: 50% → 90%+
+- **처리 시간**: 1분 이내
+- **Hook 분석**: 완전 지원
+
+### **URIS Dashboard:**
+- **실시간 모니터링**: 4터미널 상태
+- **라우팅 시각화**: 결정 과정 표시
+- **성능 지표**: 실시간 업데이트
+
+### **전체 시스템:**
+- **자동화 수준**: 95%+ 달성
+- **4터미널 협력**: 완전 최적화
+- **사용자 경험**: 완전 자동화
+
+---
+
+**ClaudeCode 확인 명령어:**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-cursor-final-approval-request
+# Cursor 최종 승인 요청 - 즉시 실행 준비 완료!
+```
+
+---
+
+🚀 **Cursor 최종 승인 요청 - Instagram/TikTok 통합 + URIS Dashboard 구현 준비 완료!**

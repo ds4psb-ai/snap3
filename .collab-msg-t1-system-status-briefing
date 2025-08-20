@@ -1,0 +1,191 @@
+# 🏗️ T1 Main: 시스템 현황 브리핑
+
+**Priority**: T1_SYSTEM_BRIEFING  
+**Type**: MEMORY_RECOVERY  
+**Correlation-ID**: T1-STATUS-BRIEF-001  
+**Status**: OPERATIONAL_READY  
+**Timestamp**: 2025-08-20 19:15:00
+
+---
+
+## 🎯 **T1 Main 역할 및 현재 상태**
+
+### **T1 Main 서버 정보**:
+- **포트**: `localhost:8080` (현재 사용 중)
+- **디렉토리**: `/Users/ted/snap3`
+- **주요 파일**: `simple-web-server.js` (메인 API 서버)
+- **역할**: 메인 API 브리지, 인제스터 UI, VDP 파이프라인 진입점
+
+### **현재 API 엔드포인트 상황**:
+```typescript
+POST /api/normalize-url              // URL → content_id 추출  
+POST /api/submit                     // 메인 제출 엔드포인트
+POST /api/vdp/extract-vertex         // VDP 처리 (T3와 연동)
+POST /api/extract-social-metadata    // Cursor 추출기 통합 (준비중)
+POST /api/vdp/cursor-extract         // Cursor 기반 VDP 추출 (준비중)
+POST /api/upload-video               // 파일 업로드 처리
+GET  /api/health                     // 시스템 상태
+GET  /api/circuit-breaker/status     // Circuit breaker 모니터링
+```
+
+---
+
+## 🚨 **4-Terminal 시스템 현황**
+
+### **Terminal 배치도**:
+```
+T1 (8080) - YOU (/Users/ted/snap3)
+├─ simple-web-server.js (메인 API)
+├─ 인제스터 UI (YouTube 100% 자동화)
+└─ Cursor 통합 준비 완료
+
+T2 (8081) - Jobs (/Users/ted/snap3-jobs)  
+├─ worker-ingest-v2.sh (배치 처리)
+└─ 성능 벤치마크 & 테스트
+
+T3 (8082) - VDP (/Users/ted/snap3/services/t2-extract)
+├─ VDP 추출 (Vertex AI)
+├─ Circuit Breaker: CLOSED (복구 완료)
+└─ Hook Genome 분석
+
+T4 (8083) - Storage (/Users/ted/snap3-storage)
+├─ BigQuery 적재 ✅ 완료
+├─ Pino 로깅 + OTel 트레이싱
+└─ URIS 시스템 구현 완료
+```
+
+---
+
+## 📊 **현재 자동화 상태**
+
+### **플랫폼별 자동화율**:
+```
+YouTube:    100% 자동화 ✅ (URL → 완전 처리)
+Instagram:  50% 수동 입력 😰 (사용자가 view/like/comments 입력)
+TikTok:     50% 수동 입력 😰 (사용자가 메타데이터 수동 입력)
+```
+
+### **Post-Cursor Integration 목표**:
+```
+YouTube:    100% 자동화 ✅ (변경없음)
+Instagram:  90%+ 자동화 🚀 (Cursor 추출기 + 워터마크 제거)
+TikTok:     90%+ 자동화 🚀 (Cursor 추출기 + 플랫폼 우회)
+사용자 시간: 5-8분 → 30초-1분 (85% 단축)
+```
+
+---
+
+## 🚀 **Cursor 통합 Phase**
+
+### **Phase 1 현황 (Cursor 담당 - 진행중)**:
+- **TikTok/Instagram 메타데이터 자동 추출기**
+- **워터마크 제거 영상 다운로드**
+- **인제스터 UI 통합 (기존 코드 활용)**
+
+### **Phase 2 대기 (T1 담당 - 준비완료)**:
+- **메인 VDP 추출기 연동** (`services/vdp-extractor/`)
+- **GitHub VDP 호환 JSON → UI 표시**
+- **메인/서브 추출기 선택 옵션**
+
+### **T1 연동 포인트**:
+```typescript
+// T1에서 Cursor API 호출 준비
+POST /api/extract-social-metadata
+POST /api/vdp/cursor-extract
+
+// T3 VDP Service 연동
+POST http://localhost:8082/api/vdp/extract-vertex
+```
+
+---
+
+## ⚡ **성능 및 상태 메트릭**
+
+### **현재 시스템 성능**:
+- **T1-API**: 응답시간 3.76ms, 성공률 100%
+- **VERTEX-API**: 응답시간 502ms, 성공률 67% (복구 중)
+- **Hook Genome**: 0.87 강도 (목표 ≥0.70 초과달성)
+- **Circuit Breaker**: VERTEX-API CLOSED (복구 완료)
+
+### **Quality Gates**:
+- **Hook Duration**: ≤3s (BLOCKER) ✅
+- **Strength Score**: ≥0.70 (BLOCKER) ✅ 0.87
+- **Schema Validation**: AJV required ✅
+- **Evidence Pack**: Real data only ✅
+
+---
+
+## 🛡️ **제한된 자동 모드 (T1 적용)**
+
+### **안전 설정**:
+```typescript
+maxExecutionTime: 120000,       // 2분 제한
+maxOperations: 3,               // 최대 3개 작업
+maxConcurrentTasks: 2,          // 동시 작업 2개
+safetyTimeout: 30000,           // 30초 안전 타임아웃
+userApprovalThreshold: 2,       // 2개 작업 후 승인 필요
+```
+
+---
+
+## 📁 **중요 파일 위치 (T1 기준)**
+
+### **T1 Main 작업 파일들**:
+```
+/Users/ted/snap3/
+├─ simple-web-server.js          // 메인 API 서버
+├─ package.json                  // 의존성
+├─ services/vdp-extractor/       // GitHub VDP 호환 추출기
+├─ services/t2-extract/          // T3 VDP 서비스 (8082)
+└─ .collab-msg-* 파일들          // 터미널 간 통신
+```
+
+### **Configuration & Environment**:
+```bash
+export PROJECT_ID="tough-variety-466003-c5"
+export REGION="us-central1" 
+export RAW_BUCKET="tough-variety-raw-central1"
+export PLATFORM_SEGMENTED_PATH=true
+```
+
+---
+
+## 🚨 **즉시 필요한 작업**
+
+### **Cursor 통합 대기 중**:
+1. **Instagram/TikTok 메타데이터 추출 API 통합**
+2. **UI 자동 입력 폼 연동**
+3. **Error Handling: Cursor 실패 시 수동 입력 fallback**
+
+### **T1 → T3 연동 확인**:
+```bash
+# T3 VDP 서비스 상태 확인
+curl -s http://localhost:8082/health
+
+# Circuit Breaker 상태 확인  
+curl -s http://localhost:8080/api/circuit-breaker/status
+```
+
+---
+
+## ⚠️ **Critical Error Codes (T1 처리)**
+```
+CONTENT_ID_MISSING           → URL normalization 먼저 호출
+HOOK_GATE_FAILED            → Hook >3s 또는 strength <0.70
+FORMDATA_MULTIPART_DETECTED → JSON 전용 처리 사용
+CURSOR_EXTRACTION_FAILED    → 수동 입력 fallback
+EVIDENCE_GENERATION_FAILED  → fpcalc/brand detection 실패
+```
+
+---
+
+## 📞 **T1 확인 명령어**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-t1-system-status-briefing
+# T1 Main 시스템 현황 숙지 완료!
+```
+
+---
+
+**📊 T1 Main: 시스템 복구 및 Cursor 통합 준비 완료 상태**

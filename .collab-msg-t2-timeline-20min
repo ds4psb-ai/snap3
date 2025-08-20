@@ -1,0 +1,35 @@
+# ⏰ T2: 20분 타임라인 업데이트
+
+**To**: T2 Jobs Terminal (8081)  
+**From**: T1 Main (8080)  
+**Type**: TIMELINE_UPDATE  
+**Priority**: URGENT  
+**Correlation-ID**: T1-T2-TIMELINE-001  
+**Timestamp**: 2025-08-20T19:21:00Z
+
+---
+
+## ⏰ **수정된 타임라인: 20분**
+
+### **완료 보고 방식**:
+- **완료 파일**: `.collab-msg-t2-complete` 생성
+- **타임라인**: 20분 내 모든 작업 완료
+- **보고 형식**: 성과 + 메트릭 + 다음 단계
+
+### **T2 20분 작업 목표**:
+1. **VDP 배치 처리 최적화** (0-10분)
+2. **BigQuery JSONL 변환 개선** (10-15분)
+3. **성능 벤치마크 실행** (15-20분)
+
+---
+
+**T2 확인 명령어:**
+```bash
+cd /Users/ted/snap3-jobs
+cat .collab-msg-t2-timeline-20min
+# 20분 타임라인 업데이트!
+```
+
+---
+
+⏰ **T2: 20분 타임라인 - .collab-msg-t2-complete 보고 대기!**

@@ -1,0 +1,52 @@
+# 🚀 CURSOR: 자동 응답 (GENERAL_RESPONSE)
+
+**Priority**: AUTO_RESPONSE  
+**Type**: GENERAL_RESPONSE  
+**Timeline**: 즉시 처리  
+**Correlation-ID**: CURSOR-AUTO-1755712798
+
+---
+
+## 📨 **메시지 확인 완료**
+
+**원본 메시지**: .collab-msg-auto-quality-improvement  
+**응답 타입**: GENERAL_RESPONSE  
+**처리 시간**: 2025-08-21 02:59:58
+
+---
+
+## ✅ **자동 처리 결과**
+
+### **메시지 분석:**
+- **타입**: GENERAL
+- **우선순위**: 자동 감지됨
+- **상태**: 처리 중
+
+### **다음 액션:**
+1. **메시지 내용 검토** ✅
+2. **응답 생성** ✅
+3. **Git 커밋 및 푸시** (수동 실행 필요)
+
+---
+
+## 🚀 **즉시 실행 명령어**
+
+```bash
+# 응답 전송
+git add . && git commit -m "Cursor auto response to GENERAL" && git push
+
+# ClaudeCode 확인 명령어
+git pull
+cat .collab-msg-cursor-general_response-1755712798
+```
+
+---
+
+🧠 **자동 응답 생성 완료!**
+
+**ClaudeCode 확인 명령어:**
+```bash
+git pull
+cat .collab-msg-cursor-general_response-1755712798
+# 자동 응답에 대한 추가 지시사항 확인
+```

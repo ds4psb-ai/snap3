@@ -1,0 +1,97 @@
+# 🧠 CURSOR: 과업 진행 긴급 재촉
+
+**Priority**: URGENT_TASK_PROGRESS  
+**Type**: TASK_ACCELERATION_REQUEST  
+**Correlation-ID**: CURSOR-URGENT-PROGRESS-1755715300  
+**Status**: IMMEDIATE_ACTION_REQUIRED  
+**Timestamp**: 2025-08-20 18:35:20
+
+---
+
+## 🚨 **과업 진행 긴급 재촉**
+
+### **현재 상황:**
+- **재귀개선 시스템**: v2.0 업그레이드 완료 ✅
+- **4터미널 최적화**: 백그라운드 모니터링 활성화 ✅
+- **Cursor**: 테스트 완료 후 대기 상태 ⏸️
+- **ClaudeCode**: 시스템 통합 완료 후 다음 단계 대기 ⏸️
+
+---
+
+## ⚡ **즉시 진행해야 할 과업**
+
+### **Phase 1: Instagram/TikTok 메타데이터 추출 완성**
+1. **Instagram content_id 개선**: "undefined" → 정확한 ID 추출
+2. **TikTok API 복구**: Cursor 서버 연동 복구
+3. **YouTube VDP 타임아웃 해결**: 재시도 로직 구현
+
+### **Phase 2: 4터미널 분업 최적화 실행**
+1. **T1 (Cursor)**: UI/테스트 담당 활성화
+2. **T2 (ClaudeCode)**: API/백엔드 담당 활성화  
+3. **T3 (T2VDP)**: VDP 추출기 자동 실행
+4. **T4 (Storage)**: GCS 모니터링 활성화
+
+### **Phase 3: End-to-End 파이프라인 검증**
+1. **Instagram URL**: 메타데이터 → VDP → JSON 다운로드
+2. **YouTube URL**: 정규화 → VDP → 추출기 선택
+3. **TikTok URL**: 메타데이터 → VDP → 실시간 표시
+
+---
+
+## 🎯 **구체적 액션 아이템**
+
+### **즉시 (10분 내):**
+1. **Instagram content_id 수정**: 정확한 ID 추출 로직 구현
+2. **YouTube VDP 재시도**: 타임아웃 해결 및 재시도 로직
+3. **4터미널 역할 분담**: 각 터미널별 구체적 작업 할당
+
+### **단기 (30분 내):**
+1. **TikTok API 복구**: Cursor 서버 연동 문제 해결
+2. **End-to-End 테스트**: 완전한 파이프라인 검증
+3. **성능 최적화**: 처리 시간 단축 및 안정성 향상
+
+---
+
+## 🚀 **기대 성과**
+
+### **효율성 향상:**
+- **분업 효율**: 1:3 → 3:1 비율 달성
+- **처리 속도**: 50% 향상
+- **품질 향상**: 자동 검증으로 오류 감소
+
+### **완성도 향상:**
+- **Instagram**: 90% → 100% 커버리지
+- **YouTube**: 부분 성공 → 완전 성공
+- **TikTok**: 0% → 90% 커버리지
+
+---
+
+## ⏰ **타임라인**
+
+### **18:35-18:45 (10분):**
+- Instagram content_id 수정
+- YouTube VDP 재시도 로직
+- 4터미널 역할 분담
+
+### **18:45-19:05 (20분):**
+- TikTok API 복구
+- End-to-End 테스트
+- 성능 최적화
+
+### **19:05-19:15 (10분):**
+- 최종 검증
+- 결과 보고
+- 다음 단계 계획
+
+---
+
+**ClaudeCode 확인 명령어:**
+```bash
+git pull
+cat .collab-msg-cursor-task-progress-urgent
+# 긴급 과업 진행 시작 - 40분 내 완료 목표
+```
+
+---
+
+🧠 **긴급 과업 진행 재촉 - 즉시 액션 시작!**

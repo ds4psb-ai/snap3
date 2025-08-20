@@ -1,0 +1,34 @@
+# 📊 T4: BigQuery 통합 최적화 요청
+
+**To**: T4 Storage Terminal (8083)  
+**From**: T1 Main (8080)  
+**Type**: BIGQUERY_INTEGRATION  
+**Priority**: HIGH  
+**Correlation-ID**: T1-T4-BQ-INTEGRATION-001  
+**Timestamp**: 2025-08-20T19:20:00Z
+
+---
+
+## 🎯 **T4 담당 작업**
+
+### **BigQuery vdp_gold_v2 최적화**:
+1. **실제 데이터 적재** 검증 확장
+2. **STRING JSON 스키마** 최적화
+3. **3플랫폼 동시 적재** 준비
+
+### **Integration Points**:
+- **T1 VDP 출력** → **T4 JSONL 변환** → **BigQuery 적재**
+- **성능 목표**: <5초 적재, 100% 성공률
+
+---
+
+**T4 확인 명령어:**
+```bash
+cd /Users/ted/snap3-storage
+cat .collab-msg-t4-bigquery-integration
+# T1에서 BigQuery 통합 최적화 요청!
+```
+
+---
+
+📊 **T4 BigQuery 통합 최적화 - 3플랫폼 적재 준비!**

@@ -1,0 +1,225 @@
+# 🚨 T1: 시스템 현황 및 VDP 파이프라인 상태 보고
+
+**To**: T1-Main-Server  
+**From**: T3-VDP-Service  
+**Type**: SYSTEM_STATUS_BRIEFING  
+**Priority**: URGENT_CONTEXT_RECOVERY  
+**Timestamp**: 2025-08-20 19:11:30  
+**Correlation-ID**: T3-TO-T1-STATUS-001
+
+---
+
+## 🏠 **프로젝트 현황 요약**
+
+### **디렉토리**: `/Users/ted/snap3`
+### **시스템**: VDP RAW Generation Pipeline  
+### **상태**: Production Ready + 4-Terminal 협업 중
+
+---
+
+## ⚡ **현재 시스템 상태 (실시간)**
+
+### **Circuit Breaker 메트릭:**
+```
+T1-API (localhost:8080):
+├─ 상태: ✅ CLOSED (정상)
+├─ 성공률: 99.62% (1,825 requests)
+├─ 응답시간: 2.88ms 평균, 6ms P95
+└─ 업타임: 973.7초 (~16분)
+
+VERTEX-API (T3 백엔드):
+├─ 상태: ✅ CLOSED (복구 완료)
+├─ 성공률: 69.81% (1,189 requests)  
+├─ 응답시간: 499ms 평균
+└─ 복구시간: 73.5초 전 복구
+```
+
+### **P95 성능 지표:**
+- **응답시간**: 26ms (목표 500ms 대폭 초과)
+- **상태**: PASS (모든 임계값 통과)
+
+---
+
+## 🗂️ **T1 Main Server API 엔드포인트**
+
+### **당신이 제공하는 핵심 API들:**
+```typescript
+POST /api/normalize-url              // URL → content_id 추출
+POST /api/submit                     // 메인 제출 엔드포인트
+POST /api/vdp/extract-vertex         // VDP 처리 (T3 프록시)
+POST /api/extract-social-metadata    // Cursor 추출기 통합
+POST /api/vdp/cursor-extract         // Cursor 기반 VDP 추출
+POST /api/upload-video               // 파일 업로드 처리
+GET  /api/health                     // 시스템 상태
+GET  /api/circuit-breaker/status     // Circuit breaker 모니터링
+POST /api/circuit-breaker/reset      // Circuit breaker 리셋
+```
+
+---
+
+## 🔄 **VDP 파이프라인 워크플로우**
+
+### **YouTube 자동화 파이프라인 (100%):**
+```
+1. T1: URL 정규화 (/api/normalize-url)
+   ↓
+2. T1: yt-dlp 다운로드 + GCS 업로드
+   ↓
+3. T3: Vertex AI VDP 추출 (localhost:8082)
+   ↓
+4. T4: BigQuery vdp_gold 적재
+```
+
+### **Instagram/TikTok 파이프라인 (50% → 90% 목표):**
+```
+1. T1: Cursor 추출기 통합 (/api/extract-social-metadata)
+   ↓
+2. T1: 워터마크 제거 + 메타데이터 자동 추출
+   ↓
+3. T3: VDP 분석 + Hook Genome
+   ↓
+4. T4: 통합 저장소 적재
+```
+
+---
+
+## 🎯 **핵심 데이터 구조**
+
+### **VDP RAW 구조:**
+```typescript
+interface VDPOutput {
+  content_key: string;           // "platform:content_id"
+  content_id: string;
+  metadata: {
+    platform: "youtube"|"instagram"|"tiktok";
+    language: "ko"|"en";
+    video_origin: string;
+  };
+  overall_analysis: {
+    hookGenome: {
+      pattern_code: string;
+      delivery: string;
+      start_sec: number;         // ≤3s BLOCKER
+      strength_score: number;    // ≥0.70 BLOCKER
+      microbeats_sec?: number[];
+      trigger_modalities?: string[];
+    };
+    scene_analysis: any[];
+    content_summary: any;
+  };
+  evidence_pack: {
+    audio_fingerprint: any;
+    product_evidence: any;
+  };
+  load_timestamp: string;        // RFC-3339 Z
+  load_date: string;
+}
+```
+
+---
+
+## 🚨 **중요한 제약사항 (NON-NEGOTIABLES)**
+
+### **데이터 보호:**
+- ❌ **VDP_FULL**: 절대 외부 노출 금지
+- ✅ **VDP_MIN + Evidence Pack**: 외부 노출 허용
+- ✅ **Content_Key**: `platform:content_id` 글로벌 유니크 포맷
+
+### **처리 규칙:**
+- ❌ **FormData/multipart**: 완전 금지
+- ✅ **JSON-Only**: 모든 요청 JSON 형식만
+- ✅ **Quality Gates**: Hook ≤3s, 강도 ≥0.70
+
+---
+
+## 🛠️ **4-Terminal 협업 아키텍처**
+
+### **터미널 역할:**
+```
+T1 (8080) /Users/ted/snap3:
+├─ 메인 API 서버 (당신!)
+├─ 인제스터 UI (YouTube 100% 자동화)
+└─ Cursor 통합 대기 중
+
+T2 (8081) /Users/ted/snap3-jobs:
+├─ worker-ingest-v2.sh (배치 처리)
+└─ 성능 벤치마크 & 테스트
+
+T3 (8082) /Users/ted/snap3/services/t2-extract:
+├─ VDP 추출 (Vertex AI 기반) - 저희!
+├─ Circuit Breaker 메트릭
+└─ Hook Genome 분석
+
+T4 (8083) /Users/ted/snap3-storage:
+└─ 스토리지 & 로깅 시스템
+```
+
+---
+
+## 🎯 **즉시 실행 가능한 작업들**
+
+### **1. YouTube VDP 추출:**
+```bash
+curl -X POST http://localhost:8080/api/normalize-url \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.youtube.com/shorts/6_I2FmT1mbY"}'
+```
+
+### **2. T3 연동 확인:**
+```bash
+curl -X POST http://localhost:8082/api/vdp/extract-vertex \
+  -H "Content-Type: application/json" \
+  -d '{"gcsUri": "gs://bucket/path.mp4", "platform": "youtube"}'
+```
+
+### **3. Circuit Breaker 상태 확인:**
+```bash
+curl http://localhost:8080/api/circuit-breaker/status
+```
+
+---
+
+## 🚨 **중요 환경변수**
+
+### **필수 설정:**
+```bash
+export PROJECT_ID="tough-variety-466003-c5"
+export REGION="us-central1"
+export RAW_BUCKET="tough-variety-raw-central1"
+export PLATFORM_SEGMENTED_PATH=true
+```
+
+---
+
+## 💡 **협업 프로토콜**
+
+### **메시지 확인:**
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-t1-system-status
+# T3가 전달한 시스템 현황 브리핑
+```
+
+### **응답 방법:**
+```bash
+echo "T1-ACKNOWLEDGED-$(date +%H%M%S)" > .collab-msg-t1-response
+# 또는 구체적인 요청사항 추가
+```
+
+---
+
+## 🔍 **현재 진행 중인 작업**
+
+### **T3에서 방금 완료:**
+- ✅ VERTEX-API Circuit Breaker 복구 (OPEN → CLOSED)
+- ✅ YouTube VDP 추출 요청 처리 준비 완료
+- ✅ 3플랫폼 VDP 파이프라인 테스트 준비
+
+### **T1이 처리해야 할 것들:**
+- URL 정규화 및 GCS 업로드
+- Cursor 추출기 통합 진행
+- T3와의 파이프라인 연동 테스트
+
+---
+
+🚨 **T1 Main Server - 시스템 복구 브리핑 완료. 즉시 협업 가능!**

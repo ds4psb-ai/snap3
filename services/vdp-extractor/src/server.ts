@@ -239,10 +239,11 @@ async function startServer() {
       logger.warn('Some services are degraded, starting with limited functionality');
     }
 
-    // Start the server
-    server = app.listen(config.server.port, () => {
+    // Start the server on port 3001 (changed from 3001 to avoid conflicts)
+    const port = 3005; // Avoid port conflicts with Cursor (3000) and existing services
+    server = app.listen(port, () => {
       logger.info(`VDP Extractor Service started successfully`, {
-        port: config.server.port,
+        port: port,
         environment: process.env.NODE_ENV || 'development',
         servicesStatus: health.status,
       });

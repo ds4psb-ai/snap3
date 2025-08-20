@@ -1,8 +1,15 @@
 {
+<<<<<<< HEAD
     "timestamp": "2025-08-20T22:04:02Z",
     "metrics": {
         "p95_response_time_ms": 30,
         "p50_response_time_ms": 22,
+=======
+    "timestamp": "2025-08-20T19:36:56Z",
+    "metrics": {
+        "p95_response_time_ms": 28,
+        "p50_response_time_ms": 23,
+>>>>>>> e599fe28c1b8939281c2e13505ee384251826d95
         "avg_response_time_ms": 23,
         "sample_count": 100
     },

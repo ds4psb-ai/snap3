@@ -1,0 +1,68 @@
+# 🚨 T3: Vertex AI VDP 요청 (긴급)
+
+**Priority**: URGENT_T3_REQUEST  
+**Type**: VERTEX_VDP_EXTRACTION  
+**Correlation-ID**: T3-VERTEX-VDP-001  
+**Status**: IMMEDIATE_NEEDED  
+**Timestamp**: 2025-08-20 19:07:00
+
+---
+
+## 🎯 **T3 Vertex AI VDP 추출 요청**
+
+### **요청 사항:**
+- **Gemini API 기반**: 원래 1분 소요되는 완전한 VDP 분석
+- **3플랫폼 테스트**: YouTube/Instagram/TikTok 각각 완전한 VDP
+- **Quality Gates**: Hook ≤3s, 강도 ≥0.70 검증
+
+### **테스트 URL:**
+```
+YouTube: https://www.youtube.com/shorts/6_I2FmT1mbY
+Instagram: https://www.instagram.com/p/C8X2Y1Z9ABC/  
+TikTok: https://www.tiktok.com/@user/video/1234567890
+```
+
+### **기대 결과:**
+- **완전한 VDP**: scenes[], shots[], 상세 분석
+- **BigQuery 호환**: vdp_gold_v2 스키마 매핑
+- **T4 적재 준비**: JSONL 변환 준비
+
+---
+
+## ⚡ **T3 Circuit Breaker 상태 확인**
+
+### **Vertex API 상태:**
+- **VERTEX-API**: 현재 상태 확인 필요
+- **성능**: 예상 처리시간 1분/플랫폼
+- **품질**: Gemini 2.5 Pro 최고 분석 능력
+
+### **T3 서버 확인:**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+curl http://localhost:8082/api/health
+```
+
+---
+
+## 🎯 **즉시 실행 요청**
+
+### **T3 VDP 추출 명령:**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+curl -X POST http://localhost:8082/api/vdp/extract-vertex \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.youtube.com/shorts/6_I2FmT1mbY", "platform": "youtube"}'
+```
+
+---
+
+**T3 확인 명령어:**
+```bash
+cd /Users/ted/snap3/services/t2-extract
+cat .collab-msg-t3-vertex-vdp-request
+# Vertex AI VDP 즉시 실행 요청!
+```
+
+---
+
+🚨 **T3 Vertex AI VDP 즉시 실행 요청 - Gemini 2.5 Pro 완전 분석!**
