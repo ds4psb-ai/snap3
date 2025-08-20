@@ -29,13 +29,14 @@ Before: URL → 5-8min manual → high error rate
 After:  URL → 30sec-1min → near 0% error
 ```
 
-## 🔄 AGENT ROLES
-- **GPT-5 Pro**: Strategy, risk analysis, high-level decisions
-- **ClaudeCode**: Implementation, testing, system integration
-- **Cursor**: UI/UX, Instagram/TikTok metadata extractor
-- **GitHub Actions**: Real-time context sync
+## 🔄 AGENT ROLES & CURRENT STATUS
+- **GPT-5 Pro**: Strategy, risk analysis, high-level decisions  
+- **ClaudeCode**: Implementation ✅, testing, system integration
+- **Cursor**: UI/UX ⭐⭐, Instagram/TikTok metadata extractor ⭐⭐⭐ (완성됨)
+- **GitHub Actions**: Real-time context sync ✅
 
-**Loop:** `/vdp:plan → /vdp:approve → /vdp:implement → /vdp:test → /vdp:review`
+**Current Phase**: Integration execution (not planning)
+**Loop:** `/vdp:status → /vdp:integrate → /vdp:accelerate → /vdp:optimize`
 
 ## 🏠 ARCHITECTURE
 **Components:**
@@ -156,4 +157,10 @@ Cursor Value: Auto metadata + watermark-free download + platform bypass
 
 **Decision Framework:** Evidence-first, agent-strength-optimized, parallel-when-possible, user-centric.
 
-**Task Assignment Intelligence:** Always specify which agent should handle each task based on specialization matrix and current workload.
+**CURRENT IMPLEMENTATION STATUS:**
+- `/api/extract-social-metadata`: ✅ IMPLEMENTED (8080 port)
+- 4-Terminal Parallel System: ✅ ACTIVE  
+- Cursor Integration API: ✅ READY
+- Agent Specialization Matrix: ✅ CONFIRMED
+
+**Task Assignment Intelligence:** Focus on coordination & optimization, not re-implementation of existing features.

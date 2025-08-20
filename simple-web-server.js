@@ -37,6 +37,74 @@ function generateCorrelationId() {
     return crypto.randomBytes(8).toString('hex');
 }
 
+// VDP Conversion Function - Transform Cursor response to VDP format
+function convertCursorToVDP(cursorData, urlResult, correlationId) {
+    const nowISO = new Date().toISOString();
+    const loadDate = nowISO.split('T')[0];
+    
+    // Generate content_key
+    const content_key = `${urlResult.platform}:${urlResult.id}`;
+    
+    structuredLog('info', 'Converting Cursor data to VDP format', {
+        contentKey: content_key,
+        platform: urlResult.platform,
+        contentId: urlResult.id,
+        conversionMode: 'CURSOR_TO_VDP'
+    }, correlationId);
+    
+    // Build VDP structure with Cursor extracted data
+    const vdpData = {
+        // VDP Required Fields
+        content_key,
+        content_id: urlResult.id,
+        metadata: {
+            platform: urlResult.platform.charAt(0).toUpperCase() + urlResult.platform.slice(1),
+            language: 'ko',
+            video_origin: 'social_media',
+            
+            // Cursor extracted social metadata
+            title: cursorData.data?.title || null,
+            view_count: parseInt(cursorData.data?.view_count) || 0,
+            like_count: parseInt(cursorData.data?.like_count) || 0,
+            comment_count: parseInt(cursorData.data?.comment_count) || 0,
+            share_count: parseInt(cursorData.data?.share_count) || 0,
+            hashtags: cursorData.data?.hashtags || [],
+            upload_date: cursorData.data?.upload_date || null,
+            top_comments: cursorData.data?.top_comments || []
+        },
+        load_timestamp: nowISO,
+        load_date: loadDate,
+        
+        // Source information
+        source_url: urlResult.originalUrl,
+        canonical_url: urlResult.canonicalUrl,
+        extracted_video_url: cursorData.data?.video_url || null,
+        
+        // Processing metadata
+        processing_info: {
+            cursor_extraction: {
+                success: cursorData.success,
+                coverage_percentage: cursorData.coverage_percentage || 0,
+                extraction_time_ms: cursorData.performance?.extraction_time || null,
+                watermark_free: cursorData.data?.watermark_free || false,
+                quality: cursorData.data?.quality || 'unknown'
+            },
+            conversion_timestamp: nowISO,
+            correlation_id: correlationId,
+            conversion_version: '1.0'
+        }
+    };
+    
+    structuredLog('success', 'VDP conversion completed', {
+        contentKey: content_key,
+        platform: urlResult.platform,
+        metadataFields: Object.keys(vdpData.metadata).length,
+        conversionSuccess: true
+    }, correlationId);
+    
+    return vdpData;
+}
+
 function structuredLog(level, message, data = {}, correlationId = null) {
     const timestamp = new Date().toISOString();
     const logEntry = {
@@ -575,29 +643,114 @@ app.post('/api/extract-social-metadata', async (req, res) => {
             canonicalUrl: urlResult.canonicalUrl
         }, correlationId);
         
-        // TODO: This endpoint will integrate with Cursor's extraction API
-        // For now, return a structured response that Cursor can implement
-        const extractionResponse = {
-            success: false, // Will be true when Cursor implements
+        // ACTIVE: Cursor API Bridge Integration
+        structuredLog('info', 'Initiating Cursor API bridge call', {
+            targetUrl: 'http://localhost:3000/api/social/extract',
             platform: urlResult.platform,
-            content_id: urlResult.id,
-            coverage_percentage: 0, // Will be populated by Cursor
-            cursor_integration_status: 'PENDING_IMPLEMENTATION',
-            data: {
+            contentId: urlResult.id
+        }, correlationId);
+        
+        let extractionResponse;
+        
+        try {
+            // Call Cursor's metadata extraction API
+            const cursorResponse = await fetch('http://localhost:3000/api/social/extract', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Correlation-ID': correlationId
+                },
+                body: JSON.stringify({
+                    url: urlResult.canonicalUrl,
+                    platform: urlResult.platform,
+                    options: {
+                        include_video: options.include_video || false,
+                        include_comments: options.include_comments !== false, // default true
+                        max_comments: options.max_comments || 3
+                    }
+                }),
+                timeout: 30000 // 30 second timeout
+            });
+            
+            if (!cursorResponse.ok) {
+                throw new Error(`Cursor API error: ${cursorResponse.status}`);
+            }
+            
+            const cursorData = await cursorResponse.json();
+            
+            structuredLog('success', 'Cursor metadata extraction successful', {
+                platform: urlResult.platform,
+                contentId: urlResult.id,
+                coveragePercentage: cursorData.coverage_percentage,
+                success: cursorData.success
+            }, correlationId);
+            
+            // Transform Cursor response to VDP format
+            extractionResponse = {
+                success: cursorData.success,
+                platform: urlResult.platform,
                 content_id: urlResult.id,
-                normalized_url: urlResult.canonicalUrl,
-                original_url: urlResult.originalUrl,
-                extraction_ready: true,
-                missing_fields: ['view_count', 'like_count', 'comment_count', 'top_comments'],
-                fallback_needed: true
-            },
-            next_steps: {
-                cursor_task: 'Implement actual metadata extraction logic',
-                api_ready: true,
-                integration_point: '/api/extract-social-metadata'
-            },
-            correlationId
-        };
+                coverage_percentage: cursorData.coverage_percentage || 0,
+                cursor_integration_status: cursorData.success ? 'ACTIVE' : 'FALLBACK',
+                data: {
+                    content_id: urlResult.id,
+                    normalized_url: urlResult.canonicalUrl,
+                    original_url: urlResult.originalUrl,
+                    
+                    // Cursor extracted metadata
+                    title: cursorData.data?.title || null,
+                    view_count: cursorData.data?.view_count || 0,
+                    like_count: cursorData.data?.like_count || 0,
+                    comment_count: cursorData.data?.comment_count || 0,
+                    share_count: cursorData.data?.share_count || 0,
+                    hashtags: cursorData.data?.hashtags || [],
+                    upload_date: cursorData.data?.upload_date || null,
+                    top_comments: cursorData.data?.top_comments || [],
+                    
+                    // Video download info
+                    video_url: cursorData.data?.video_url || null,
+                    
+                    // Quality metrics
+                    extraction_quality: cursorData.data?.quality || 'unknown',
+                    watermark_free: cursorData.data?.watermark_free || false
+                },
+                performance: {
+                    extraction_time_ms: cursorData.performance?.extraction_time || null,
+                    api_response_time_ms: Date.now() - startTime
+                },
+                correlationId
+            };
+            
+        } catch (error) {
+            structuredLog('warning', 'Cursor API unavailable - fallback mode activated', {
+                error: error.message,
+                fallbackMode: 'MANUAL_INPUT',
+                cursorStatus: 'UNAVAILABLE'
+            }, correlationId);
+            
+            // Fallback response when Cursor is unavailable
+            extractionResponse = {
+                success: false,
+                platform: urlResult.platform,
+                content_id: urlResult.id,
+                coverage_percentage: 0,
+                cursor_integration_status: 'UNAVAILABLE',
+                data: {
+                    content_id: urlResult.id,
+                    normalized_url: urlResult.canonicalUrl,
+                    original_url: urlResult.originalUrl,
+                    extraction_ready: true,
+                    missing_fields: ['view_count', 'like_count', 'comment_count', 'top_comments'],
+                    fallback_needed: true,
+                    fallback_reason: error.message
+                },
+                fallback_options: {
+                    manual_form: 'Use web UI for manual metadata input',
+                    retry_later: 'Try again when Cursor API is available'
+                },
+                correlationId
+            };
+        }
         
         const processingTime = Date.now() - startTime;
         
@@ -623,6 +776,130 @@ app.post('/api/extract-social-metadata', async (req, res) => {
         res.status(500).json({
             error: 'METADATA_EXTRACTION_ERROR',
             message: 'Metadata extraction failed',
+            details: error.message,
+            correlationId
+        });
+    }
+});
+
+// Enhanced VDP Pipeline Integration - Convert Cursor data and submit to VDP pipeline
+app.post('/api/vdp/cursor-extract', async (req, res) => {
+    const startTime = Date.now();
+    const correlationId = req.correlationId;
+    
+    structuredLog('info', 'VDP pipeline integration with Cursor extraction initiated', {
+        endpoint: '/api/vdp/cursor-extract',
+        platform: req.body.platform,
+        url: req.body.url?.substring(0, 50) + '...'
+    }, correlationId);
+    
+    try {
+        const { url, platform, options = {} } = req.body;
+        
+        // Step 1: Get metadata from Cursor
+        const metadataResponse = await fetch(`http://localhost:8080/api/extract-social-metadata`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Correlation-ID': correlationId
+            },
+            body: JSON.stringify({ url, platform, options })
+        });
+        
+        if (!metadataResponse.ok) {
+            throw new Error(`Metadata extraction failed: ${metadataResponse.status}`);
+        }
+        
+        const metadataResult = await metadataResponse.json();
+        
+        if (!metadataResult.success) {
+            structuredLog('warning', 'Cursor extraction failed - using fallback', {
+                cursorStatus: 'FAILED',
+                fallbackMode: 'PARTIAL_VDP',
+                coveragePercentage: metadataResult.coverage_percentage
+            }, correlationId);
+        }
+        
+        // Step 2: Convert to VDP format
+        if (!normalizeSocialUrl) {
+            return res.status(500).json({
+                error: 'NORMALIZER_NOT_LOADED',
+                message: 'URL normalizer not available',
+                correlationId
+            });
+        }
+        
+        const urlResult = await normalizeSocialUrl(url);
+        const vdpData = convertCursorToVDP(metadataResult, urlResult, correlationId);
+        
+        // Step 3: Store VDP request in GCS for processing
+        const timestamp = Date.now();
+        const fileName = `ingest/requests/${platform.toLowerCase()}/${vdpData.content_id}_cursor_${timestamp}.json`;
+        
+        const bucket = storage.bucket(RAW_BUCKET);
+        const file = bucket.file(fileName);
+        
+        await file.save(JSON.stringify(vdpData, null, 2), {
+            metadata: {
+                contentType: 'application/json',
+                metadata: {
+                    'vdp-platform': platform.toLowerCase(),
+                    'vdp-content-id': vdpData.content_id,
+                    'vdp-content-key': vdpData.content_key,
+                    'vdp-cursor-integration': metadataResult.success ? 'ACTIVE' : 'FALLBACK',
+                    'vdp-coverage-percentage': metadataResult.coverage_percentage || '0',
+                    'vdp-correlation-id': correlationId,
+                    'vdp-processing-type': 'cursor_enhanced'
+                }
+            }
+        });
+        
+        const gcsUri = `gs://${RAW_BUCKET}/${fileName}`;
+        const totalProcessingTime = Date.now() - startTime;
+        
+        structuredLog('success', 'VDP pipeline integration completed', {
+            gcsUri,
+            contentKey: vdpData.content_key,
+            cursorSuccess: metadataResult.success,
+            coveragePercentage: metadataResult.coverage_percentage,
+            totalProcessingTimeMs: totalProcessingTime
+        }, correlationId);
+        
+        // Return integration response
+        res.status(202).json({
+            success: true,
+            message: 'Cursor 통합 VDP 파이프라인 처리 시작',
+            job_id: `vdp_cursor_${timestamp}_${vdpData.content_id}`,
+            content_key: vdpData.content_key,
+            platform: platform.toLowerCase(),
+            content_id: vdpData.content_id,
+            gcs_uri: gcsUri,
+            cursor_integration: {
+                status: metadataResult.cursor_integration_status,
+                coverage_percentage: metadataResult.coverage_percentage,
+                extraction_success: metadataResult.success
+            },
+            processing: {
+                status: 'queued',
+                estimated_completion: new Date(Date.now() + 180000).toISOString(), // 3 minutes
+                total_processing_time_ms: totalProcessingTime
+            },
+            correlationId
+        });
+        
+    } catch (error) {
+        const processingTime = Date.now() - startTime;
+        
+        structuredLog('error', 'VDP pipeline integration failed', {
+            error: error.message,
+            stack: error.stack,
+            processingTimeMs: processingTime,
+            errorCode: 'VDP_CURSOR_INTEGRATION_ERROR'
+        }, correlationId);
+        
+        res.status(500).json({
+            error: 'VDP_CURSOR_INTEGRATION_ERROR',
+            message: 'Cursor VDP 파이프라인 통합 중 오류 발생',
             details: error.message,
             correlationId
         });
