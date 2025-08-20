@@ -1,0 +1,199 @@
+# 🚀 Phase 2 Sprint 시작 지시서
+
+**Priority**: HIGH  
+**Action**: Phase2-Sprint-Start  
+**Timestamp**: 2025-08-20 현재  
+**Timeline**: T+30~60분 (Phase 2)  
+**Correlation-ID**: PHASE2-SPRINT-START-002
+
+---
+
+## 🎯 **Phase 2 목표 (다음 30분)**
+
+### **ClaudeCode Mission (T1/T3):**
+- Circuit Breaker 고도화 + 지수 백오프 구현
+- 실시간 성능 메트릭 통합
+
+### **Cursor Mission (UI/3000):**  
+- Platform-specific Ingest Wizard 구현
+- Instagram/TikTok 자동화 UI 완성
+
+---
+
+## 🖥️ **구체적 터미널 명령어 (즉시 실행)**
+
+### **T1 Terminal (Main/8080) - ClaudeCode 실행**
+```bash
+cd /Users/ted/snap3
+
+# Circuit Breaker 고도화 구현 시작
+echo "🔧 [T1] Circuit Breaker 고도화 시작"
+echo "📊 현재: DLQ Publisher 준비 완료"
+echo "🎯 목표: 지수 백오프 + 상태 전환 자동화"
+
+# 현재 서버 상태 확인
+curl -s http://localhost:8080/health | jq '.'
+
+# Circuit Breaker 상태 확인
+curl -s http://localhost:8080/api/circuit-breaker/status | jq '.'
+
+# Phase 2 진입 표시
+echo "⚡ [T1] Phase 2 Circuit Breaker 구현 시작" > .t1-phase2-status
+```
+
+### **T2 Terminal (Jobs/8081) - 벤치마크 계속**
+```bash
+cd /Users/ted/snap3-jobs
+
+# 현재 벤치마크 상태 확인
+echo "📊 [T2] 벤치마크 상태 확인"
+ps aux | grep -v grep | grep "benchmark"
+
+# Circuit Breaker 테스트 결과 확인
+if [ -f ./benchmark-results.json ]; then
+  echo "✅ [T2] 벤치마크 결과 수집 중..."
+  tail -n 5 ./benchmark-results.json
+else
+  echo "🔄 [T2] 벤치마크 실행 중... (완료 대기)"
+fi
+
+# Phase 2 연계 - T1에게 테스트 결과 전달 준비
+echo "📤 [T2] T1 Circuit Breaker 테스트 데이터 준비 중" > .t2-phase2-status
+```
+
+### **T3 Terminal (VDP/8082) - 메트릭 수집 활성화**  
+```bash
+cd /Users/ted/snap3/services/t2-extract
+
+# 실시간 메트릭 수집 시작
+echo "📈 [T3] 실시간 메트릭 수집 활성화"
+
+# 성능 메트릭 모니터링 시작
+npm run metrics:start 2>/dev/null || echo "🔄 [T3] 메트릭 수집 시스템 준비 중"
+
+# Circuit Breaker 연동 준비
+curl -s http://localhost:8082/metrics 2>/dev/null || echo "⏳ [T3] T3 메트릭 서버 시작 대기"
+
+# Phase 2 메트릭 수집 상태
+echo "📊 [T3] Phase 2 메트릭 수집 준비 완료" > .t3-phase2-status
+```
+
+### **T4 Terminal (Storage/8083) - 로깅 지원**
+```bash
+cd /Users/ted/snap3-storage
+
+# Phase 2 로깅 준비
+echo "📝 [T4] Phase 2 로깅 시스템 준비"
+
+# 현재 스토리지 상태
+ls -la ./logs/ 2>/dev/null | tail -n 3
+
+# Circuit Breaker 로그 수집 준비
+mkdir -p ./logs/circuit-breaker/ 2>/dev/null
+echo "📁 [T4] Circuit Breaker 로그 디렉토리 준비 완료"
+
+# Phase 2 로깅 상태
+echo "🗂️ [T4] Phase 2 로깅 지원 활성화" > .t4-phase2-status
+```
+
+---
+
+## 👨‍💻 **Cursor 작업 지시 (Platform Wizard)**
+
+### **Cursor 명령어 (즉시 실행):**
+```bash
+cd /Users/ted/snap3
+
+# Phase 2 Cursor 작업 확인
+cat .collab-msg-phase2-sprint-start
+
+# Summary Dock 상태 확인
+ls -la src/components/collaboration/SummaryDock.tsx
+
+echo "🎨 [Cursor] Phase 2 Platform Wizard 구현 시작"
+echo "🎯 목표: Instagram/TikTok 50% → 90%+ 자동화"
+```
+
+### **Platform Wizard 구현 요구사항:**
+
+#### **1. Platform Selection UI (src/components/platform/PlatformWizard.tsx)**
+```typescript
+interface PlatformWizardProps {
+  onPlatformSelect: (platform: 'youtube' | 'instagram' | 'tiktok') => void;
+  currentPlatform?: string;
+  extractorStatus: {
+    youtube: 'ready';
+    instagram: 'extracting' | 'ready' | 'manual-required';
+    tiktok: 'extracting' | 'ready' | 'manual-required';
+  };
+}
+```
+
+#### **2. Auto Metadata Fill UI**
+- **Instagram**: URL 입력 → Cursor 추출 → 폼 자동 채우기
+- **TikTok**: URL 입력 → Cursor 추출 → 폼 자동 채우기  
+- **Fallback**: 추출 실패시 수동 입력 UI 활성화
+
+#### **3. Progress Indicator**
+- **단계별 진행**: URL 검증 → 메타데이터 추출 → VDP 처리 → 완료
+- **실시간 상태**: 각 단계별 소요 시간 표시
+- **에러 처리**: 실패 지점 + 대안 제시
+
+#### **4. Integration Points**
+- **API**: `POST /api/extract-social-metadata`
+- **Validation**: URL 형식, 플랫폼 감지, content_id 추출
+- **Error Handling**: 추출 실패 → Manual 입력 Mode 전환
+
+---
+
+## 🔄 **Phase 2 병렬 실행 타임라인**
+
+### **T+30분 (현재) → T+45분**
+- **T1**: Circuit Breaker 고도화 (75% 진행)
+- **T2**: 벤치마크 완료 + 결과 분석
+- **T3**: 실시간 메트릭 연동 (T1 Circuit Breaker와 동기화)
+- **Cursor**: Platform Wizard 기본 구조 (50% 진행)
+
+### **T+45분 → T+60분**
+- **T1**: 지수 백오프 완성 + T3 메트릭 통합
+- **T2**: T1에게 테스트 결과 전달 완료
+- **T3**: P95 응답시간 실시간 수집 + 시각화
+- **Cursor**: Instagram/TikTok URL 입력 → 자동 추출 완성
+
+---
+
+## ✅ **Phase 2 완료 조건**
+
+### **ClaudeCode 완료 신호:**
+```bash
+# T1에서 실행
+echo "✅ Circuit Breaker + 지수 백오프 완료" > .t1-phase2-done
+curl -s http://localhost:8080/api/circuit-breaker/advanced-status | jq '.exponential_backoff' | grep -q "enabled" && echo "✅ Phase 2 ClaudeCode 완료"
+```
+
+### **Cursor 완료 신호:**
+```bash
+# Cursor에서 실행  
+echo "✅ Platform Wizard 완료" > .cursor-phase2-done
+ls src/components/platform/PlatformWizard.tsx && echo "✅ Phase 2 Cursor 완료"
+```
+
+---
+
+## 🎯 **즉시 실행 명령어 요약**
+
+### **ClaudeCode (지금 바로 T1에서):**
+```bash
+cd /Users/ted/snap3 && echo "🔧 Phase 2 Circuit Breaker 구현 시작" && curl -s http://localhost:8080/health
+```
+
+### **Cursor (지금 바로):**
+```bash
+cd /Users/ted/snap3 && cat .collab-msg-phase2-sprint-start && echo "🎨 Phase 2 Platform Wizard 구현 시작"
+```
+
+---
+
+**🚀 Phase 2 Sprint 시작!** - 30분 타이머 시작 ⏰
+
+**동시 실행**: ClaudeCode (Circuit Breaker) + Cursor (Platform Wizard) 병렬 작업 개시!

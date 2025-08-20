@@ -1,0 +1,122 @@
+# 📨 Cursor Phase 2 Platform Wizard 구현 지시서
+
+**Priority**: HIGH  
+**Action**: Phase2-Platform-Wizard  
+**타이밍**: 🔄 T1 Circuit Breaker 완료 후 시작  
+**Dependency**: T1 `.t1-phase2a-done` 파일 생성 확인 필수
+
+---
+
+## 🎯 **Platform Wizard 구현 목표**
+
+### **목표**: Instagram/TikTok 수동 입력 50% → 자동화 90%+
+### **방법**: Cursor 추출 API + 자동 폼 채우기 UI
+
+---
+
+## 🔧 **구현 요구사항**
+
+### **1. Platform Selection UI**
+**파일**: `src/components/platform/PlatformWizard.tsx`
+
+```typescript
+interface PlatformWizardProps {
+  onUrlSubmit: (url: string, platform: 'youtube' | 'instagram' | 'tiktok') => void;
+  extractorStatus: {
+    youtube: 'ready';
+    instagram: 'extracting' | 'ready' | 'manual' | 'error';
+    tiktok: 'extracting' | 'ready' | 'manual' | 'error';
+  };
+  autoExtractProgress: {
+    step: 'url_validation' | 'metadata_extraction' | 'vdp_processing' | 'complete';
+    progress: number; // 0-100
+    estimatedTimeLeft: number; // seconds
+  };
+}
+```
+
+### **2. Auto-Extract Flow UI**
+- **URL 입력** → **플랫폼 감지** → **Cursor 추출 API 호출** → **폼 자동 채우기**
+- **진행률 표시**: 각 단계별 진행률 + 소요 시간
+- **Fallback UI**: 추출 실패시 Manual 입력 모드 전환
+
+### **3. API Integration**
+**사용할 API**: `POST /api/extract-social-metadata`
+```typescript
+interface ExtractRequest {
+  url: string;
+  platform: 'instagram' | 'tiktok';
+  options: {
+    include_comments: boolean;
+    watermark_free: boolean;
+  };
+}
+```
+
+---
+
+## 🎨 **UI 구성 요소**
+
+### **Platform Wizard Layout:**
+```
+┌─────────────────────────────────────┐
+│ 🎬 Platform Video Ingester         │
+├─────────────────────────────────────┤
+│ URL: [_________________] [Extract]  │
+│ Platform: [Auto-detected: TikTok]   │
+├─────────────────────────────────────┤
+│ ⚡ Auto-Extract Progress             │
+│ [████████████░░░] 75%               │
+│ Step: Metadata Extraction (12s)    │
+├─────────────────────────────────────┤
+│ 📊 Extracted Metadata:             │
+│ Views: 1,234,567                    │
+│ Likes: 45,623                       │
+│ Comments: 891                       │
+│ [Edit Manually] [Proceed to VDP]    │
+└─────────────────────────────────────┘
+```
+
+---
+
+## ⚠️ **Cursor 작업 시작 조건**
+
+### **사전 확인 필수:**
+```bash
+cd /Users/ted/snap3
+
+# T1 완료 신호 대기
+while [ ! -f .t1-phase2a-done ]; do
+  echo "⏳ T1 Circuit Breaker 완료 대기 중..."
+  sleep 5
+done
+
+echo "✅ T1 준비 완료 - Cursor Platform Wizard 시작"
+```
+
+### **API 엔드포인트 확인:**
+```bash
+# T1 Circuit Breaker API 확인
+curl -s http://localhost:8080/api/circuit-breaker/status | jq '.'
+
+# 메타데이터 추출 API 확인
+curl -s http://localhost:8080/api/extract-social-metadata -X POST -H "Content-Type: application/json" -d '{"url":"test"}' | grep -q "error\|success"
+```
+
+---
+
+## 🎯 **Phase 2 Cursor 완료 조건**
+
+### **완료 신호:**
+```bash
+echo "✅ Platform Wizard 완료" > .cursor-phase2-done
+```
+
+### **기능 테스트:**
+- [ ] URL 입력 → 플랫폼 자동 감지
+- [ ] Instagram URL → 메타데이터 자동 추출  
+- [ ] TikTok URL → 메타데이터 자동 추출
+- [ ] 추출 실패 → Manual 모드 전환
+- [ ] 진행률 표시 → 실시간 업데이트
+
+**🎯 T1 완료 신호 확인 후 Platform Wizard 구현 시작!**
