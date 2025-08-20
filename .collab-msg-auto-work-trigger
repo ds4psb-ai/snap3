@@ -1,0 +1,16 @@
+# 🤖 AUTO: 자동 작업 트리거
+
+**Work Phase**: integration
+**Confidence**: 80%
+**Triggered At**: 2025-08-21 03:45:23
+
+## 🎯 **자동 감지된 작업**
+
+**Recommended Actions:**
+1. integration 단계 즉시 시작
+2. 최적 터미널 배정
+3. 병렬 처리 활성화
+
+```bash
+cat .collab-msg-auto-work-trigger
+```
