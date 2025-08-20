@@ -6,15 +6,118 @@ const fetch = require('node-fetch');
 const multer = require('multer');
 const crypto = require('crypto');
 const LRU = require('lru-cache');
+const { request } = require('undici');
+const https = require('https');
+const http = require('http');
+const Ajv = require('ajv');
+const fs = require('fs');
 
 // Import the URL normalizer (ES6 import in CommonJS using dynamic import)
 let normalizeSocialUrl;
+
+// AJV Schema Precompilation (GPT-5 Optimization #2)
+const ajv = new Ajv({ strict: true, allErrors: true });
+let validateVDPSchema, validateMetadataSchema;
+
+// Load and precompile schemas at boot time
+function precompileSchemas() {
+    try {
+        // Load VDP schema
+        const vdpSchemaPath = path.join(__dirname, 'schemas/vdp-vertex-hook.schema.json');
+        if (fs.existsSync(vdpSchemaPath)) {
+            const vdpSchema = JSON.parse(fs.readFileSync(vdpSchemaPath, 'utf8'));
+            validateVDPSchema = ajv.compile(vdpSchema);
+            console.log('✅ VDP schema precompiled successfully');
+        }
+        
+        // Create metadata validation schema
+        const metadataSchema = {
+            type: 'object',
+            required: ['platform', 'language', 'video_origin'],
+            properties: {
+                platform: { type: 'string', enum: ['YouTube', 'Instagram', 'TikTok'] },
+                language: { type: 'string', pattern: '^[a-z]{2}(-[A-Z]{2})?$' },
+                video_origin: { type: 'string' },
+                view_count: { type: 'integer', minimum: 0 },
+                like_count: { type: 'integer', minimum: 0 },
+                comment_count: { type: 'integer', minimum: 0 },
+                share_count: { type: 'integer', minimum: 0 }
+            },
+            additionalProperties: true
+        };
+        validateMetadataSchema = ajv.compile(metadataSchema);
+        console.log('✅ Metadata schema precompiled successfully');
+        
+    } catch (error) {
+        console.error('❌ Schema precompilation failed:', error);
+        // Continue without precompiled schemas (graceful degradation)
+    }
+}
 
 // LRU Cache for metadata responses (60-second TTL)
 const metadataCache = new LRU({
     max: 500,
     maxAge: 60000 // 60 seconds
 });
+
+// HTTP Keep-Alive Agent Configuration (GPT-5 Optimization #1)
+const httpAgent = new http.Agent({
+    keepAlive: true,
+    maxSockets: 50,
+    timeout: 2000,
+    freeSocketTimeout: 4000
+});
+
+const httpsAgent = new https.Agent({
+    keepAlive: true,
+    maxSockets: 50,
+    timeout: 2000,
+    freeSocketTimeout: 4000
+});
+
+// Enhanced fetch with Keep-Alive and timeout
+function createFetchWithKeepAlive(url, options = {}) {
+    const isHttps = url.startsWith('https');
+    const agent = isHttps ? httpsAgent : httpAgent;
+    
+    // AbortController for 2s timeout with jitter retry
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+    
+    return fetch(url, {
+        ...options,
+        agent,
+        signal: controller.signal
+    }).then(response => {
+        clearTimeout(timeout);
+        return response;
+    }).catch(error => {
+        clearTimeout(timeout);
+        if (error.name === 'AbortError') {
+            // Retry once with jitter (100-300ms delay)
+            const jitter = 100 + Math.random() * 200;
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    const retryController = new AbortController();
+                    const retryTimeout = setTimeout(() => retryController.abort(), 2000);
+                    
+                    fetch(url, {
+                        ...options,
+                        agent,
+                        signal: retryController.signal
+                    }).then(response => {
+                        clearTimeout(retryTimeout);
+                        resolve(response);
+                    }).catch(retryError => {
+                        clearTimeout(retryTimeout);
+                        reject(retryError);
+                    });
+                }, jitter);
+            });
+        }
+        throw error;
+    });
+}
 
 // GCS Configuration
 const storage = new Storage({
@@ -486,6 +589,15 @@ app.post('/api/vdp/extract-vertex', async (req, res) => {
             top_comments: comments
         };
         
+        // AJV Precompiled Schema Validation
+        if (validateMetadataSchema && !validateMetadataSchema(ingestRequest.metadata)) {
+            structuredLog('warning', 'Metadata validation failed (non-blocking)', {
+                validationErrors: validateMetadataSchema.errors,
+                platform,
+                contentId: content_id
+            }, correlationId);
+        }
+        
         if (platform === 'tiktok') {
             ingestRequest.metadata.duration = parseInt(req.body.duration) || null;
         }
@@ -677,8 +789,8 @@ app.post('/api/extract-social-metadata', async (req, res) => {
         let extractionResponse;
         
         try {
-            // Call Cursor's metadata extraction API
-            const cursorResponse = await fetch('http://localhost:3000/api/social/extract', {
+            // Call Cursor's metadata extraction API with Keep-Alive
+            const cursorResponse = await createFetchWithKeepAlive('http://localhost:3000/api/social/extract', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -829,8 +941,8 @@ app.post('/api/vdp/cursor-extract', async (req, res) => {
     try {
         const { url, platform, options = {} } = req.body;
         
-        // Step 1: Get metadata from Cursor
-        const metadataResponse = await fetch(`http://localhost:8080/api/extract-social-metadata`, {
+        // Step 1: Get metadata from Cursor with Keep-Alive
+        const metadataResponse = await createFetchWithKeepAlive(`http://localhost:8080/api/extract-social-metadata`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1093,6 +1205,9 @@ const PORT = process.env.PORT || 8080;
 
 // Initialize server
 async function startServer() {
+    // Precompile schemas first (GPT-5 Optimization #2)
+    precompileSchemas();
+    
     await loadNormalizer();
     
     // Enhanced startup logging with environment validation
