@@ -1,0 +1,121 @@
+{
+  "circuit_breaker_status": {
+    "state": "OPEN",
+    "failureCount": 14,
+    "threshold": 5,
+    "totalRequests": 28,
+    "successfulRequests": 12,
+    "successRate": "42.86%",
+    "lastFailureTime": 1755689368042,
+    "uptime": 31.073746375
+  },
+  "recent_metrics": [
+    {
+      "timestamp": "2025-08-20T11:29:13.933Z",
+      "state": "OPEN",
+      "success": false,
+      "responseTime": 0.003,
+      "errorType": "HTTP_400",
+      "failureCount": 5,
+      "totalRequests": 19,
+      "successRate": "63.16"
+    },
+    {
+      "timestamp": "2025-08-20T11:29:14.234Z",
+      "state": "OPEN",
+      "success": false,
+      "responseTime": 0,
+      "errorType": "CIRCUIT_BREAKER_OPEN",
+      "failureCount": 6,
+      "totalRequests": 20,
+      "successRate": "60.00"
+    },
+    {
+      "timestamp": "2025-08-20T11:29:14.534Z",
+      "state": "OPEN",
+      "success": false,
+      "responseTime": 0,
+      "errorType": "CIRCUIT_BREAKER_OPEN",
+      "failureCount": 7,
+      "totalRequests": 21,
+      "successRate": "57.14"
+    },
+    {
+      "timestamp": "2025-08-20T11:29:14.836Z",
+      "state": "OPEN",
+      "success": false,
+      "responseTime": 0,
+      "errorType": "CIRCUIT_BREAKER_OPEN",
+      "failureCount": 8,
+      "totalRequests": 22,
+      "successRate": "54.55"
+    },
+    {
+      "timestamp": "2025-08-20T11:29:15.137Z",
+      "state": "OPEN",
+      "success": false,
+      "responseTime": 0,
+      "errorType": "CIRCUIT_BREAKER_OPEN",
+      "failureCount": 9,
+      "totalRequests": 23,
+      "successRate": "52.17"
+    },
+    {
+      "timestamp": "2025-08-20T11:29:15.439Z",
+      "state": "OPEN",
+      "success": false,
+      "responseTime": 0,
+      "errorType": "CIRCUIT_BREAKER_OPEN",
+      "failureCount": 10,
+      "totalRequests": 24,
+      "successRate": "50.00"
+    },
+    {
+      "timestamp": "2025-08-20T11:29:15.740Z",
+      "state": "OPEN",
+      "success": false,
+      "responseTime": 0,
+      "errorType": "CIRCUIT_BREAKER_OPEN",
+      "failureCount": 11,
+      "totalRequests": 25,
+      "successRate": "48.00"
+    },
+    {
+      "timestamp": "2025-08-20T11:29:26.039Z",
+      "state": "OPEN",
+      "success": false,
+      "responseTime": 0,
+      "errorType": "CIRCUIT_BREAKER_OPEN",
+      "failureCount": 12,
+      "totalRequests": 26,
+      "successRate": "46.15"
+    },
+    {
+      "timestamp": "2025-08-20T11:29:27.040Z",
+      "state": "OPEN",
+      "success": false,
+      "responseTime": 0,
+      "errorType": "CIRCUIT_BREAKER_OPEN",
+      "failureCount": 13,
+      "totalRequests": 27,
+      "successRate": "44.44"
+    },
+    {
+      "timestamp": "2025-08-20T11:29:28.041Z",
+      "state": "OPEN",
+      "success": false,
+      "responseTime": 0,
+      "errorType": "CIRCUIT_BREAKER_OPEN",
+      "failureCount": 14,
+      "totalRequests": 28,
+      "successRate": "42.86"
+    }
+  ],
+  "performance_summary": {
+    "total_requests": 28,
+    "success_rate": "42.86%",
+    "average_response_time": "0.304s",
+    "failure_count": 14,
+    "current_state": "OPEN"
+  }
+}

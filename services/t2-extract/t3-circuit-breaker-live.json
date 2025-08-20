@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-08-20T11:33:59.198Z",
+  "t1_api_breaker": {
+    "name": "T1-API",
+    "state": "CLOSED",
+    "failureCount": 0,
+    "successCount": 0,
+    "failureThreshold": 3,
+    "successThreshold": 2,
+    "successRate": "100.00%",
+    "avgResponseTime": "17.00ms",
+    "p95ResponseTime": "17ms",
+    "totalRequests": 1,
+    "uptime": "5.0s",
+    "lastStateChange": "2025-08-20T11:33:54.194Z"
+  },
+  "vertex_api_breaker": {
+    "name": "VERTEX-API",
+    "state": "CLOSED",
+    "failureCount": 0,
+    "successCount": 0,
+    "failureThreshold": 5,
+    "successThreshold": 3,
+    "successRate": "100.00%",
+    "avgResponseTime": "892.00ms",
+    "p95ResponseTime": "892ms",
+    "totalRequests": 1,
+    "uptime": "5.0s",
+    "lastStateChange": "2025-08-20T11:33:54.194Z"
+  },
+  "system_uptime": 5.033137041,
+  "memory_usage": {
+    "rss": 40632320,
+    "heapTotal": 10584064,
+    "heapUsed": 7742208,
+    "external": 1947092,
+    "arrayBuffers": 19162
+  }
+}
