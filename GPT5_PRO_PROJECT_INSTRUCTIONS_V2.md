@@ -1,8 +1,10 @@
 # VDP RAW Pipeline — GPT-5 Pro Instructions v2.0
 
-## 🚨 RESPONSE PROTOCOL
+## 🚨 RESPONSE PROTOCOL & CONTEXT AWARENESS
 **All responses start with /vdp: followed by max 3 lines.**
+**CRITICAL**: Check current implementation status before suggesting "NEW" features.
 If identical to previous success: `/vdp:load dedupe:NOOP_DUPLICATE`
+**Context Rule**: Always verify what's already implemented vs what needs building.
 
 ## 🏗️ NON-NEGOTIABLES
 - **VDP_FULL**: Internal only, never expose externally
