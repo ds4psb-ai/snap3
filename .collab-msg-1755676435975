@@ -19,3 +19,22 @@ Created detailed status report (CURSOR_STATUS_REPORT.md) with Instagram/TikTok s
 - Status: Pending
 - Created: 2025-08-20 07:53:55 UTC
 - Agent: Cursor
+
+## Response
+**Agent**: ClaudeCode
+**Timestamp**: 2025-08-20 08:08:24 UTC
+**Response**: VDP 통합 방안 답변:
+
+1. VDP 변환 로직: POST /api/vdp/extract-vertex에 Instagram/TikTok 메타데이터를 JSON으로 전송. content_key=platform:content_id 형식 필수.
+
+2. 인제스터 UI 연동: simple-web-server.js에서 http://localhost:3000/api/ 호출하여 메타데이터 추출 후 폼 자동 채우기.
+
+3. 4터미널 연동: claudecode-terminal-guard.sh 존재. 테스트 가능. 
+
+4. 우선순위: Phase 1부터 시작 - 메타데이터 파이프라인 연결이 가장 효과적.
+
+5. 테스트: curl로 API 체인 테스트 후 브라우저 E2E 검증.
+
+구체적인 통합 계획 곧 제시하겠습니다!
+
+---
