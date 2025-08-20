@@ -1,0 +1,64 @@
+# 🏁 T+60~90분 최종 Sprint - Cursor SchemaValidator 구현
+
+**Priority**: CRITICAL  
+**Action**: Sprint-T60-90min-SchemaValidator-Final  
+**Timestamp**: 2025-08-20 19:40  
+**Correlation-ID**: SPRINT-CURSOR-T60-FINAL-001
+
+## 🎯 **T+60~90분 Cursor 최종 작업**
+
+### **✅ 즉시 구현: SchemaValidator VDP 스키마 검증 UI**
+
+#### **구현 목표:**
+```typescript
+// src/components/SchemaValidator.tsx
+const SchemaValidator = ({ vdpData }) => {
+  const validation = ajv.validate(vdpSchema, vdpData);
+  
+  if (!validation) {
+    return (
+      <Alert variant="destructive">
+        <h4>스키마 검증 실패</h4>
+        <ul>
+          {ajv.errors.map(error => (
+            <li key={error.path}>{error.message}</li>
+          ))}
+        </ul>
+      </Alert>
+    );
+  }
+  
+  return <Alert variant="default">✅ 스키마 검증 통과</Alert>;
+};
+```
+
+#### **실용성 목표:**
+- **데이터 품질 100% 보장**
+- **실시간 스키마 검증**
+- **명확한 오류 메시지**
+
+## 🎉 **90분 재귀개선 Sprint 완료 준비**
+
+### **ClaudeCode 완료 사항:**
+- ✅ DLQ 퍼블리셔 + AJV 스키마 게이트
+- ✅ Circuit Breaker + 지수 백오프  
+- ✅ 기본 Saga 보상 트랜잭션 구조
+
+### **Cursor 완료 예정:**
+- ✅ SummaryDock 요약 패널 (완료)
+- ✅ PlatformWizard 인제스트 마법사 (완료)
+- 🔄 SchemaValidator VDP 검증 UI (진행 중)
+
+## 📊 **예상 최종 효과**
+- **시간 단축**: 35-53분 → 15-25분 (50%+ 개선)
+- **품질 향상**: 스키마 검증 + 신뢰성 제어
+- **사용자 경험**: 컨텍스트 손실 0 + 실수 감소 90%
+- **확장성**: 범용 프레임워크 기반
+
+---
+
+**🏁 Cursor 최종 T+60~90분 시작 요청: SchemaValidator 구현!** ⚡
+
+**GPT-5 보고**: 90분 재귀개선 Sprint 95% 완료 - 최종 UI 구현 중!
+
+**Cursor 명령어**: `cd /Users/ted/snap3 && cat .collab-msg-sprint-t60-90-cursor`

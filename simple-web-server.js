@@ -22,6 +22,262 @@ const pubsub = new PubSub({
 });
 const DLQ_TOPIC = 'vdp-failed-processing';
 
+// Circuit Breaker Configuration (Recursive Improvement #2 - T+30~60min)
+class CircuitBreaker {
+    constructor(threshold = 5, timeout = 60000, resetTimeout = 300000) {
+        this.threshold = threshold;       // 실패 임계값
+        this.timeout = timeout;           // 요청 타임아웃 (60s)
+        this.resetTimeout = resetTimeout; // 복구 대기 시간 (5분)
+        this.state = 'CLOSED';           // CLOSED, OPEN, HALF_OPEN
+        this.failureCount = 0;
+        this.lastFailureTime = null;
+        this.nextAttemptTime = null;
+    }
+    
+    async execute(operation, correlationId, context = {}) {
+        // Circuit state check
+        if (this.state === 'OPEN') {
+            if (Date.now() < this.nextAttemptTime) {
+                structuredLog('warning', 'Circuit breaker OPEN - request blocked', {
+                    state: this.state,
+                    failureCount: this.failureCount,
+                    nextAttemptIn: this.nextAttemptTime - Date.now(),
+                    ...context
+                }, correlationId);
+                
+                throw new Error('Circuit breaker OPEN - service temporarily unavailable');
+            } else {
+                this.state = 'HALF_OPEN';
+                structuredLog('info', 'Circuit breaker transitioning to HALF_OPEN', {
+                    state: this.state
+                }, correlationId);
+            }
+        }
+        
+        try {
+            const result = await operation();
+            
+            // Success - reset circuit
+            if (this.state === 'HALF_OPEN') {
+                this.state = 'CLOSED';
+                this.failureCount = 0;
+                structuredLog('success', 'Circuit breaker reset to CLOSED', {
+                    state: this.state,
+                    operation: context.operation || 'unknown'
+                }, correlationId);
+            }
+            
+            return result;
+            
+        } catch (error) {
+            this.failureCount++;
+            this.lastFailureTime = Date.now();
+            
+            // Check if threshold exceeded
+            if (this.failureCount >= this.threshold) {
+                this.state = 'OPEN';
+                this.nextAttemptTime = Date.now() + this.resetTimeout;
+                
+                structuredLog('error', 'Circuit breaker OPENED due to threshold exceeded', {
+                    state: this.state,
+                    failureCount: this.failureCount,
+                    threshold: this.threshold,
+                    resetIn: this.resetTimeout,
+                    error: error.message,
+                    ...context
+                }, correlationId);
+            }
+            
+            throw error;
+        }
+    }
+    
+    getState() {
+        return {
+            state: this.state,
+            failureCount: this.failureCount,
+            threshold: this.threshold,
+            lastFailureTime: this.lastFailureTime,
+            nextAttemptTime: this.nextAttemptTime
+        };
+    }
+}
+
+// Circuit Breaker instances for different services
+const t3VdpCircuitBreaker = new CircuitBreaker(3, 30000, 180000); // 3 실패, 30s 타임아웃, 3분 복구
+
+// Exponential Backoff Function (Recursive Improvement #2)
+function createExponentialBackoff(baseDelay = 1000, maxDelay = 30000, maxRetries = 3) {
+    return async function executeWithBackoff(operation, correlationId, context = {}) {
+        let lastError;
+        
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+                const result = await operation();
+                
+                if (attempt > 0) {
+                    structuredLog('success', 'Operation succeeded after retry', {
+                        attempt,
+                        totalAttempts: attempt + 1,
+                        operation: context.operation || 'unknown'
+                    }, correlationId);
+                }
+                
+                return result;
+                
+            } catch (error) {
+                lastError = error;
+                
+                if (attempt === maxRetries) {
+                    structuredLog('error', 'Operation failed after all retries', {
+                        attempt,
+                        totalAttempts: maxRetries + 1,
+                        finalError: error.message,
+                        operation: context.operation || 'unknown'
+                    }, correlationId);
+                    break;
+                }
+                
+                // Calculate delay with jitter
+                const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
+                const jitter = delay * 0.1 * Math.random(); // 10% jitter
+                const finalDelay = delay + jitter;
+                
+                structuredLog('warning', 'Operation failed - retrying with exponential backoff', {
+                    attempt: attempt + 1,
+                    totalAttempts: maxRetries + 1,
+                    error: error.message,
+                    retryDelayMs: Math.round(finalDelay),
+                    nextAttemptIn: Math.round(finalDelay),
+                    operation: context.operation || 'unknown'
+                }, correlationId);
+                
+                await new Promise(resolve => setTimeout(resolve, finalDelay));
+            }
+        }
+        
+        throw lastError;
+    };
+}
+
+// Combined Circuit Breaker + Exponential Backoff for T3 VDP calls
+const t3WithBackoff = createExponentialBackoff(2000, 30000, 3);
+
+// Saga Transaction Framework (Recursive Improvement #3 - T+60~90min)
+class SagaTransaction {
+    constructor(sagaId, correlationId) {
+        this.sagaId = sagaId;
+        this.correlationId = correlationId;
+        this.steps = [];
+        this.completedSteps = [];
+        this.state = 'STARTED';
+        this.startTime = Date.now();
+    }
+    
+    addStep(stepName, executeAction, compensateAction) {
+        this.steps.push({
+            name: stepName,
+            execute: executeAction,
+            compensate: compensateAction,
+            status: 'PENDING'
+        });
+    }
+    
+    async execute() {
+        structuredLog('info', 'Saga transaction started', {
+            sagaId: this.sagaId,
+            totalSteps: this.steps.length,
+            steps: this.steps.map(s => s.name)
+        }, this.correlationId);
+        
+        try {
+            // Execute all steps
+            for (const step of this.steps) {
+                structuredLog('info', `Executing saga step: ${step.name}`, {
+                    sagaId: this.sagaId,
+                    stepName: step.name,
+                    completedSteps: this.completedSteps.length
+                }, this.correlationId);
+                
+                const result = await step.execute();
+                step.status = 'COMPLETED';
+                step.result = result;
+                this.completedSteps.push(step);
+                
+                structuredLog('success', `Saga step completed: ${step.name}`, {
+                    sagaId: this.sagaId,
+                    stepName: step.name,
+                    completedSteps: this.completedSteps.length,
+                    totalSteps: this.steps.length
+                }, this.correlationId);
+            }
+            
+            this.state = 'COMPLETED';
+            const totalTime = Date.now() - this.startTime;
+            
+            structuredLog('success', 'Saga transaction completed successfully', {
+                sagaId: this.sagaId,
+                state: this.state,
+                completedSteps: this.completedSteps.length,
+                totalProcessingTime: totalTime
+            }, this.correlationId);
+            
+            return { success: true, sagaId: this.sagaId, state: this.state };
+            
+        } catch (error) {
+            this.state = 'COMPENSATING';
+            
+            structuredLog('error', 'Saga transaction failed - starting compensation', {
+                sagaId: this.sagaId,
+                failedAt: this.completedSteps.length,
+                error: error.message,
+                compensationSteps: this.completedSteps.length
+            }, this.correlationId);
+            
+            // Compensate in reverse order
+            await this.compensate();
+            throw error;
+        }
+    }
+    
+    async compensate() {
+        const compensationSteps = [...this.completedSteps].reverse();
+        
+        for (const step of compensationSteps) {
+            try {
+                structuredLog('info', `Compensating saga step: ${step.name}`, {
+                    sagaId: this.sagaId,
+                    stepName: step.name
+                }, this.correlationId);
+                
+                if (step.compensate) {
+                    await step.compensate(step.result);
+                    structuredLog('success', `Saga step compensated: ${step.name}`, {
+                        sagaId: this.sagaId,
+                        stepName: step.name
+                    }, this.correlationId);
+                }
+                
+            } catch (compensationError) {
+                structuredLog('error', `Saga compensation failed for step: ${step.name}`, {
+                    sagaId: this.sagaId,
+                    stepName: step.name,
+                    compensationError: compensationError.message
+                }, this.correlationId);
+                
+                // Continue with other compensations
+            }
+        }
+        
+        this.state = 'COMPENSATED';
+        structuredLog('info', 'Saga compensation completed', {
+            sagaId: this.sagaId,
+            state: this.state,
+            compensatedSteps: compensationSteps.length
+        }, this.correlationId);
+    }
+}
+
 // AJV Schema Precompilation (GPT-5 Optimization #2) + DLQ Gate
 const ajv = new Ajv({ strict: true, allErrors: true });
 let validateVDPSchema, validateMetadataSchema;

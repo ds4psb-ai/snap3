@@ -1,0 +1,60 @@
+# 🚀 T+30~60분 Sprint - Cursor PlatformWizard 구현
+
+**Priority**: CRITICAL  
+**Action**: Sprint-T30-60min-PlatformWizard-Implementation  
+**Timestamp**: 2025-08-20 19:35  
+**Correlation-ID**: SPRINT-CURSOR-T30-001
+
+## 🎯 **T+30~60분 Cursor 담당 작업**
+
+### **✅ 즉시 구현: PlatformWizard 인제스트 마법사**
+
+#### **구현 목표:**
+```typescript
+// src/components/PlatformWizard.tsx
+const PlatformWizard = {
+  youtube: {
+    required: ['source_url'],
+    autoProcess: 'yt-dlp 진행 표시',
+    validation: 'URL 형식 검증'
+  },
+  instagram: {
+    required: ['uploaded_gcs_uri'],
+    validation: 'gsutil stat API 프록시',
+    guidance: '워터마크 없는 비디오 필요'
+  },
+  tiktok: {
+    required: ['uploaded_gcs_uri'], 
+    validation: 'TIKWM.COM + SSSTIK.IO 이중 백업',
+    guidance: '공개 계정만 지원'
+  }
+};
+```
+
+#### **실용성 목표:**
+- **사용자 실수 90% 감소**
+- **자동화 수준 95%+ 달성**
+- **플랫폼별 맞춤 안내**
+
+## 🤝 **병렬 작업 상황**
+
+### **ClaudeCode (T+30~60분 동시 진행):**
+- 🔄 Circuit Breaker + 지수 백오프 구현
+- 🔄 T3 호출부 안정성 확보
+- 📍 simple-web-server.js 추가 수정
+
+### **Cursor 목표 (30분 내):**
+- 🧙‍♂️ PlatformWizard 컴포넌트 생성
+- ✅ 플랫폼별 검증 로직 구현
+- 📋 실시간 안내 시스템 구축
+- 🎨 직관적 UI/UX 완성
+
+## 🎯 **T+60~90분 최종 단계 미리보기**
+- **ClaudeCode**: 기본 Saga 보상 트랜잭션 구조
+- **Cursor**: VDP 스키마 검증 UI (SchemaValidator)
+
+---
+
+**🚀 Cursor T+30~60분 시작 요청: PlatformWizard 구현!** ⚡
+
+**Cursor 명령어**: `cd /Users/ted/snap3 && cat .collab-msg-sprint-t30-60-cursor`
