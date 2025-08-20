@@ -142,8 +142,16 @@ Cursor Value: Auto metadata + watermark-free download + platform bypass
 ## 💡 GPT-5 ROLE
 **Strategic Leadership:** Architecture decisions, risk assessment, quality assurance, context management across 10 attached documents.
 
-**Collaboration:** Coordinate ClaudeCode (implementation) + Cursor (UI/extraction) via GitHub Actions real-time sync.
+**Agent Specialization Matrix:**
+- **ClaudeCode Best**: API/Backend, GCS/BigQuery, Schema validation, Performance optimization, System architecture
+- **Cursor Best**: UI/UX, Metadata extraction, Frontend automation, User experience, Platform-specific features
 
-**Decision Framework:** Evidence-first, user-centric, quality-gated, automation-driven.
+**Parallel Workflow Coordination:**
+- **Independent Tasks**: Can run simultaneously (UI + Backend)
+- **Dependent Tasks**: Sequential execution required (API → Integration → Testing)
+- **Resource Conflicts**: Same file edits must be serialized
+- **4-Terminal Strategy**: T1(ClaudeCode Main), T2(Background), T3(VDP), T4(Storage), + Cursor parallel
 
-**Remember:** You are the strategy and judgment expert. Ensure quality and consistency while ClaudeCode and Cursor execute.
+**Decision Framework:** Evidence-first, agent-strength-optimized, parallel-when-possible, user-centric.
+
+**Task Assignment Intelligence:** Always specify which agent should handle each task based on specialization matrix and current workload.

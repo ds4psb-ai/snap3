@@ -519,6 +519,116 @@ app.post('/api/vdp/extract-vertex', async (req, res) => {
     }
 });
 
+// Cursor Metadata Extractor Integration Endpoint
+app.post('/api/extract-social-metadata', async (req, res) => {
+    const startTime = Date.now();
+    const correlationId = req.correlationId;
+    
+    structuredLog('info', 'Cursor metadata extraction request received', {
+        url: req.body.url?.substring(0, 50) + '...',
+        platform: req.body.platform,
+        endpoint: '/api/extract-social-metadata'
+    }, correlationId);
+    
+    try {
+        const { url, platform, options = {} } = req.body;
+        
+        // Validation
+        if (!url || !platform) {
+            structuredLog('error', 'Missing required fields for metadata extraction', {
+                hasUrl: !!url,
+                hasPlatform: !!platform,
+                errorCode: 'REQUIRED_FIELDS_MISSING'
+            }, correlationId);
+            
+            return res.status(400).json({
+                error: 'REQUIRED_FIELDS_MISSING',
+                message: 'url and platform fields are required',
+                correlationId
+            });
+        }
+        
+        // Platform validation
+        if (!['instagram', 'tiktok'].includes(platform.toLowerCase())) {
+            return res.status(400).json({
+                error: 'INVALID_PLATFORM',
+                message: 'Only Instagram and TikTok metadata extraction supported',
+                supported_platforms: ['instagram', 'tiktok'],
+                correlationId
+            });
+        }
+        
+        // URL normalization first
+        if (!normalizeSocialUrl) {
+            return res.status(500).json({
+                error: 'NORMALIZER_NOT_LOADED',
+                message: 'URL normalizer not available',
+                correlationId
+            });
+        }
+        
+        const urlResult = await normalizeSocialUrl(url);
+        
+        structuredLog('success', 'URL normalized for metadata extraction', {
+            platform: urlResult.platform,
+            contentId: urlResult.id,
+            canonicalUrl: urlResult.canonicalUrl
+        }, correlationId);
+        
+        // TODO: This endpoint will integrate with Cursor's extraction API
+        // For now, return a structured response that Cursor can implement
+        const extractionResponse = {
+            success: false, // Will be true when Cursor implements
+            platform: urlResult.platform,
+            content_id: urlResult.id,
+            coverage_percentage: 0, // Will be populated by Cursor
+            cursor_integration_status: 'PENDING_IMPLEMENTATION',
+            data: {
+                content_id: urlResult.id,
+                normalized_url: urlResult.canonicalUrl,
+                original_url: urlResult.originalUrl,
+                extraction_ready: true,
+                missing_fields: ['view_count', 'like_count', 'comment_count', 'top_comments'],
+                fallback_needed: true
+            },
+            next_steps: {
+                cursor_task: 'Implement actual metadata extraction logic',
+                api_ready: true,
+                integration_point: '/api/extract-social-metadata'
+            },
+            correlationId
+        };
+        
+        const processingTime = Date.now() - startTime;
+        
+        structuredLog('info', 'Metadata extraction API ready for Cursor integration', {
+            processingTimeMs: processingTime,
+            platform: urlResult.platform,
+            contentId: urlResult.id,
+            integrationStatus: 'READY_FOR_CURSOR'
+        }, correlationId);
+        
+        res.json(extractionResponse);
+        
+    } catch (error) {
+        const processingTime = Date.now() - startTime;
+        
+        structuredLog('error', 'Metadata extraction API error', {
+            error: error.message,
+            stack: error.stack,
+            processingTimeMs: processingTime,
+            errorCode: 'METADATA_EXTRACTION_ERROR'
+        }, correlationId);
+        
+        res.status(500).json({
+            error: 'METADATA_EXTRACTION_ERROR',
+            message: 'Metadata extraction failed',
+            details: error.message,
+            correlationId
+        });
+    }
+});
+
 // Test VDP submission endpoint (for compatibility)
 app.post('/api/vdp/test-submit', (req, res) => {
     console.log('📝 Test submission received');
