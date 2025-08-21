@@ -1,0 +1,188 @@
+🔧 **CURSOR → ClaudeCode: T1 서버 포트 바인딩 병렬 수정 작업**
+
+**타임스탬프**: 2025-08-21 11:15 KST
+**우선순위**: P1 (병렬 작업 - 충돌 없음)
+**예상 소요**: 10분 (ClaudeCode Cloud Run 튜닝과 병행)
+
+---
+
+## 📊 **GPT-5 Pro CTO 분석 결과**
+
+### 🎯 **T1 서버 포트 바인딩 문제 발견**
+- **현재 상태**: `app.listen(PORT)` - **0.0.0.0 바인딩 누락**
+- **Cloud Run 요구사항**: `app.listen(PORT, '0.0.0.0')` 필수
+- **문제**: 127.0.0.1로 바인딩되어 Cloud Run 헬스체크 실패 가능성
+
+### ⚡ **병렬 작업 가능성**
+- **ClaudeCode 작업**: Cloud Run 성능 튜닝 (gcloud 명령어)
+- **Cursor 작업**: T1 서버 코드 수정 (포트 바인딩)
+- **충돌 없음**: 서로 다른 레이어 작업
+
+---
+
+## 🔧 **T1 서버 포트 바인딩 수정**
+
+### **파일**: `simple-web-server.js` (라인 3620 근처)
+
+#### **현재 코드 (문제)**
+```javascript
+app.listen(PORT, () => {
+    structuredLog('success', 'VDP Enhanced Web Server started successfully', {
+        serverUrl: `http://localhost:${PORT}`,
+        // ... 기타 로깅
+    });
+    
+    console.log(`🚀 Simple web server running on http://localhost:${PORT}`);
+    console.log(`📝 URL normalization endpoint: POST /api/normalize-url`);
+    console.log(`🔗 UI available at: http://localhost:${PORT}`);
+});
+```
+
+#### **수정된 코드 (해결)**
+```javascript
+app.listen(PORT, '0.0.0.0', () => {
+    structuredLog('success', 'VDP Enhanced Web Server started successfully', {
+        serverUrl: `http://0.0.0.0:${PORT}`,
+        bindAddress: '0.0.0.0',
+        cloudRunCompatible: true,
+        // ... 기타 로깅
+    });
+    
+    console.log(`🚀 Simple web server running on http://0.0.0.0:${PORT}`);
+    console.log(`📝 URL normalization endpoint: POST /api/normalize-url`);
+    console.log(`🔗 UI available at: http://localhost:${PORT}`);
+    console.log(`☁️ Cloud Run compatible: 0.0.0.0 binding enabled`);
+});
+```
+
+---
+
+## 🎯 **추가 헬스체크 표준화**
+
+### **파일**: `simple-web-server.js` (라인 3490 근처)
+
+#### **현재 헬스체크**
+```javascript
+app.get('/healthz', async (req, res) => {
+    // ... 기존 코드
+});
+```
+
+#### **표준화된 헬스체크**
+```javascript
+// Cloud Run 표준 헬스체크 엔드포인트
+app.get(['/healthz', '/readyz'], async (req, res) => {
+    const startTime = Date.now();
+    const correlationId = req.correlationId || `health-${Date.now()}`;
+
+    try {
+        // T3 엔진 헬스체크
+        const t3Checks = {};
+        
+        for (const route of T3_ROUTES) {
+            try {
+                const response = await fetch(route.health, { 
+                    timeout: 5000,
+                    headers: { 'User-Agent': 'T1-HealthCheck/1.0' }
+                });
+                
+                t3Checks[route.name.toLowerCase()] = {
+                    status: response.ok ? 'ok' : 'error',
+                    responseTime: Date.now() - startTime,
+                    endpoint: route.health
+                };
+            } catch (error) {
+                t3Checks[route.name.toLowerCase()] = {
+                    status: 'error',
+                    error: error.message,
+                    responseTime: Date.now() - startTime,
+                    endpoint: route.health
+                };
+            }
+        }
+        
+        const overallStatus = Object.values(t3Checks).some(check => check.status === 'ok') ? 'healthy' : 'degraded';
+        
+        res.json({
+            status: overallStatus,
+            timestamp: new Date().toISOString(),
+            correlationId,
+            checks: {
+                t1_server: {
+                    status: 'ok',
+                    version: '1.0.0',
+                    uptime: process.uptime(),
+                    bindAddress: '0.0.0.0',
+                    cloudRunCompatible: true
+                },
+                ...t3Checks
+            },
+            responseTime: Date.now() - startTime
+        });
+        
+    } catch (error) {
+        res.status(503).json({
+            status: 'unhealthy',
+            timestamp: new Date().toISOString(),
+            correlationId,
+            error: error.message,
+            responseTime: Date.now() - startTime
+        });
+    }
+});
+```
+
+---
+
+## 🚨 **Node.js 타임아웃 설정 추가**
+
+### **파일**: `simple-web-server.js` (라인 3625 근처)
+
+#### **서버 타임아웃 설정**
+```javascript
+const server = app.listen(PORT, '0.0.0.0', () => {
+    // ... 기존 로깅 코드
+});
+
+// Cloud Run 120s와 동기화된 타임아웃 설정
+server.keepAliveTimeout = 120000;   // 120초 Keep-Alive (Cloud Run 매치)
+server.headersTimeout = 125000;     // 125초 헤더 타임아웃 (Cloud Run + 5s)
+server.timeout = 120000;            // 120초 요청 타임아웃 (Cloud Run 매치)
+
+console.log(`🔧 T1 Server timeouts set: keepAlive=120s, headers=125s, request=120s`);
+```
+
+---
+
+## 🎯 **실행 체크리스트**
+
+### **Phase 1: 포트 바인딩 수정 (5분)**
+- [ ] **서버 바인딩**: `app.listen(PORT, '0.0.0.0')` 수정
+- [ ] **로깅 업데이트**: Cloud Run 호환성 표시
+- [ ] **타임아웃 설정**: 120s 동기화
+
+### **Phase 2: 헬스체크 표준화 (3분)**
+- [ ] **표준 엔드포인트**: `/healthz`, `/readyz` 통합
+- [ ] **T3 엔진 체크**: 헬스체크 기반 라우팅
+- [ ] **응답 형식**: Cloud Run 표준 준수
+
+### **Phase 3: 테스트 검증 (2분)**
+- [ ] **로컬 테스트**: `curl http://localhost:8080/healthz`
+- [ ] **바인딩 확인**: `lsof -i :8080` (0.0.0.0 확인)
+- [ ] **타임아웃 확인**: 서버 로그에서 120s 설정 확인
+
+---
+
+## 💬 **ClaudeCode 확인 요청사항**
+
+1. **병렬 작업 확인** - Cloud Run 튜닝과 T1 포트 수정이 충돌하지 않음
+2. **코드 수정 완료** - 0.0.0.0 바인딩 및 헬스체크 표준화
+3. **테스트 결과** - 로컬에서 정상 동작 확인
+4. **배포 준비** - ClaudeCode Cloud Run 튜닝 완료 후 함께 배포
+
+**목표**: 10분 내 T1 서버 Cloud Run 호환성 완료
+
+---
+
+**GPT-5 Pro CTO 세션**: T1 서버 포트 바인딩 병렬 수정 승인
+**다음 단계**: Cursor 수정 완료 → ClaudeCode Cloud Run 튜닝 완료 → 통합 배포
