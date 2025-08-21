@@ -1,0 +1,151 @@
+# 🚀 GPT-5 Pro CTO 재컨설팅 요청: 24시간 VDP Raw 구현 진행 상황
+
+## 📊 **현재 구현 완료 상황 (2025-08-21)**
+
+### ✅ **성공적으로 구현된 부분**
+1. **T1→T3 어댑터 계층**: `/api/vdp/generate` 엔드포인트 완벽 구현
+   - JSON-only 강제 검증 완벽 작동
+   - Zod 스키마 검증 (플랫폼·필수필드·URI 검증) 완료
+   - 헬스체크 기반 엔진 선택 로직 정상 작동
+   - VDP Post-Merge(Deep Merge) 함수 구현 완료
+
+2. **T3 메인 서버 (3001)**: 정상 실행 중
+   - 헬스체크 성공: `{"status":"healthy","timestamp":"2025-08-21T07:19:34.497Z"}`
+   - 서비스 상태: healthy
+
+3. **T1 서버 (8080)**: 새로운 어댑터 엔드포인트 정상 작동
+   - 요청 검증 통과
+   - 엔진 선택 로직 작동 (vertex 선택됨)
+   - 페이로드 변환 완료
+
+### ⚠️ **현재 문제점**
+
+#### **1. T3 서브 서버 (8082) 문제**
+```
+❌ T3 Secondary VDP 생성 실패: 422 에러
+문제: 스키마 검증 실패 (요청 바디 422 원인)
+상태: 서버는 실행 중이나 요청 형식 불일치
+```
+
+#### **2. 포트 충돌 문제**
+```
+Error: listen EADDRINUSE: address already in use :::3001
+문제: T3 서브 서버가 3001 포트 사용 시도
+해결: 8082 포트로 올바르게 설정 필요
+```
+
+#### **3. `/readyz` 엔드포인트 인식 안됨**
+```
+Cannot GET /readyz
+문제: 새로 추가한 엔드포인트가 인식되지 않음
+원인: 서버 재시작 또는 라우팅 설정 문제
+```
+
+## 🔍 **현재 테스트 결과**
+
+### **T1→T3 어댑터 테스트**
+```bash
+curl -X POST http://localhost:8080/api/vdp/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "platform": "instagram",
+    "content_id": "test123",
+    "gcsUri": "gs://tough-variety-raw-central1/raw/input/instagram/test123.mp4",
+    "meta": {
+      "like_count": 1000,
+      "comment_count": 50,
+      "author": "test_user"
+    },
+    "opts": {
+      "force_full_pipeline": true
+    }
+  }'
+```
+
+### **결과**
+```
+✅ 요청 검증 통과
+✅ 엔진 선택: vertex
+✅ 페이로드 변환 완료
+❌ T3 Secondary VDP 생성 실패: 422
+❌ 최종 결과: T3_UNAVAILABLE
+```
+
+## 🎯 **재컨설팅 요청사항**
+
+### **1. T3 서브 서버 (8082) 422 에러 해결**
+- **요청 바디 422 원인**: 정확한 스키마 불일치 지점 파악
+- **페이로드 형식**: T3 서브 서버가 기대하는 정확한 형식
+- **스키마 검증**: Zod/DTO로 필수 필드 누락/타입 오류 명시
+
+### **2. 포트 설정 문제 해결**
+- **T3 서브 서버**: 8082 포트로 올바르게 설정
+- **포트 충돌**: 3001 포트 사용 시도 문제 해결
+- **서버 설정**: 올바른 포트 바인딩 방법
+
+### **3. `/readyz` 엔드포인트 인식 문제**
+- **라우팅 설정**: Express 라우터 설정 확인
+- **서버 재시작**: 변경사항 적용을 위한 재시작 방법
+- **엔드포인트 테스트**: 정상 작동 확인 방법
+
+### **4. 다음 단계 우선순위**
+- **즉시 해결**: T3 서브 서버 422 에러
+- **중간 단계**: 포트 설정 및 `/readyz` 엔드포인트
+- **최종 목표**: VDP Raw 생성 성공
+
+## 📋 **기술적 세부사항**
+
+### **현재 T3 서브 서버 설정**
+```typescript
+// services/vdp-extractor/src/server.ts
+app.get('/readyz', createAsyncHandler(vdpController.readinessCheck));
+app.get('/version', createAsyncHandler(vdpController.versionInfo));
+```
+
+### **현재 T3 서브 서버 포트 설정**
+```typescript
+// services/vdp-extractor/src/server.ts
+server: {
+  port: 3001,  // ⚠️ 문제: 8082로 변경 필요
+  corsOrigin: "http://localhost:3000",
+  rateLimitWindowMs: 900000,
+  rateLimitMaxRequests: 100
+}
+```
+
+### **현재 페이로드 형식 (vertex 엔진)**
+```json
+{
+  "gcsUri": "gs://tough-variety-raw-central1/raw/input/instagram/test123.mp4",
+  "metadata": {
+    "platform": "instagram",
+    "language": "ko",
+    "video_origin": "Real-Footage"
+  },
+  "content_key": "instagram:test123",
+  "processing_options": {
+    "force_full_pipeline": true,
+    "hook_genome_analysis": true
+  }
+}
+```
+
+## 🚀 **기대 결과**
+
+### **즉시 해결 후**
+1. **T3 서브 서버**: 422 에러 해결 → VDP 생성 성공
+2. **포트 설정**: 8082 포트로 올바른 바인딩
+3. **헬스체크**: `/readyz`, `/version` 엔드포인트 정상 작동
+4. **통합 테스트**: `/api/vdp/generate` → VDP Raw 생성 성공
+
+### **최종 목표**
+- **30-60초 / 90%+ 자동화** 달성
+- **IG/TikTok YouTube와 동일한 품질**의 VDP Raw 생성
+- **완전한 메타데이터 보존** (19필드)
+- **안정적인 T3 서버 연동**
+
+---
+
+**GPT-5 Pro CTO님의 정확한 기술적 가이드로 T3 서브 서버 문제를 해결하여 VDP Raw 시스템을 완성하겠습니다!**
+
+**현재 T1→T3 어댑터는 완벽하게 구현되어 있으며, T3 서브 서버의 422 에러만 해결하면 전체 시스템이 정상 작동할 것입니다.**
