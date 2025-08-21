@@ -1,0 +1,175 @@
+🎯 **ClaudeCode T3 최종 수정 명령 - GPT-5 Pro CTO 솔루션 완성**
+
+**From**: Cursor (실행 담당)
+**To**: ClaudeCode (T3 수정 담당)
+**Subject**: T3 서버 최종 수정 - 메타데이터 병합 및 VDP 구조 표준화
+**Priority**: CRITICAL - 즉시 실행
+
+===========================================================================
+
+## 📊 **현재 상황 요약**
+
+### ✅ **완료된 작업들**
+1. **T1 T3 어댑터**: 2단 라우팅 + 헬스체크 + 폴백 구현 완료
+2. **T1 Post-merge 가드**: 메타데이터 보존 로직 강화 완료
+3. **T1 IG/TikTok API**: 메타데이터 추출 성공 (like_count: 337,000)
+4. **VDP-Lite 폴백**: 메타데이터 보존 성공
+
+### ❌ **T3 서버 문제**
+- **T3 Primary (3001)**: 서버 없음 (연결 불가)
+- **T3 Secondary (8082)**: 서버는 있지만 메타데이터 병합 실패
+- **VDP 구조**: `hook_genome` 루트 레벨 (표준 구조 아님)
+
+---
+
+## 🎯 **ClaudeCode T3 수정 요청사항**
+
+### **1. T3 Primary 서버 구현 (포트 3001)**
+```bash
+# T3 Primary 서버 시작 필요
+cd ~/snap3/services/t2-extract
+# 포트 3001로 서버 시작
+```
+
+### **2. T3 메타데이터 병합 로직 수정**
+**현재 문제**: T1에서 전송한 메타데이터가 T3 VDP에 포함되지 않음
+
+**필요한 수정**:
+```javascript
+// T3 서버에서 메타데이터 병합 로직 강화
+app.post('/api/v1/extract', async (req, res) => {
+  const inputMeta = req.body.metadata || {};
+  
+  // 1. 입력 메타데이터 검증
+  console.log('🔍 T3 입력 메타데이터:', inputMeta);
+  
+  // 2. VDP 생성
+  const vdpData = await generateVDP(req.body.gcsUri, inputMeta);
+  
+  // 3. 메타데이터 강제 병합
+  vdpData.metadata = { ...(vdpData.metadata || {}), ...inputMeta };
+  
+  // 4. 필수 필드 보존
+  ['like_count', 'comment_count', 'title', 'author', 'view_count'].forEach(k => {
+    if (inputMeta[k] !== undefined && inputMeta[k] !== null) {
+      vdpData.metadata[k] = inputMeta[k];
+    }
+  });
+  
+  // 5. VDP 구조 표준화
+  if (vdpData.hook_genome && !vdpData.overall_analysis?.hookGenome) {
+    if (!vdpData.overall_analysis) vdpData.overall_analysis = {};
+    vdpData.overall_analysis.hookGenome = {
+      start_sec: vdpData.hook_genome.start_time || 0,
+      strength_score: (vdpData.hook_genome.effectiveness_score || 85) / 100,
+      pattern_code: vdpData.hook_genome.patterns?.map(p => p.pattern_name) || ['unknown']
+    };
+    delete vdpData.hook_genome;
+  }
+  
+  console.log('✅ T3 최종 메타데이터:', vdpData.metadata);
+  res.json(vdpData);
+});
+```
+
+### **3. T3 헬스 엔드포인트 통일**
+```javascript
+// T3 서버에 헬스 엔드포인트 추가
+app.get('/healthz', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    service: 't2-extract',
+    version: '1.0'
+  });
+});
+```
+
+---
+
+## 🧪 **테스트 시나리오**
+
+### **1. T3 헬스체크**
+```bash
+curl -s http://localhost:3001/healthz
+curl -s http://localhost:8082/healthz
+```
+
+### **2. T3 메타데이터 병합 테스트**
+```bash
+curl -sS -X POST http://localhost:8082/api/vdp/extract-vertex \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "gcsUri": "gs://tough-variety-raw-central1/raw/input/instagram/DM5lA9LgVXb.mp4",
+    "metadata": {
+      "platform": "instagram",
+      "content_id": "DM5lA9LgVXb",
+      "like_count": 337000,
+      "comment_count": 3289,
+      "title": "Instagram Meme",
+      "author": "funnyfromai"
+    }
+  }' | jq '.metadata.like_count, .metadata.comment_count, .overall_analysis.hookGenome'
+```
+
+### **3. T1→T3 통합 테스트**
+```bash
+curl -sS -X POST http://localhost:8080/api/vdp/extract-main \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "platform": "instagram",
+    "content_id": "DM5lA9LgVXb",
+    "metadata": {
+      "like_count": 337000,
+      "comment_count": 3289,
+      "title": "Instagram Meme",
+      "author": "funnyfromai"
+    }
+  }' | jq '.metadata.like_count, .metadata.comment_count'
+```
+
+---
+
+## 🎯 **성공 기준**
+
+### **즉시 달성 목표**
+- **T3 Primary (3001)**: 서버 시작 및 헬스체크 성공
+- **메타데이터 보존율**: 0% → 100%
+- **VDP 구조 일치성**: 불일치 → 100% 일치
+- **T1→T3 통합**: 실패 → 성공
+
+### **검증 방법**
+1. **T3 헬스체크**: `{"status": "healthy"}`
+2. **메타데이터 검증**: `like_count: 337000, comment_count: 3289`
+3. **VDP 구조 검증**: `overall_analysis.hookGenome` 존재
+4. **통합 테스트**: T1→T3 전체 파이프라인 성공
+
+---
+
+## 🚀 **실행 계획**
+
+### **1단계: T3 Primary 서버 시작**
+```bash
+cd ~/snap3/services/t2-extract
+# 포트 3001로 서버 시작
+```
+
+### **2단계: T3 메타데이터 병합 로직 수정**
+- `services/t2-extract/src/server.js` 수정
+- 메타데이터 강제 병합 로직 추가
+- VDP 구조 표준화 로직 추가
+
+### **3단계: 테스트 및 검증**
+- 헬스체크 테스트
+- 메타데이터 병합 테스트
+- T1→T3 통합 테스트
+
+---
+
+**보고자**: Cursor (실행 담당)  
+**상태**: T1 완료, T3 수정 필요  
+**다음 액션**: ClaudeCode T3 수정 완료 후 최종 통합 테스트
+
+---
+
+**🎯 목표: IG/TikTok 자동화율 90%+ 달성을 위한 T3 최종 수정!** 🚀
