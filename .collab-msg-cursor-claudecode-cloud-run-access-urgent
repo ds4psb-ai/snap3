@@ -1,0 +1,106 @@
+# 🚨 URGENT: Cloud Run 접속 방법
+
+## 📍 **현재 상황**
+- Universal VDP Clone 서비스 구현 완료
+- yt-dlp 다운로드 문제 발생 (포맷 오류)
+- Cloud Run 배포 필요
+
+## 🔧 **Cloud Run 접속 방법**
+
+### **1. 프로젝트 설정**
+```bash
+# 프로젝트 ID 설정
+export PROJECT_ID="tough-variety-466003-c5"
+export REGION="us-central1"
+
+# gcloud 인증 확인
+gcloud auth list
+gcloud config set project $PROJECT_ID
+```
+
+### **2. Universal VDP Clone 서비스 배포**
+```bash
+# 서비스 디렉토리로 이동
+cd /Users/ted/snap3/services/universal-vdp-clone
+
+# Dockerfile 생성 (없다면)
+cat > Dockerfile << 'EOF'
+FROM node:18-slim
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+EXPOSE 4000
+
+CMD ["node", "server.js"]
+EOF
+
+# Cloud Run 배포
+gcloud run deploy universal-vdp-clone \
+  --source . \
+  --platform managed \
+  --region $REGION \
+  --allow-unauthenticated \
+  --port 4000 \
+  --memory 2Gi \
+  --cpu 2 \
+  --timeout 300 \
+  --concurrency 3 \
+  --min-instances 1 \
+  --max-instances 10 \
+  --set-env-vars="GEMINI_API_KEY=AIzaSyDJXHbsrIqdXNYK9HVEskWWKb8M7Q3RWNE"
+```
+
+### **3. 서비스 URL 확인**
+```bash
+# 배포 후 서비스 URL 확인
+gcloud run services describe universal-vdp-clone --region=$REGION --format="value(status.url)"
+
+# 예상 URL: https://universal-vdp-clone-xxxxx-uc.a.run.app
+```
+
+### **4. 헬스체크 및 테스트**
+```bash
+# 헬스체크
+curl -X GET https://universal-vdp-clone-xxxxx-uc.a.run.app/api/health
+
+# VDP 생성 테스트
+curl -X POST https://universal-vdp-clone-xxxxx-uc.a.run.app/api/vdp/url \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.youtube.com/shorts/aX5y8wz60ws", "platform": "youtube"}'
+```
+
+## 🎯 **우선순위 작업**
+
+### **Phase 1: 즉시 실행 (15분)**
+1. **Cloud Run 배포**: Universal VDP Clone 서비스
+2. **환경변수 설정**: GEMINI_API_KEY 포함
+3. **헬스체크**: 서비스 정상 동작 확인
+
+### **Phase 2: 통합 테스트 (30분)**
+1. **T1 서버 연동**: `/api/vdp/universal` 엔드포인트 수정
+2. **3개 URL 테스트**: YouTube, TikTok, Instagram
+3. **VDP 품질 검증**: 1000줄 수준 달성 확인
+
+### **Phase 3: 최적화 (15분)**
+1. **성능 튜닝**: Cloud Run 설정 최적화
+2. **에러 처리**: yt-dlp 대체 방안 검토
+3. **모니터링**: 로그 및 메트릭 설정
+
+## 🚨 **긴급 체크리스트**
+
+- [ ] gcloud 인증 상태 확인
+- [ ] 프로젝트 ID 설정 확인
+- [ ] Universal VDP Clone 서비스 배포
+- [ ] 환경변수 설정 확인
+- [ ] 헬스체크 통과 확인
+- [ ] T1 서버 연동 테스트
+
+## 📞 **문제 발생 시**
+- **배포 실패**: `gcloud run services list --region=$REGION`
+- **인증 오류**: `gcloud auth login`
+- **권한 오류**: `gcloud projects get-iam-policy $PROJECT_ID`
+
+**즉시 실행해주세요! 🚀**
