@@ -1,0 +1,142 @@
+🚀 **CURSOR → ClaudeCode: Phase 1 완료 보고 및 다음 단계 지시**
+
+**타임스탬프**: 2025-08-21 10:40 KST
+**상태**: ✅ Phase 1 완료 확인
+**다음 단계**: Phase 2 T3 메타데이터 병합 구현
+
+---
+
+## 📊 **Phase 1 완료 현황**
+
+### ✅ **T1 Shim 구현 완료 확인**
+- **metadata_passthrough 키 추가**: ✅ 이미 구현됨 (라인 2848, 2966)
+- **페이로드 표준화**: ✅ T3 Main/Sub 양방향 호환 구조
+- **메타데이터 병합 로직**: ✅ T1 Post-merge 구현 완료
+
+### 🔍 **현재 구현 상태**
+```javascript
+// T3 호출 시 metadata_passthrough 키 포함
+const t3Payload = {
+    input: { gcsUri: `gs://${RAW_BUCKET}/raw/input/${platform}/${content_id}.mp4` },
+    meta: { platform, language: 'ko', video_origin: 'Real-Footage' },
+    metadata_passthrough: {
+        platform, content_id,
+        ...req.body.metadata  // 커서에서 추출한 메타데이터
+    },
+    processing_options: { force_full_pipeline: true }
+};
+```
+
+### ✅ **T1 Post-merge 메타데이터 보존 로직**
+```javascript
+// 핵심 메타데이터 필드 강제 보존
+['like_count','comment_count','title','author','view_count','share_count','upload_date','hashtags'].forEach(k => {
+    if (inboundMeta[k] !== undefined && inboundMeta[k] !== null) {
+        m[k] = inboundMeta[k];
+    }
+});
+```
+
+---
+
+## 🎯 **Phase 2: T3 메타데이터 병합 구현**
+
+### **현재 문제점**
+- T3 Sub 서버에서 422 에러 발생
+- **원인**: T3가 `metadata_passthrough` 키를 인식하지 못함
+- **해결**: T3 서버에서 `metadata_passthrough` → VDP 루트 `metadata` 병합 로직 구현
+
+### **Phase 2 구현 범위**
+
+#### **T3 Main 서버 (포트 3001)**
+```javascript
+// services/vdp-extractor/src/controllers/vdp.controller.ts
+app.post('/api/v1/extract', async (req, res) => {
+    const { input, meta, metadata_passthrough } = req.body;
+    
+    // VDP 생성
+    const vdp = await runVDP(input.gcsUri, meta);
+    
+    // 메타데이터 병합 (metadata_passthrough → metadata)
+    vdp.metadata = { 
+        ...(vdp.metadata || {}), 
+        ...(metadata_passthrough || {}) 
+    };
+    
+    return res.json(vdp);
+});
+```
+
+#### **T3 Sub 서버 (포트 8082)**
+```javascript
+// services/t2-extract/src/server.js 또는 해당 엔드포인트
+app.post('/api/vdp/extract-vertex', async (req, res) => {
+    const { input, meta, metadata_passthrough } = req.body;
+    
+    // VDP 생성
+    const vdp = await runVDP(input.gcsUri, meta);
+    
+    // 메타데이터 병합
+    vdp.metadata = { 
+        ...(vdp.metadata || {}), 
+        ...(metadata_passthrough || {}) 
+    };
+    
+    return res.json(vdp);
+});
+```
+
+---
+
+## ⚡ **즉시 실행 지시사항**
+
+### **1. T3 Main 서버 수정 (30분)**
+- **파일**: `services/vdp-extractor/src/controllers/vdp.controller.ts`
+- **작업**: `/api/v1/extract` 엔드포인트에 메타데이터 병합 로직 추가
+
+### **2. T3 Sub 서버 수정 (30분)**
+- **파일**: `services/t2-extract/` 또는 해당 서버 파일
+- **작업**: `/api/vdp/extract-vertex` 엔드포인트에 메타데이터 병합 로직 추가
+
+### **3. 서버 재시작 및 테스트 (15분)**
+```bash
+# T3 Main 재시작
+cd services/vdp-extractor && npm run dev
+
+# T3 Sub 재시작 (포트 8082)
+# 해당 서버 재시작
+
+# 테스트
+curl -sS -H "Content-Type: application/json" \
+     -d "$PAYLOAD" \
+     http://localhost:3001/api/v1/extract | \
+     jq '.metadata.like_count,.metadata.title'
+```
+
+---
+
+## 🚨 **긴급 해결 목표**
+
+### **422 에러 해결**
+- **현재**: T3 Sub에서 `metadata_passthrough` 키 인식 실패
+- **목표**: T3 서버에서 메타데이터 병합 후 정상 응답
+
+### **메타데이터 보존 확인**
+- **테스트 케이스**: Instagram `like_count: 336000` → VDP 결과에서 동일 값 확인
+- **기대 결과**: `metadata.like_count == 336000` (null 아님)
+
+---
+
+## 💬 **ClaudeCode 확인 요청사항**
+
+1. **Phase 1 완료 확인** - T1 Shim 구현 상태 검토
+2. **Phase 2 시작 승인** - T3 메타데이터 병합 구현 진행
+3. **T3 서버 파일 경로 확인** - 정확한 파일 위치 파악
+4. **구현 우선순위** - Main vs Sub 서버 중 어느 것부터 시작할지
+
+**목표**: 1시간 내 T3 422 에러 해결 및 메타데이터 보존 완료
+
+---
+
+**GPT-5 Pro CTO 세션**: VDP Raw 구현 진행 중
+**다음 단계**: ClaudeCode Phase 2 구현 → Phase 3 통합 테스트
