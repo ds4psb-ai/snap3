@@ -1,0 +1,102 @@
+# 🚨 Cursor → ClaudeCode: Universal VDP 스키마 업그레이드 긴급 요청
+
+## 📊 **문제 상황**
+- **현재 VDP**: 단순한 viral_dna 구조 (기본 수준)
+- **목표 VDP**: 1000줄 수준의 상세 분석 (true-hybrid-v5-universal-final-test.json)
+- **우선순위**: CRITICAL
+
+## 🎯 **목표 VDP 구조 분석**
+
+### **필수 섹션들**
+```json
+{
+  "content_id": "6_I2FmT1mbY",
+  "default_lang": "en",
+  "metadata": { ... },
+  "overall_analysis": {
+    "summary": "상세한 비디오 요약",
+    "emotional_arc": "감정적 아크 분석",
+    "audience_reaction": {
+      "analysis": "시청자 반응 분석",
+      "common_reactions": ["반응 목록"],
+      "notable_comments": [{"text": "댓글", "lang": "ko", "translation_en": "번역"}],
+      "overall_sentiment": "Positive"
+    },
+    "safety_flags": [],
+    "confidence": {
+      "overall": 0.98,
+      "scene_classification": 0.96,
+      "device_analysis": 0.95
+    },
+    "hookGenome": {
+      "start_sec": 0,
+      "pattern_code": "curiosity_gap",
+      "strength_score": 0.9,
+      "trigger_modalities": ["visual", "auditory"],
+      "microbeats_sec": [0.5, 1.5, 4],
+      "connected_scene_id": "S01_Opening",
+      "hook_integration_analysis": "상세한 훅 분석"
+    },
+    "asr_transcript": "음성 인식 텍스트",
+    "asr_lang": "ko",
+    "asr_translation_en": "영어 번역",
+    "ocr_text": [
+      {
+        "text": "OCR 텍스트",
+        "lang": "ko",
+        "translation_en": "영어 번역"
+      }
+    ]
+  },
+  "scenes": [
+    {
+      "scene_id": "S01_Opening",
+      "start_time": 0,
+      "end_time": 3,
+      "narrative_type": "Hook",
+      "shot_details": {
+        "camera_movement": "Static",
+        "keyframes": ["키프레임 설명"],
+        "composition": "컴포지션 분석"
+      },
+      "style_analysis": {
+        "lighting": "조명 분석",
+        "mood_palette": "분위기 팔레트",
+        "edit_grammar": "편집 문법"
+      }
+    }
+  ],
+  "product_mentions": [],
+  "service_mentions": []
+}
+```
+
+## 🔧 **요청 사항**
+
+### **1. VDP 스키마 완전 업그레이드**
+- 현재 `viral_dna` 구조를 `overall_analysis` + `scenes` 구조로 변경
+- `hookGenome` 상세 분석 추가
+- `asr_transcript` + `ocr_text` 추가
+- `audience_reaction` 상세 분석 추가
+
+### **2. Gemini 프롬프트 업그레이드**
+- 더 상세한 분석 요청
+- 1000줄 수준의 출력 요구
+- Evidence Pack 수준의 상세도
+
+### **3. 즉시 적용**
+- 현재 YouTube VDP는 성공했지만 수준이 부족
+- TikTok, Instagram 테스트 전에 스키마 업그레이드 필요
+
+## 🚨 **긴급 요청**
+**ClaudeCode: Universal VDP 스키마를 true-hybrid-v5 수준으로 업그레이드해주세요!**
+
+### **확인 방법**
+```bash
+git pull
+cat .collab-msg-cursor-universal-vdp-upgrade-urgent-20250821-2210
+```
+
+---
+
+*🤖 Cursor → ClaudeCode Universal VDP 스키마 업그레이드 긴급 요청 (2025-08-21 22:10)*
