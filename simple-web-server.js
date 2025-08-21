@@ -2707,59 +2707,145 @@ app.post('/api/vdp/extract-main', async (req, res) => {
             content_id = urlResult.id;
         }
         
-        // GPT-5 Pro CTO Solution: T3 Adapter with Main→Sub Fallback
-        // Step 1: Try Main VDP (port 3001) first
-        let vdpResponse;
-        try {
-            vdpResponse = await fetch('http://localhost:3001/api/v1/extract', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Correlation-ID': correlationId
-                },
-                body: JSON.stringify({
-                    gcsUri: `gs://${RAW_BUCKET}/raw/input/${(platform || 'unknown').toLowerCase()}/${content_id}.mp4`,
-                    metadata: {
-                        platform: platform || 'unknown',
-                        content_id: content_id,
-                        ...req.body.metadata
-                    },
-                    meta: {
-                        content_id: content_id,
-                        content_key: `${(platform || 'unknown').toLowerCase()}:${content_id}`,
-                        source_url: url
-                    },
-                    processing_options: {
-                        force_full_pipeline: true,
-                        audio_fingerprint: false,
-                        brand_detection: false,
-                        hook_genome_analysis: true
-                    },
-                    use_vertex: false
-                }),
-                timeout: 60000 // 60초 타임아웃
-            });
-        } catch (mainError) {
-            console.log(`[T3 Adapter] Main VDP (3001) failed: ${mainError.message}, trying T3 fallback`);
-            vdpResponse = null;
+        // GPT-5 Pro CTO Solution: T3 Adapter with Main→Sub Fallback (단순화)
+        const T3_ROUTES = [
+            {
+                health: 'http://localhost:3001/healthz',
+                url: 'http://localhost:3001/api/v1/extract',
+                name: 'Primary'
+            },
+            {
+                health: 'http://localhost:8082/healthz',
+                url: 'http://localhost:8082/api/vdp/extract-vertex',
+                name: 'Secondary'
+            }
+        ];
+        
+        async function callT3Extract(payload) {
+            for (const route of T3_ROUTES) {
+                try {
+                    // 헬스체크 먼저 수행
+                    const healthResponse = await fetch(route.health, {
+                        cache: 'no-store',
+                        signal: AbortSignal.timeout(1500)
+                    });
+                    
+                    if (!healthResponse.ok) {
+                        console.log(`❌ T3 ${route.name} 헬스체크 실패: ${healthResponse.status}`);
+                        continue;
+                    }
+                    
+                    console.log(`✅ T3 ${route.name} 헬스체크 성공, VDP 생성 시도...`);
+                    
+                    // VDP 생성 요청
+                    const vdpResponse = await fetch(route.url, {
+                        method: 'POST',
+                        body: JSON.stringify(payload),
+                        headers: {
+                            'content-type': 'application/json'
+                        },
+                        signal: AbortSignal.timeout(120000) // 120초 타임아웃
+                    });
+                    
+                    if (vdpResponse.ok) {
+                        const vdpData = await vdpResponse.json();
+                        console.log(`✅ T3 ${route.name} VDP 생성 성공`);
+                        return vdpData;
+                    } else {
+                        console.log(`❌ T3 ${route.name} VDP 생성 실패: ${vdpResponse.status}`);
+                    }
+                    
+                } catch (error) {
+                    console.log(`❌ T3 ${route.name} 연결 실패: ${error.message}`);
+                }
+            }
+            
+            throw new Error('T3_UNAVAILABLE - 모든 T3 서버가 사용 불가능합니다');
         }
         
-        if (vdpResponse && vdpResponse.ok) {
-            const vdpData = await vdpResponse.json();
+        // T3 호출 시도
+        const t3Payload = {
+            gcsUri: `gs://${RAW_BUCKET}/raw/input/${(platform || 'unknown').toLowerCase()}/${content_id}.mp4`,
+            metadata: {
+                platform: platform || 'unknown',
+                content_id: content_id,
+                ...req.body.metadata
+            },
+            meta: {
+                content_id: content_id,
+                content_key: `${(platform || 'unknown').toLowerCase()}:${content_id}`,
+                source_url: url
+            },
+            processing_options: {
+                force_full_pipeline: true,
+                audio_fingerprint: false,
+                brand_detection: false,
+                hook_genome_analysis: true
+            },
+            use_vertex: false
+        };
+        
+        try {
+            const t3Data = await callT3Extract(t3Payload);
+            
+            // GPT-5 Pro CTO Solution: T1 Post-merge 메타데이터 강제 보존
+            const ensured = (() => {
+                const base = t3Data ?? {};
+                const inboundMeta = req.body?.metadata ?? {};
+                
+                // 1. 메타데이터 병합
+                base.metadata = { ...(base.metadata ?? {}), ...inboundMeta };
+                
+                // 2. 필수 필드 강제 보존
+                const m = base.metadata;
+                if (!m.platform) m.platform = req.body?.platform ?? inboundMeta.platform ?? 'unknown';
+                if (!m.content_id) m.content_id = req.body?.content_id ?? inboundMeta.content_id ?? 'unknown';
+                
+                // 3. 핵심 메타데이터 필드 강제 보존
+                ['like_count','comment_count','title','author','view_count','share_count','upload_date','hashtags'].forEach(k => {
+                    if (inboundMeta[k] !== undefined && inboundMeta[k] !== null) {
+                        m[k] = inboundMeta[k];
+                    }
+                });
+                
+                // 4. VDP 구조 표준화
+                if (!base.overall_analysis) {
+                    base.overall_analysis = {};
+                }
+                
+                if (base.hook_genome && !base.overall_analysis.hookGenome) {
+                    base.overall_analysis.hookGenome = {
+                        start_sec: base.hook_genome.start_time || 0,
+                        strength_score: base.hook_genome.effectiveness_score / 10 || 0.85,
+                        pattern_code: base.hook_genome.patterns?.map(p => p.pattern_name) || ['unknown']
+                    };
+                    delete base.hook_genome;
+                }
+                
+                console.log('🔍 T1 Post-merge 메타데이터 검증:', {
+                    like_count: m.like_count,
+                    comment_count: m.comment_count,
+                    title: m.title,
+                    author: m.author,
+                    hookGenome_exists: !!base.overall_analysis?.hookGenome
+                });
+                
+                return base;
+            })();
             
             structuredLog('success', 'Main VDP extraction completed', {
-                contentId: vdpData.content_id,
-                platform: vdpData.platform,
-                processingTime: vdpData.processing_time_ms
+                contentId: content_id,
+                platform: platform,
+                postMerge: true
             }, correlationId);
             
-            res.json(vdpData);
+            res.json(ensured);
             return;
+            
+        } catch (t3Error) {
+            console.log(`❌ T3 호출 실패: ${t3Error.message}`);
+            throw new Error(`T3_UNAVAILABLE: ${t3Error.message}`);
         }
-        
-        // Step 2: T3 Fallback if Main VDP failed
-        console.log(`[T3 Adapter] Main VDP failed, trying T3 fallback (8082)`);
-        throw new Error(`Main VDP failed: ${vdpResponse?.status || 'connection error'}`);
         
     } catch (error) {
         structuredLog('warn', 'Main VDP extraction failed, attempting T3 fallback', {
@@ -3357,6 +3443,79 @@ async function startServer() {
             res.end(metrics);
         } catch (error) {
             res.status(500).json({ error: 'Metrics collection failed' });
+        }
+    });
+
+    // GPT-5 Pro CTO Solution: T1 헬스체크 표준화
+    app.get('/healthz', async (req, res) => {
+        const startTime = Date.now();
+        const correlationId = `health_${Date.now()}`;
+        
+        try {
+            // T3 서비스 헬스체크
+            const t3Checks = {};
+            
+            // T3 Primary (3001) 헬스체크
+            try {
+                const t3PrimaryResponse = await fetch('http://localhost:3001/healthz', {
+                    signal: AbortSignal.timeout(1500)
+                });
+                t3Checks.t3_main = {
+                    status: t3PrimaryResponse.ok ? 'ok' : 'error',
+                    statusCode: t3PrimaryResponse.status,
+                    responseTime: Date.now() - startTime
+                };
+            } catch (error) {
+                t3Checks.t3_main = {
+                    status: 'error',
+                    error: error.message,
+                    responseTime: Date.now() - startTime
+                };
+            }
+            
+            // T3 Secondary (8082) 헬스체크
+            try {
+                const t3SecondaryResponse = await fetch('http://localhost:8082/healthz', {
+                    signal: AbortSignal.timeout(1500)
+                });
+                t3Checks.t3_sub = {
+                    status: t3SecondaryResponse.ok ? 'ok' : 'error',
+                    statusCode: t3SecondaryResponse.status,
+                    responseTime: Date.now() - startTime
+                };
+            } catch (error) {
+                t3Checks.t3_sub = {
+                    status: 'error',
+                    error: error.message,
+                    responseTime: Date.now() - startTime
+                };
+            }
+            
+            const overallStatus = Object.values(t3Checks).some(check => check.status === 'ok') ? 'healthy' : 'degraded';
+            
+            res.json({
+                status: overallStatus,
+                timestamp: new Date().toISOString(),
+                correlationId,
+                checks: {
+                    t1_server: {
+                        status: 'ok',
+                        version: '1.0.0',
+                        uptime: process.uptime()
+                    },
+                    ...t3Checks
+                },
+                responseTime: Date.now() - startTime
+            });
+            
+        } catch (error) {
+            res.status(503).json({
+                status: 'unhealthy',
+                timestamp: new Date().toISOString(),
+                correlationId,
+                error: error.message,
+                responseTime: Date.now() - startTime
+            });
         }
     });
 
