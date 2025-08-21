@@ -1,0 +1,215 @@
+🚨 **CURSOR → ClaudeCode: GPT-5 Pro CTO 15분 핫픽스 지시사항**
+
+**타임스탬프**: 2025-08-21 10:45 KST
+**우선순위**: P0 (Critical - 즉시 실행)
+**예상 소요**: 15분 핫픽스
+
+---
+
+## 📊 **GPT-5 Pro CTO 분석 결과**
+
+### 🎯 **422 에러 원인 분석**
+- **T3_sub(8082) 스키마 불일치**: 요청 페이로드와 서버 스키마 불일치
+- **포트 충돌**: T3_sub가 3001로 바인딩 시도 (8082여야 함)
+- **헬스엔드포인트 불일치**: `/readyz` 미구현, `/health`만 존재
+
+### ⚡ **15분 핫픽스 목표**
+1. **422 에러 해결**: T3_sub 스키마 정규화
+2. **포트 고정**: 8082 포트 확실히 바인딩
+3. **헬스엔드포인트 표준화**: `/readyz` alias 추가
+4. **T1→T3 페이로드 정규화**: 엔진별 맞춤 페이로드
+
+---
+
+## 🔧 **즉시 실행 지시사항**
+
+### **Phase 1: T3_sub(8082) 서버 핫픽스 (10분)**
+
+#### **파일**: `services/t2-extract/src/server.ts` (또는 해당 서버 파일)
+
+```typescript
+import express from "express";
+import { z } from "zod";
+
+const app = express();
+app.use(express.json({ limit: "5mb" }));
+
+// 1) Health/Ready/Version 표준화
+app.get(["/health","/healthz","/readyz"], (_req,res)=>res.json({status:"ok"}));
+app.get("/version", (_req,res)=>res.json({
+  service: "t2-extract", 
+  engine: "VertexAI", 
+  rev: process.env.SERVICE_REVISION ?? "local",
+  port: process.env.PORT ?? "8082"
+}));
+
+// 2) Strict 입력스키마 (서비스 내부 기준)
+const MetaSchema = z.object({
+  platform: z.enum(["youtube","youtube_shorts","instagram","tiktok"]),
+  language: z.string().default("ko"),
+  content_id: z.string().optional(),
+  source_url: z.string().url().optional()
+}).strict();
+
+const ExtractReqSchema = z.object({
+  gcsUri: z.string().startsWith("gs://"),
+  meta: MetaSchema,
+  options: z.object({
+    hookGate: z.object({
+      min_strength: z.number().min(0).max(1).default(0.70),
+      max_start_sec: z.number().positive().default(3.0)
+    }).optional()
+  }).optional()
+}).strict();
+
+// 3) 전처리: unknown 필드 제거(미리 sanitize)
+function pick<T extends object, K extends keyof T>(obj: T | undefined, keys: K[]): Pick<T, K> {
+  if (!obj) return {} as Pick<T,K>;
+  const out = {} as any; 
+  for (const k of keys) if (k in obj) out[k] = (obj as any)[k];
+  return out as Pick<T,K>;
+}
+
+function sanitizeBody(b: any){
+  const meta = pick(b?.meta, ["platform","language","content_id","source_url"]);
+  const out: any = { gcsUri: b?.gcsUri, meta };
+  if (b?.options?.hookGate) out.options = { hookGate: pick(b.options.hookGate, ["min_strength","max_start_sec"]) };
+  return out;
+}
+
+app.post("/api/vdp/extract-vertex", async (req,res)=>{
+  try {
+    const clean = sanitizeBody(req.body);            // unknown 제거
+    const data = ExtractReqSchema.parse(clean);      // zod 검증
+    
+    // ... Vertex 호출 & VDP 생성 로직 ...
+    
+    res.json({ ok:true, received: data });
+  } catch (e:any) {
+    return res.status(422).json({
+      type: "https://api.vdp.example/problems/invalid-input",
+      title: "Validation failed",
+      status: 422,
+      code: "SCHEMA_MISMATCH",
+      detail: e?.message
+    });
+  }
+});
+
+// 4) 포트 고정 (Cloud Run도 PORT 준수)
+const PORT = process.env.PORT ?? "8082";
+app.listen(Number(PORT), ()=> console.log(`[t2-extract] listening on ${PORT}`));
+```
+
+### **Phase 2: T1 어댑터 페이로드 정규화 (5분)**
+
+#### **파일**: `simple-web-server.js` (T1 어댑터 부분)
+
+```javascript
+// T3_sub(8082) 전용 페이로드 정규화
+const PLATFORM_MAP = { 
+  Instagram:"instagram", 
+  TikTok:"tiktok", 
+  YouTube:"youtube", 
+  youtube:"youtube" 
+};
+
+function toVertexPayload(input){
+  return {
+    gcsUri: input.gcsUri,                  // gs://...
+    meta: {
+      platform: PLATFORM_MAP[input.platform] ?? input.platform,
+      language: input.language ?? "ko",
+      content_id: input.content_id,
+      source_url: input.source_url
+    },
+    options: input.options?.hookGate ? { 
+      options: { 
+        hookGate: {
+          min_strength: input.options.hookGate.min_strength ?? 0.70,
+          max_start_sec: input.options.hookGate.max_start_sec ?? 3.0
+        }
+      }
+    }.options : undefined
+  };
+}
+
+// 전송 전 최종 sanitize
+function stripUnknownVertex(b){
+  const out = { gcsUri:b.gcsUri, meta:{}, options: undefined };
+  if (b?.meta) out.meta = (({platform,language,content_id,source_url})=>({platform,language,content_id,source_url}))(b.meta);
+  if (b?.options?.hookGate) out.options = { hookGate: (({min_strength,max_start_sec})=>({min_strength,max_start_sec}))(b.options.hookGate) };
+  return out;
+}
+```
+
+---
+
+## 🧪 **스모크 테스트 (복붙 실행)**
+
+```bash
+# A) T3_sub 살아있는지
+curl -s http://localhost:8082/health    # -> {"status":"ok"}
+curl -s http://localhost:8082/readyz    # -> {"status":"ok"}
+curl -s http://localhost:8082/version   # -> JSON with { service:"t2-extract", ... }
+
+# B) 최소 성공 케이스(422 제거)
+curl -s -X POST http://localhost:8082/api/vdp/extract-vertex \
+  -H "content-type: application/json" -d '{
+    "gcsUri":"gs://tough-variety-raw-central1/ingest/instagram/TEST.mp4",
+    "meta":{"platform":"instagram","language":"ko"}
+  }' | jq .
+
+# C) 어댑터 경유
+curl -s -X POST http://localhost:8080/api/vdp/generate \
+  -H "content-type: application/json" -d '{
+    "engine":"vertex",
+    "platform":"Instagram",
+    "gcsUri":"gs://tough-variety-raw-central1/ingest/instagram/TEST.mp4",
+    "language":"ko",
+    "content_id":"C_TEST_01",
+    "source_url":"https://instagram.com/reel/XYZ"
+  }' | jq '.status,.errors'
+```
+
+**기대 결과**: A,B 200 OK / C는 `status: "ok"` 또는 진행 상태
+
+---
+
+## 🚨 **실패 원인별 디코딩**
+
+| 증상 | 흔한 원인 | 해결 |
+|------|-----------|------|
+| 422 + "SCHEMA_MISMATCH" | `metadata` 탑레벨 사용, `platform` 대소문자/미지원 enum | **sanitize + strict Zod** / `meta.*`만 전송 |
+| 400 (메인) | 메인은 `/api/v1/extract`(URL 중심), GCS 전용 페이로드 전송 | 메인/서브 엔진별 전송 스키마 분기 |
+| 404 `/readyz` | 서브에 `/readyz` 미구현 | alias 추가(`/health` 재사용) |
+| 포트 충돌 | 서브가 3001로 뜸 | `PORT=8082` 고정 & Procfile/Env 재검증 |
+
+---
+
+## 🎯 **핵심 규칙**
+
+### **T3_sub(8082) 허용 Top-level 키**
+- **허용**: `gcsUri`, `meta`, `options` 만
+- **불허**: `metadata`, `processing_options`, `content_key` 등
+- **platform**: lowercase enum (instagram|tiktok|youtube|youtube_shorts)
+
+### **엔진 라우팅**
+- **T3_main(3001)**: `/api/v1/extract` (URL 중심)
+- **T3_sub(8082)**: `/api/vdp/extract-vertex` (GCS 중심)
+
+---
+
+## 💬 **ClaudeCode 확인 요청사항**
+
+1. **T3_sub 서버 파일 경로 확인** - 정확한 파일 위치 파악
+2. **포트 8082 고정** - 환경변수 및 바인딩 설정 확인
+3. **Zod 스키마 구현** - strict 검증 로직 추가
+4. **T1 어댑터 수정** - 엔진별 페이로드 정규화
+
+**목표**: 15분 내 422 에러 해결 및 T3_sub 정상 동작
+
+---
+
+**GPT-5 Pro CTO 세션**: 15분 핫픽스 지시 완료
+**다음 단계**: ClaudeCode 핫픽스 구현 → 스모크 테스트 → Phase 3 통합 테스트
