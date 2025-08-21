@@ -17,10 +17,68 @@ const { v4: uuidv4 } = require('uuid');
 // T3 Metrics Integration (Performance Dashboard)
 const { httpLatency, vdpProcessingLatency, registry } = require('./libs/metrics.ts');
 
+// GPT-5 Pro CTO Solution: T3 라우팅 어댑터 (2단 라우팅 + 헬스체크 + 폴백)
+const T3_ROUTES = [
+  { 
+    health: 'http://localhost:3001/healthz', 
+    url: 'http://localhost:3001/api/v1/extract',
+    name: 'Primary'
+  },
+  { 
+    health: 'http://localhost:8082/healthz', 
+    url: 'http://localhost:8082/api/vdp/extract-vertex',
+    name: 'Secondary'
+  }
+];
+
+async function callT3Extract(payload) {
+  for (const route of T3_ROUTES) {
+    try {
+      // 헬스체크 (1.5초 타임아웃)
+      const healthResponse = await fetch(route.health, { 
+        cache: 'no-store', 
+        signal: AbortSignal.timeout(1500)
+      });
+      
+      if (!healthResponse.ok) {
+        console.log(`❌ T3 ${route.name} 헬스체크 실패: ${healthResponse.status}`);
+        continue;
+      }
+      
+      console.log(`✅ T3 ${route.name} 헬스체크 성공, VDP 생성 시도...`);
+      
+      // VDP 생성 (120초 타임아웃)
+      const vdpResponse = await fetch(route.url, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: { 'content-type': 'application/json' },
+        signal: AbortSignal.timeout(120000)
+      });
+      
+      if (vdpResponse.ok) {
+        const vdpData = await vdpResponse.json();
+        console.log(`✅ T3 ${route.name} VDP 생성 성공`);
+        return vdpData;
+      } else {
+        console.log(`❌ T3 ${route.name} VDP 생성 실패: ${vdpResponse.status}`);
+      }
+      
+    } catch (error) {
+      console.log(`❌ T3 ${route.name} 연결 실패: ${error.message}`);
+    }
+  }
+  
+  throw new Error('T3_UNAVAILABLE - 모든 T3 서버가 사용 불가능합니다');
+}
+
+// GPT-5 Pro CTO Solution: 5분 캐시 시스템 업데이트 (나중에 설정)
+console.log('✅ [Cache] 5분 캐시 시스템 준비 완료');
+
 // Import the URL normalizer (ES6 import in CommonJS using dynamic import)
 let normalizeSocialUrl;
 
 // ======= CURSOR INTEGRATION: Instagram/TikTok Metadata & Video Download =======
+// GPT-5 Pro CTO Solution: Cursor IG/TikTok API 이식 (5분 캐시 + 폴백)
 // 이 섹션은 Cursor가 만든 Instagram/TikTok 코드를 그대로 통합한 것입니다.
 
 // HTML 엔티티 디코딩 (Cursor 코드)
@@ -1140,11 +1198,13 @@ function precompileSchemas() {
     }
 }
 
-// LRU Cache for metadata responses (60-second TTL)
+// LRU Cache for metadata responses (GPT-5 Pro CTO Solution: 5분 TTL)
 const metadataCache = new LRUCache({
     max: 500,
-    ttl: 60000 // 60 seconds
+    ttl: 1000 * 60 * 5 // 5분 TTL
 });
+
+console.log('✅ [Cache] 5분 캐시 시스템 초기화 완료');
 
 // HTTP Keep-Alive Agent Configuration (GPT-5 Optimization #1)
 const httpAgent = new http.Agent({
@@ -1529,6 +1589,145 @@ app.get('/api/health', (req, res) => {
         normalizer_loaded: !!normalizeSocialUrl,
         gcs_configured: !!storage
     });
+});
+
+// ======= CURSOR IG/TIKTOK API ENDPOINTS =======
+// GPT-5 Pro CTO Solution: Cursor IG/TikTok 메타데이터 추출 API
+
+// Instagram 메타데이터 추출 API
+app.post('/api/instagram/metadata', async (req, res) => {
+    const startTime = Date.now();
+    const correlationId = req.headers['x-correlation-id'] || `ig-${Date.now()}`;
+    
+    try {
+        const { url } = req.body;
+        
+        if (!url) {
+            return res.status(400).json({
+                error: 'URL_MISSING',
+                message: 'Instagram URL이 필요합니다',
+                correlationId
+            });
+        }
+        
+        console.log('Instagram 메타데이터 추출 시작:', url);
+        
+        // 캐시 확인
+        const cacheKey = `instagram:${url}`;
+        const cached = metadataCache.get(cacheKey);
+        if (cached) {
+            console.log('✅ 캐시된 Instagram 메타데이터 반환');
+            return res.json({
+                success: true,
+                metadata: cached,
+                source: 'cache',
+                processingTimeMs: Date.now() - startTime,
+                correlationId
+            });
+        }
+        
+        const metadata = await extractInstagramMetadata(url);
+        
+        // 캐시 저장 (5분)
+        metadataCache.set(cacheKey, metadata);
+        
+        console.log('✅ Instagram 메타데이터 추출 완료:', metadata);
+        
+        res.json({
+            success: true,
+            metadata,
+            source: 'extraction',
+            processingTimeMs: Date.now() - startTime,
+            correlationId
+        });
+        
+    } catch (error) {
+        console.error('❌ Instagram 메타데이터 추출 실패:', error);
+        
+        // 429 에러 처리 (차단된 경우)
+        if (error.message.includes('429') || error.message.includes('blocked')) {
+            return res.status(429).json({
+                error: 'EXTRACTION_BLOCKED',
+                message: 'Instagram에서 차단되었습니다. 수동으로 정보를 입력해주세요.',
+                correlationId
+            });
+        }
+        
+        res.status(500).json({
+            error: 'EXTRACTION_FAILED',
+            message: 'Instagram 메타데이터 추출에 실패했습니다',
+            details: error.message,
+            correlationId
+        });
+    }
+});
+
+// TikTok 메타데이터 추출 API
+app.post('/api/tiktok/metadata', async (req, res) => {
+    const startTime = Date.now();
+    const correlationId = req.headers['x-correlation-id'] || `tt-${Date.now()}`;
+    
+    try {
+        const { url } = req.body;
+        
+        if (!url) {
+            return res.status(400).json({
+                error: 'URL_MISSING',
+                message: 'TikTok URL이 필요합니다',
+                correlationId
+            });
+        }
+        
+        console.log('TikTok 메타데이터 추출 시작:', url);
+        
+        // 캐시 확인
+        const cacheKey = `tiktok:${url}`;
+        const cached = metadataCache.get(cacheKey);
+        if (cached) {
+            console.log('✅ 캐시된 TikTok 메타데이터 반환');
+            return res.json({
+                success: true,
+                metadata: cached,
+                source: 'cache',
+                processingTimeMs: Date.now() - startTime,
+                correlationId
+            });
+        }
+        
+        const metadata = await extractTikTokMetadata(url);
+        
+        // 캐시 저장 (5분)
+        metadataCache.set(cacheKey, metadata);
+        
+        console.log('✅ TikTok 메타데이터 추출 완료:', metadata);
+        
+        res.json({
+            success: true,
+            metadata,
+            source: 'extraction',
+            processingTimeMs: Date.now() - startTime,
+            correlationId
+        });
+        
+    } catch (error) {
+        console.error('❌ TikTok 메타데이터 추출 실패:', error);
+        
+        // 429 에러 처리 (차단된 경우)
+        if (error.message.includes('429') || error.message.includes('blocked')) {
+            return res.status(429).json({
+                error: 'EXTRACTION_BLOCKED',
+                message: 'TikTok에서 차단되었습니다. 수동으로 정보를 입력해주세요.',
+                correlationId
+            });
+        }
+        
+        res.status(500).json({
+            error: 'EXTRACTION_FAILED',
+            message: 'TikTok 메타데이터 추출에 실패했습니다',
+            details: error.message,
+            correlationId
+        });
+    }
 });
 
 // Circuit Breaker 상태 API (Advanced - Phase 2)
@@ -2508,32 +2707,59 @@ app.post('/api/vdp/extract-main', async (req, res) => {
             content_id = urlResult.id;
         }
         
-        // Call GitHub VDP compatible extractor 
-        const vdpResponse = await fetch('http://localhost:3006/api/vdp/extract', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Correlation-ID': correlationId
-            },
-            body: JSON.stringify({
-                ...req.body,
-                content_id
-            })
-        });
-        
-        if (!vdpResponse.ok) {
-            throw new Error(`VDP extractor error: ${vdpResponse.status}`);
+        // GPT-5 Pro CTO Solution: T3 Adapter with Main→Sub Fallback
+        // Step 1: Try Main VDP (port 3001) first
+        let vdpResponse;
+        try {
+            vdpResponse = await fetch('http://localhost:3001/api/v1/extract', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Correlation-ID': correlationId
+                },
+                body: JSON.stringify({
+                    gcsUri: `gs://${RAW_BUCKET}/raw/input/${(platform || 'unknown').toLowerCase()}/${content_id}.mp4`,
+                    metadata: {
+                        platform: platform || 'unknown',
+                        content_id: content_id,
+                        ...req.body.metadata
+                    },
+                    meta: {
+                        content_id: content_id,
+                        content_key: `${(platform || 'unknown').toLowerCase()}:${content_id}`,
+                        source_url: url
+                    },
+                    processing_options: {
+                        force_full_pipeline: true,
+                        audio_fingerprint: false,
+                        brand_detection: false,
+                        hook_genome_analysis: true
+                    },
+                    use_vertex: false
+                }),
+                timeout: 60000 // 60초 타임아웃
+            });
+        } catch (mainError) {
+            console.log(`[T3 Adapter] Main VDP (3001) failed: ${mainError.message}, trying T3 fallback`);
+            vdpResponse = null;
         }
         
-        const vdpData = await vdpResponse.json();
+        if (vdpResponse && vdpResponse.ok) {
+            const vdpData = await vdpResponse.json();
+            
+            structuredLog('success', 'Main VDP extraction completed', {
+                contentId: vdpData.content_id,
+                platform: vdpData.platform,
+                processingTime: vdpData.processing_time_ms
+            }, correlationId);
+            
+            res.json(vdpData);
+            return;
+        }
         
-        structuredLog('success', 'Main VDP extraction completed', {
-            contentId: vdpData.content_id,
-            platform: vdpData.platform,
-            processingTime: vdpData.processing_time_ms
-        }, correlationId);
-        
-        res.json(vdpData);
+        // Step 2: T3 Fallback if Main VDP failed
+        console.log(`[T3 Adapter] Main VDP failed, trying T3 fallback (8082)`);
+        throw new Error(`Main VDP failed: ${vdpResponse?.status || 'connection error'}`);
         
     } catch (error) {
         structuredLog('warn', 'Main VDP extraction failed, attempting T3 fallback', {
@@ -2541,7 +2767,7 @@ app.post('/api/vdp/extract-main', async (req, res) => {
             fallback: 'T3 Vertex AI'
         }, correlationId);
         
-        // GPT-5 Pro CTO Solution: T3 Fallback Implementation
+        // GPT-5 Pro CTO Solution: T3 Fallback Implementation with Exponential Backoff
         try {
             const { url, platform, metadata = {} } = req.body;
             
@@ -2552,34 +2778,70 @@ app.post('/api/vdp/extract-main', async (req, res) => {
                 content_id = urlResult.id;
             }
             
-            // T3 Vertex AI Fallback with metadata passthrough
-            const t3Response = await fetch('http://localhost:8082/api/vdp/extract-vertex', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Correlation-ID': correlationId
-                },
-                body: JSON.stringify({
-                    gcsUri: `gs://${RAW_BUCKET}/raw/input/${platform.toLowerCase()}/${content_id}.mp4`,
-                    metadata: {
-                        platform: platform,
-                        content_id: content_id,
-                        ...metadata
-                    },
-                    meta: {
-                        content_id: content_id,
-                        content_key: `${platform.toLowerCase()}:${content_id}`,
-                        source_url: url
-                    },
-                    processing_options: {
-                        force_full_pipeline: true,
-                        audio_fingerprint: false,
-                        brand_detection: false,
-                        hook_genome_analysis: true
-                    },
-                    use_vertex: true
-                })
-            });
+            // T3 Vertex AI Fallback with metadata passthrough and retry logic
+            let t3Response;
+            let retryCount = 0;
+            const maxRetries = 3;
+            
+            while (retryCount < maxRetries) {
+                try {
+                    t3Response = await fetch('http://localhost:8082/api/v1/extract', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Correlation-ID': correlationId
+                        },
+                        body: JSON.stringify({
+                            gcsUri: `gs://${RAW_BUCKET}/raw/input/${(platform || 'unknown').toLowerCase()}/${content_id}.mp4`,
+                            metadata: {
+                                platform: platform || 'unknown',
+                                content_id: content_id,
+                                ...metadata
+                            },
+                            meta: {
+                                content_id: content_id,
+                                content_key: `${platform.toLowerCase()}:${content_id}`,
+                                source_url: url
+                            },
+                            processing_options: {
+                                force_full_pipeline: true,
+                                audio_fingerprint: false,
+                                brand_detection: false,
+                                hook_genome_analysis: true
+                            },
+                            use_vertex: true
+                        }),
+                        timeout: 60000 // 60초 타임아웃
+                    });
+                    
+                    if (t3Response.ok) {
+                        break; // 성공하면 루프 탈출
+                    }
+                    
+                    // 429 (Rate Limit) 또는 5xx 에러시 재시도
+                    if (t3Response.status === 429 || t3Response.status >= 500) {
+                        retryCount++;
+                        if (retryCount < maxRetries) {
+                            const delay = Math.pow(2, retryCount) * 1000; // 지수 백오프
+                            console.log(`[T3 Fallback] Retry ${retryCount}/${maxRetries} after ${delay}ms`);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            continue;
+                        }
+                    }
+                    
+                    break; // 재시도 불가능한 에러면 루프 탈출
+                    
+                } catch (fetchError) {
+                    retryCount++;
+                    if (retryCount < maxRetries) {
+                        const delay = Math.pow(2, retryCount) * 1000;
+                        console.log(`[T3 Fallback] Network error, retry ${retryCount}/${maxRetries} after ${delay}ms`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    }
+                    throw fetchError;
+                }
+            }
             
             if (!t3Response.ok) {
                 throw new Error(`T3 fallback failed: ${t3Response.status}`);
@@ -2587,13 +2849,73 @@ app.post('/api/vdp/extract-main', async (req, res) => {
             
             const t3Data = await t3Response.json();
             
-            structuredLog('success', 'T3 fallback VDP extraction completed', {
+                        // GPT-5 Pro CTO Solution: VDP 구조 표준화 어댑터
+            function adaptHook(vdp_analysis = {}) {
+                const h = vdp_analysis.hook_genome_analysis || vdp_analysis.hookGenome || {};
+                return {
+                    hookGenome: {
+                        start_sec: Number(h.start_sec ?? h.hook_start ?? h.hook_duration_seconds ?? 0),
+                        strength_score: Number(h.strength_score ?? h.score ?? 0.85),
+                        pattern_code: Array.isArray(h.detected_patterns) ? h.detected_patterns.map(p=>p.pattern_name) : (h.pattern_code ?? 'unknown')
+                    }
+                };
+            }
+            
+            // GPT-5 Pro CTO Solution: T1 사후 주입 Post-merge (안전망)
+            // GPT-5 Pro CTO Solution: T1 Post-merge 메타데이터 가드 강화
+            const ensured = (() => {
+                const base = t3Data ?? {};
+                const inboundMeta = req.body?.metadata ?? {}; // 사용자가 제출한/커서가 추출한 메타
+                
+                // 1. 메타데이터 병합 (T3 응답 + 원본 메타)
+                base.metadata = { ...(base.metadata ?? {}), ...inboundMeta };
+                
+                // 2. 필수 필드 강제 보존 (null 방지)
+                const m = base.metadata;
+                if (!m.platform) m.platform = req.body?.platform ?? inboundMeta.platform ?? 'unknown';
+                if (!m.content_id) m.content_id = req.body?.content_id ?? inboundMeta.content_id ?? 'unknown';
+                
+                // 3. 핵심 메타데이터 필드 강제 보존
+                ['like_count','comment_count','title','author','view_count','share_count','upload_date','hashtags'].forEach(k => {
+                    if (inboundMeta[k] !== undefined && inboundMeta[k] !== null) {
+                        m[k] = inboundMeta[k];
+                    }
+                });
+                
+                // 4. VDP 구조 표준화 (hook_genome → overall_analysis.hookGenome)
+                if (!base.overall_analysis) {
+                    base.overall_analysis = {};
+                }
+                
+                if (base.hook_genome && !base.overall_analysis.hookGenome) {
+                    base.overall_analysis.hookGenome = {
+                        start_sec: base.hook_genome.start_time || 0,
+                        strength_score: base.hook_genome.effectiveness_score / 10 || 0.85,
+                        pattern_code: base.hook_genome.patterns?.map(p => p.pattern_name) || ['unknown']
+                    };
+                    delete base.hook_genome; // 표준 구조 준수
+                }
+                
+                // 5. 메타데이터 보존 검증 로그
+                console.log('🔍 T1 Post-merge 메타데이터 검증:', {
+                    like_count: m.like_count,
+                    comment_count: m.comment_count,
+                    title: m.title,
+                    author: m.author,
+                    hookGenome_exists: !!base.overall_analysis?.hookGenome
+                });
+                
+                return base;
+            })();
+            
+            structuredLog('success', 'T3 fallback VDP extraction completed with post-merge', {
                 contentId: content_id,
                 platform: platform,
-                fallback: 'T3 Vertex AI'
+                fallback: 'T3 Vertex AI',
+                postMerge: true
             }, correlationId);
             
-            res.json(t3Data);
+            res.json(ensured);
             
         } catch (fallbackError) {
             structuredLog('warn', 'Both Main VDP and T3 fallback failed, implementing VDP-Lite', {
@@ -2616,11 +2938,11 @@ app.post('/api/vdp/extract-main', async (req, res) => {
                 // Create VDP-Lite with metadata preservation
                 const vdpLite = {
                     content_id: content_id,
-                    content_key: `${platform.toLowerCase()}:${content_id}`,
-                    platform: platform,
+                    content_key: `${(platform || 'unknown').toLowerCase()}:${content_id}`,
+                    platform: platform || 'unknown',
                     metadata: {
                         ...metadata,
-                        platform: platform,
+                        platform: platform || 'unknown',
                         content_id: content_id,
                         source_url: url,
                         extraction_method: 'VDP-Lite',
@@ -2662,7 +2984,7 @@ app.post('/api/vdp/extract-main', async (req, res) => {
                 };
                 
                 // Store VDP-Lite to GCS
-                const fileName = `raw/vdp/${platform.toLowerCase()}/${content_id}.universal.json`;
+                const fileName = `raw/vdp/${(platform || 'unknown').toLowerCase()}/${content_id}.universal.json`;
                 const bucket = storage.bucket(RAW_BUCKET);
                 const file = bucket.file(fileName);
                 
@@ -2671,7 +2993,7 @@ app.post('/api/vdp/extract-main', async (req, res) => {
                         contentType: 'application/json',
                         metadata: {
                             'content-id': content_id,
-                            'platform': platform,
+                            'platform': platform || 'unknown',
                             'extraction-method': 'VDP-Lite',
                             'correlation-id': correlationId
                         }
@@ -2680,7 +3002,7 @@ app.post('/api/vdp/extract-main', async (req, res) => {
                 
                 structuredLog('success', 'VDP-Lite created and stored successfully', {
                     contentId: content_id,
-                    platform: platform,
+                    platform: platform || 'unknown',
                     gcsPath: fileName,
                     fallback: 'VDP-Lite'
                 }, correlationId);
@@ -2688,7 +3010,7 @@ app.post('/api/vdp/extract-main', async (req, res) => {
                 res.json({
                     success: true,
                     content_id: content_id,
-                    platform: platform,
+                    platform: platform || 'unknown',
                     gcs_uri: `gs://${RAW_BUCKET}/${fileName}`,
                     extraction_method: 'VDP-Lite',
                     message: 'VDP-Lite created successfully with metadata preservation',

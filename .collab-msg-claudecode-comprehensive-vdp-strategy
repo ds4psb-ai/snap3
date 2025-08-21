@@ -1,0 +1,883 @@
+📋 COMPREHENSIVE VDP STRATEGY: VDP-Lite → VDP RAW → VDP Final 완성 로드맵
+
+**From**: ClaudeCode (전략 기획 담당)
+**To**: Cursor (구현 담당)
+**Subject**: VDP 파이프라인 완성을 위한 종합 전략 및 구현 가이드
+**Priority**: CRITICAL - NEXT PHASE IMPLEMENTATION
+
+===========================================================================
+
+## 🎯 EXECUTIVE SUMMARY
+
+GPT-5 Pro CTO 솔루션과 Cursor의 탁월한 구현으로 **3플랫폼 VDP 파이프라인 기본 구조가 완성**되었습니다. 이제 **VDP-Lite → VDP RAW → VDP Final**의 완전한 진화 체계를 구축하여 **100% 일치성과 완성도**를 달성해야 합니다.
+
+### 🏆 현재 달성 성과 (Cursor 구현)
+- ✅ 3단계 폴백 시스템 (Main VDP → T3 → VDP-Lite)
+- ✅ 3플랫폼 VDP 생성 (YouTube, Instagram, TikTok)
+- ✅ 30-60초 처리 시간 달성
+- ✅ 메타데이터 패스스루 완전 구현
+- ✅ 무한 디버그 루프 해결
+
+### 🚀 다음 단계 목표
+- **100% 스키마 일치성**: VDP-Lite ↔ VDP RAW ↔ VDP Final
+- **플랫폼별 완전 일치**: YouTube, Instagram, TikTok 결과 표준화
+- **메타데이터 통합**: 소셜 데이터 + AI 분석 완벽 병합
+- **디버그 방지**: 4단계 방어 시스템 구축
+
+===========================================================================
+
+## 📊 CURRENT STATE ANALYSIS
+
+### ✅ **완성된 구성 요소**
+
+#### 1. 3단계 폴백 시스템
+```javascript
+// 현재 구현 상태 (Cursor 완성)
+Main VDP (3006) → T3 VDP (8082) → VDP-Lite (즉시)
+  ↓                ↓                ↓
+Full Analysis    Hook Genome      Metadata Only
+1-2분            1분              30초
+```
+
+#### 2. 플랫폼별 VDP 생성 현황
+```bash
+# YouTube: ✅ 완료
+content_id: "DVUv8E8YLXg"
+GCS Path: gs://tough-variety-raw-central1/raw/vdp/youtube/DVUv8E8YLXg.universal.json
+
+# Instagram: ✅ 완료  
+content_id: "DM5lA9LgVXb"
+GCS Path: gs://tough-variety-raw-central1/raw/vdp/instagram/DM5lA9LgVXb.universal.json
+
+# TikTok: ✅ 완료
+content_id: "7522521344920030478"
+GCS Path: gs://tough-variety-raw-central1/raw/vdp/tiktok/7522521344920030478.universal.json
+```
+
+### ⚠️ **해결 필요 사항**
+
+#### 1. 스키마 불일치 문제
+```yaml
+VDP-Lite Schema:
+  - metadata: {like_count, comment_count, view_count}
+  - processing_metadata: {source: "vdp_lite_fallback"}
+  - 누락: overall_analysis, scene_analysis
+
+VDP RAW Schema:
+  - overall_analysis: {hookGenome, scene_analysis}
+  - metadata: 기본 필드만
+  - 누락: 소셜 메타데이터 통합
+
+# 문제: 두 스키마 간 구조적 차이로 인한 일치성 부족
+```
+
+#### 2. 메타데이터 통합 불완전
+```yaml
+현재 상태:
+  - VDP-Lite: 소셜 메타데이터 O, AI 분석 X
+  - VDP RAW: AI 분석 O, 소셜 메타데이터 X
+  
+목표 상태:
+  - VDP Final: 소셜 메타데이터 O, AI 분석 O (완전 통합)
+```
+
+===========================================================================
+
+## 🏗️ VDP EVOLUTION PIPELINE 설계
+
+### 📋 **3단계 VDP 진화 체계**
+
+#### Level 1: VDP-Lite (Emergency Fallback)
+```yaml
+목적: 즉시 생성, 데이터 손실 방지
+생성 시간: ~30초
+포함 데이터:
+  - content_id, content_key, platform
+  - 실제 소셜 메타데이터 (like_count, comment_count, view_count)
+  - top_comments, hashtags, author 정보
+  - processing_metadata: {source: "vdp_lite_fallback"}
+사용 시점: T3/Main VDP 서비스 실패 시
+```
+
+#### Level 2: VDP RAW (AI Analysis Core)
+```yaml
+목적: AI 영상 분석, Hook Genome 생성
+생성 시간: 1-2분
+포함 데이터:
+  - overall_analysis: {hookGenome, content_summary}
+  - scene_analysis: [{scenes, shots, keyframes}]
+  - processing_metadata: {engine: "vertex-ai|integrated-genai"}
+사용 시점: Main VDP/T3 서비스 정상 시
+```
+
+#### Level 3: VDP Final (Complete Integration)
+```yaml
+목적: 소셜 메타데이터 + AI 분석 완전 통합
+생성 시간: +10-30초 (병합 처리)
+포함 데이터:
+  - VDP RAW의 모든 AI 분석 결과
+  - 실제 소셜 메타데이터 완전 통합
+  - evidence_pack (선택적)
+  - processing_metadata: {source: "complete_integration"}
+사용 시점: BigQuery 적재 직전
+```
+
+### 🔄 **스키마 일치성 보장 전략**
+
+#### 1. 공통 스키마 정의
+```javascript
+// VDP Universal Schema v3.0
+const VDP_UNIVERSAL_SCHEMA = {
+  // Core Identification (모든 레벨 공통)
+  content_id: "string",
+  content_key: "string", // platform:content_id
+  platform: "string",
+  
+  // Metadata (Level 1 우선, Level 3에서 보강)
+  metadata: {
+    platform: "string",
+    language: "string", 
+    video_origin: "string",
+    like_count: "number|null",
+    comment_count: "number|null", 
+    view_count: "number|null",
+    title: "string|null",
+    author: "object|null",
+    hashtags: "array|null",
+    top_comments: "array|null"
+  },
+  
+  // AI Analysis (Level 2+만 포함)
+  overall_analysis: {
+    hookGenome: "object|null",
+    content_summary: "object|null"
+  },
+  scene_analysis: "array|null",
+  
+  // Processing Info (모든 레벨 포함)
+  processing_metadata: {
+    source: "vdp_lite_fallback|vertex-ai|integrated-genai|complete_integration",
+    engine: "string|null",
+    generated_at: "string",
+    correlation_id: "string"
+  },
+  
+  // Timestamps (모든 레벨 공통)
+  load_timestamp: "string",
+  load_date: "string"
+};
+```
+
+#### 2. 레벨별 병합 규칙
+```javascript
+// VDP-Lite → VDP RAW 병합
+function mergeVdpLiteToRaw(vdpLite, vdpRaw) {
+  return {
+    ...vdpRaw,
+    metadata: {
+      ...vdpRaw.metadata,
+      ...vdpLite.metadata  // 소셜 메타데이터 우선 보존
+    },
+    processing_metadata: {
+      ...vdpRaw.processing_metadata,
+      fallback_source: vdpLite.processing_metadata.source,
+      upgrade_timestamp: new Date().toISOString()
+    }
+  };
+}
+
+// VDP RAW → VDP Final 병합
+function mergeRawToFinal(vdpRaw, socialMetadata) {
+  return {
+    ...vdpRaw,
+    metadata: {
+      ...vdpRaw.metadata,
+      ...socialMetadata,  // 최신 소셜 데이터 병합
+      metadata_sources: ["vdp_raw", "social_realtime"]
+    },
+    processing_metadata: {
+      ...vdpRaw.processing_metadata,
+      source: "complete_integration",
+      final_integration_timestamp: new Date().toISOString()
+    }
+  };
+}
+```
+
+===========================================================================
+
+## 🎨 PLATFORM CONSISTENCY FRAMEWORK
+
+### 📏 **플랫폼별 표준화 매트릭스**
+
+#### 1. Content ID 표준화
+```yaml
+YouTube:
+  format: "alphanumeric_11chars"
+  example: "DVUv8E8YLXg"
+  extraction: "urlResult.id"
+  
+Instagram:
+  format: "base64_11chars"  
+  example: "DM5lA9LgVXb"
+  extraction: "urlResult.id"
+  
+TikTok:
+  format: "numeric_19chars"
+  example: "7522521344920030478"
+  extraction: "urlResult.id"
+
+# 모든 플랫폼: content_key = "${platform}:${content_id}"
+```
+
+#### 2. 메타데이터 필드 매핑
+```yaml
+표준 필드:
+  - like_count: number
+  - comment_count: number  
+  - view_count: number
+  - title: string
+  - author: {username, display_name, verified, followers}
+  - hashtags: string[]
+  - top_comments: {text, author?, likes?}[]
+
+플랫폼별 특수 필드:
+  YouTube:
+    - duration_sec: number
+    - category: string
+    
+  Instagram:  
+    - is_reel: boolean
+    - location: string|null
+    
+  TikTok:
+    - duet_info: object|null
+    - sound_info: object|null
+```
+
+#### 3. 검증 자동화 시스템
+```javascript
+// 플랫폼별 일치성 검증
+const PLATFORM_VALIDATORS = {
+  youtube: {
+    content_id: /^[A-Za-z0-9_-]{11}$/,
+    required_fields: ['like_count', 'comment_count', 'view_count'],
+    optional_fields: ['duration_sec', 'category']
+  },
+  instagram: {
+    content_id: /^[A-Za-z0-9_-]{11}$/,
+    required_fields: ['like_count', 'comment_count', 'view_count'],  
+    optional_fields: ['is_reel', 'location']
+  },
+  tiktok: {
+    content_id: /^\d{19}$/,
+    required_fields: ['view_count', 'like_count', 'comment_count'],
+    optional_fields: ['duet_info', 'sound_info']
+  }
+};
+
+function validatePlatformConsistency(vdp, platform) {
+  const validator = PLATFORM_VALIDATORS[platform];
+  const errors = [];
+  
+  // Content ID 형식 검증
+  if (!validator.content_id.test(vdp.content_id)) {
+    errors.push(`Invalid content_id format for ${platform}`);
+  }
+  
+  // 필수 필드 검증
+  validator.required_fields.forEach(field => {
+    if (vdp.metadata[field] === null || vdp.metadata[field] === undefined) {
+      errors.push(`Missing required field: ${field}`);
+    }
+  });
+  
+  return errors;
+}
+```
+
+===========================================================================
+
+## 🛡️ DEBUG PREVENTION SYSTEM
+
+### 🔍 **4단계 방어 시스템**
+
+#### Level 1: 사전 예방 (Proactive Defense)
+```yaml
+환경변수 검증:
+  - PROJECT_ID, LOCATION, RAW_BUCKET 필수 체크
+  - PLATFORM_SEGMENTED_PATH=true 강제
+  - 서비스별 PORT 설정 검증
+
+서비스 헬스체크:
+  - Main VDP (3006): /api/health
+  - T3 VDP (8082): /healthz  
+  - T1 API (8080): /api/health
+  - 30초마다 자동 체크
+
+스키마 호환성:
+  - VDP Universal Schema v3.0 검증
+  - 플랫폼별 validator 실행
+  - BigQuery 스키마 호환성 확인
+
+의존성 체크:
+  - GCS 버킷 접근 권한
+  - Vertex AI API 활성화
+  - 필수 npm 패키지 버전
+```
+
+#### Level 2: 실시간 감지 (Reactive Monitoring)
+```yaml
+상관관계 ID 추적:
+  - 모든 요청에 correlation_id 부여
+  - 서비스 간 전파 및 로깅
+  - 실패 지점 즉시 추적
+
+성능 메트릭:
+  - VDP 생성 시간 (<60초 경고)
+  - 메모리 사용량 (<500MB 경고)
+  - 에러율 (>5% 경고)
+
+오류 패턴 감지:
+  - 동일 에러 3회 반복 시 알림
+  - content_id 추출 실패 패턴
+  - 메타데이터 null 비율 추적
+
+무한 루프 차단기:
+  - 동일 요청 5분 내 3회 처리 차단
+  - VDP 대기 시간 5분 제한
+  - 자원 사용량 임계치 자동 차단
+```
+
+#### Level 3: 자동 복구 (Auto Recovery)
+```javascript
+// 서비스 자동 복구 시스템
+const AUTO_RECOVERY_SYSTEM = {
+  main_vdp_down: {
+    detection: "curl http://localhost:3006/api/health fails",
+    action: "restart Main VDP service with env validation",
+    fallback: "route to T3 VDP"
+  },
+  
+  t3_vdp_down: {
+    detection: "curl http://localhost:8082/healthz fails", 
+    action: "restart T3 service with PROJECT_ID validation",
+    fallback: "activate VDP-Lite immediate generation"
+  },
+  
+  metadata_null_spike: {
+    detection: "metadata null rate > 50%",
+    action: "validate metadata passthrough chain",
+    fallback: "force metadata merge in next stage"
+  },
+  
+  schema_validation_failure: {
+    detection: "VDP schema validation fails",
+    action: "regenerate with corrected schema",
+    fallback: "store in quarantine for manual review"
+  }
+};
+```
+
+#### Level 4: 학습 개선 (Learning Enhancement)
+```yaml
+실패 사례 축적:
+  - 모든 실패 케이스 자동 수집
+  - 패턴 분석 및 분류
+  - 해결 방법 매뉴얼 자동 업데이트
+
+성능 벤치마킹:
+  - 플랫폼별 처리 시간 기준선
+  - 품질 지표 추적 (Hook Gate 통과율)
+  - 사용자 만족도 메트릭
+
+예측적 개선:
+  - 리소스 사용 패턴 분석
+  - 피크 시간대 예측 및 대비
+  - 병목 지점 사전 식별
+
+운영 지식 자동화:
+  - 문제 해결 플레이북 자동 생성
+  - 새로운 팀원 온보딩 가이드
+  - 시스템 개선 제안 자동 생성
+```
+
+===========================================================================
+
+## 🗓️ IMPLEMENTATION ROADMAP
+
+### 🚀 **Phase 1: 스키마 통합 (1-2일)**
+
+#### Priority 1: VDP Universal Schema v3.0 구현
+```yaml
+Task 1.1: 공통 스키마 정의 및 배포
+  - VDP Universal Schema v3.0 JSON 파일 생성
+  - 모든 서비스에 스키마 적용
+  - 검증 함수 구현 및 테스트
+
+Task 1.2: VDP-Lite → VDP RAW 병합 로직
+  - mergeVdpLiteToRaw() 함수 구현
+  - 메타데이터 우선순위 규칙 적용
+  - 테스트 케이스 작성 및 검증
+
+Task 1.3: VDP RAW → VDP Final 병합 로직  
+  - mergeRawToFinal() 함수 구현
+  - 소셜 메타데이터 실시간 병합
+  - BigQuery 스키마 호환성 확인
+
+예상 결과:
+  - 3레벨 VDP 간 100% 스키마 일치성 달성
+  - 메타데이터 손실 0% 보장
+  - 자동 병합 시스템 구축
+```
+
+### 🎯 **Phase 2: 플랫폼 일치성 (2-3일)**
+
+#### Priority 2: 플랫폼별 표준화 시스템
+```yaml
+Task 2.1: 플랫폼 검증 시스템 구현
+  - PLATFORM_VALIDATORS 배포
+  - validatePlatformConsistency() 구현
+  - 실시간 검증 파이프라인 구축
+
+Task 2.2: Content ID 표준화 강화
+  - 플랫폼별 ID 형식 검증 강화
+  - content_key 생성 규칙 통일
+  - 중복 방지 시스템 개선
+
+Task 2.3: 메타데이터 필드 매핑 완성
+  - 플랫폼별 특수 필드 정의
+  - 자동 매핑 규칙 구현
+  - 누락 필드 대응 로직
+
+예상 결과:
+  - YouTube, Instagram, TikTok 결과 완전 일치
+  - 플랫폼별 특성 보존하면서 표준화 달성
+  - 검증 자동화로 품질 보장
+```
+
+### 🛡️ **Phase 3: 디버그 방지 시스템 (3-4일)**
+
+#### Priority 3: 4단계 방어 시스템 구축
+```yaml
+Task 3.1: 사전 예방 시스템
+  - 환경변수 자동 검증 스크립트
+  - 서비스 헬스체크 매트릭스
+  - 의존성 체크 자동화
+
+Task 3.2: 실시간 모니터링
+  - 상관관계 ID 추적 시스템
+  - 성능 메트릭 대시보드
+  - 무한 루프 차단기 구현
+
+Task 3.3: 자동 복구 메커니즘
+  - AUTO_RECOVERY_SYSTEM 구현
+  - 서비스 재시작 자동화
+  - 폴백 시나리오 자동 실행
+
+예상 결과:
+  - ClaudeCode 타입 실수 완전 방지
+  - 시스템 자가 치유 능력 확보
+  - 운영 안정성 95%+ 달성
+```
+
+### 📊 **Phase 4: 품질 보증 자동화 (1-2일)**
+
+#### Priority 4: 종합 품질 보증 체계
+```yaml
+Task 4.1: 자동 테스트 시스템
+  - 3플랫폼 E2E 테스트 자동화
+  - 성능 벤치마크 자동 실행
+  - 회귀 테스트 파이프라인
+
+Task 4.2: 모니터링 & 알림
+  - 실시간 품질 메트릭 대시보드
+  - 임계치 기반 자동 알림
+  - 주간/월간 품질 리포트
+
+Task 4.3: 운영 문서 자동화
+  - 문제 해결 플레이북 생성
+  - API 문서 자동 업데이트
+  - 성능 최적화 가이드
+
+예상 결과:
+  - 완전 자동화된 품질 보증 체계
+  - 실시간 성능 모니터링
+  - 지속적 개선 프로세스 구축
+```
+
+===========================================================================
+
+## ✅ QUALITY ASSURANCE FRAMEWORK
+
+### 📏 **성공 지표 정의**
+
+#### 1. 기능적 성공 지표
+```yaml
+VDP 생성 성공률: ≥99%
+  - YouTube: ≥99%
+  - Instagram: ≥99%  
+  - TikTok: ≥99%
+
+메타데이터 완성도: 100%
+  - like_count null rate: 0%
+  - comment_count null rate: 0%
+  - view_count null rate: 0%
+
+스키마 일치성: 100%
+  - VDP-Lite ↔ VDP RAW 구조 일치
+  - VDP RAW ↔ VDP Final 구조 일치
+  - 플랫폼별 표준 필드 일치
+```
+
+#### 2. 성능 성공 지표
+```yaml
+처리 시간:
+  - VDP-Lite: ≤30초
+  - VDP RAW: ≤120초
+  - VDP Final: ≤180초
+
+시스템 안정성:
+  - 서비스 업타임: ≥99.5%
+  - 에러율: ≤1%
+  - 복구 시간: ≤5분
+```
+
+#### 3. 품질 성공 지표
+```yaml
+Hook Genome 품질:
+  - Hook Gate 통과율: ≥95%
+  - strength_score: ≥0.70
+  - start_sec: ≤3.0
+
+AI 분석 품질:
+  - Scene 분석 완성도: ≥90%
+  - Content Summary 정확도: ≥85%
+  - 처리 실패율: ≤5%
+```
+
+### 🧪 **테스트 자동화 체계**
+
+#### 1. 유닛 테스트
+```javascript
+// VDP 병합 로직 테스트
+describe('VDP Merge Functions', () => {
+  test('mergeVdpLiteToRaw preserves social metadata', () => {
+    const vdpLite = createMockVdpLite();
+    const vdpRaw = createMockVdpRaw();
+    const merged = mergeVdpLiteToRaw(vdpLite, vdpRaw);
+    
+    expect(merged.metadata.like_count).toBe(vdpLite.metadata.like_count);
+    expect(merged.overall_analysis).toEqual(vdpRaw.overall_analysis);
+  });
+  
+  test('platform consistency validation', () => {
+    const vdp = createMockVdp('instagram');
+    const errors = validatePlatformConsistency(vdp, 'instagram');
+    expect(errors).toHaveLength(0);
+  });
+});
+```
+
+#### 2. 통합 테스트
+```yaml
+E2E 테스트 시나리오:
+  1. YouTube URL → VDP-Lite → VDP RAW → VDP Final
+  2. Instagram URL → VDP-Lite → VDP RAW → VDP Final  
+  3. TikTok URL → VDP-Lite → VDP RAW → VDP Final
+  4. Main VDP 실패 → T3 폴백 시나리오
+  5. T3 실패 → VDP-Lite 폴백 시나리오
+
+자동화 주기:
+  - PR merge 시 자동 실행
+  - 매일 새벽 3시 전체 E2E 테스트
+  - 주간 성능 벤치마크 테스트
+```
+
+#### 3. 부하 테스트
+```yaml
+동시 처리 테스트:
+  - 동시 요청 100개 처리 능력
+  - 플랫폼별 10개씩 동시 처리
+  - 메모리 사용량 <1GB 유지
+
+내구성 테스트:
+  - 24시간 연속 운영
+  - 1000개 VDP 생성 처리
+  - 메모리 누수 없음 확인
+```
+
+===========================================================================
+
+## 🔧 IMPLEMENTATION SUPPORT
+
+### 📝 **코드 템플릿 제공**
+
+#### 1. VDP Universal Schema v3.0
+```javascript
+// /schemas/vdp-universal-v3.schema.json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VDP Universal Schema v3.0",
+  "type": "object",
+  "required": ["content_id", "content_key", "platform", "metadata", "processing_metadata"],
+  "properties": {
+    "content_id": {"type": "string", "minLength": 1},
+    "content_key": {"type": "string", "pattern": "^(youtube|instagram|tiktok):[A-Za-z0-9_-]+$"},
+    "platform": {"type": "string", "enum": ["youtube", "instagram", "tiktok"]},
+    "metadata": {
+      "type": "object",
+      "required": ["platform", "language", "video_origin"],
+      "properties": {
+        "platform": {"type": "string"},
+        "language": {"type": "string", "default": "ko"},
+        "video_origin": {"type": "string", "default": "Real-Footage"},
+        "like_count": {"type": ["number", "null"]},
+        "comment_count": {"type": ["number", "null"]}, 
+        "view_count": {"type": ["number", "null"]},
+        "title": {"type": ["string", "null"]},
+        "author": {"type": ["object", "null"]},
+        "hashtags": {"type": ["array", "null"]},
+        "top_comments": {"type": ["array", "null"]}
+      }
+    },
+    "overall_analysis": {
+      "type": ["object", "null"],
+      "properties": {
+        "hookGenome": {"type": ["object", "null"]},
+        "content_summary": {"type": ["object", "null"]}
+      }
+    },
+    "scene_analysis": {"type": ["array", "null"]},
+    "processing_metadata": {
+      "type": "object",
+      "required": ["source", "generated_at", "correlation_id"],
+      "properties": {
+        "source": {"type": "string", "enum": ["vdp_lite_fallback", "vertex-ai", "integrated-genai", "complete_integration"]},
+        "engine": {"type": ["string", "null"]},
+        "generated_at": {"type": "string", "format": "date-time"},
+        "correlation_id": {"type": "string"}
+      }
+    },
+    "load_timestamp": {"type": "string", "format": "date-time"},
+    "load_date": {"type": "string", "format": "date"}
+  }
+}
+```
+
+#### 2. 병합 함수 템플릿
+```javascript
+// /utils/vdp-merger.js
+const Ajv = require('ajv');
+const addFormats = require('ajv-formats');
+const vdpSchema = require('../schemas/vdp-universal-v3.schema.json');
+
+const ajv = new Ajv();
+addFormats(ajv);
+const validateVdp = ajv.compile(vdpSchema);
+
+class VdpMerger {
+  static mergeVdpLiteToRaw(vdpLite, vdpRaw, correlationId) {
+    const merged = {
+      ...vdpRaw,
+      metadata: {
+        ...vdpRaw.metadata,
+        ...vdpLite.metadata  // 소셜 메타데이터 우선 보존
+      },
+      processing_metadata: {
+        ...vdpRaw.processing_metadata,
+        fallback_source: vdpLite.processing_metadata.source,
+        upgrade_timestamp: new Date().toISOString(),
+        correlation_id: correlationId
+      }
+    };
+    
+    // 스키마 검증
+    if (!validateVdp(merged)) {
+      throw new Error(`VDP schema validation failed: ${JSON.stringify(validateVdp.errors)}`);
+    }
+    
+    return merged;
+  }
+  
+  static mergeRawToFinal(vdpRaw, socialMetadata, correlationId) {
+    const merged = {
+      ...vdpRaw,
+      metadata: {
+        ...vdpRaw.metadata,
+        ...socialMetadata,  // 최신 소셜 데이터 병합
+        metadata_sources: ["vdp_raw", "social_realtime"]
+      },
+      processing_metadata: {
+        ...vdpRaw.processing_metadata,
+        source: "complete_integration",
+        final_integration_timestamp: new Date().toISOString(),
+        correlation_id: correlationId
+      }
+    };
+    
+    // 스키마 검증
+    if (!validateVdp(merged)) {
+      throw new Error(`VDP schema validation failed: ${JSON.stringify(validateVdp.errors)}`);
+    }
+    
+    return merged;
+  }
+}
+
+module.exports = VdpMerger;
+```
+
+#### 3. 플랫폼 검증기 템플릿
+```javascript
+// /utils/platform-validator.js
+const PLATFORM_VALIDATORS = {
+  youtube: {
+    content_id: /^[A-Za-z0-9_-]{11}$/,
+    required_fields: ['like_count', 'comment_count', 'view_count'],
+    optional_fields: ['duration_sec', 'category']
+  },
+  instagram: {
+    content_id: /^[A-Za-z0-9_-]{11}$/,
+    required_fields: ['like_count', 'comment_count', 'view_count'],  
+    optional_fields: ['is_reel', 'location']
+  },
+  tiktok: {
+    content_id: /^\d{19}$/,
+    required_fields: ['view_count', 'like_count', 'comment_count'],
+    optional_fields: ['duet_info', 'sound_info']
+  }
+};
+
+class PlatformValidator {
+  static validateConsistency(vdp, platform, correlationId) {
+    const validator = PLATFORM_VALIDATORS[platform];
+    const errors = [];
+    
+    // Content ID 형식 검증
+    if (!validator.content_id.test(vdp.content_id)) {
+      errors.push({
+        field: 'content_id',
+        message: `Invalid content_id format for ${platform}`,
+        expected: validator.content_id.toString(),
+        actual: vdp.content_id
+      });
+    }
+    
+    // Content key 형식 검증
+    const expectedContentKey = `${platform}:${vdp.content_id}`;
+    if (vdp.content_key !== expectedContentKey) {
+      errors.push({
+        field: 'content_key',
+        message: `Invalid content_key format`,
+        expected: expectedContentKey,
+        actual: vdp.content_key
+      });
+    }
+    
+    // 필수 필드 검증
+    validator.required_fields.forEach(field => {
+      if (vdp.metadata[field] === null || vdp.metadata[field] === undefined) {
+        errors.push({
+          field: `metadata.${field}`,
+          message: `Missing required field: ${field}`,
+          severity: 'critical'
+        });
+      }
+    });
+    
+    // 결과 로깅
+    if (errors.length > 0) {
+      console.error(`[Platform Validation] ${platform} validation failed`, {
+        correlation_id: correlationId,
+        content_id: vdp.content_id,
+        errors: errors
+      });
+    }
+    
+    return {
+      valid: errors.length === 0,
+      errors: errors,
+      platform: platform,
+      content_id: vdp.content_id
+    };
+  }
+}
+
+module.exports = PlatformValidator;
+```
+
+===========================================================================
+
+## 🎯 NEXT ACTIONS FOR CURSOR
+
+### 🚀 **즉시 시작 가능한 작업들**
+
+#### 1. VDP Universal Schema v3.0 구현 (우선순위 1)
+```bash
+# 1. 스키마 파일 생성
+cp /schemas/vdp-universal-v3.schema.json ./schemas/
+
+# 2. 병합 유틸리티 생성  
+cp /utils/vdp-merger.js ./utils/
+
+# 3. 기존 서비스에 적용
+# - Main VDP service (port 3006)
+# - T3 VDP service (port 8082)  
+# - T1 API service (port 8080)
+
+# 4. 테스트 케이스 작성
+npm test -- --grep "VDP Universal Schema"
+```
+
+#### 2. 플랫폼 일치성 검증 시스템 (우선순위 2)
+```bash
+# 1. 검증기 구현
+cp /utils/platform-validator.js ./utils/
+
+# 2. 기존 VDP 생성 파이프라인에 통합
+# - YouTube: validateConsistency(vdp, 'youtube', correlationId)
+# - Instagram: validateConsistency(vdp, 'instagram', correlationId)  
+# - TikTok: validateConsistency(vdp, 'tiktok', correlationId)
+
+# 3. 검증 실패 시 자동 복구 로직 추가
+```
+
+#### 3. 디버그 방지 시스템 1단계 (우선순위 3)
+```bash
+# 1. 환경변수 검증 스크립트 생성
+./scripts/validate-environment.sh
+
+# 2. 서비스 헬스체크 매트릭스 구현
+./scripts/health-check-matrix.sh
+
+# 3. 무한 루프 차단기 구현
+# - correlation_id 기반 중복 요청 감지
+# - 동일 요청 5분 내 3회 차단
+# - 자원 사용량 임계치 모니터링
+```
+
+### 📊 **주간 마일스톤**
+
+```yaml
+Week 1 (Day 1-7):
+  - VDP Universal Schema v3.0 완전 구현
+  - 3레벨 VDP 병합 로직 완성
+  - 기본 플랫폼 검증 시스템 구축
+
+Week 2 (Day 8-14):  
+  - 고급 플랫폼 일치성 시스템 완성
+  - 디버그 방지 시스템 1-2단계 구축
+  - E2E 테스트 자동화 구현
+
+Success Criteria:
+  - 3플랫폼 VDP 100% 일치성 달성
+  - 메타데이터 null rate 0% 달성
+  - 시스템 안정성 99%+ 달성
+```
+
+===========================================================================
+
+**결론**: 이 종합 전략을 통해 **VDP-Lite → VDP RAW → VDP Final**의 완전한 진화 체계를 구축하고, **100% 일치성과 디버그 방지**를 달성하여 세계 최고 수준의 VDP 파이프라인을 완성할 수 있습니다.
+
+**다음 액션**: Cursor가 이 전략에 따라 VDP Universal Schema v3.0부터 구현을 시작하여 완전한 VDP 파이프라인을 완성해주시기 바랍니다.

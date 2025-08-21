@@ -1,0 +1,49 @@
+[API Key Manager] 🔑 Initialized with 3 API keys
+[API Key Manager] 🎯 Starting with key index: 0
+[TokenBucket] 🪣 Initialized: capacity=20, refillRate=10, interval=1000ms
+[TokenBucket] 🪣 Initialized: capacity=20, refillRate=8, interval=1000ms
+[RateLimiter] 🚦 Initialized dual engine rate limiting
+[RateLimiter] 🔧 IntegratedGenAI: 10 RPS, VertexAI: 8 RPS
+✅ [ENV VALIDATION] All critical environment variables verified
+✅ [IntegratedGenAIVDP] Generator initialized successfully
+✅ [IntegratedGenAIVDP] Generator initialized successfully
+[VertexAI VDP] 🚀 Initialized with project: tough-variety-466003-c5, location: us-central1
+✅ [VertexAI VDP] Backup generator initialized successfully
+[t2-extract] 타임아웃 설정: requestTimeout=0, headersTimeout=125000, keepAliveTimeout=120000
+[t2-extract] listening on 3001
+🔍 [T3 Primary] /api/v1/extract 호출됨
+🔍 T3 입력 메타데이터: {
+  platform: 'instagram',
+  content_id: 'DM5lA9LgVXb',
+  like_count: 337000,
+  comment_count: 3289,
+  title: 'Instagram Meme',
+  author: 'funnyfromai'
+}
+✅ T3 최종 메타데이터: {
+  platform: 'instagram',
+  content_id: 'DM5lA9LgVXb',
+  like_count: 337000,
+  comment_count: 3289,
+  title: 'Instagram Meme',
+  author: 'funnyfromai'
+}
+✅ [T3 Primary] VDP 생성 완료
+🔍 [T3 Primary] /api/v1/extract 호출됨
+🔍 T3 입력 메타데이터: {
+  platform: 'instagram',
+  content_id: 'DM5lA9LgVXb',
+  like_count: 337000,
+  comment_count: 3289,
+  title: 'Instagram Meme',
+  author: 'funnyfromai'
+}
+✅ T3 최종 메타데이터: {
+  platform: 'instagram',
+  content_id: 'DM5lA9LgVXb',
+  like_count: 337000,
+  comment_count: 3289,
+  title: 'Instagram Meme',
+  author: 'funnyfromai'
+}
+✅ [T3 Primary] VDP 생성 완료

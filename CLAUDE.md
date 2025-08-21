@@ -7,7 +7,42 @@
 
 ---
 
-## 🚨 CRITICAL: System Architecture
+## 🚨 CRITICAL: 협업 시스템 아키텍처 (v2.0)
+
+### 🏗️ **3-Agent 협업 체계**
+
+```
+GPT-5 Pro 컨설턴트 (헤드 역할)
+    ↓ 전략적 지시 & 컨설팅
+Cursor (작업 분배 & 실행)
+    ↙ ↘ 작업 분배
+Cursor        ClaudeCode
+(개별 작업)    (개별 작업)
+```
+
+### 🎯 **역할 정의 & 책임**
+
+#### **GPT-5 Pro 컨설턴트** (전략 헤드)
+- **핵심 역할**: 전략적 의사결정, 아키텍처 방향성, 기술 컨설팅
+- **제한사항**: 프로젝트 파일 직접 접근 불가 (원격 지시)
+- **할루시네이션 위험**: MVP 개발에 부적합한 지시 가능성
+- **협업 방식**: 문서 기반 컨설팅 + 링크 공유
+
+#### **Cursor** (실행 매니저)
+- **핵심 역할**: 작업 분배, 프로젝트 관리, 실시간 모니터링
+- **책임**: GPT-5 지시사항 선별 & 검증, 작업 우선순위 결정
+- **협업 도구**: 메시지 시스템, 파일 공유, 상태 모니터링
+
+#### **ClaudeCode** (기술 구현)
+- **핵심 역할**: 기술 구현, 코드 작성, 시스템 통합
+- **책임**: Cursor 지시사항 실행, 기술적 피드백 제공
+- **자동 보고**: 작업 완료 시 자동 메시지 전송 필수
+
+### 🔄 **작업 흐름 프로토콜**
+
+```
+1. GPT-5 컨설팅 → 2. Cursor 검증 → 3. 작업 분배 → 4. 실행 → 5. 자동 보고
+```
 
 ### Core Infrastructure
 ```bash
@@ -20,6 +55,8 @@ export PLATFORM_SEGMENTED_PATH=true
 ### Application Ports
 - **Ingest UI**: `localhost:8080` (simple-web-server.js) - Multi-platform input
 - **Main App**: `localhost:3000` (snap3) - Video generation pipeline
+- **T3 Primary**: `localhost:3001` (t2-extract) - Primary VDP processor
+- **T3 Secondary**: `localhost:8082` (t2-extract) - Fallback VDP processor
 
 ---
 
@@ -260,31 +297,122 @@ EVIDENCE_GENERATION_FAILED  → fpcalc/brand detection failed
 
 ---
 
-## 🎯 Collaboration Protocols
+## 🎯 **3-Agent 협업 프로토콜 v2.0**
 
-### Agent Coordination
-- **GPT-5 Pro**: Strategy, risk analysis, high-level decisions
-- **ClaudeCode**: Implementation, testing, system integration  
-- **Cursor**: UI/UX, Instagram/TikTok metadata extraction
-- **Real-time Sync**: GitHub Actions auto-context updates
+### 📋 **GPT-5 Pro 컨설턴트 협업 매뉴얼**
 
-### Communication Channels
-```bash
-# Send message to Cursor
-./scripts/simple-notifier.sh send "Cursor" "Action" "Details" "priority"
-
-# Check messages
-./scripts/simple-notifier.sh check
-
-# Git coordination
-./scripts/claudecode-terminal-guard.sh detect_terminal
+#### **컨설팅 요청 프로세스**
+```yaml
+트리거: 중요 작업 완료 시점
+빈도: 주요 마일스톤마다 (예: T3 패치 완료, 통합 테스트 완료)
+목적: 전략적 방향성 검증 + 다음 단계 계획
 ```
 
-### ⚠️ **CRITICAL: Cursor 메시지 전달 필수 규칙**
-- **메시지 파일 생성시**: 반드시 커서용 명령어 함께 제공
-- **커서 명령어 예시**: `cd /Users/ted/snap3 && cat .collab-msg-[ID]`
-- **또는**: `./scripts/simple-notifier.sh check`
-- **이유**: 커서가 메시지 파일 위치를 모르면 메시지 수신 불가
+#### **컨설팅 문서 작성 규칙**
+```markdown
+# GPT-5 Pro 컨설팅 요청
+## 현재 상태
+- [완료된 작업]
+- [현재 성과 지표]
+- [기술적 달성사항]
+
+## 질문 사항
+- [전략적 의사결정 필요 사항]
+- [기술 아키텍처 검증 요청]
+
+## 프로젝트 컨텍스트 업데이트
+- [GPT-5의 잘못된 이해 시정]
+- [새로운 프로젝트 정보 업데이트]
+```
+
+#### **할루시네이션 방지 체크리스트**
+- ✅ MVP 개발 적합성 검증
+- ✅ 프로젝트 실제 상황과 부합성 확인
+- ✅ 기술적 실현 가능성 검토
+- ✅ 리소스/시간 제약 고려
+
+### 🤖 **Cursor-ClaudeCode 협업 규칙**
+
+#### **작업 분배 기준**
+```yaml
+Cursor 담당:
+  - Instagram/TikTok 메타데이터 추출
+  - UI/UX 개발
+  - 실시간 모니터링
+  - 작업 우선순위 결정
+
+ClaudeCode 담당:
+  - 백엔드 서비스 구현
+  - VDP 처리 시스템
+  - 데이터베이스 통합
+  - 시스템 아키텍처 구현
+
+공동 작업:
+  - API 인터페이스 설계
+  - 통합 테스트
+  - 성능 최적화
+```
+
+#### **🚨 ClaudeCode 자동 보고 필수 규칙**
+
+**작업 완료 시 자동 실행 사항:**
+1. **메시지 파일 생성**: `.collab-msg-claudecode-[작업명]-[상태]`
+2. **디렉토리 정보 포함**: 반드시 `cd /Users/ted/snap3` 명령어 제공
+3. **상태 요약**: 완료/진행/대기 상태 명시
+4. **다음 단계**: 구체적인 후속 작업 제안
+
+**메시지 템플릿:**
+```markdown
+# ClaudeCode 작업 완료 보고
+
+## 📊 작업 결과
+- 작업명: [구체적 작업명]
+- 상태: [완료/진행/대기]
+- 소요시간: [실제 소요시간]
+
+## ✅ 달성 성과
+- [구체적 성과 1]
+- [구체적 성과 2]
+
+## 📋 확인 명령어
+```bash
+cd /Users/ted/snap3
+cat .collab-msg-claudecode-[작업명]
+```
+
+## 🔄 다음 단계 제안
+- [구체적 후속 작업]
+- [예상 소요시간]
+```
+
+### Communication Channels
+
+#### **자동 메시지 시스템 v2.0**
+```bash
+# ClaudeCode → Cursor 자동 메시지 (작업 완료시)
+echo "작업 완료 보고" > .collab-msg-claudecode-[작업명]
+
+# Cursor → ClaudeCode 지시사항
+echo "새로운 작업 지시" > .collab-msg-cursor-[작업명]
+
+# GPT-5 컨설팅 링크 공유
+echo "컨설팅 결과: [링크]" > .collab-msg-gpt5-consulting-[날짜]
+```
+
+#### **상호 검증 프로세스**
+```yaml
+ClaudeCode 작업 완료:
+  1. 자동 메시지 생성
+  2. Cursor 검증 요청
+  3. 필요시 수정/보완
+  4. 최종 승인 후 다음 단계
+
+Cursor 지시사항:
+  1. GPT-5 컨설팅 반영
+  2. 실현 가능성 검토
+  3. ClaudeCode 역량 고려
+  4. 우선순위 기반 작업 배정
+```
 
 ---
 
