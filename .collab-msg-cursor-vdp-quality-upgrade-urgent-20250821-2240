@@ -1,0 +1,129 @@
+# 🚨 Cursor → ClaudeCode: VDP 품질 업그레이드 긴급 요청
+
+## 📊 **품질 차이 분석**
+- **목표 VDP**: true-hybrid-v5 (1000줄 수준)
+- **현재 VDP**: 기본 수준 (100줄 수준)
+- **품질 차이**: **10배 수준의 차이**
+- **우선순위**: CRITICAL
+
+## 🎯 **목표 VDP 구조 분석**
+
+### **필수 섹션들 (현재 누락됨)**
+```json
+{
+  "overall_analysis": {
+    "summary": "상세한 비디오 요약 (현재: Analysis pending)",
+    "emotional_arc": "감정적 아크 분석 (현재: Analysis pending)",
+    "audience_reaction": {
+      "analysis": "시청자 반응 분석 (현재: Analysis pending)",
+      "common_reactions": ["반응 목록"],
+      "notable_comments": [{"text": "댓글", "lang": "ko", "translation_en": "번역"}],
+      "overall_sentiment": "Positive"
+    },
+    "hookGenome": {
+      "start_sec": 0,
+      "pattern_code": "curiosity_gap",
+      "strength_score": 0.9,
+      "trigger_modalities": ["visual", "auditory"],
+      "microbeats_sec": [0.5, 1.5, 4],
+      "connected_scene_id": "S01_Opening",
+      "hook_integration_analysis": "상세한 훅 분석"
+    },
+    "asr_transcript": "완전한 음성 인식 텍스트",
+    "asr_lang": "ko",
+    "asr_translation_en": "영어 번역",
+    "ocr_text": [{"text": "OCR 텍스트", "lang": "ko", "translation_en": "영어 번역"}]
+  },
+  "scenes": [
+    {
+      "scene_id": "S01_Opening",
+      "time_start": 0,
+      "time_end": 8.1,
+      "duration_sec": 8.1,
+      "importance": "critical",
+      "hook_connection": {
+        "is_hook_scene": "true",
+        "hook_elements": ["visual_surprise", "audio_cue", "relatable_premise"],
+        "viral_mechanics": "상세한 바이럴 메커니즘 분석"
+      },
+      "narrative_unit": {
+        "narrative_role": "Hook",
+        "summary": "상세한 장면 요약",
+        "dialogue": "대화 내용",
+        "dialogue_lang": "ko",
+        "dialogue_translation_en": "영어 번역",
+        "rhetoric": ["curiosity", "relatability", "juxtaposition"],
+        "rhetoric_analysis": "수사학 분석",
+        "comedic_device": ["punchline", "dramatic_irony"],
+        "comedic_analysis": "코미디 분석"
+      },
+      "setting": {
+        "location": "indoor office space",
+        "visual_style": {
+          "cinematic_properties": "영화적 특성 분석",
+          "lighting_analysis": "조명 분석",
+          "color_psychology": "색채 심리학",
+          "mood_palette": ["shocked", "ironic", "defeated"],
+          "edit_grammar": {
+            "cut_speed": "slow",
+            "camera_style": "static",
+            "subtitle_style": "bold_white_with_outline"
+          }
+        },
+        "audio_style": {
+          "music": "음악 분석",
+          "ambient_sound": "환경음 분석",
+          "tone": "톤 분석",
+          "audio_emotional_impact": "오디오 감정적 영향",
+          "audio_events": [{"timestamp": 30, "event": "can_open", "description": "이벤트 설명"}]
+        }
+      },
+      "shots": [
+        {
+          "shot_id": "S01_Shot01",
+          "start": 0,
+          "end": 3,
+          "camera": {"shot": "MS", "angle": "eye", "move": "static"},
+          "composition": {
+            "grid": "center",
+            "notes": ["상세한 컴포지션 노트"],
+            "visual_impact": "시각적 영향 분석"
+          },
+          "keyframes": [{"role": "start", "t_rel_shot": 1, "desc": "키프레임 설명"}],
+          "confidence": "high"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## 🔧 **요청 사항**
+
+### **1. Gemini 프롬프트 완전 업그레이드**
+- 현재 기본 분석 → 상세한 1000줄 수준 분석
+- ASR, OCR, Hook Genome, Scene Analysis 모두 포함
+- true-hybrid-v5 수준의 상세도 요구
+
+### **2. VDP 스키마 완전 재구성**
+- 현재 `Core Identity`, `Execution` 구조 → `overall_analysis`, `scenes` 구조
+- 장면별 상세 분석 (narrative_unit, setting, audio_style, shots)
+- 완전한 ASR/OCR 텍스트 + 번역
+
+### **3. 품질 검증 시스템**
+- 목표: 1000줄 수준의 출력
+- 최소 요구사항: ASR, OCR, Hook Genome, Scene Analysis
+- 품질 기준: true-hybrid-v5와 동일한 수준
+
+## 🚨 **긴급 요청**
+**ClaudeCode: VDP 품질을 true-hybrid-v5 수준으로 완전 업그레이드해주세요. 현재는 기본 수준이고 목표는 1000줄 수준의 상세한 영상 해석입니다!**
+
+### **확인 방법**
+```bash
+git pull
+cat .collab-msg-cursor-vdp-quality-upgrade-urgent-20250821-2240
+```
+
+---
+
+*🤖 Cursor → ClaudeCode VDP 품질 업그레이드 긴급 요청 (2025-08-21 22:40)*
