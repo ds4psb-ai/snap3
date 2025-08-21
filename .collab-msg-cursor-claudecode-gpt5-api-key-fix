@@ -1,0 +1,93 @@
+# 🚨 GPT-5 Pro API 키 문제 해결 - ClaudeCode 긴급 안내
+
+## ❌ 현재 문제
+**GPT-5 Pro API 인증 오류 (401)** - API 키가 설정되지 않아 자동화 서비스가 작동하지 않음
+
+## 🔧 즉시 해결 방법
+
+### 1. OpenAI API 키 설정
+```bash
+# 실제 OpenAI API 키 설정 (test-key-for-deployment 대신)
+export OPENAI_API_KEY="sk-..."  # 실제 OpenAI API 키 입력
+
+# 또는 .env 파일에 직접 설정
+echo "OPENAI_API_KEY=sk-..." >> services/cloud-run-automation/.env
+```
+
+### 2. Cloud Run 재배포 (API 키 포함)
+```bash
+cd services/cloud-run-automation
+
+# 환경변수 확인
+echo $OPENAI_API_KEY
+
+# 재배포 (실제 API 키로)
+./deploy.sh
+```
+
+### 3. 대안: GPT-5 Pro 없이 VDP 테스트
+```bash
+# GPT-5 Pro 연동 없이 VDP 생성만 테스트
+curl -X POST https://cloud-run-automation-xxxxx-uc.a.run.app/api/vdp-generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.youtube.com/shorts/aX5y8wz60ws",
+    "platform": "youtube"
+  }'
+```
+
+## 🎯 우선순위
+
+### **Option 1: GPT-5 Pro 연동 완료** (권장)
+1. 실제 OpenAI API 키 설정
+2. Cloud Run 재배포
+3. 전체 자동화 워크플로우 테스트
+
+### **Option 2: VDP 생성만 테스트** (빠른 테스트)
+1. GPT-5 Pro 연동 비활성화
+2. VDP 생성 기능만 테스트
+3. 3개 플랫폼 URL 직접 테스트
+
+## 📋 테스트 명령어
+
+### 헬스체크
+```bash
+curl https://cloud-run-automation-xxxxx-uc.a.run.app/api/health
+```
+
+### VDP 직접 생성 (GPT-5 Pro 없이)
+```bash
+# YouTube
+curl -X POST https://cloud-run-automation-xxxxx-uc.a.run.app/api/vdp-generate \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.youtube.com/shorts/aX5y8wz60ws", "platform": "youtube"}'
+
+# TikTok
+curl -X POST https://cloud-run-automation-xxxxx-uc.a.run.app/api/vdp-generate \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.tiktok.com/@lovedby4bxnia/video/7529657626947374349", "platform": "tiktok"}'
+
+# Instagram
+curl -X POST https://cloud-run-automation-xxxxx-uc.a.run.app/api/vdp-generate \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.instagram.com/reel/DLx4668NGGv/", "platform": "instagram"}'
+```
+
+## 🚨 긴급 조치
+
+### **즉시 실행해주세요!**
+1. **API 키 설정**: 실제 OpenAI API 키로 설정
+2. **재배포**: `./deploy.sh` 실행
+3. **테스트**: VDP 생성 기능 확인
+
+### **API 키가 없다면**
+1. **VDP 생성만 테스트**: GPT-5 Pro 연동 없이
+2. **Universal VDP Clone 서비스 직접 테스트**: 포트 4000
+3. **결과 보고**: 어떤 방식으로든 3개 플랫폼 VDP 생성 결과
+
+## 📊 목표
+**3개 플랫폼 VDP 완성**: YouTube, TikTok, Instagram에서 고품질 VDP 생성
+
+---
+
+**즉시 실행하고 결과를 Git으로 보고해주세요! 🚀**
