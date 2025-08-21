@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VDP Content Processor | 영상 분석 도구</title>
+    <meta name="description" content="YouTube, Instagram, TikTok 콘텐츠의 VDP(Video Detail Processing) 분석을 한 번에 처리">
+    
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="container">
+                <h1 class="header__title">
+                    🎬 VDP Content Processor
+                </h1>
+                <p class="header__subtitle">
+                    YouTube, Instagram, TikTok 콘텐츠 분석을 한 번에
+                </p>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="container">
+                <!-- Fixed Top Metrics Display -->
+                <div id="metrics-display" class="metrics-display" style="display: none;">
+                    <div class="metrics-header">
+                        <h3 class="metrics-title">📊 품질 메트릭</h3>
+                        <div class="hook-gate-status" id="hook-gate-status">
+                            <span class="gate-badge gate-badge--pending" id="gate-badge">
+                                <span class="badge-icon">⏳</span>
+                                <span class="badge-text">Hook Gate 대기</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-card" id="scenes-metric">
+                            <div class="metric-icon">🎬</div>
+                            <div class="metric-content">
+                                <div class="metric-value">
+                                    <span id="scenes-current">-</span>/<span id="scenes-target">4</span>
+                                </div>
+                                <div class="metric-label">Scenes</div>
+                                <div class="metric-status" id="scenes-status">-</div>
+                            </div>
+                        </div>
+                        <div class="metric-card" id="shots-metric">
+                            <div class="metric-icon">📸</div>
+                            <div class="metric-content">
+                                <div class="metric-value">
+                                    <span id="shots-current">-</span>/<span id="shots-target">8</span>
+                                </div>
+                                <div class="metric-label">Shots</div>
+                                <div class="metric-status" id="shots-status">-</div>
+                            </div>
+                        </div>
+                        <div class="metric-card" id="keyframes-metric">
+                            <div class="metric-icon">🔑</div>
+                            <div class="metric-content">
+                                <div class="metric-value">
+                                    <span id="keyframes-current">-</span>/<span id="keyframes-target">20</span>
+                                </div>
+                                <div class="metric-label">Keyframes</div>
+                                <div class="metric-status" id="keyframes-status">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metrics-actions">
+                        <button type="button" id="auto-retry-btn" class="retry-density-btn" style="display: none;">
+                            <span class="btn-icon">🔄</span>
+                            <span class="btn-text">정보 밀도 부족 시 재확장 호출 (2패스)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <form id="vdp-form" class="vdp-form" novalidate>
+                    
+                    <!-- Platform Selection -->
+                    <fieldset class="platform-selector" role="radiogroup" aria-labelledby="platform-legend">
+                        <legend id="platform-legend" class="platform-selector__legend">
+                            콘텐츠 플랫폼 선택
+                        </legend>
+                        
+                        <div class="platform-options">
+                            <input type="radio" id="youtube" name="platform" value="youtube" checked>
+                            <label for="youtube" class="platform-option">
+                                <span class="platform-option__icon">🎬</span>
+                                <span class="platform-option__name">YouTube</span>
+                                <span class="platform-option__desc">Shorts URL 입력</span>
+                            </label>
+                            
+                            <input type="radio" id="instagram" name="platform" value="instagram">
+                            <label for="instagram" class="platform-option">
+                                <span class="platform-option__icon">📷</span>
+                                <span class="platform-option__name">Instagram</span>
+                                <span class="platform-option__desc">URL → 자동 추출</span>
+                            </label>
+                            
+                            <input type="radio" id="tiktok" name="platform" value="tiktok">
+                            <label for="tiktok" class="platform-option">
+                                <span class="platform-option__icon">🎵</span>
+                                <span class="platform-option__name">TikTok</span>
+                                <span class="platform-option__desc">URL → 자동 추출</span>
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <!-- VDP Extractor Selection (Phase 2) -->
+                    <fieldset class="extractor-selector" role="radiogroup" aria-labelledby="extractor-legend">
+                        <legend id="extractor-legend" class="extractor-selector__legend">
+                            VDP 추출기 선택
+                        </legend>
+                        
+                        <div class="extractor-options">
+                            <div class="extractor-option">
+                                <input type="radio" id="main-extractor" name="vdp_extractor" value="main" checked>
+                                <label for="main-extractor" class="extractor-option__label">
+                                    <span class="extractor-icon">🧠</span>
+                                    <span class="extractor-info">
+                                        <span class="extractor-name">Main Extractor</span>
+                                        <span class="extractor-desc">Gemini 2.5 Pro | GitHub VDP 호환</span>
+                                    </span>
+                                </label>
+                            </div>
+                            
+                            <div class="extractor-option">
+                                <input type="radio" id="sub-extractor" name="vdp_extractor" value="sub">
+                                <label for="sub-extractor" class="extractor-option__label">
+                                    <span class="extractor-icon">⚡</span>
+                                    <span class="extractor-info">
+                                        <span class="extractor-name">Sub Extractor</span>
+                                        <span class="extractor-desc">Vertex AI | Hook Genome 전문</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Content Input Forms -->
+                    <div class="content-input">
+                        
+                        <!-- YouTube Form -->
+                        <div id="youtube-form" class="platform-form platform-form--active">
+                            <div class="form-group">
+                                <label for="youtube-url" class="form-label">
+                                    YouTube Shorts URL
+                                    <span class="form-label__required" aria-label="필수">*</span>
+                                </label>
+                                <input 
+                                    type="url" 
+                                    id="youtube-url" 
+                                    name="source_url"
+                                    class="form-input form-input--url"
+                                    placeholder="https://www.youtube.com/shorts/VIDEO_ID"
+                                    pattern=".*youtube\.com/shorts/.*"
+                                    required
+                                    aria-describedby="youtube-url-help"
+                                >
+                                <div id="youtube-url-help" class="form-help">
+                                    모든 YouTube 링크 형태를 붙여넣어도 됩니다. 시스템이 자동으로 영상 ID와 표준 URL을 채웁니다.
+                                </div>
+                            </div>
+                            
+                            
+                            
+                            <div class="form-group">
+                                <label for="youtube-video-origin" class="form-label">
+                                    원본 유형
+                                    <span class="form-label__required" aria-label="필수">*</span>
+                                </label>
+                                <select id="youtube-video-origin" name="video_origin" class="form-select" required>
+                                    <option value="unknown">Unknown</option>
+                                    <option value="real_footage">Real footage</option>
+                                    <option value="ai_generated" selected>AI generated</option>
+                                </select>
+                                <div class="form-help">영상이 실제 촬영인지, AI 생성인지 선택하세요</div>
+                            </div>
+                        </div>
+
+                        <!-- Instagram Form -->
+                        <div id="instagram-form" class="platform-form">
+                            <div class="form-group">
+                                <label for="instagram-source-url" class="form-label">
+                                    Instagram URL
+                                    <span class="form-label__required" aria-label="필수">*</span>
+                                </label>
+                                <input 
+                                    type="url" 
+                                    id="instagram-source-url" 
+                                    name="source_url"
+                                    class="form-input"
+                                    placeholder="https://instagram.com/p/EXAMPLE_ID"
+                                    required
+                                    onblur="autoExtractInstagramMetadata()"
+                                >
+                                <div class="form-help">URL을 입력하면 자동으로 추출 가능한 데이터가 채워집니다.</div>
+                                <div id="instagram-extraction-status" class="extraction-status"></div>
+                            </div>
+                            
+                            <!-- Auto-filled metadata display -->
+                            <div id="instagram-metadata-display" class="metadata-display" style="display: none;">
+                                <div class="metadata-grid">
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">조회수 (수동 입력)</label>
+                                        <input type="number" id="instagram-view-count" name="view_count" class="form-input" placeholder="조회수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">좋아요 (수동 입력)</label>
+                                        <input type="number" id="instagram-like-count" name="like_count" class="form-input" placeholder="좋아요 수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">댓글 (수동 입력)</label>
+                                        <input type="number" id="instagram-comment-count" name="comment_count" class="form-input" placeholder="댓글 수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">작성자 (수동 입력)</label>
+                                        <input type="text" id="instagram-author" name="author" class="form-input" placeholder="작성자를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">해시태그 (수동 입력)</label>
+                                        <input type="text" id="instagram-hashtags" name="hashtags" class="form-input" placeholder="#태그1 #태그2 #태그3">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">업로드 날짜 (수동 입력)</label>
+                                        <input type="date" id="instagram-upload-date" name="upload_date" class="form-input">
+                                    </div>
+                                    
+                                    <div class="metadata-item metadata-item--full">
+                                        <label class="metadata-label">베스트 댓글 (수동 입력, 최대 5개)</label>
+                                        <div class="comments-input-group">
+                                            <input type="text" id="instagram-comment-1" name="top_comment_1" class="form-input" placeholder="1번째 베스트 댓글을 입력하세요">
+                                            <input type="text" id="instagram-comment-2" name="top_comment_2" class="form-input" placeholder="2번째 베스트 댓글을 입력하세요">
+                                            <input type="text" id="instagram-comment-3" name="top_comment_3" class="form-input" placeholder="3번째 베스트 댓글을 입력하세요">
+                                            <input type="text" id="instagram-comment-4" name="top_comment_4" class="form-input" placeholder="4번째 베스트 댓글을 입력하세요">
+                                            <input type="text" id="instagram-comment-5" name="top_comment_5" class="form-input" placeholder="5번째 베스트 댓글을 입력하세요">
+                                        </div>
+                                        <div class="form-help">댓글은 자동 추출되지 않으므로 수동으로 입력해주세요</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Video origin - only field user must provide -->
+                            <div class="form-group">
+                                <label for="instagram-video-origin" class="form-label">
+                                    원본 유형
+                                    <span class="form-label__required" aria-label="필수">*</span>
+                                </label>
+                                <select id="instagram-video-origin" name="video_origin" class="form-select" required>
+                                    <option value="unknown">Unknown</option>
+                                    <option value="real_footage">Real footage</option>
+                                    <option value="ai_generated" selected>AI generated</option>
+                                </select>
+                                <div class="form-help">영상이 실제 촬영인지, AI 생성인지 선택하세요</div>
+                            </div>
+                            
+                        </div>
+
+                        <!-- TikTok Form -->
+                        <div id="tiktok-form" class="platform-form">
+                            <div class="form-group">
+                                <label for="tiktok-source-url" class="form-label">
+                                    TikTok URL
+                                    <span class="form-label__required" aria-label="필수">*</span>
+                                </label>
+                                <input 
+                                    type="url" 
+                                    id="tiktok-source-url" 
+                                    name="source_url"
+                                    class="form-input"
+                                    placeholder="https://tiktok.com/@user/video/1234567890"
+                                    required
+                                    onblur="autoExtractTikTokMetadata()"
+                                >
+                                <div class="form-help">URL을 입력하면 자동으로 추출 가능한 데이터가 채워집니다.</div>
+                                <div id="tiktok-extraction-status" class="extraction-status"></div>
+                            </div>
+                            
+                            <!-- Auto-filled metadata display -->
+                            <div id="tiktok-metadata-display" class="metadata-display" style="display: none;">
+                                <div class="metadata-grid">
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">조회수 (수동 입력)</label>
+                                        <input type="number" id="tiktok-view-count" name="view_count" class="form-input" placeholder="조회수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">좋아요 (수동 입력)</label>
+                                        <input type="number" id="tiktok-like-count" name="like_count" class="form-input" placeholder="좋아요 수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">댓글 (수동 입력)</label>
+                                        <input type="number" id="tiktok-comment-count" name="comment_count" class="form-input" placeholder="댓글 수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">공유 (수동 입력)</label>
+                                        <input type="number" id="tiktok-share-count" name="share_count" class="form-input" placeholder="공유 수를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">작성자 (수동 입력)</label>
+                                        <input type="text" id="tiktok-author" name="author" class="form-input" placeholder="작성자를 입력하세요">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">해시태그 (수동 입력)</label>
+                                        <input type="text" id="tiktok-hashtags" name="hashtags" class="form-input" placeholder="#태그1 #태그2 #태그3">
+                                    </div>
+                                    <div class="metadata-item">
+                                        <label class="metadata-label">업로드 날짜 (수동 입력)</label>
+                                        <input type="date" id="tiktok-upload-date" name="upload_date" class="form-input">
+                                    </div>
+                                    
+                                    <div class="metadata-item metadata-item--full">
+                                        <label class="metadata-label">베스트 댓글 (수동 입력, 최대 5개)</label>
+                                        <div class="comments-input-group">
+                                            <input type="text" id="tiktok-comment-1" name="top_comment_1" class="form-input" placeholder="1번째 베스트 댓글을 입력하세요">
+                                            <input type="text" id="tiktok-comment-2" name="top_comment_2" class="form-input" placeholder="2번째 베스트 댓글을 입력하세요">
+                                            <input type="text" id="tiktok-comment-3" name="top_comment_3" class="form-input" placeholder="3번째 베스트 댓글을 입력하세요">
+                                            <input type="text" id="tiktok-comment-4" name="top_comment_4" class="form-input" placeholder="4번째 베스트 댓글을 입력하세요">
+                                            <input type="text" id="tiktok-comment-5" name="top_comment_5" class="form-input" placeholder="5번째 베스트 댓글을 입력하세요">
+                                        </div>
+                                        <div class="form-help">댓글은 자동 추출되지 않으므로 수동으로 입력해주세요</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Video origin - only field user must provide -->
+                            <div class="form-group">
+                                <label for="tiktok-video-origin" class="form-label">
+                                    원본 유형
+                                    <span class="form-label__required" aria-label="필수">*</span>
+                                </label>
+                                <select id="tiktok-video-origin" name="video_origin" class="form-select" required>
+                                    <option value="unknown">Unknown</option>
+                                    <option value="real_footage">Real footage</option>
+                                    <option value="ai_generated" selected>AI generated</option>
+                                </select>
+                                <div class="form-help">영상이 실제 촬영인지, AI 생성인지 선택하세요</div>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <!-- VDP Extractor Selection -->
+                    <fieldset class="extractor-selector" role="radiogroup" aria-labelledby="extractor-legend">
+                        <legend id="extractor-legend" class="extractor-selector__legend">
+                            🔧 VDP 추출기 선택
+                        </legend>
+                        <div class="extractor-options">
+                            <input type="radio" id="main-extractor" name="extractor" value="main" checked>
+                            <label for="main-extractor" class="extractor-option">
+                                <span class="extractor-option__icon">🎯</span>
+                                <span class="extractor-option__name">Main VDP</span>
+                                <span class="extractor-option__desc">Gemini 2.5 Pro | GitHub 호환</span>
+                                <span class="extractor-option__status extractor-option__status--ready">Ready</span>
+                            </label>
+                            
+                            <input type="radio" id="vertex-extractor" name="extractor" value="vertex">
+                            <label for="vertex-extractor" class="extractor-option">
+                                <span class="extractor-option__icon">⚡</span>
+                                <span class="extractor-option__name">Vertex VDP</span>
+                                <span class="extractor-option__desc">Hook Genome | Evidence Pack</span>
+                                <span id="vertex-status" class="extractor-option__status extractor-option__status--warning">OPEN</span>
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <!-- Submit Button -->
+                    <div class="form-actions">
+                        <button type="submit" id="submit-btn" class="submit-btn" disabled>
+                            <span class="submit-btn__icon">🚀</span>
+                            <span class="submit-btn__text">콘텐츠 분석 시작</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Progress Section -->
+                <div id="progress-section" class="progress-section" style="display: none;">
+                    <div class="progress-header">
+                        <h2 class="progress-title">처리 중...</h2>
+                        <div class="progress-meta">
+                            <span id="progress-platform" class="progress-platform"></span>
+                            <span id="progress-job-id" class="progress-job-id"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                        <div id="progress-fill" class="progress-bar__fill" style="width: 0%"></div>
+                        <div class="progress-bar__text">
+                            <span id="progress-percentage">0%</span>
+                            <span id="progress-step">처리를 준비하고 있습니다...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="progress-steps" class="progress-steps">
+                        <div class="progress-step progress-step--pending">
+                            <span class="progress-step__icon">⏳</span>
+                            <span class="progress-step__text">제출 내용 검증 중...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="results-section" class="results-section" style="display: none;">
+                    <!-- VDP Results Display -->
+                    <div id="vdp-results" class="vdp-results" style="display: none;">
+                        <div class="results-header">
+                            <h2 class="results-title">
+                                <span class="results-icon">🎬</span>
+                                VDP 분석 결과
+                            </h2>
+                            <div class="results-meta">
+                                <span id="extractor-used" class="extractor-badge"></span>
+                                <span id="processing-time" class="processing-time"></span>
+                            </div>
+                        </div>
+
+                        <!-- Scene Analysis -->
+                        <div class="vdp-section">
+                            <h3 class="section-title">🎭 Scene Analysis</h3>
+                            <div id="scene-analysis" class="scene-grid">
+                                <!-- Scene cards will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Hook Analysis -->
+                        <div class="vdp-section">
+                            <h3 class="section-title">🎣 Hook Analysis</h3>
+                            <div id="hook-analysis" class="hook-display">
+                                <div class="hook-metrics">
+                                    <div class="metric-badge" id="hook-timing">
+                                        <span class="metric-label">Timing</span>
+                                        <span class="metric-value">-</span>
+                                    </div>
+                                    <div class="metric-badge" id="hook-strength">
+                                        <span class="metric-label">Strength</span>
+                                        <span class="metric-value">-</span>
+                                    </div>
+                                </div>
+                                <div class="hook-content" id="hook-content">
+                                    <!-- Hook details will be populated -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content Summary -->
+                        <div class="vdp-section">
+                            <h3 class="section-title">📝 Content Summary</h3>
+                            <div id="content-summary" class="content-summary">
+                                <!-- Summary will be populated -->
+                            </div>
+                        </div>
+
+                        <!-- GitHub VDP Compatible JSON Display (Phase 2) -->
+                        <div id="github-vdp-section" class="vdp-section" style="display: none;">
+                            <h3 class="section-title">
+                                <span class="section-icon">🔗</span>
+                                GitHub VDP 호환 JSON
+                                <span class="github-badge">GitHub Compatible</span>
+                            </h3>
+                            <div class="github-vdp-container">
+                                <div class="github-vdp-header">
+                                    <div class="github-vdp-meta">
+                                        <span id="github-content-key" class="content-key">-</span>
+                                        <span id="github-extractor-type" class="extractor-type">-</span>
+                                    </div>
+                                    <button type="button" id="copy-github-json-btn" class="copy-btn">
+                                        <span class="copy-icon">📋</span>
+                                        <span class="copy-text">JSON 복사</span>
+                                    </button>
+                                </div>
+                                <div id="github-vdp-json-display" class="json-display">
+                                    <!-- GitHub VDP JSON will be displayed here -->
+                                </div>
+                                <div class="github-vdp-actions">
+                                    <button type="button" id="download-github-json-btn" class="export-btn">
+                                        <span class="btn-icon">💾</span>
+                                        <span class="btn-text">GitHub JSON 다운로드</span>
+                                    </button>
+                                    <button type="button" id="view-gcs-link-btn" class="export-btn export-btn--secondary">
+                                        <span class="btn-icon">☁️</span>
+                                        <span class="btn-text">GCS 링크 보기</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Export Actions -->
+                        <div class="export-actions">
+                            <button type="button" id="export-json-btn" class="export-btn">
+                                <span class="btn-icon">📄</span>
+                                <span class="btn-text">JSON 다운로드</span>
+                            </button>
+                            <button type="button" id="view-raw-btn" class="export-btn export-btn--secondary">
+                                <span class="btn-icon">🔍</span>
+                                <span class="btn-text">RAW 데이터 보기</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Error Display -->
+                    <div id="error-results" class="error-results" style="display: none;">
+                        <!-- Error content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="container">
+                <p class="footer__text">
+                    VDP Content Processor v1.0 | 
+                    <a href="/api/docs" class="footer__link">API 문서</a> | 
+                    <a href="/health" class="footer__link">서비스 상태</a>
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="scripts/logger.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/url-auto-fill.js"></script>
+    <script src="scripts/vdp-quality-guide.js"></script>
+</body>
+</html>

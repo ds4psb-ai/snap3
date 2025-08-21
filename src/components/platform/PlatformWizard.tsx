@@ -45,6 +45,10 @@ export default function PlatformWizard({
   const [metadata, setMetadata] = useState<SocialMetadata | null>(null);
   const [manualMode, setManualMode] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  
+  // 수동 입력 필드들
+  const [uploadDate, setUploadDate] = useState<string>('');
+  const [manualComments, setManualComments] = useState<string[]>(['', '', '', '', '']);
 
   // URL 입력 시 플랫폼 자동 감지
   useEffect(() => {
@@ -101,7 +105,20 @@ export default function PlatformWizard({
       throw new Error(result.error || '메타데이터 추출 실패');
     }
 
-    return result.data;
+    // API 응답을 SocialMetadata 형식으로 변환
+    const data = result.data;
+    return {
+      content_id: data.content_id,
+      views: data.view_count || 0,
+      likes: data.like_count || 0,
+      comments: data.comment_count || 0,
+      top_comments: data.top_comments || [],
+      extraction_time: new Date().toISOString(),
+      platform: data.platform || platform,
+      author: data.author,
+      upload_date: data.upload_date,
+      hashtags: data.hashtags || []
+    };
   };
 
   const handleExtractMetadata = async () => {
@@ -117,6 +134,11 @@ export default function PlatformWizard({
       const extractedMetadata = await extractMetadata(url, platform);
       setMetadata(extractedMetadata);
       setExtractionStatus('success');
+      
+      // 업로드 날짜 자동 채우기
+      if (extractedMetadata.upload_date) {
+        setUploadDate(extractedMetadata.upload_date.split('T')[0]); // YYYY-MM-DD 형식으로 변환
+      }
       
       if (onMetadataExtracted) {
         onMetadataExtracted(extractedMetadata);
@@ -377,6 +399,77 @@ export default function PlatformWizard({
                 placeholder="0"
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 수동 입력 섹션 */}
+      {(extractionStatus === 'success' || manualMode) && (platform === 'instagram' || platform === 'tiktok') && (
+        <div className="mt-6 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">추가 정보 입력</h3>
+          
+          {/* 업로드 날짜 입력 */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              업로드 날짜 {extractionStatus === 'success' && uploadDate && (
+                <span className="text-green-600 text-xs">(자동 추출됨)</span>
+              )}
+            </label>
+            <input
+              type="date"
+              value={uploadDate}
+              onChange={(e) => setUploadDate(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* 베스트 댓글 5개 입력 */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              베스트 댓글 (최대 5개)
+            </label>
+            <div className="space-y-3">
+              {manualComments.map((comment, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-500 w-6">
+                    {index + 1}.
+                  </span>
+                  <input
+                    type="text"
+                    value={comment}
+                    onChange={(e) => {
+                      const newComments = [...manualComments];
+                      newComments[index] = e.target.value;
+                      setManualComments(newComments);
+                    }}
+                    placeholder={`${index + 1}번째 베스트 댓글을 입력하세요`}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  />
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              * 댓글은 자동 추출되지 않으므로 수동으로 입력해주세요
+            </p>
+          </div>
+
+          {/* 제출 버튼 */}
+          <div className="mt-6">
+            <button
+              onClick={() => {
+                console.log('폼 데이터:', {
+                  url,
+                  platform,
+                  uploadDate,
+                  manualComments: manualComments.filter(c => c.trim()),
+                  metadata
+                });
+                alert('데이터가 저장되었습니다!');
+              }}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            >
+              저장하기
+            </button>
           </div>
         </div>
       )}

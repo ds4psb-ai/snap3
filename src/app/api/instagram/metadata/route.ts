@@ -716,7 +716,7 @@ async function extractInstagramMetadata(url: string) {
         metadata.metadata = {
           ...metadata.metadata,
           title: decodeHtmlEntitiesNode(metaData.title || ''),
-          upload_date: actualUploadDate ? new Date(actualUploadDate).toISOString() : new Date().toISOString(),
+          upload_date: actualUploadDate ? new Date(actualUploadDate + ' UTC').toISOString() : new Date().toISOString(),
           author: {
             username: actualAuthor || metaData.author || 'unknown',
             display_name: actualAuthor || metaData.author || 'Unknown Author',

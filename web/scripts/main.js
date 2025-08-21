@@ -463,10 +463,8 @@ class VDPProcessor {
             this.showProgressSection();
             this.updateProgress(0, '제출 내용을 검증하고 있습니다...', []);
             
-            // Determine endpoint based on extractor selection
-            const selectedExtractor = document.querySelector('input[name="extractor"]:checked')?.value || 'main';
-            const endpoint = this.testMode ? '/vdp/test-submit' : 
-                           selectedExtractor === 'main' ? '/api/vdp/extract-main' : '/api/vdp/extract-vertex';
+            // Use unified /api/submit endpoint for all platforms (YouTube pipeline integration)
+            const endpoint = this.testMode ? '/api/vdp/test-submit' : '/api/submit';
             // Enhanced logging for JSON-only submission
             window.logger.info('JSON-only submission initiated', {
                 correlationId: this.correlationId,
@@ -1681,7 +1679,10 @@ async function autoExtractInstagramMetadata() {
                 document.getElementById('instagram-hashtags').value = result.data.hashtags.join(' ');
             }
             if (result.data.upload_date) {
-                document.getElementById('instagram-upload-date').value = result.data.upload_date;
+                // Convert ISO date to YYYY-MM-DD format for HTML date input
+                const uploadDate = new Date(result.data.upload_date);
+                const dateString = uploadDate.toISOString().split('T')[0];
+                document.getElementById('instagram-upload-date').value = dateString;
             }
             
             // Store for submission
@@ -1768,7 +1769,10 @@ async function autoExtractTikTokMetadata() {
                 document.getElementById('tiktok-hashtags').value = result.data.hashtags.join(' ');
             }
             if (result.data.upload_date) {
-                document.getElementById('tiktok-upload-date').value = result.data.upload_date;
+                // Convert ISO date to YYYY-MM-DD format for HTML date input
+                const uploadDate = new Date(result.data.upload_date);
+                const dateString = uploadDate.toISOString().split('T')[0];
+                document.getElementById('tiktok-upload-date').value = dateString;
             }
             
             // Store for submission

@@ -664,7 +664,7 @@ export default function SocialMediaExtractor() {
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4 text-muted-foreground" />
                           <span className="font-medium">팔로워:</span>
-                          <span>{tiktokMetadata.followers.toLocaleString()}</span>
+                          <span>{tiktokMetadata.followers?.toLocaleString() || '수동 입력'}</span>
                         </div>
                       </CardContent>
                     </Card>

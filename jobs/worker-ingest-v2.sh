@@ -567,7 +567,7 @@ process_request() {
             process_youtube_request "$platform" "$content_id" "$src_url" "$out_gcs" "$local_json"
             ;;
         "instagram"|"tiktok")
-            process_social_metadata_only "$platform" "$content_id" "$local_json"
+            process_social_full_pipeline "$platform" "$content_id" "$src_url" "$out_gcs" "$local_json"
             ;;
         *)
             local context=$(jq -n \
@@ -589,9 +589,9 @@ process_request() {
             ;;
     esac
     
-    # Create done marker only after successful VDP verification for YouTube
-    if [[ "$platform" == "youtube" ]]; then
-        # YouTube: Wait for VDP file before creating .done marker
+    # Create done marker only after successful VDP verification for all platforms
+    if [[ "$platform_lower" == "youtube" || "$platform_lower" == "instagram" || "$platform_lower" == "tiktok" ]]; then
+        # All platforms: Wait for VDP file before creating .done marker
         if wait_for_vdp "$platform" "$content_id" "$request_correlation_id"; then
             echo "✅" | gsutil cp - "$DONE_MARKER"
             log_with_correlation "INFO" "Done marker created after VDP verification" "$request_correlation_id"
@@ -599,9 +599,9 @@ process_request() {
             log_with_correlation "WARN" "❌ VDP 미생성 → .done 생략 (다음 폴링 때 재시도 허용)" "$request_correlation_id"
         fi
     else
-        # Instagram/TikTok: Create done marker immediately (metadata-only)
+        # Unknown platform: Create done marker immediately (fallback)
         echo "✅" | gsutil cp - "$DONE_MARKER"
-        log_with_correlation "INFO" "Done marker created for metadata-only processing" "$request_correlation_id"
+        log_with_correlation "INFO" "Done marker created for unknown platform" "$request_correlation_id"
     fi
     
     # Calculate total processing time and log completion
@@ -682,41 +682,9 @@ process_youtube_request() {
         return 1
     fi
     
-    # Step 2: Evidence Pack Generation/Upload
-    local audio_fp_json="${EVID_DIR}${content_id}.audio.fp.json"
-    local product_ev_json="${EVID_DIR}${content_id}.product.evidence.json"
-    
-    echo "🔍 Generating Evidence Packs..."
-    
-    # Audio Fingerprint Generation (Chromaprint)
-    echo "   → Audio fingerprint (3-sample strategy)"
-    if command -v npm &> /dev/null && npm run evidence:audio -- "${INPUT_MP4}" "${content_id}" "${WORKDIR}/${content_id}.audio.fp.json" 2>/dev/null; then
-        gsutil cp "${WORKDIR}/${content_id}.audio.fp.json" "${audio_fp_json}" || true
-        echo "   ✅ Audio fingerprint uploaded"
-    else
-        echo "   ⚠️  Audio fingerprint generation skipped (npm script not available)"
-        echo '{"cluster_id":"UNKNOWN","confidence":0.5,"fingerprint":"","processing_metadata":{"source":"fallback"}}' > "${WORKDIR}/${content_id}.audio.fp.json"
-        gsutil cp "${WORKDIR}/${content_id}.audio.fp.json" "${audio_fp_json}" || true
-    fi
-    
-    # Product/Brand Evidence Generation
-    echo "   → Product/brand evidence extraction"
-    if command -v npm &> /dev/null; then
-        echo '{"overall_analysis":{"asr_transcript":"","ocr_text":""},"metadata":{"hashtags":[],"title":"","description":""}}' > "${WORKDIR}/${content_id}.vdp.seed.json"
-        
-        if npm run evidence:brands -- "${WORKDIR}/${content_id}.vdp.seed.json" "${WORKDIR}/${content_id}.product.evidence.json" 2>/dev/null; then
-            gsutil cp "${WORKDIR}/${content_id}.product.evidence.json" "${product_ev_json}" || true
-            echo "   ✅ Product evidence uploaded"
-        else
-            echo "   ⚠️  Product evidence generation failed, creating minimal evidence"
-            echo '{"product_mentions":[],"brand_detection_metrics":{"total_brands":0,"confidence":"low"},"processing_metadata":{"source":"fallback"}}' > "${WORKDIR}/${content_id}.product.evidence.json"
-            gsutil cp "${WORKDIR}/${content_id}.product.evidence.json" "${product_ev_json}" || true
-        fi
-    else
-        echo "   ⚠️  Product evidence generation skipped (npm not available)"
-        echo '{"product_mentions":[],"brand_detection_metrics":{"total_brands":0,"confidence":"low"},"processing_metadata":{"source":"fallback"}}' > "${WORKDIR}/${content_id}.product.evidence.json"
-        gsutil cp "${WORKDIR}/${content_id}.product.evidence.json" "${product_ev_json}" || true
-    fi
+    # Step 2: Evidence Pack Generation/Upload (SKIPPED - Evidence OFF Mode)
+    echo "🔍 Evidence Pack Generation SKIPPED (Evidence OFF Mode enabled)"
+    echo "   → Evidence mode disabled, proceeding directly to VDP generation"
     
     # Step 3: VDP Generation Trigger (Async)
     echo "🚀 Triggering VDP generation: ${US_T2}"
@@ -758,7 +726,117 @@ process_youtube_request() {
 }
 
 # ============================================================================
-# Instagram/TikTok Metadata-Only Processing
+# Instagram/TikTok Full Pipeline (Download → VDP)
+# ============================================================================
+process_social_full_pipeline() {
+    local platform="$1"
+    local content_id="$2"
+    local src_url="$3"
+    local out_gcs="$4"
+    local local_json="$5"
+    
+    log_with_correlation "INFO" "Social full pipeline processing started" "$CORRELATION_ID"
+    log_with_correlation "DEBUG" "Platform: $platform, Content ID: $content_id, Source: $src_url" "$CORRELATION_ID"
+    
+    # 플랫폼별 경로 표준화 with comprehensive validation
+    local INPUT_MP4="${INPUT_PREFIX}/${platform}/${content_id}.mp4"
+    local OUT_VDP="${OUT_VDP_PREFIX}/${platform}/${content_id}.NEW.universal.json"
+    
+    # Comprehensive platform segmentation validation
+    if ! validate_platform_segmentation "$INPUT_MP4" "$platform" "input" "$CORRELATION_ID"; then
+        log_with_correlation "ERROR" "Platform segmentation validation failed for input path" "$CORRELATION_ID"
+        return 1
+    fi
+    
+    if ! validate_platform_segmentation "$OUT_VDP" "$platform" "output" "$CORRELATION_ID"; then
+        log_with_correlation "ERROR" "Platform segmentation validation failed for output path" "$CORRELATION_ID"
+        return 1
+    fi
+    
+    log_with_correlation "DEBUG" "Platform paths - Input: $INPUT_MP4, Output: $OUT_VDP" "$CORRELATION_ID"
+    
+    # Step 1: Video Download → GCS Upload (using simple-web-server.js API)
+    echo "📹 Downloading ${platform} video via API: ${src_url}"
+    
+    # Call the simple-web-server.js download API
+    local download_api_url="http://localhost:8080/api/download-social-video"
+    local download_payload=$(jq -n \
+        --arg url "$src_url" \
+        --arg platform "$platform" \
+        --arg content_id "$content_id" \
+        '{
+          "url": $url,
+          "platform": $platform,
+          "content_id": $content_id
+        }')
+    
+    if download_response=$(curl -sS -X POST "$download_api_url" \
+        -H 'Content-Type: application/json' \
+        -d "$download_payload" 2>&1); then
+        
+        echo "✅ Video download API called successfully"
+        
+        # Check if video file was downloaded and uploaded to GCS
+        if gsutil -q stat "$INPUT_MP4" 2>/dev/null; then
+            echo "✅ Video uploaded to: ${INPUT_MP4}"
+        else
+            echo "❌ Video not found at expected location: ${INPUT_MP4}"
+            echo "⏸️  Skipping request (download may have failed): ${content_id}"
+            return 1
+        fi
+    else
+        echo "❌ Video download API failed for: ${src_url}"
+        echo "   Error: $download_response"
+        echo "⏸️  Skipping request (API call failed): ${content_id}"
+        return 1
+    fi
+    
+    # Step 2: Evidence Pack Generation (SKIPPED - Evidence OFF Mode)
+    echo "🔍 Evidence Pack Generation SKIPPED (Evidence OFF Mode enabled)"
+    echo "   → Evidence mode disabled, proceeding directly to VDP generation"
+    
+    # Step 3: VDP Generation Trigger (Async)
+    echo "🚀 Triggering VDP generation: ${US_T2}"
+    
+    # Build API request payload with GenAI forced Evidence OFF mode
+    api_payload=$(jq -n \
+        --arg gcsUri "${INPUT_MP4}" \
+        --argjson meta "$(cat "$local_json")" \
+        --arg platform_name "$platform" \
+        '{
+          "gcsUri": $gcsUri,
+          "meta": ($meta + {
+            "content_id": ($meta.content_id // ""),
+            "platform": $platform_name,
+            "language": "ko",
+            "video_origin": "Real-Footage",
+            "original_sound": true
+          }),
+          "processing_options": {
+            "force_full_pipeline": true,
+            "audio_fingerprint": false,
+            "brand_detection": false,
+            "hook_genome_analysis": true
+          },
+          "use_vertex": false
+        }')
+    
+    # Trigger VDP generation
+    if curl_response=$(curl -sS -X POST "${US_T2}/api/vdp/extract-vertex" \
+        -H 'Content-Type: application/json' \
+        -d "$api_payload" 2>&1); then
+        
+        echo "✅ VDP generation triggered successfully"
+        echo "   Response: $(echo "$curl_response" | jq -r '.overall_analysis.content_summary // .status // "OK"' 2>/dev/null || echo "Response received")"
+    else
+        echo "❌ VDP generation trigger failed"
+        echo "   Error: $curl_response"
+        return 1
+    fi
+}
+
+# ============================================================================
+# Instagram/TikTok Metadata-Only Processing (LEGACY - kept for fallback)
 # ============================================================================
 process_social_metadata_only() {
     local platform="$1"

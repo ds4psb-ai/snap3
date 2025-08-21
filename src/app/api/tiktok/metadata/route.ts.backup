@@ -77,83 +77,126 @@ async function scrapeTikTokPage(url: string): Promise<any> {
     const html = await response.text();
     console.log('HTML 길이:', html.length);
     
-    // webapp.video-detail 데이터 추출 (문서에 명시된 방법)
-    const videoDetailRegex = /"webapp\.video-detail":\s*\{[^}]*"itemInfo":\s*\{[^}]*"itemStruct":\s*\{([^}]*)\}/;
-    const videoDetailMatch = html.match(videoDetailRegex);
+    // webapp.video-detail 데이터 추출 (더 정확한 정규식)
+    const videoDetailMatch = html.match(/"webapp\.video-detail":\s*({[^}]+})/);
     console.log('videoDetailMatch:', videoDetailMatch ? '찾음' : '없음');
     
-    // stats 데이터 추출 (더 정확한 패턴)
-    const statsRegex = /"stats":\s*\{([^}]*)\}/;
-    const statsMatch = html.match(statsRegex);
+    if (!videoDetailMatch) {
+      throw new Error('TikTok 비디오 데이터를 찾을 수 없습니다');
+    }
+
+    // stats 데이터 추출
+    const statsMatch = html.match(/"stats":\s*({[^}]+})/);
     console.log('statsMatch:', statsMatch ? '찾음' : '없음');
     
     // author 데이터 추출
-    const authorRegex = /"author":\s*\{([^}]*)\}/;
-    const authorMatch = html.match(authorRegex);
+    const authorMatch = html.match(/"author":\s*({[^}]+})/);
     console.log('authorMatch:', authorMatch ? '찾음' : '없음');
 
+    // JSON 파싱 시도
     let videoData: any = {};
     let statsData: any = {};
     let authorData: any = {};
 
-    if (videoDetailMatch) {
-      const videoContent = videoDetailMatch[1];
-      
-      // ID 추출
-      const idMatch = videoContent.match(/"id":\s*"([^"]+)"/);
-      if (idMatch) videoData.id = idMatch[1];
-      
-      // 설명 추출
-      const descMatch = videoContent.match(/"desc":\s*"([^"]*)"/);
-      if (descMatch) videoData.desc = descMatch[1];
-      
-      // 생성 시간 추출
-      const createTimeMatch = videoContent.match(/"createTime":\s*"?(\d+)"?/);
-      if (createTimeMatch) videoData.createTime = createTimeMatch[1];
-      
-      // 썸네일 추출
-      const coverMatch = videoContent.match(/"cover":\s*"([^"]+)"/);
-      if (coverMatch) videoData.cover = coverMatch[1].replace(/\\u002F/g, '/');
-      
-      // 길이 추출
-      const durationMatch = videoContent.match(/"duration":\s*"?(\d+)"?/);
-      if (durationMatch) videoData.duration = parseInt(durationMatch[1]);
+    try {
+      // video-detail 데이터 파싱
+      const videoDetailStr = videoDetailMatch[1];
+      const itemInfoMatch = videoDetailStr.match(/"itemInfo":\s*({[^}]+})/);
+      if (itemInfoMatch) {
+        const itemStructMatch = itemInfoMatch[1].match(/"itemStruct":\s*({[^}]+})/);
+        if (itemStructMatch) {
+          // 기본 비디오 정보 추출
+          const itemStruct = itemStructMatch[1];
+          
+          // ID 추출
+          const idMatch = itemStruct.match(/"id":\s*"([^"]+)"/);
+          if (idMatch) videoData.id = idMatch[1];
+          
+          // 설명 추출
+          const descMatch = itemStruct.match(/"desc":\s*"([^"]*)"/);
+          if (descMatch) videoData.desc = descMatch[1];
+          
+          // 생성 시간 추출
+          const createTimeMatch = itemStruct.match(/"createTime":\s*"([^"]+)"/);
+          if (createTimeMatch) videoData.createTime = createTimeMatch[1];
+          
+          // 비디오 정보 추출
+          const videoMatch = itemStruct.match(/"video":\s*({[^}]+})/);
+          if (videoMatch) {
+            const videoInfo = videoMatch[1];
+            
+            // 썸네일 추출
+            const coverMatch = videoInfo.match(/"cover":\s*"([^"]+)"/);
+            if (coverMatch) videoData.cover = coverMatch[1].replace(/\\u002F/g, '/');
+            
+            // 길이 추출
+            const durationMatch = videoInfo.match(/"duration":\s*(\d+)/);
+            if (durationMatch) videoData.duration = parseInt(durationMatch[1]);
+            
+            // 해상도 추출
+            const widthMatch = videoInfo.match(/"width":\s*(\d+)/);
+            const heightMatch = videoInfo.match(/"height":\s*(\d+)/);
+            if (widthMatch) videoData.width = parseInt(widthMatch[1]);
+            if (heightMatch) videoData.height = parseInt(heightMatch[1]);
+          }
+        }
+      }
+    } catch (e) {
+      console.log('video-detail 파싱 오류:', e);
     }
 
-    if (statsMatch) {
-      const statsContent = statsMatch[1];
-      
-      // 좋아요 수
-      const diggMatch = statsContent.match(/"diggCount":\s*"?(\d+)"?/);
-      if (diggMatch) statsData.diggCount = parseInt(diggMatch[1]);
-      
-      // 댓글 수
-      const commentMatch = statsContent.match(/"commentCount":\s*"?(\d+)"?/);
-      if (commentMatch) statsData.commentCount = parseInt(commentMatch[1]);
-      
-      // 공유 수
-      const shareMatch = statsContent.match(/"shareCount":\s*"?(\d+)"?/);
-      if (shareMatch) statsData.shareCount = parseInt(shareMatch[1]);
-      
-      // 재생 수
-      const playMatch = statsContent.match(/"playCount":\s*"?(\d+)"?/);
-      if (playMatch) statsData.playCount = parseInt(playMatch[1]);
+    try {
+      // stats 데이터 파싱
+      if (statsMatch) {
+        const statsStr = statsMatch[1];
+        
+        // 좋아요 수
+        const diggMatch = statsStr.match(/"diggCount":\s*(\d+)/);
+        if (diggMatch) statsData.diggCount = parseInt(diggMatch[1]);
+        
+        // 댓글 수
+        const commentMatch = statsStr.match(/"commentCount":\s*(\d+)/);
+        if (commentMatch) statsData.commentCount = parseInt(commentMatch[1]);
+        
+        // 공유 수
+        const shareMatch = statsStr.match(/"shareCount":\s*(\d+)/);
+        if (shareMatch) statsData.shareCount = parseInt(shareMatch[1]);
+        
+        // 재생 수
+        const playMatch = statsStr.match(/"playCount":\s*(\d+)/);
+        if (playMatch) statsData.playCount = parseInt(playMatch[1]);
+        
+        // 저장 수
+        const collectMatch = statsStr.match(/"collectCount":\s*"?(\d+)"?/);
+        if (collectMatch) statsData.collectCount = parseInt(collectMatch[1]);
+      }
+    } catch (e) {
+      console.log('stats 파싱 오류:', e);
     }
 
-    if (authorMatch) {
-      const authorContent = authorMatch[1];
-      
-      // 닉네임
-      const nicknameMatch = authorContent.match(/"nickname":\s*"([^"]+)"/);
-      if (nicknameMatch) authorData.nickname = nicknameMatch[1];
-      
-      // 사용자명
-      const uniqueIdMatch = authorContent.match(/"uniqueId":\s*"([^"]+)"/);
-      if (uniqueIdMatch) authorData.uniqueId = uniqueIdMatch[1];
-      
-      // 팔로워 수
-      const followerMatch = authorContent.match(/"followerCount":\s*"?(\d+)"?/);
-      if (followerMatch) authorData.followerCount = parseInt(followerMatch[1]);
+    try {
+      // author 데이터 파싱
+      if (authorMatch) {
+        const authorStr = authorMatch[1];
+        
+        // 닉네임
+        const nicknameMatch = authorStr.match(/"nickname":\s*"([^"]+)"/);
+        if (nicknameMatch) authorData.nickname = nicknameMatch[1];
+        
+        // 사용자명
+        const uniqueIdMatch = authorStr.match(/"uniqueId":\s*"([^"]+)"/);
+        if (uniqueIdMatch) authorData.uniqueId = uniqueIdMatch[1];
+        
+        // 팔로워 수
+        const followerMatch = authorStr.match(/"followerCount":\s*(\d+)/);
+        if (followerMatch) authorData.followerCount = parseInt(followerMatch[1]);
+        
+        // 팔로잉 수
+        const followingMatch = authorStr.match(/"followingCount":\s*(\d+)/);
+        if (followingMatch) authorData.followingCount = parseInt(followingMatch[1]);
+      }
+    } catch (e) {
+      console.log('author 파싱 오류:', e);
     }
 
     const result = {
@@ -179,28 +222,10 @@ async function extractTikTokMetadata(url: string): Promise<TikTokMetadata> {
     if (scrapedData && scrapedData.video && scrapedData.stats && scrapedData.video.id) {
       console.log('웹 스크래핑 성공');
       
-      // TikTok createTime 처리 (Unix timestamp 또는 ISO 문자열)
-      let createTime = null;
-      if (scrapedData.video.createTime) {
-        const createTimeStr = scrapedData.video.createTime.toString();
-        if (createTimeStr.length === 10) {
-          // Unix timestamp (초 단위)
-          createTime = new Date(parseInt(createTimeStr) * 1000).toISOString();
-        } else if (createTimeStr.length === 13) {
-          // Unix timestamp (밀리초 단위)
-          createTime = new Date(parseInt(createTimeStr)).toISOString();
-        } else {
-          // ISO 문자열 또는 다른 형식
-          try {
-            // 시간대 문제 해결: 문자열 날짜인 경우 UTC 기준으로 파싱
-            const dateToUse = createTimeStr.includes('UTC') ? createTimeStr : createTimeStr + ' UTC';
-            createTime = new Date(dateToUse).toISOString();
-          } catch (e) {
-            console.log('날짜 파싱 실패:', createTimeStr);
-            createTime = null;
-          }
-        }
-      }
+      // Unix timestamp를 날짜로 변환
+      const createTime = scrapedData.video.createTime ? 
+        new Date(parseInt(scrapedData.video.createTime) * 1000).toISOString() : 
+        null;
       
       // 해시태그 추출 (설명에서)
       const hashtags = scrapedData.video.desc ? 

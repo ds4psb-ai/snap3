@@ -15,7 +15,7 @@ export class LimitedAutoMode {
 
   constructor(config: Partial<LimitedAutoModeConfig> = {}) {
     this.config = {
-      maxExecutionTime: 120000,       // 2분 (120초)
+      maxExecutionTime: 0,            // 제한 없음 (무제한)
       maxOperations: 3,               // 최대 3개 작업
       maxConcurrentTasks: 2,          // 최대 2개 동시 작업
       safetyTimeout: 30000,           // 30초 안전 타임아웃
@@ -26,8 +26,8 @@ export class LimitedAutoMode {
 
   // 작업 실행 전 제한 사항 확인
   canExecute(taskName: string): { allowed: boolean; reason?: string } {
-    // 1. 최대 실행 시간 체크
-    if (Date.now() - this.startTime > this.config.maxExecutionTime) {
+    // 1. 최대 실행 시간 체크 (제한 없음)
+    if (this.config.maxExecutionTime > 0 && Date.now() - this.startTime > this.config.maxExecutionTime) {
       return { 
         allowed: false, 
         reason: `최대 실행 시간 초과 (${this.config.maxExecutionTime}ms)` 

@@ -1805,6 +1805,35 @@ input[type="radio"] {
     }
 }
 
+/* User Input Section Styles */
+.user-input-section {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    border: 2px solid #6366f1;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8fafc 0%, rgba(99, 102, 241, 0.05) 100%);
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #6366f1;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.auto-filled-section {
+    margin-top: 1.5rem;
+    opacity: 0.85;
+}
+
+.auto-filled-section .section-title {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
 /* Metadata Display Styles */
 .metadata-display {
     background: #f8fafc;
