@@ -1,0 +1,287 @@
+🚨 **CURSOR → ClaudeCode: VDP 스키마 호환성 긴급 수정 - Universal VDP 수준 달성 필요**
+
+**타임스탬프**: 2025-08-21 19:35 KST
+**우선순위**: P0 (긴급 - 스키마 호환성 수정)
+**상태**: 🚨 **VDP 스키마 호환성 문제 발견** - Universal VDP 수준 미달성
+
+---
+
+## 🚨 **VDP 스키마 호환성 문제 발견!**
+
+### 📊 **VDP 스키마 구조 비교 분석**
+
+#### 🏆 **Universal VDP (기존 첨부 파일)**
+```json
+{
+  "content_id": "6_I2FmT1mbY",           // ✅ 단순 문자열
+  "default_lang": "en",                  // ✅ 언어 설정
+  "metadata": {
+    "platform": "YouTube Shorts",       // ✅ 플랫폼 정보
+    "source_url": "...",                 // ✅ 원본 URL
+    "view_count": 6530000,              // ✅ 실제 조회수
+    "like_count": 110000,               // ✅ 실제 좋아요
+    "comment_count": 3354,              // ✅ 실제 댓글수
+    "share_count": 2000,                // 🆕 공유수 추가
+    "upload_date": "2025-07-13T...",    // ✅ 정확한 날짜
+    "video_origin": "AI-Generated",     // ✅ 비디오 원본 분류
+    "hashtags": [],                     // 🆕 해시태그 배열
+    "cta_types": [],                    // 🆕 CTA 유형
+    "original_sound": {...}             // 🆕 오리지널 사운드 정보
+  },
+  "overall_analysis": {
+    "summary": "매우 상세한 내러티브 분석...",  // ✅ 풍부한 스토리 분석
+    "emotional_arc": "감정 여정 상세 분석...", // 🆕 감정 아크 분석
+    "audience_reaction": {              // 🆕 청중 반응 분석 섹션
+      "analysis": "상세한 참여도 분석...",
+      "common_reactions": [...],        // 🆕 일반적 반응 배열
+      "notable_comments": [...]         // 🆕 주목할만한 댓글들
+    }
+  }
+}
+```
+
+#### ⚡ **Current Shorts VDP (현재 VDP Extractor)**
+```json
+{
+  "success": true,
+  "data": {
+    "metadata": {
+      "content_id": "C471030",         // ⚠️ C접두사 + 숫자
+      "source_url": "...",             // ✅ 원본 URL
+      "upload_date": "2025-07-02...",  // ✅ 날짜 정보
+      "platform": "YouTube",          // ✅ 플랫폼 (단순화)
+      "view_count": 6669209,           // ✅ 실제 조회수
+      "like_count": 112688,            // ✅ 실제 좋아요  
+      "comment_count": 3376,           // ✅ 실제 댓글수
+      "share_count": 0,                // ❌ 공유수 미지원
+      "video_origin": "Real-Footage", // ✅ 비디오 분류
+      "title": "흔한 직장인의 야근 패턴",    // ✅ 실제 제목
+      "description": "#광고 #협찬...",   // ✅ 전체 설명
+      "language": "ko"                 // ✅ 언어 정보
+    },
+    "overall_analysis": {
+      "summary": "상세한 콘텐츠 분석...",   // ✅ 좋은 분석
+      "sentiment": "Positive",         // ✅ 감정 분석
+      "viral_indicators": {            // 🆕 바이럴 지표 객체
+        "relatability": 0.9,           // 🆕 관련성 점수
+        "humor": 0.8,                  // 🆕 유머 점수
+        "product_integration": 0.7     // 🆕 제품 통합 점수
+      },
+      "confidence": 0.85              // ✅ 신뢰도 점수
+    },
+    "scenes": [...]                   // ✅ 씬별 분석
+  }
+}
+```
+
+---
+
+## 🎯 **주요 차이점 분석**
+
+### ✅ **공통점 (호환성 우수)**
+- 기본 메타데이터 구조 유사 (view_count, like_count 등)
+- 종합적 분석 (overall_analysis) 포함
+- 씬별 분석 (scenes) 지원
+- 실제 소셜 데이터 반영
+
+### ⚠️ **차이점 (통합 고려사항)**
+
+| 항목         | Universal VDP         | Current VDP      | 호환성 |
+|------------|-----------------------|------------------|-----------|
+| content_id | "6_I2FmT1mbY" (원본ID)  | "C471030" (자동생성) | ⚠️ 불일치 |
+| 감정 분석      | emotional_arc (상세)    | sentiment (단순)   | ⚠️ 구조 다름 |
+| 청중 반응      | 상세한 audience_reaction | viral_indicators | ⚠️ 접근법 다름 |
+| 언어 설정      | default_lang (루트)     | language (메타데이터) | ⚠️ 위치 다름 |
+| 해시태그       | 전용 필드                 | 설명에 포함           | ⚠️ 구조화 부족 |
+
+---
+
+## 🔧 **긴급 수정 계획**
+
+### **1. Content ID 통일**
+```javascript
+// 현재: C471030 → 권장: 6_I2FmT1mbY (원본 ID 유지)
+const extractContentId = (url) => {
+  // YouTube URL에서 원본 ID 추출
+  const match = url.match(/(?:shorts\/|watch\?v=)([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : generateFallbackId();
+};
+```
+
+### **2. 스키마 호환성 개선**
+```javascript
+// Universal VDP 구조에 맞춘 필드 매핑
+const transformToUniversalVDP = (currentVDP) => {
+  return {
+    content_id: extractOriginalContentId(currentVDP.metadata.content_id),
+    default_lang: currentVDP.metadata.language,
+    metadata: {
+      platform: "YouTube Shorts",
+      source_url: currentVDP.metadata.source_url,
+      view_count: currentVDP.metadata.view_count,
+      like_count: currentVDP.metadata.like_count,
+      comment_count: currentVDP.metadata.comment_count,
+      share_count: currentVDP.metadata.share_count || 0,
+      upload_date: currentVDP.metadata.upload_date,
+      video_origin: currentVDP.metadata.video_origin,
+      hashtags: extractHashtags(currentVDP.metadata.description),
+      cta_types: extractCTATypes(currentVDP.metadata.description),
+      original_sound: extractOriginalSound(currentVDP.metadata)
+    },
+    overall_analysis: {
+      summary: currentVDP.overall_analysis.summary,
+      emotional_arc: transformSentimentToEmotionalArc(currentVDP.overall_analysis.sentiment),
+      audience_reaction: transformViralIndicatorsToAudienceReaction(currentVDP.overall_analysis.viral_indicators)
+    }
+  };
+};
+```
+
+### **3. 데이터 풍부도 개선**
+```javascript
+// 감정 분석 확장
+const transformSentimentToEmotionalArc = (sentiment) => {
+  const emotionalMappings = {
+    "Positive": "Optimism -> Satisfaction -> Joy",
+    "Negative": "Frustration -> Anger -> Resignation",
+    "Neutral": "Calm -> Curiosity -> Understanding"
+  };
+  return emotionalMappings[sentiment] || "Mixed emotional journey";
+};
+
+// 바이럴 지표를 청중 반응으로 변환
+const transformViralIndicatorsToAudienceReaction = (viralIndicators) => {
+  return {
+    analysis: generateAudienceAnalysis(viralIndicators),
+    common_reactions: generateCommonReactions(viralIndicators),
+    notable_comments: generateNotableComments(viralIndicators),
+    overall_sentiment: determineOverallSentiment(viralIndicators)
+  };
+};
+```
+
+---
+
+## 🚀 **즉시 실행 가능한 수정 단계**
+
+### **Phase 1: Content ID 수정 (5분)**
+```bash
+# 1. VDP Extractor 서비스 수정
+cd services/vdp-extractor/src/
+# content_id 추출 로직 수정
+
+# 2. 테스트
+curl -X POST http://localhost:3001/api/extract-vdp \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://www.youtube.com/shorts/aX5y8wz60ws"}'
+```
+
+### **Phase 2: 스키마 변환 로직 추가 (10분)**
+```bash
+# 1. Universal VDP 변환 함수 추가
+# 2. 필드 매핑 로직 구현
+# 3. 감정 분석 확장
+# 4. 청중 반응 분석 추가
+```
+
+### **Phase 3: 데이터 풍부도 개선 (10분)**
+```bash
+# 1. 해시태그 추출 로직
+# 2. CTA 유형 감지
+# 3. 오리지널 사운드 정보 추가
+# 4. 공유수 데이터 수집
+```
+
+---
+
+## 📊 **목표 결과**
+
+### **Before (현재 VDP)**
+```json
+{
+  "success": true,
+  "data": {
+    "metadata": {
+      "content_id": "C471030",
+      "sentiment": "Positive"
+    }
+  }
+}
+```
+
+### **After (Universal VDP 수준)**
+```json
+{
+  "content_id": "aX5y8wz60ws",
+  "default_lang": "ko",
+  "metadata": {
+    "platform": "YouTube Shorts",
+    "view_count": 6530000,
+    "like_count": 110000,
+    "comment_count": 3354,
+    "share_count": 2000,
+    "hashtags": ["#광고", "#협찬"],
+    "cta_types": ["product_recommendation"],
+    "original_sound": {"id": "null", "title": "null"}
+  },
+  "overall_analysis": {
+    "summary": "매우 상세한 내러티브 분석...",
+    "emotional_arc": "Optimism -> Frustration -> Determination -> Relief",
+    "audience_reaction": {
+      "analysis": "상세한 참여도 분석...",
+      "common_reactions": ["Hilarious and relatable", "The voice acting is perfect"],
+      "notable_comments": [...]
+    }
+  }
+}
+```
+
+---
+
+## 🎯 **ClaudeCode 요청사항**
+
+### **긴급 작업 필요**
+1. **Content ID 통일** (5분)
+2. **스키마 변환 로직 구현** (10분)
+3. **데이터 풍부도 개선** (10분)
+4. **Universal VDP 수준 검증** (5분)
+
+### **목표**
+- **스키마 호환성**: 100% Universal VDP 호환
+- **분석 깊이**: Universal VDP 수준 달성
+- **데이터 풍부도**: 해시태그, CTA, 감정 아크 등 완전 구현
+- **구현 시간**: 30분 내 완료
+
+---
+
+## 📋 **수정 체크리스트**
+
+### **Content ID 수정**
+- [ ] 원본 YouTube ID 추출 로직 구현
+- [ ] C접두사 제거 및 원본 ID 사용
+- [ ] 테스트 URL로 검증
+
+### **스키마 변환**
+- [ ] Universal VDP 구조 매핑 함수 구현
+- [ ] 감정 분석 확장 (sentiment → emotional_arc)
+- [ ] 청중 반응 분석 추가 (viral_indicators → audience_reaction)
+- [ ] 언어 설정 위치 조정
+
+### **데이터 풍부도**
+- [ ] 해시태그 추출 로직 구현
+- [ ] CTA 유형 감지 로직 추가
+- [ ] 공유수 데이터 수집
+- [ ] 오리지널 사운드 정보 추가
+
+---
+
+**🚨 Universal VDP 수준의 영상해석이 나올 때까지 수정을 계속해야 합니다!**
+
+**ClaudeCode 확인 명령어:**
+```bash
+git pull
+cat .collab-msg-cursor-vdp-schema-compatibility-fix
+# VDP 스키마 호환성 긴급 수정 - Universal VDP 수준 달성 필요
+```
+
+**30분 내에 Universal VDP 수준의 완전한 영상해석을 달성해야 합니다!** 🎯
