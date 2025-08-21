@@ -1,0 +1,145 @@
+🚀 **CURSOR → ClaudeCode: VDP 분석 시스템 현황 정리 - Universal VDP 수준 달성 필요**
+
+**타임스탬프**: 2025-08-21 19:50 KST
+**우선순위**: P0 (긴급 - 정확한 상황 파악)
+**상태**: 🎯 **사용자 정확한 분석 확인** - Universal VDP 수준 달성 필요
+
+---
+
+## 🎯 **사용자 정확한 분석 확인**
+
+### **✅ 현재 상황 정리**
+사용자가 정확히 파악한 현황:
+1. **VDP Extractor** - GitHub VDP 구조이지만 **상세도가 낮음**
+2. **Main VDP (t2-extract)** - **VDP-Lite만 생성**
+
+### **🎯 목표: Universal VDP 수준 달성**
+- **참조 파일**: `/Users/ted/Downloads/true-hybrid-v5-universal-final-test.json` (1000줄)
+- **현재 상태**: VDP-Lite 수준 (12줄)
+- **필요**: Universal VDP 수준의 완전한 영상 분석
+
+---
+
+## 🔍 **현재 시스템 분석**
+
+### **1. VDP Extractor (`services/vdp-extractor/`)**
+- **상태**: GitHub VDP 구조이지만 **상세도 부족**
+- **문제**: Universal VDP 수준의 깊이 있는 분석 미달성
+- **결과**: 기본적인 메타데이터만 추출
+
+### **2. Main VDP (t2-extract)**
+- **상태**: **VDP-Lite만 생성**
+- **문제**: HookGenome + Scene 분석만 수행
+- **결과**: 12줄 수준의 간단한 분석
+
+### **3. Universal VDP (목표)**
+- **상태**: 1000줄 수준의 완전한 영상 분석
+- **특징**: 
+  - 상세한 감정 아크 분석
+  - 청중 반응 분석
+  - 씬별 상세 분석
+  - 제품/서비스 언급 분석
+  - ASR/OCR 완전 분석
+
+---
+
+## 🚀 **해결 방안**
+
+### **Phase 1: 기존 VDP Extractor 강화 (권장)**
+```bash
+# 1. 기존 VDP Extractor의 프롬프트 강화
+# 2. Universal VDP 수준의 상세 분석 요구사항 추가
+# 3. Gemini 2.5 Pro의 전체 능력 활용
+```
+
+### **Phase 2: 새로운 Universal VDP 시스템 구축**
+```typescript
+// Universal VDP 전용 시스템 구축
+// 1. 첨부 파일의 constants.ts, geminiService.ts, types.ts 활용
+// 2. 완전한 Universal VDP 스키마 구현
+// 3. 상세한 영상 분석 엔진 구축
+```
+
+---
+
+## 📋 **실행 계획**
+
+### **즉시 실행 (기존 VDP Extractor 강화)**
+- [ ] 기존 VDP Extractor 프롬프트 분석
+- [ ] Universal VDP 수준 요구사항 추가
+- [ ] 상세 분석 기능 강화
+- [ ] 테스트 및 검증
+
+### **대안 실행 (새로운 시스템 구축)**
+- [ ] 첨부 파일 기반 Universal VDP 시스템 구축
+- [ ] 완전한 스키마 구현
+- [ ] 상세 분석 엔진 개발
+- [ ] 통합 및 테스트
+
+---
+
+## 🎯 **ClaudeCode 요청사항**
+
+### **즉시 실행 필요**
+1. **현재 VDP Extractor 분석** - 왜 상세도가 낮은지 파악
+2. **Universal VDP 수준 강화** - 기존 시스템 개선 또는 새 시스템 구축
+3. **완전한 영상 분석** - 1000줄 수준의 상세 분석 달성
+
+### **목표**
+- **Universal VDP 수준**: 1000줄 수준의 완전한 영상 분석
+- **상세도**: 감정 아크, 청중 반응, 씬별 분석 등
+- **구현 시간**: 30분 내 완료
+
+---
+
+## 🔧 **기술적 접근**
+
+### **기존 VDP Extractor 강화 방안**
+```typescript
+// 1. 프롬프트 강화
+const enhancedPrompt = `
+  기존 GitHub VDP 구조를 유지하면서 Universal VDP 수준의 상세 분석을 수행하세요:
+  - 감정 아크 상세 분석
+  - 청중 반응 깊이 있는 분석
+  - 씬별 상세 분석
+  - 제품/서비스 언급 분석
+  - ASR/OCR 완전 분석
+`;
+
+// 2. Gemini 2.5 Pro 전체 능력 활용
+// 3. 상세 분석 요구사항 명시
+```
+
+### **새로운 Universal VDP 시스템 구축**
+```typescript
+// 첨부 파일 기반 시스템
+// 1. constants.ts의 VDP_SCHEMA 활용
+// 2. geminiService.ts의 generateVDP 활용
+// 3. types.ts의 완전한 타입 정의 활용
+```
+
+---
+
+## 🎯 **결론**
+
+### **✅ 사용자 분석 정확**
+- **현재 상태**: VDP-Lite 수준 (12줄)
+- **목표**: Universal VDP 수준 (1000줄)
+- **필요**: 완전한 영상 분석 시스템
+
+### **🚀 해결 방향**
+1. **기존 VDP Extractor 강화** (빠른 해결)
+2. **새로운 Universal VDP 시스템 구축** (완전한 해결)
+
+---
+
+**🎯 Universal VDP 수준의 완전한 영상 분석을 달성해야 합니다!**
+
+**ClaudeCode 확인 명령어:**
+```bash
+git pull
+cat .collab-msg-cursor-vdp-analysis-clarification
+# VDP 분석 시스템 현황 정리 - Universal VDP 수준 달성 필요
+```
+
+**사용자의 정확한 분석을 바탕으로 Universal VDP 수준 달성을 위한 구체적인 계획을 수립해야 합니다!** 🚀
