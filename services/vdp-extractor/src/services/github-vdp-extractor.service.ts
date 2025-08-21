@@ -76,7 +76,7 @@ export class GitHubVDPExtractorService {
       this.logger.info(`Starting GitHub VDP extraction for URL: ${request.url}`);
 
       // Step 1: Detect platform and extract content ID
-      const platformInfo = this.detectPlatform(request.url);
+      const platformInfo = this.detectPlatform(request.url || request.gcsUri || '');
       if (platformInfo.platform === 'unknown') {
         throw new PlatformNotSupportedError(platformInfo.platform);
       }
@@ -188,7 +188,7 @@ export class GitHubVDPExtractorService {
         vdpData.metadata = {
           ...vdpData.metadata,
           platform: platformInfo.platform === 'youtube' ? 'YouTube' : vdpData.metadata.platform,
-          source_url: request.url,
+          source_url: request.url || request.gcsUri || '',
           view_count: videoMetadata.viewCount || vdpData.metadata.view_count,
           like_count: videoMetadata.likeCount || vdpData.metadata.like_count,
           comment_count: videoMetadata.commentCount || vdpData.metadata.comment_count,
@@ -199,7 +199,7 @@ export class GitHubVDPExtractorService {
         this.logger.warn('Gemini analysis failed, using fallback values:', error);
         
         // Fallback: Create minimal GitHub VDP structure
-        vdpData = this.createFallbackVDP(platformInfo, videoMetadata, request.url);
+        vdpData = this.createFallbackVDP(platformInfo, videoMetadata, request.url || request.gcsUri || '');
       }
 
       const processingTime = Date.now() - startTime;

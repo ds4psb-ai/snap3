@@ -1581,7 +1581,55 @@ app.post('/api/submit', async (req, res) => {
     }
 });
 
-// Health check endpoint
+// Health check endpoint (표준화: /healthz)
+app.get('/healthz', async (req, res) => {
+    const correlationId = generateCorrelationId();
+    const startTime = Date.now();
+    
+    try {
+        // T3 헬스체크
+        const t3Checks = {};
+        
+        try {
+            const mainVdpCheck = await fetch('http://localhost:3001/healthz', { timeout: 2000 });
+            t3Checks.t3_main = mainVdpCheck.ok ? 'ok' : 'down';
+        } catch {
+            t3Checks.t3_main = 'down';
+        }
+        
+        try {
+            const subVdpCheck = await fetch('http://localhost:8082/healthz', { timeout: 2000 });
+            t3Checks.t3_sub = subVdpCheck.ok ? 'ok' : 'down';
+        } catch {
+            t3Checks.t3_sub = 'down';
+        }
+
+        res.status(200).json({
+            status: 'ok',
+            version: '1.0.0',
+            timestamp: new Date().toISOString(),
+            correlationId,
+            deps: {
+                normalizer: !!normalizeSocialUrl ? 'ok' : 'down',
+                gcs: !!storage ? 'ok' : 'down',
+                ...t3Checks
+            },
+            uptime: process.uptime(),
+            responseTime: Date.now() - startTime
+        });
+        
+    } catch (error) {
+        res.status(503).json({
+            status: 'unhealthy',
+            timestamp: new Date().toISOString(),
+            correlationId,
+            error: error.message,
+            responseTime: Date.now() - startTime
+        });
+    }
+});
+
+// 기존 헬스체크 호환성 유지
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'ok', 
@@ -2707,19 +2755,41 @@ app.post('/api/vdp/extract-main', async (req, res) => {
             content_id = urlResult.id;
         }
         
-        // GPT-5 Pro CTO Solution: T3 Adapter with Main→Sub Fallback (단순화)
-        const T3_ROUTES = [
-            {
-                health: 'http://localhost:3001/healthz',
-                url: 'http://localhost:3001/api/v1/extract',
-                name: 'Primary'
-            },
-            {
-                health: 'http://localhost:8082/healthz',
-                url: 'http://localhost:8082/api/vdp/extract-vertex',
-                name: 'Secondary'
+        // GPT-5 Pro CTO Solution: 플랫폼별 라우팅 전략
+        const getT3Routes = (platform) => {
+            // YouTube는 메인 VDP 추출기 우선
+            if (platform === 'youtube') {
+                return [
+                    {
+                        health: 'http://localhost:3001/healthz',
+                        url: 'http://localhost:3001/api/v1/extract',
+                        name: 'Main-VDP'
+                    },
+                    {
+                        health: 'http://localhost:8082/healthz',
+                        url: 'http://localhost:8082/api/vdp/extract-vertex',
+                        name: 'Sub-VDP'
+                    }
+                ];
+            } 
+            // Instagram/TikTok은 서브 VDP 추출기 우선 (현재 지원 상황)
+            else {
+                return [
+                    {
+                        health: 'http://localhost:8082/healthz',
+                        url: 'http://localhost:8082/api/vdp/extract-vertex',
+                        name: 'Sub-VDP'
+                    },
+                    {
+                        health: 'http://localhost:3001/healthz',
+                        url: 'http://localhost:3001/api/v1/extract',
+                        name: 'Main-VDP'
+                    }
+                ];
             }
-        ];
+        };
+        
+        const T3_ROUTES = getT3Routes(platform);
         
         async function callT3Extract(payload) {
             for (const route of T3_ROUTES) {
@@ -2744,7 +2814,7 @@ app.post('/api/vdp/extract-main', async (req, res) => {
                         headers: {
                             'content-type': 'application/json'
                         },
-                        signal: AbortSignal.timeout(120000) // 120초 타임아웃
+                        signal: AbortSignal.timeout(300000) // 300초 타임아웃 (5분)
                     });
                     
                     if (vdpResponse.ok) {

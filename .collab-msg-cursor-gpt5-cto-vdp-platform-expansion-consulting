@@ -1,0 +1,155 @@
+# 🎯 GPT-5 Pro CTO 컨설팅 요청: VDP 플랫폼 확장 및 T1 서버 연결 문제
+
+## 📊 **현재 상황 요약**
+
+### ✅ **성공한 부분**
+- **메인 VDP 추출기**: 3001 포트에서 정상 실행 (healthy)
+- **YouTube 지원**: 완전 지원, 상세한 영상해석 및 실제 메타데이터 추출 성공
+- **영상해석 품질**: YouTube 기준으로 매우 높은 품질 (장면 분석, 키프레임, 문화적 맥락)
+
+### ❌ **해결 필요한 문제**
+1. **T1 서버 연결 실패**: 메인 VDP 추출기 호출 시 VDP-Lite로 폴백
+2. **플랫폼 지원 제한**: TikTok/Instagram 미지원으로 폴백 VDP만 생성
+3. **플랫폼 일관성 부족**: 3개 플랫폼 모두 동일한 품질의 VDP 생성 불가
+
+## 🧪 **테스트 결과 상세**
+
+### **YouTube (성공)**
+```json
+{
+  "success": true,
+  "processingTime": 12369,
+  "metadata": {
+    "view_count": 4072375,
+    "like_count": 51587,
+    "comment_count": 1287,
+    "title": "테토남인척 하는 미X놈 #shorts #커플 #커플유튜브 #테토남 #에겐남"
+  },
+  "overall_analysis": {
+    "summary": "상세한 영상해석...",
+    "viral_indicators": "High view velocity, Medium engagement",
+    "cultural_context": "Korean/Vietnamese cultural references"
+  },
+  "scenes": [
+    {
+      "scene_id": 1,
+      "narrative_role": "Hook",
+      "shots": [{"keyframes": [...]}]
+    }
+  ]
+}
+```
+
+### **TikTok (실패 - 폴백)**
+```json
+{
+  "success": true,
+  "processingTime": 0,
+  "metadata": {
+    "view_count": 0,
+    "like_count": 0,
+    "comment_count": 0
+  },
+  "overall_analysis": {
+    "summary": "Fallback analysis: Limited metadata available"
+  },
+  "scenes": []
+}
+```
+
+### **Instagram (실패 - 폴백)**
+```json
+{
+  "success": true,
+  "processingTime": 0,
+  "metadata": {
+    "view_count": 0,
+    "like_count": 0,
+    "comment_count": 0
+  },
+  "overall_analysis": {
+    "summary": "Fallback analysis: Limited metadata available"
+  },
+  "scenes": []
+}
+```
+
+## 🎯 **컨설팅 요청 사항**
+
+### **1. 메인 VDP 추출기 플랫폼 확장**
+- **목표**: TikTok/Instagram 지원 추가하여 YouTube와 동일한 품질의 VDP 생성
+- **제약사항**: 기존 YouTube 영상해석 룰/스키마 절대 변경 금지
+- **요구사항**: 
+  - TikTok/Instagram 영상 다운로드 및 분석 기능
+  - YouTube와 동일한 장면 분석, 키프레임 추출
+  - 문화적 맥락 분석 및 바이럴 팩터 분석
+
+### **2. T1 서버 연결 문제 해결**
+- **현재 문제**: T1에서 메인 VDP 추출기 호출 시 연결 실패
+- **요구사항**: 
+  - T1 → 메인 VDP 추출기 (3001) 정상 연결
+  - 실패 시 서브 VDP 추출기 (8082) 폴백
+  - 최종적으로 VDP-Lite 폴백
+
+### **3. 플랫폼 일관성 확보**
+- **목표**: 3개 플랫폼 모두 동일한 품질의 VDP 생성
+- **기준**: YouTube 분석 품질을 TikTok/Instagram에도 적용
+- **요구사항**:
+  - 동일한 메타데이터 구조
+  - 동일한 영상해석 깊이
+  - 동일한 처리 시간 (12-15초)
+
+### **4. 최종 VDP 적재 시스템 완성**
+- **목표**: 메타데이터 + 영상해석 데이터가 모두 포함된 완전한 VDP 적재
+- **요구사항**:
+  - BigQuery 적재 준비
+  - 플랫폼별 세그먼트 경로 유지
+  - 실시간 처리 및 배치 처리 지원
+
+## ⚠️ **중요 제약사항 및 규칙**
+
+### **절대 변경 금지**
+1. **메인 VDP 추출기 영상해석 룰/스키마**: YouTube 분석 품질 기준 유지
+2. **VDP 구조**: GitHub VDP Extractor와 100% 호환 JSON 구조 유지
+3. **처리 시간**: 12-15초 내 완료 (YouTube 기준)
+4. **분석 깊이**: 장면 분석, 키프레임, 문화적 맥락 분석 유지
+
+### **확장 시 고려사항**
+1. **플랫폼별 특성**: TikTok/Instagram의 고유한 특성 반영
+2. **다운로드 방식**: 각 플랫폼의 적절한 다운로드 방법 적용
+3. **메타데이터 추출**: 플랫폼별 API/스크래핑 방식 최적화
+4. **에러 처리**: 플랫폼별 차단/제한 상황 대응
+
+## 📋 **요청하는 전략적 가이드**
+
+### **1. 아키텍처 검토**
+- 메인 VDP 추출기의 TikTok/Instagram 확장 방안
+- T1 서버 연결 문제의 근본 원인 분석
+- 플랫폼별 처리 파이프라인 최적화
+
+### **2. 기술적 의사결정**
+- TikTok/Instagram 영상 다운로드 전략
+- 플랫폼별 메타데이터 추출 방식
+- 에러 처리 및 폴백 전략
+
+### **3. 구현 로드맵**
+- 단계별 플랫폼 확장 계획
+- 테스트 및 검증 방법
+- 성능 최적화 방안
+
+### **4. 품질 보장**
+- YouTube 분석 품질 유지 방법
+- 플랫폼별 일관성 확보 방안
+- 최종 VDP 적재 시스템 완성 전략
+
+## 🎯 **기대 결과**
+
+1. **3개 플랫폼 완전 지원**: YouTube, TikTok, Instagram 모두 동일한 품질의 VDP 생성
+2. **T1 서버 연결 안정화**: 메인 VDP 추출기 정상 호출 및 폴백 체계 완성
+3. **빅데이터 시스템 준비**: 완전한 VDP 데이터로 BigQuery 적재 가능
+4. **실시간 처리**: 12-15초 내 3개 플랫폼 모두 처리 완료
+
+---
+
+**GPT-5 Pro CTO님의 전략적 가이드와 기술적 의사결정을 기다립니다.**
+

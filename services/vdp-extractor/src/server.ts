@@ -140,8 +140,9 @@ try {
 // API Routes
 const apiRouter = express.Router();
 
-// Health check endpoint (no rate limiting)
-app.get('/health', createAsyncHandler(vdpController.healthCheck));
+// Health check endpoints (표준화)
+app.get('/healthz', createAsyncHandler(vdpController.healthCheck));
+app.get('/health', createAsyncHandler(vdpController.healthCheck)); // 기존 호환성
 
 // Service info endpoint
 apiRouter.get('/info', createAsyncHandler(vdpController.getServiceInfo));
@@ -239,8 +240,8 @@ async function startServer() {
       logger.warn('Some services are degraded, starting with limited functionality');
     }
 
-    // Start the server on port 3001 (changed from 3001 to avoid conflicts)
-    const port = 3005; // Avoid port conflicts with Cursor (3000) and existing services
+    // Start the server on port 3001 (Main VDP Extractor)
+    const port = 3001; // Main VDP Extractor port
     server = app.listen(port, () => {
       logger.info(`VDP Extractor Service started successfully`, {
         port: port,

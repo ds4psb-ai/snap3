@@ -29,7 +29,16 @@ const urlSchema = z.string().url().refine(
 
 // Extract VDP request validation schema
 const extractVDPRequestSchema = z.object({
-  url: urlSchema,
+  url: urlSchema.optional(),
+  gcsUri: z.string().optional(),
+  metadata: z.object({
+    platform: z.string().optional(),
+    content_id: z.string().optional(),
+    like_count: z.number().optional(),
+    comment_count: z.number().optional(),
+    title: z.string().optional(),
+    author: z.string().optional(),
+  }).optional(),
   platform: z.enum(['youtube', 'tiktok', 'instagram', 'auto']).optional(),
   options: z.object({
     includeContentAnalysis: z.boolean().optional(),
@@ -38,12 +47,23 @@ const extractVDPRequestSchema = z.object({
     deepAnalysis: z.boolean().optional(),
     skipCache: z.boolean().optional(),
   }).optional(),
-});
+}).refine(
+  (data) => data.url || data.gcsUri,
+  {
+    message: "Either 'url' or 'gcsUri' must be provided",
+  }
+);
 
 // Batch extract request validation schema
 const batchExtractRequestSchema = z.object({
   urls: z.array(urlSchema).min(1).max(50), // Limit to 50 URLs per batch
-  options: extractVDPRequestSchema.shape.options.optional(),
+  options: z.object({
+    includeContentAnalysis: z.boolean().optional(),
+    includeViralFactors: z.boolean().optional(),
+    maxComments: z.number().min(0).max(100).optional(),
+    deepAnalysis: z.boolean().optional(),
+    skipCache: z.boolean().optional(),
+  }).optional(),
 });
 
 /**

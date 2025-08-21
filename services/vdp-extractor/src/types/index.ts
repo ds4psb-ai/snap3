@@ -2,7 +2,16 @@ export * from '../schemas/viral-dna-profile';
 
 // API Request/Response types
 export interface ExtractVDPRequest {
-  url: string;
+  url?: string;
+  gcsUri?: string;
+  metadata?: {
+    platform?: string;
+    content_id?: string;
+    like_count?: number;
+    comment_count?: number;
+    title?: string;
+    author?: string;
+  };
   platform?: 'youtube' | 'tiktok' | 'instagram' | 'auto';
   options?: {
     includeContentAnalysis?: boolean;

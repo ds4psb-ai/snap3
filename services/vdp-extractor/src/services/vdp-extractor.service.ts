@@ -63,7 +63,7 @@ export class VDPExtractorService {
       this.logger.info(`Starting VDP extraction for URL: ${request.url}`);
 
       // Step 1: Detect platform and extract content ID
-      const platformInfo = this.detectPlatform(request.url);
+      const platformInfo = this.detectPlatform(request.url || request.gcsUri || '');
       if (platformInfo.platform === 'unknown') {
         throw new PlatformNotSupportedError(platformInfo.platform);
       }
@@ -109,9 +109,9 @@ export class VDPExtractorService {
           videoBuffer,
           'video/mp4',
           {
-            source_url: request.url,
-            platform: platformInfo.platform,
-            content_id: platformInfo.contentId,
+                      source_url: request.url || request.gcsUri || '',
+          platform: platformInfo.platform,
+          content_id: platformInfo.contentId,
             ...platformMetadata,
           }
         );
@@ -125,7 +125,7 @@ export class VDPExtractorService {
         if (platformMetadata) {
           vdpData.metadata = {
             ...vdpData.metadata,
-            source_url: request.url,
+            source_url: request.url || request.gcsUri || '',
             platform: this.capitalizePlatform(platformInfo.platform),
             view_count: (platformMetadata as any).viewCount || vdpData.metadata.view_count || 0,
             like_count: (platformMetadata as any).likeCount || vdpData.metadata.like_count || 0,
@@ -138,7 +138,7 @@ export class VDPExtractorService {
         this.logger.error('Gemini analysis failed:', error);
         
         // Create fallback VDP with basic structure
-        vdpData = this.createFallbackVDP(platformInfo, platformMetadata, request.url);
+        vdpData = this.createFallbackVDP(platformInfo, platformMetadata, request.url || request.gcsUri || '');
       }
 
       // Validate the final VDP

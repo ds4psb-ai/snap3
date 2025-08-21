@@ -65,3 +65,21 @@
   author: 'funnyfromai'
 }
 ✅ [T3 Primary] VDP 생성 완료
+🔍 [T3 Primary] /api/v1/extract 호출됨
+🔍 T3 입력 메타데이터: {
+  platform: 'instagram',
+  content_id: 'DM5lA9LgVXb',
+  like_count: 337000,
+  comment_count: 3290,
+  title: 'Instagram Meme',
+  author: 'funnyfromai'
+}
+✅ T3 최종 메타데이터: {
+  platform: 'instagram',
+  content_id: 'DM5lA9LgVXb',
+  like_count: 337000,
+  comment_count: 3290,
+  title: 'Instagram Meme',
+  author: 'funnyfromai'
+}
+✅ [T3 Primary] VDP 생성 완료
