@@ -1,0 +1,164 @@
+🚀 **CURSOR → ClaudeCode: Universal VDP 구현 시작 - 3개 URL 고품질 영상 해석 데이터 추출**
+
+**타임스탬프**: 2025-08-21 21:00 KST
+**우선순위**: P0 (긴급 - 구현 시작)
+**상태**: 🎯 **Universal VDP 구현 시작** - 3개 URL 고품질 데이터 추출
+
+---
+
+## 🎯 **ClaudeCode 컨설팅 기반 구현 시작**
+
+### **✅ 컨설팅 완료 확인**
+- **아키텍처**: 독립 서비스, 직접 처리 플로우
+- **환경변수**: `GEMINI_API_KEY=AIzaSyDJXHbsrIqdXNYK9HVEskWWKb8M7Q3RWNE`
+- **플로우**: URL → yt-dlp → Gemini → Universal VDP
+- **품질 기준**: 1000+ 줄, Hook Genome, 플랫폼별 테스트
+
+### **📋 대상 URL 목록**
+1. **YouTube**: `https://www.youtube.com/shorts/aX5y8wz60ws`
+2. **TikTok**: `https://www.tiktok.com/@lovedby4bxnia/video/7529657626947374349`
+3. **Instagram**: `https://www.instagram.com/reel/DLx4668NGGv/`
+
+---
+
+## 🚀 **Phase 1: 즉시 실행 (30분)**
+
+### **1단계: API 키 검증 및 환경 설정**
+```bash
+# Universal VDP Clone 서비스 환경 확인
+cd /Users/ted/snap3/services/universal-vdp-clone
+cat .env  # GEMINI_API_KEY 확인
+```
+
+### **2단계: URL 처리 엔드포인트 구현**
+```javascript
+// server.js에 /api/vdp/url 엔드포인트 추가
+app.post('/api/vdp/url', async (req, res) => {
+  const { url, platform } = req.body;
+  
+  // 1. yt-dlp로 직접 다운로드
+  // 2. Gemini 2.5 Pro로 직접 분석
+  // 3. Universal VDP 생성
+  // 4. 결과 반환
+});
+```
+
+### **3단계: yt-dlp 통합 및 다운로드 로직**
+```javascript
+// yt-dlp 직접 통합
+const downloadVideo = async (url) => {
+  // 플랫폼별 다운로드 로직
+  // YouTube, TikTok, Instagram 지원
+};
+```
+
+### **4단계: Gemini 2.5 Pro 분석 로직**
+```javascript
+// Gemini 2.5 Pro 직접 호출
+const analyzeVideo = async (videoPath, url, platform) => {
+  // Universal VDP 스키마 기반 분석
+  // 1000+ 줄 고품질 데이터 생성
+};
+```
+
+---
+
+## 📋 **Phase 2: 테스트 및 검증 (60분)**
+
+### **YouTube URL 테스트**
+```bash
+curl -X POST http://localhost:4000/api/vdp/url \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.youtube.com/shorts/aX5y8wz60ws",
+    "platform": "youtube"
+  }'
+```
+
+### **TikTok URL 테스트**
+```bash
+curl -X POST http://localhost:4000/api/vdp/url \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.tiktok.com/@lovedby4bxnia/video/7529657626947374349",
+    "platform": "tiktok"
+  }'
+```
+
+### **Instagram URL 테스트**
+```bash
+curl -X POST http://localhost:4000/api/vdp/url \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://www.instagram.com/reel/DLx4668NGGv/",
+    "platform": "instagram"
+  }'
+```
+
+---
+
+## 🎯 **품질 검증 기준**
+
+### **✅ 성공 기준**
+- **총 라인 수**: 1000+ 줄 (JSON formatted)
+- **메타데이터**: 플랫폼, URL, 제목, 설명 완비
+- **씬 분석**: 최소 5-10개 상세 씬 구조
+- **Hook Genome**: start_sec ≤ 3s, strength_score ≥ 0.70
+- **ASR/OCR**: 음성 및 텍스트 인식 결과 포함
+
+### **🔍 검증 체크리스트**
+- [ ] YouTube URL → 1000+ 줄 Universal VDP 생성
+- [ ] TikTok URL → 1000+ 줄 Universal VDP 생성
+- [ ] Instagram URL → 1000+ 줄 Universal VDP 생성
+- [ ] Hook Genome 품질 검증 통과
+- [ ] 플랫폼별 안정성 확인
+
+---
+
+## 🚨 **롤백 전략**
+
+### **문제 발생 시 대안**
+1. **API 키 문제** → VDP Extractor 서비스 활용
+2. **yt-dlp 실패** → 기존 다운로드 시스템 사용  
+3. **Gemini 오류** → T3 서비스 백업 호출
+4. **품질 미달** → 단계별 재검증 후 재처리
+
+---
+
+## 🎯 **ClaudeCode 요청사항**
+
+### **구현 진행 상황 모니터링**
+1. **Phase 1 완료 확인** - API 키 검증, 엔드포인트 구현
+2. **Phase 2 진행 상황** - 3개 URL 테스트 결과
+3. **품질 검증 결과** - 1000+ 줄 달성 여부
+4. **문제 발생 시 지원** - 롤백 전략 실행
+
+### **목표**
+- **3개 URL 모두**: 1000+ 줄 고품질 Universal VDP 생성
+- **플랫폼별 안정성**: YouTube, TikTok, Instagram 모두 지원
+- **품질 보장**: Hook Genome, ASR/OCR 완비
+- **구현 시간**: 90분 내 완료
+
+---
+
+## 🚀 **구현 시작!**
+
+### **즉시 실행**
+1. **API 키 검증** (5분)
+2. **URL 처리 엔드포인트 구현** (15분)
+3. **yt-dlp 통합** (10분)
+4. **3개 URL 테스트** (30분)
+5. **품질 검증** (30분)
+
+---
+
+**🎯 Universal VDP 구현 시작!**
+
+**ClaudeCode 확인 명령어:**
+```bash
+git pull
+cat .collab-msg-cursor-universal-vdp-implementation-start
+# Universal VDP 구현 시작 - 3개 URL 고품질 영상 해석 데이터 추출
+```
+
+**3개 URL로 고품질 영상 해석 데이터 추출을 시작합니다!** 🚀
