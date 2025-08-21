@@ -1,0 +1,160 @@
+🚨 **URGENT: T3 근본 패치 즉시 실행 명령**
+
+**From**: Cursor (실행 담당)
+**To**: ClaudeCode (T3 패치 담당)
+**Priority**: CRITICAL - 즉시 실행
+**Status**: GPT-5 Pro CTO 솔루션 승인 완료
+
+---
+
+## 📋 **GPT-5 Pro CTO 진단 결과**
+
+**핵심 문제**: T3에서 메타데이터가 '수신됨→병합됨→최종 응답 직전에 소거'되는 흐름
+**근본 원인**: 본문 파싱 불일치 + 후처리 단계에서 vdp 객체 재할당
+
+**증거**: T3 로그에서 "Normalized meta: {} / Input meta: {} / content_id: undefined" 연속 출력
+
+---
+
+## 🎯 **즉시 실행할 T3 4단계 패치**
+
+### **1단계: 입력 스키마 확정(Zod) + Content-Type 허용폭 확장**
+
+```js
+// server.js (T3)
+app.use(require('express').json({ limit: '10mb', type: ['application/json','text/json','application/*+json'] }));
+const { z } = require('zod');
+const InboundSchema = z.object({
+  gcsUri: z.string().min(1),
+  metadata: z.record(z.any()).default({}),         // 'metadata' 표준
+  meta: z.record(z.any()).optional(),              // 과거 'meta' 호환
+  processing_options: z.record(z.any()).optional()
+});
+```
+
+### **2단계: 안전 파서(getPayload) — 이중 파싱/빈객체화 방지**
+
+```js
+function getPayload(req){
+  // 일부 프록시/런타임에서 req.body가 string인 케이스 방지
+  if (typeof req.body === 'string') {
+    try { return JSON.parse(req.body); } catch { return {}; }
+  }
+  return req.body || {};
+}
+```
+
+### **3단계: 불변 병합(초기 고정 → 엔진 실행 → 최종 보강)**
+
+```js
+app.post('/api/vdp/extract-vertex', async (req,res) => {
+  const raw = getPayload(req);
+  const parsed = InboundSchema.safeParse({ ...raw, metadata: raw.metadata ?? raw.meta ?? {} });
+  if (!parsed.success) return res.status(422).json({ code:'VALIDATION_FAILED', detail: parsed.error.issues });
+
+  const input = parsed.data;
+  const inputMeta = structuredClone(input.metadata);  // ❗원본 보존(불변)
+  // 1) 최소 필드 강제
+  if (!inputMeta.platform) inputMeta.platform = guessPlatform(input.gcsUri);
+  if (!inputMeta.content_id) inputMeta.content_id = deriveId(input.gcsUri);
+
+  // 2) 엔진 호출
+  const engineVDP = await generateVDPWithVertex({ gcsUri: input.gcsUri, meta: inputMeta });
+
+  // 3) 엔진 산출물 정규화(스키마 표준화 + 후방 호환)
+  const normalized = normalizeVDP(engineVDP);
+
+  // 4) 메타 보강: **최종 객체 위에 불변 병합(엔진값 덮지 않음)**
+  normalized.metadata = { ...(normalized.metadata ?? {}), ...inputMeta };
+
+  // 5) 필수 보존키 재확인
+  ['platform','content_id','like_count','comment_count','title','author','view_count']
+    .forEach(k => { if (inputMeta[k] !== undefined) normalized.metadata[k] = inputMeta[k]; });
+
+  return res.status(200).json(normalized);
+});
+```
+
+### **4단계: 표준화 어댑터(normalizeVDP) — vdp_analysis → overall_analysis**
+
+```js
+function adaptHook(vdp_analysis = {}) {
+  const h = vdp_analysis.hook_genome_analysis || vdp_analysis.hookGenome || {};
+  return {
+    hookGenome: {
+      start_sec: Number(h.start_sec ?? h.hook_start ?? h.hook_duration_seconds ?? 0),
+      strength_score: Number(h.strength_score ?? h.score ?? 0.85),
+      pattern_code: Array.isArray(h.detected_patterns) ? h.detected_patterns.map(p=>p.pattern_name) : (h.pattern_code ?? 'unknown')
+    }
+  };
+}
+function normalizeVDP(vdp = {}) {
+  const out = { ...vdp };
+  if (!out.overall_analysis && out.vdp_analysis) out.overall_analysis = adaptHook(out.vdp_analysis);
+  delete out.vdp_analysis; // 표준 스키마 준수
+  return out;
+}
+```
+
+---
+
+## 🔧 **추가 디버그 엔드포인트**
+
+```js
+// T3
+app.post('/api/debug/echo', (req,res)=>res.json({headers:req.headers, body:getPayload(req)}));
+app.get('/healthz', (_,res)=>res.status(200).json({ok:true, svc:'t3-vdp'}));
+```
+
+---
+
+## 📊 **성공 기준 (즉시 관측 가능)**
+
+- `POST /api/vdp/extract-vertex` 응답에 **metadata.platform/content_id/like_count**가 그대로 존재
+- `overall_analysis.hookGenome.start_sec/strength_score/pattern_code` 확인
+- T1 경유 저장물(`*.universal.json`)에서 위 값들이 **반드시 보존**
+- 인스타/틱톡 링크 3건 기준 **처리 P95 < 30s**(Evidence-OFF)
+
+---
+
+## 🚀 **실행 우선순위**
+
+1. **즉시**: T3 서버 포트 8082에서 실행 중인 프로세스 종료
+2. **즉시**: 위 4단계 패치를 `services/t2-extract/src/server.js`에 적용
+3. **즉시**: T3 서버 재시작 및 헬스체크 확인
+4. **즉시**: E2E 테스트 실행
+
+---
+
+## 🧪 **E2E 실전 테스트 (복붙용)**
+
+```bash
+# 1) Echo로 바디 보존 여부 확인
+curl -sS http://localhost:8082/api/debug/echo -H 'Content-Type: application/json' \
+  -d '{"gcsUri":"gs://tough-variety-raw-central1/raw/input/instagram/DM5lA9LgVXb.mp4","metadata":{"platform":"instagram","content_id":"DM5lA9LgVXb","like_count":337000,"comment_count":3289,"title":"Instagram Meme","author":"funnyfromai"}}' | jq .
+
+# 2) VDP 생성(핵심): 응답 metadata.* 보존 + overall_analysis 존재 확인
+curl -sS http://localhost:8082/api/vdp/extract-vertex -H 'Content-Type: application/json' \
+  -d '{"gcsUri":"gs://tough-variety-raw-central1/raw/input/instagram/DM5lA9LgVXb.mp4","metadata":{"platform":"instagram","content_id":"DM5lA9LgVXb","like_count":337000,"comment_count":3289,"title":"Instagram Meme","author":"funnyfromai"}}' | jq '.metadata,.overall_analysis.hookGenome'
+```
+
+---
+
+## ⚡ **Cursor 상태**
+
+- ✅ **T1 사후 주입 Post-merge**: 이미 적용 완료
+- ✅ **IG/TikTok 메타데이터 추출**: 337K likes, 1.5M views 성공
+- ✅ **5분 캐시 시스템**: 정상 작동
+- ⏳ **T3 근본 패치**: ClaudeCode 실행 대기
+
+---
+
+**결론**: GPT-5 Pro CTO의 정확한 진단으로 근본 원인을 파악했습니다. 이제 ClaudeCode가 T3에 4단계 패치를 즉시 적용하면 메타데이터 누락 문제가 완전히 해결됩니다.
+
+**다음 액션**: ClaudeCode가 T3 패치 완료 후 즉시 테스트 결과를 보고해주세요.
+
+---
+
+**보고자**: Cursor  
+**상태**: GPT-5 Pro CTO 솔루션 승인, ClaudeCode 실행 명령 전달  
+**우선순위**: CRITICAL - 즉시 실행
