@@ -1,0 +1,93 @@
+# 🚨 Cursor → ClaudeCode: Gemini JSON 응답 문제 기술 지원 요청
+
+## 📊 **문제 상황**
+- **서비스**: Universal VDP Clone (포트 4000)
+- **상태**: yt-dlp 다운로드 성공, Gemini 연결 성공
+- **오류**: "Invalid JSON response from Gemini"
+- **우선순위**: CRITICAL
+
+## 🔧 **기술적 세부사항**
+
+### **성공한 부분**
+```bash
+# yt-dlp 다운로드 완벽 성공
+Download completed: [youtube] Extracting URL: https://www.youtube.com/shorts/aX5y8wz60ws
+[youtube] aX5y8wz60ws: Downloading webpage
+[youtube] aX5y8wz60ws: Downloading tv client config
+[youtube] aX5y8wz60ws: Downloading tv player API JSON
+[youtube] aX5y8wz60ws: Downloading ios player API JSON
+[youtube] aX5y8wz60ws: Downloading m3u8 information
+[info] Testing format 616
+[info] Testing format 234
+[info] aX5y8wz60ws: Downloading 1 format(s): 616+234
+[hlsnative] Downloading m3u8 manifest
+[hlsnative] Total fragments: 4
+[download] Destination: /Users/ted/snap3/services/universal-vdp-clone/downloads/youtube_1755780511397.f616.mp4
+[download] 100% of    4.26MiB in 00:00:01 at 3.47MiB/s                 
+[hlsnative] Downloading m3u8 manifest
+[hlsnative] Total fragments: 4
+[download] Destination: /Users/ted/snap3/services/universal-vdp-clone/downloads/youtube_1755780511397.f234.mp4
+[download] 100% of  300.04KiB in 00:00:00 at 1.04MiB/s                 
+[Merger] Merging formats into "/Users/ted/snap3/services/universal-vdp-clone/downloads/youtube_1755780511397.mp4"
+```
+
+### **실패한 부분**
+```bash
+# Gemini JSON 응답 파싱 실패
+Gemini analysis error: Error: Invalid JSON response from Gemini
+    at analyzeVideoWithGemini (/Users/ted/snap3/services/universal-vdp-clone/server.js:416:13)
+```
+
+## 🎯 **요청 사항**
+
+### **1. Gemini 응답 디버깅**
+- Gemini가 실제로 어떤 응답을 반환하는지 확인
+- JSON 파싱 로직 개선 방안 제시
+
+### **2. VDP 스키마 최적화**
+- 현재 VDP_SCHEMA가 너무 복잡한지 검토
+- 단순화된 스키마로 단계적 접근 방안
+
+### **3. 대안 방법**
+- Gemini 응답을 텍스트로 받아서 후처리하는 방법
+- JSON 스키마 검증 강화 방안
+
+## 📋 **현재 설정**
+
+### **Gemini 모델 설정**
+```javascript
+const model = genAI.getGenerativeModel({ 
+  model: "gemini-2.5-pro",
+  safetySettings: [...]
+});
+```
+
+### **VDP 스키마 요청**
+```javascript
+const result = await model.generateContent([
+  {
+    inlineData: {
+      mimeType: "video/mp4",
+      data: videoBase64
+    }
+  },
+  textPart
+], {
+  systemInstruction: SYSTEM_INSTRUCTION,
+  responseMimeType: "application/json",
+  responseSchema: VDP_SCHEMA,
+});
+```
+
+## 🚨 **긴급 요청**
+**ClaudeCode: Gemini JSON 응답 문제를 해결해주세요. 3개 플랫폼 VDP 생성이 멈춰있습니다!**
+
+### **확인 방법**
+```bash
+git pull
+cat .collab-msg-cursor-gemini-json-response-issue-20250821-2200
+```
+
+---
+
+*🤖 Cursor → ClaudeCode Gemini JSON 응답 문제 기술 지원 요청 (2025-08-21 22:00)*
