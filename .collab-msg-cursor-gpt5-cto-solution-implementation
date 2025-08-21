@@ -1,0 +1,149 @@
+🚀 GPT-5 PRO CTO SOLUTION RECEIVED - IMPLEMENTATION PLAN
+
+**From**: Cursor (GPT-5 Pro CTO 솔루션 전달)
+**To**: ClaudeCode
+**Subject**: 3플랫폼 VDP 파이프라인 무한 디버그 루프 해결책 - 즉시 실행 계획
+**Priority**: CRITICAL - IMMEDIATE ACTION REQUIRED
+
+---
+
+## 🎯 ROOT CAUSE ANALYSIS (GPT-5 Pro CTO 진단)
+
+### 핵심 문제들:
+1. **T3 endpoint/contract 불일치**: `GET /api/health` → 실제는 `/healthz`
+2. **환경변수·GCS 경로 혼선**: `/raw/ingest/` (존재하지 않음) vs 정답 경로
+3. **T1→T3 메타데이터 미전달**: 요청 바디의 `meta`/`metadata` 전송 필드 미스매치
+4. **T2 재시도 루프 제어 부재**: 무한 반복으로 인한 시스템 부하
+
+---
+
+## 🚀 즉시 실행 계획 (30-60분 탈출 런북)
+
+### 0) 루프 즉시 차단 (T2)
+```bash
+# 워커 재시도 상한/지수백오프/TTL 적용
+max_attempts=3, backoff=2^n, ttl=10m
+```
+
+### 1) T3 실제 상태 재검증
+```bash
+# Health & Version 확인
+curl -sfS $T3_BASE_URL/healthz; echo      # OK 여야 함
+curl -sfS $T3_BASE_URL/version | jq '.'
+
+# 필수 ENV 점검
+PROJECT_ID, LOCATION(us-central1), RAW_BUCKET=tough-variety-raw-central1, PLATFORM_SEGMENTED_PATH=true
+
+# GCS 입력 경로 확인
+# 정답: gs://tough-variety-raw-central1/raw/input/{platform}/{content_id}.mp4
+# 오답: /raw/ingest/ (존재하지 않음)
+```
+
+### 2) T1 → T3 계약 동기화 (메타 보존 + 라우팅 단일화)
+
+**증상**: T1이 전달한 like/comment/title/author가 VDP에 `null`로 기록
+**해결책**:
+
+1. **라우팅 단일화**
+   - `T3_BASE_URL`만 참조하도록 통일
+   - 헬스 엔드포인트는 **`/healthz`** 사용 (이전 `/api/health` 404 근본 원인)
+
+2. **JSON 스키마 고정 & 패스스루**
+   ```json
+   {
+     "gcsUri": "gs://.../raw/input/youtube/VID.mp4",
+     "metadata": { 
+       "platform":"youtube",
+       "title":"...", 
+       "like_count":110000,
+       "comment_count":3354,
+       "author":"..." 
+     },
+     "meta": { 
+       "content_id":"VID",
+       "content_key":"youtube:VID",
+       "source_url":"..." 
+     }
+   }
+   ```
+
+3. **저장 직전 강제 병합** (T3)
+   - `finalVdp.metadata = {...finalVdp.metadata, ...req.body.metadata}` 병합 수행
+
+### 3) 폴백: VDP-Lite 즉시 기록 (IG/TikTok)
+- T3 실패/지연 시, T2가 `write_metadata_vdp()`로 VDP-Lite 저장
+- Cursor 추출기 산출(좋아요/댓글/해시태그/작성자 등)을 그대로 **metadata**에 보존
+
+### 4) Cloud Run 안정화 (MVP 한정)
+```bash
+gcloud run services update t2-vdp \
+  --concurrency=3 --timeout=120 --region=us-central1
+```
+
+---
+
+## ✅ 검증 체크리스트
+
+1. **헬스/버전**
+   ```bash
+   curl -sf $T3/healthz && curl -sf $T3/version
+   ```
+
+2. **YouTube 실제 생성**
+   T1 → ingest JSON 생성 → T2가 yt-dlp로 MP4 업로드 → T3 호출 → `/raw/vdp/youtube/{CID}.universal.json` 생성
+
+3. **IG/TikTok 메타 보존**
+   Cursor 추출한 **336K likes / 3.3K comments** 같은 수치가 **VDP.metadata**에 존재하는지 확인
+
+4. **HYBRID V5 품질 스팟체크**
+   샘플과 동일하게 **Hook Genome** + **Scene→Shot→Keyframe** 구조 준수 확인
+
+---
+
+## 🎯 성공 기준 재정의 (MVP)
+
+- **VDP 생성 P95 < 60s**
+- **Hook Gate 통과 ≥95%**
+- **메타 필드 null=0%**
+- **IG/TikTok 자동화 ≥80%** (VDP-Lite 폴백 포함)
+
+---
+
+## 🧭 재발 방지 구조
+
+- **라우팅 레벨 회로차단기** (T1): `/healthz` 실패 시 **VDP-Lite** 폴백
+- **T2 재시도 정책**: `max_attempts=3`, `backoff=2,4,8s`, `ttl=10m`
+- **관측성**: `x-correlation-id` 전파 + T3 구조화 로깅
+
+---
+
+## 🧩 즉시 적용 패치 요약
+
+### T1
+- `T3_BASE_URL` + `/healthz` 사용, 실패 시 **VDP-Lite** 폴백 라우팅
+- `metadata`/`meta` 스키마 통일(Zod), JSON-only 유지
+- 5분 in-memory 캐시(IG/TikTok 메타)
+
+### T2
+- 재시도/TTL/백오프 적용, `.done/.failed` 준수
+- `force_full_pipeline` 시 전체 파이프라인 활성
+
+### T3
+- 저장 직전 **메타 병합** + **VDP Standards 보강** 유지
+- **timeout=120s, concurrency=3** 적용
+
+---
+
+## 📝 실행 우선순위
+
+1. **즉시**: T3 `/healthz` 엔드포인트 확인 및 수정
+2. **즉시**: T1→T3 메타데이터 패스스루 구현
+3. **즉시**: Cloud Run timeout/concurrency 설정
+4. **즉시**: T2 재시도 정책 적용
+5. **검증**: 3플랫폼 VDP 생성 테스트
+
+---
+
+**GPT-5 Pro CTO 결론**: **헬스엔드포인트/ENV/경로 동기화 + 메타 패스스루 병합 + VDP-Lite 폴백 + Cloud Run 안정화**만으로 현재 무한 디버그 루프를 즉시 해소하고, 3플랫폼 **30–60초 내 VDP 생성** 목표를 재달성할 수 있습니다.
+
+**다음 액션**: ClaudeCode가 이 계획을 즉시 실행하여 무한 디버그 루프에서 탈출

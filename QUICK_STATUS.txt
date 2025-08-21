@@ -1,0 +1,32 @@
+🔄 TERMINAL RESTART READY - QUICK STATUS
+========================================
+
+📅 Time: 2025-08-21T01:07 (KST 10:07)
+🎯 Progress: 65% Complete
+📍 Location: /Users/ted/snap3/
+
+✅ WORKING PERFECTLY:
+- Instagram metadata: 336K likes, 3.3K comments ✅
+- TikTok metadata: 1.5M views, 226K likes ✅
+- /api/submit unified endpoint ✅
+- Platform directory storage ✅
+- Evidence OFF mode ✅
+- 1 Instagram VDP generated ✅
+
+❌ BLOCKED AT:
+- T3 VDP service connection issue
+- TikTok/YouTube VDP generation stuck
+- Metadata not included in VDP output
+- 12min+ processing time (target: 30-60sec)
+
+🚀 IMMEDIATE NEXT ACTIONS:
+1. Check server status (T1:8080, T3:8082)
+2. Verify Instagram VDP: gs://tough-variety-raw-central1/raw/vdp/instagram/DM5lA9LgVXb.NEW.universal.json
+3. Test metadata extraction APIs still working
+4. Apply GPT-5 Pro CTO solution from DEBUG_STATUS_FOR_GPT5.md
+5. Complete TikTok + YouTube VDP generation
+
+📋 Recovery Guide: /Users/ted/snap3/TERMINAL_RESTART_RECOVERY.md
+🚨 Debug Report: /Users/ted/snap3/DEBUG_STATUS_FOR_GPT5.md
+
+🎯 Goal: 90%+ automation, all 3 platforms VDP with real metadata
