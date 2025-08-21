@@ -1,0 +1,198 @@
+🚀 **CURSOR → ClaudeCode: GPT-5 Pro CTO 다음 단계 구현 지시사항**
+
+**타임스탬프**: 2025-08-21 11:00 KST
+**우선순위**: P0 (Critical - 즉시 실행)
+**예상 소요**: 30-60분 집중 구현
+
+---
+
+## 📊 **GPT-5 Pro CTO 상황 재확인**
+
+### ✅ **해결됨**
+- T3_sub 422 스키마 오류
+- `/healthz`·`/readyz` 노출
+- 플랫폼 소문자 정규화
+
+### ⚠️ **잔여 이슈**
+- Vertex 호출 시 `400 Bad Request: "contents field is required"`
+- IntegratedGenAI 500 에러
+- **원인**: 요청 바디 불일치 또는 GCS 접근권한 누락
+
+---
+
+## 🛠 **즉시 적용: T3_sub "contents" 400/500 제거 런북**
+
+### **Phase 1: 사전 점검 (5분)**
+
+#### **모델/리전 설정**
+- **리전**: `us-central1` 사용 (global 금지)
+- **모델**: 최신 **Gemini 2.0 Flash/Pro** 사용
+- **GCS 접근권한**: Vertex 서비스 에이전트에 Storage Object Viewer 부여
+
+#### **GCS 권한 확인**
+```bash
+# Vertex 서비스 에이전트 권한 확인
+gcloud projects get-iam-policy tough-variety-466003-c5 \
+  --flatten="bindings[].members" \
+  --format="table(bindings.role)" \
+  --filter="bindings.members:service-PROJECT_NUMBER@gcp-sa-aiplatform.iam.gserviceaccount.com"
+```
+
+### **Phase 2: T3_sub 요청 페이로드 규격화 (15분)**
+
+#### **표준 요청 페이로드**
+```json
+{
+  "gcs_video_uri": "gs://tough-variety-raw-central1/ingest/instagram/<CONTENT_ID>.mp4",
+  "platform": "instagram",
+  "language": "ko",
+  "video_origin": "real_footage",
+  "saved_metadata": {
+    "title": "...", "author": "...",
+    "view_count": 1500000, "like_count": 226000, "comment_count": 3300
+  },
+  "gen": {
+    "response_mime_type": "application/json",
+    "temperature": 0.2
+  }
+}
+```
+
+#### **T3_sub → Vertex 변환 (필수 형태)**
+```javascript
+const req = body; // 위 JSON
+const request = {
+  contents: [{
+    role: 'user',
+    parts: [
+      { file_data: { file_uri: req.gcs_video_uri, mime_type: 'video/mp4' } },
+      { text: buildPrompt(req.platform, req.language, req.video_origin, req.saved_metadata) }
+    ]
+  }],
+  generation_config: { 
+    response_mime_type: req.gen?.response_mime_type || 'application/json',
+    temperature: req.gen?.temperature ?? 0.2 
+  }
+};
+```
+
+**핵심**: **`contents` → `parts` 안에 `file_data`(GCS)와 `text`(분석지시/메타 프롬프트) 동시 포함**
+
+### **Phase 3: Cloud Run 성능·안정화 (10분)**
+
+#### **배포 설정**
+```bash
+gcloud run services update t2-vdp --region=us-central1 \
+  --concurrency=3 --timeout=120 --min-instances=1 --no-cpu-throttling
+```
+
+#### **설정 근거**
+- **동시성**: `3` (CPU-바운드 해석에 안정적)
+- **타임아웃**: `120s` (현재 P95~30초 목표)
+- **콜드스타트 완화**: `min-instances=1` + CPU Always On
+
+---
+
+## 🧩 **T1/T2/T3/T4 + Cursor 역할별 즉시 지시**
+
+### **T1 (Main UI/API)**
+1. **/api/vdp/generate → T3_sub 전용 페이로드**로 송신
+2. **메타 유지**: `saved_metadata.*` 전송 필드 화이트리스트로 제한
+3. **캐시(5분)**: 인스턴스 단위 in-memory로 MVP 운영
+
+### **T2 (Jobs Worker)**
+1. **다운로드 통일**: IG/TikTok 모두 **yt-dlp** 사용
+   ```bash
+   yt-dlp -S "proto,ext:mp4:m4a,res,br" -o "/tmp/%(id)s.%(ext)s" "<URL>"
+   ```
+2. **Evidence 15초 지문**: `fpcalc -length 15 input.mp3`
+3. **브랜드 감지**: MVP는 **정확 매칭** 우선
+
+### **T3 (VDP Extractor: main:3001 / sub:8082)**
+1. **어댑터 계층**: `request`(contents…) 생성 후 Vertex 호출
+2. **모델 선택 로직**: `/readyz`에서 모델 가용성/할당량 점검
+3. **건강검사**: Cloud Run Startup/Liveness Probe를 `/readyz`/`/healthz`에 매핑
+
+### **T4 (Storage Loader)**
+- 현행 유지. VDP-Lite는 운영 안전망으로 남기되, **VDP Raw 성공 시 우선 적재**
+
+### **Cursor**
+- **Playwright Docker 베이스** 고정, 스크래핑은 **pwuser + seccomp profile** 사용
+
+---
+
+## 🧪 **즉시 검증 시나리오 (스모크)**
+
+### **1. GCS 접근 확인**
+```bash
+# T3_sub /readyz에서 입력 mp4 HEAD 성공 확인
+curl -s http://localhost:8082/readyz | jq .
+```
+
+### **2. Vertex 바인딩 테스트**
+```bash
+curl -sS http://localhost:8082/api/vdp/extract-vertex \
+  -H "Content-Type: application/json" \
+  -d '{
+    "gcs_video_uri":"gs://tough-variety-raw-central1/ingest/tiktok/123.mp4",
+    "platform":"tiktok","language":"ko","video_origin":"real_footage",
+    "saved_metadata":{"view_count":1500000,"like_count":226000,"comment_count":3300},
+    "gen":{"response_mime_type":"application/json","temperature":0.2}
+  }' | jq .
+```
+
+### **3. 성능 확인**
+- Cloud Run 설정 적용 후 **P95 ≤ 30s** 확인
+
+---
+
+## 🎯 **목표 및 기대 효과**
+
+### **목표**
+- **VDP Raw**: IG/TikTok 90%+ 자동화
+- **성능**: P95 ≤ 30s, 재시도/디버그 루프 소멸
+- **안정성**: 99%+ 가용성
+
+### **MVP Q&A**
+- **Q1. IG/TikTok 자동화 달성 최소 범위?**
+  A. **메타+다운로드+VDP Raw 1회전 성공**이 기준
+
+- **Q2. 15초 부분지문 품질?**
+  A. 짧은 숏폼(≤60s)에서 **충분히 견고**하고 생성시간 단축
+
+- **Q3. Cloud Run 동시성/타임아웃?**
+  A. `concurrency=3`은 CPU-바운드 해석에 **안정적 출발선**
+
+---
+
+## 🔐 **리스크/컴플라이언스 메모**
+
+- **IG Reels 다운로드**: 종종 **로그인/쿠키** 요구 (정책 변화 빈번)
+- **TikTok 무워터마크**: 플랫폼 상태에 따라 변동 (간헐적 실패 사례)
+
+---
+
+## 🧾 **체크리스트 (오늘 적용)**
+
+- [ ] **T3_sub**: `contents+file_data+text` 변환 어댑터 적용
+- [ ] **IAM**: Vertex 서비스 에이전트에 입력 버킷 `storage.objects.get` 보장
+- [ ] **Cloud Run 재배포**: `--concurrency=3 --timeout=120 --min-instances=1 --no-cpu-throttling`
+- [ ] **T2**: IG/TikTok `yt-dlp` 경로 통일 + 쿠키 처리 가이드 반영
+- [ ] **Evidence**: `fpcalc -length 15` 파이프라인 반영
+- [ ] **헬스체크**: `/readyz`에서 GCS/Vertex 둘 다 검사하도록 구현
+
+---
+
+## 💬 **ClaudeCode 확인 요청사항**
+
+1. **T3_sub Vertex AI 요청 구조** - `contents` 배열에 `file_data`와 `text` 포함
+2. **GCS 권한 설정** - Vertex 서비스 에이전트 권한 확인
+3. **Cloud Run 설정** - 동시성/타임아웃/인스턴스 설정 적용
+4. **T2 yt-dlp 통합** - IG/TikTok 다운로드 통일
+
+**목표**: 30-60분 내 Vertex AI 400/500 에러 해결 및 VDP Raw 정상화
+
+---
+
+**GPT-5 Pro CTO 세션**: 다음 단계 구현 지시 완료
+**다음 단계**: ClaudeCode 구현 → 스모크 테스트 → VDP Raw 정상화
