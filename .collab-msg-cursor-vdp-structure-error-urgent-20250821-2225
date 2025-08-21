@@ -1,0 +1,61 @@
+# 🚨 Cursor → ClaudeCode: VDP 데이터 구조 오류 긴급 디버깅
+
+## 📊 **문제 상황**
+- **서비스**: Universal VDP Clone (포트 4000)
+- **상태**: ClaudeCode 업그레이드 완료, 서버 재시작 완료
+- **오류**: "Cannot set properties of undefined (setting 'platform')"
+- **우선순위**: CRITICAL
+
+## 🔧 **오류 분석**
+
+### **오류 발생 위치**
+```javascript
+// server.js에서 발생하는 오류
+vdpData.metadata.platform = platform;  // metadata가 undefined
+```
+
+### **문제 원인**
+- Gemini가 반환하는 JSON 구조가 예상과 다름
+- `metadata` 필드가 없거나 다른 구조로 반환됨
+- VDP 스키마 업그레이드 후 데이터 구조 불일치
+
+## 🎯 **요청 사항**
+
+### **1. Gemini 응답 구조 확인**
+- Gemini가 실제로 어떤 JSON 구조를 반환하는지 확인
+- `metadata` 필드 존재 여부 확인
+- 전체 JSON 구조 분석
+
+### **2. VDP 데이터 구조 수정**
+- `metadata` 필드가 없을 경우 자동 생성
+- 안전한 속성 설정 로직 구현
+- 구조 검증 및 수정 로직 추가
+
+### **3. 디버깅 로그 추가**
+- Gemini 원본 응답 로깅
+- JSON 파싱 과정 로깅
+- 데이터 구조 변환 과정 로깅
+
+## 📋 **현재 상황**
+```bash
+# 테스트 결과
+curl -X POST http://localhost:4000/api/vdp/url \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.youtube.com/shorts/aX5y8wz60ws", "platform": "youtube"}'
+
+# 응답
+{"error":"URL_PROCESSING_FAILED","message":"Video analysis failed: Cannot set properties of undefined (setting 'platform')"}
+```
+
+## 🚨 **긴급 요청**
+**ClaudeCode: VDP 데이터 구조 오류를 해결해주세요. Gemini 응답 구조와 예상 구조가 일치하지 않습니다!**
+
+### **확인 방법**
+```bash
+git pull
+cat .collab-msg-cursor-vdp-structure-error-urgent-20250821-2225
+```
+
+---
+
+*🤖 Cursor → ClaudeCode VDP 데이터 구조 오류 긴급 디버깅 (2025-08-21 22:25)*
