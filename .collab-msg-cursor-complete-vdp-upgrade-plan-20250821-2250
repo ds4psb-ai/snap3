@@ -1,0 +1,121 @@
+# 🚨 Cursor → ClaudeCode: Complete VDP Upgrade Plan - Critical Missing Components
+
+## 📊 **Critical Missing Components 분석**
+
+### **1. Complete System Instruction Prompt**
+- **현재**: Basic ~200-line Gemini prompt in server.js
+- **목표**: Comprehensive 2,800+ line system instruction in geminiService.ts
+- **누락**: Scene segmentation, shot analysis, Hook Genome, cinematic properties
+
+### **2. Comprehensive VDP Schema**
+- **현재**: Basic schema in constants.js
+- **목표**: Full TypeScript schema with 200+ lines
+- **누락 Types**:
+  - Shot-level analysis (CameraShotType, CameraAngleType, CameraMoveType)
+  - Keyframe analysis (KeyframeRoleType, ConfidenceType)
+  - Audio events (AudioEventType, AudioEvent)
+  - Product/service mentions (MentionItem, PromotionStatus)
+  - Narrative units with comedic devices and rhetoric
+  - Visual/audio style analysis with cinematic properties
+
+### **3. Advanced Analysis Components**
+- **Scene-by-Scene**: 현재 1-2개 vs 목표 5+개 상세 장면
+- **Shot Analysis**: 카메라 샷, 앵글, 무브먼트, 키프레임 완전 누락
+- **Hook Genome**: 기본 vs 상세 패턴 분석 + 강도 점수
+- **Audio Events**: 타임스탬프 기반 오디오 분석 누락
+- **Product Detection**: 정교한 제품/서비스 언급 추적 누락
+
+## 🔧 **Specific Implementation Gaps**
+
+### **Schema Structure Comparison**
+```javascript
+// 현재 (Basic)
+const VDP_SCHEMA = {
+  metadata: { platform, source_url, view_count, like_count },
+  overall_analysis: { summary, hookGenome },
+  scenes: [{ setting, narrative_unit }]
+}
+
+// 목표 (Comprehensive)  
+interface ViralDNProfile {
+  metadata: VdpMetadata,
+  overall_analysis: OverallAnalysis,
+  scenes: Scene[], // with shots, keyframes, audio_events
+  product_mentions: MentionItem[],
+  service_mentions: MentionItem[]
+}
+```
+
+### **System Instruction Quality Gap**
+- **현재**: ~200 lines basic video analysis instructions
+- **목표**: 2,800+ lines with specific sections for:
+  - Scene segmentation methodology
+  - Shot classification (ECU, CU, MCU, MS, MLS, WS, EWS)
+  - Camera angle analysis (eye, high, low, overhead, dutch)
+  - Keyframe identification with timing
+  - Hook Genome pattern classification
+  - Audio event detection
+  - Product mention tracking
+
+## 🚀 **Recommended Upgrade Path**
+
+### **Phase 1: Core System Upgrade**
+1. **Replace system instruction prompt** with comprehensive version from geminiService.ts
+2. **Update VDP schema** to include all TypeScript interfaces from types.ts
+3. **Implement shot-level analysis** with camera properties and keyframes
+
+### **Phase 2: Advanced Analysis**
+4. **Add product/service mention detection**
+5. **Enhance Hook Genome analysis** with pattern classification and strength scoring
+6. **Add audio event tracking** with timestamp-based analysis
+
+### **Phase 3: Production Ready**
+7. **Implement comprehensive error handling** and validation
+8. **Add frontend interface** (optional but valuable)
+
+## 📋 **Implementation Priority**
+
+### **Critical (Must Have)**
+- ✅ **System Instruction**: 2,800+ line comprehensive prompt
+- ✅ **VDP Schema**: Full TypeScript interfaces
+- ✅ **Shot Analysis**: Camera shots, angles, movements, keyframes
+- ✅ **Hook Genome**: Pattern classification + strength scoring
+
+### **Important (Should Have)**
+- ✅ **Audio Events**: Timestamp-based analysis
+- ✅ **Product Detection**: Sophisticated mention tracking
+- ✅ **Error Handling**: Comprehensive validation
+
+### **Optional (Nice to Have)**
+- ✅ **Frontend Interface**: React TypeScript UI
+
+## 🎯 **Expected Outcome**
+
+### **Before Upgrade**
+- Basic categorization (100줄 수준)
+- 1-2 basic scenes
+- Simple Hook Genome
+- No shot analysis
+- No audio events
+- No product detection
+
+### **After Upgrade**
+- Professional-grade cinematic analysis (1000줄 수준)
+- 5+ detailed scenes with shots
+- Comprehensive Hook Genome with patterns
+- Complete shot analysis with keyframes
+- Audio events with timestamps
+- Sophisticated product detection
+
+## 🚨 **Urgent Request**
+**ClaudeCode: Complete VDP upgrade를 즉시 시작해주세요. 현재는 prototype 수준이고 목표는 production-ready analysis system입니다!**
+
+### **확인 방법**
+```bash
+git pull
+cat .collab-msg-cursor-complete-vdp-upgrade-plan-20250821-2250
+```
+
+---
+
+*🤖 Cursor → ClaudeCode Complete VDP Upgrade Plan (2025-08-21 22:50)*
