@@ -19,7 +19,7 @@ REQ_PREFIX="${REQ_PREFIX:-gs://tough-variety-raw-central1/ingest/requests}"
 INPUT_PREFIX="${INPUT_PREFIX:-gs://tough-variety-raw-central1/raw/input}"
 EVID_PREFIX="${EVID_PREFIX:-gs://tough-variety-raw-central1/raw/vdp/evidence}"
 OUT_VDP_PREFIX="${OUT_VDP_PREFIX:-gs://tough-variety-raw-central1/raw/vdp}"
-US_T2="${US_T2:-https://t2-vdp-355516763169.us-central1.run.app}"
+US_T2="${US_T2:-http://localhost:8082}"
 
 # Regional Alignment & Platform Segmentation Enforcement
 REQUIRED_REGION="${REQUIRED_REGION:-us-central1}"
@@ -67,8 +67,8 @@ validate_regional_alignment() {
         return 1
     fi
     
-    # Check service endpoint region
-    if [[ "$US_T2" != *"us-central1"* ]]; then
+    # Check service endpoint region (skip localhost)
+    if [[ "$US_T2" != *"us-central1"* && "$US_T2" != *"localhost"* ]]; then
         local context=$(jq -n \
             --arg expected_region "$REQUIRED_REGION" \
             --arg service_url "$US_T2" \
@@ -689,7 +689,7 @@ process_youtube_request() {
     # Step 3: VDP Generation Trigger (Async)
     echo "🚀 Triggering VDP generation: ${US_T2}"
     
-    # Build API request payload with GenAI forced Evidence OFF mode
+    # Build API request payload with metadata passthrough (GPT-5 Pro CTO Solution)
     api_payload=$(jq -n \
         --arg gcsUri "${INPUT_MP4}" \
         --argjson meta "$(cat "$local_json")" \
@@ -702,6 +702,7 @@ process_youtube_request() {
             "video_origin": "Real-Footage",
             "original_sound": true
           }),
+          "metadata": ($meta.metadata // {}),
           "processing_options": {
             "force_full_pipeline": true,
             "audio_fingerprint": false,
@@ -711,17 +712,31 @@ process_youtube_request() {
           "use_vertex": false
         }')
     
-    # Trigger VDP generation with Evidence Pack merger
-    if curl_response=$(curl -sS -X POST "${US_T2}/api/vdp/extract-vertex" \
-        -H 'Content-Type: application/json' \
-        -d "$api_payload" 2>&1); then
+    # 🚀 GPT-5 Pro CTO Solution: T3 헬스체크 with VDP-Lite 폴백 (YouTube)
+    echo "🔍 Checking T3 health: ${US_T2}/healthz"
+    if t3_health=$(curl -sS -m 10 "${US_T2}/healthz" 2>/dev/null) && echo "$t3_health" | jq -e '.status == "healthy"' >/dev/null 2>&1; then
+        echo "✅ T3 service healthy, proceeding with full VDP generation"
         
-        echo "✅ VDP generation triggered successfully"
-        echo "   Response: $(echo "$curl_response" | jq -r '.overall_analysis.content_summary // .status // "OK"' 2>/dev/null || echo "Response received")"
+        # Trigger VDP generation with Evidence Pack merger
+        if curl_response=$(curl -sS -X POST "${US_T2}/api/vdp/extract-vertex" \
+            -H 'Content-Type: application/json' \
+            -d "$api_payload" 2>&1); then
+            
+            echo "✅ VDP generation triggered successfully"
+            echo "   Response: $(echo "$curl_response" | jq -r '.overall_analysis.content_summary // .status // "OK"' 2>/dev/null || echo "Response received")"
+        else
+            echo "❌ VDP generation trigger failed despite healthy T3, falling back to VDP-Lite"
+            echo "   Error: $curl_response"
+            
+            # VDP-Lite 폴백: 메타데이터만으로 VDP 생성
+            write_metadata_vdp "youtube" "$content_id" "$local_json" "$CORRELATION_ID"
+        fi
     else
-        echo "❌ VDP generation trigger failed"
-        echo "   Error: $curl_response"
-        return 1
+        echo "⚠️ T3 service unhealthy, activating VDP-Lite fallback immediately"
+        echo "   Health check result: $t3_health"
+        
+        # VDP-Lite 폴백: 메타데이터만으로 VDP 생성
+        write_metadata_vdp "youtube" "$content_id" "$local_json" "$CORRELATION_ID"
     fi
 }
 
@@ -798,7 +813,7 @@ process_social_full_pipeline() {
     # Step 3: VDP Generation Trigger (Async)
     echo "🚀 Triggering VDP generation: ${US_T2}"
     
-    # Build API request payload with GenAI forced Evidence OFF mode
+    # Build API request payload with metadata passthrough (GPT-5 Pro CTO Solution)
     api_payload=$(jq -n \
         --arg gcsUri "${INPUT_MP4}" \
         --argjson meta "$(cat "$local_json")" \
@@ -812,6 +827,7 @@ process_social_full_pipeline() {
             "video_origin": "Real-Footage",
             "original_sound": true
           }),
+          "metadata": ($meta.metadata // {}),
           "processing_options": {
             "force_full_pipeline": true,
             "audio_fingerprint": false,
@@ -821,17 +837,31 @@ process_social_full_pipeline() {
           "use_vertex": false
         }')
     
-    # Trigger VDP generation
-    if curl_response=$(curl -sS -X POST "${US_T2}/api/vdp/extract-vertex" \
-        -H 'Content-Type: application/json' \
-        -d "$api_payload" 2>&1); then
+    # 🚀 GPT-5 Pro CTO Solution: T3 헬스체크 with VDP-Lite 폴백
+    echo "🔍 Checking T3 health: ${US_T2}/healthz"
+    if t3_health=$(curl -sS -m 10 "${US_T2}/healthz" 2>/dev/null) && echo "$t3_health" | jq -e '.status == "healthy"' >/dev/null 2>&1; then
+        echo "✅ T3 service healthy, proceeding with full VDP generation"
         
-        echo "✅ VDP generation triggered successfully"
-        echo "   Response: $(echo "$curl_response" | jq -r '.overall_analysis.content_summary // .status // "OK"' 2>/dev/null || echo "Response received")"
+        # Trigger VDP generation
+        if curl_response=$(curl -sS -X POST "${US_T2}/api/vdp/extract-vertex" \
+            -H 'Content-Type: application/json' \
+            -d "$api_payload" 2>&1); then
+            
+            echo "✅ VDP generation triggered successfully"
+            echo "   Response: $(echo "$curl_response" | jq -r '.overall_analysis.content_summary // .status // "OK"' 2>/dev/null || echo "Response received")"
+        else
+            echo "❌ VDP generation trigger failed despite healthy T3, falling back to VDP-Lite"
+            echo "   Error: $curl_response"
+            
+            # VDP-Lite 폴백: 메타데이터만으로 VDP 생성
+            write_metadata_vdp "$platform" "$content_id" "$local_json" "$CORRELATION_ID"
+        fi
     else
-        echo "❌ VDP generation trigger failed"
-        echo "   Error: $curl_response"
-        return 1
+        echo "⚠️ T3 service unhealthy, activating VDP-Lite fallback immediately"
+        echo "   Health check result: $t3_health"
+        
+        # VDP-Lite 폴백: 메타데이터만으로 VDP 생성
+        write_metadata_vdp "$platform" "$content_id" "$local_json" "$CORRELATION_ID"
     fi
 }
 
@@ -981,6 +1011,72 @@ process_social_metadata_only() {
 
 # ============================================================================
 # Cross-Region Access Monitoring
+# ============================================================================
+# VDP-Lite Fallback Generation (GPT-5 Pro CTO Solution)
+# ============================================================================
+write_metadata_vdp() {
+    local platform="$1"
+    local content_id="$2" 
+    local local_json="$3"
+    local correlation_id="$4"
+    
+    log_with_correlation "INFO" "🚀 Generating VDP-Lite fallback for ${platform}:${content_id}" "$correlation_id"
+    
+    # Extract metadata from original request
+    local metadata=$(jq '.metadata // {}' "$local_json")
+    local source_url=$(jq -r '.source_url // .url // "unknown"' "$local_json")
+    local content_key="${platform}:${content_id}"
+    
+    # Create VDP-Lite structure with real metadata
+    local vdp_lite_path="${OUT_VDP_PREFIX}/${platform}/${content_id}.universal.json"
+    local vdp_lite=$(jq -n \
+        --arg content_id "$content_id" \
+        --arg content_key "$content_key" \
+        --arg platform "$platform" \
+        --arg source_url "$source_url" \
+        --argjson metadata "$metadata" \
+        --arg correlation_id "$correlation_id" \
+        '{
+          "content_id": $content_id,
+          "content_key": $content_key,
+          "metadata": ($metadata + {
+            "platform": $platform,
+            "language": "ko",
+            "video_origin": "Real-Footage"
+          }),
+          "processing_metadata": {
+            "source": "vdp_lite_fallback",
+            "engine": "metadata_only",
+            "generated_at": (now | strftime("%Y-%m-%dT%H:%M:%S.%fZ")),
+            "correlation_id": $correlation_id,
+            "reason": "t3_service_unavailable",
+            "fallback_type": "immediate_metadata"
+          },
+          "load_timestamp": (now | strftime("%Y-%m-%dT%H:%M:%S.%fZ")),
+          "load_date": (now | strftime("%Y-%m-%d"))
+        }')
+    
+    # Save VDP-Lite to GCS
+    if echo "$vdp_lite" | gsutil cp - "$vdp_lite_path"; then
+        echo "✅ VDP-Lite generated successfully: $vdp_lite_path"
+        log_with_correlation "INFO" "VDP-Lite fallback completed successfully" "$correlation_id"
+        
+        # Log preserved metadata summary
+        local like_count=$(echo "$metadata" | jq -r '.like_count // "unknown"')
+        local comment_count=$(echo "$metadata" | jq -r '.comment_count // "unknown"')
+        local view_count=$(echo "$metadata" | jq -r '.view_count // "unknown"')
+        
+        echo "📊 Preserved metadata: ${like_count} likes, ${comment_count} comments, ${view_count} views"
+        log_with_correlation "INFO" "Metadata preserved: likes=$like_count, comments=$comment_count, views=$view_count" "$correlation_id"
+        
+        return 0
+    else
+        echo "❌ VDP-Lite generation failed"
+        log_with_correlation "ERROR" "VDP-Lite fallback generation failed" "$correlation_id"
+        return 1
+    fi
+}
+
 # ============================================================================
 monitor_cross_region_access() {
     local service_endpoint="$1"

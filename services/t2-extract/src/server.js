@@ -1235,7 +1235,7 @@ Return a complete VDP 2.0 JSON structure.`;
     
     console.log(`[Dual Engine VDP] ✅ Generation complete using ${vdp.processing_metadata?.engine || 'unknown'} engine`);
 
-    // 5) VDP 2.0 metadata enrichment (using normalized meta)
+    // 5) VDP 2.0 metadata enrichment (using normalized meta + req.body.metadata)
     if (normalizedMeta.platform) {
       vdp.metadata = vdp.metadata || {};
       vdp.metadata.platform = normalizedMeta.platform;
@@ -1244,6 +1244,16 @@ Return a complete VDP 2.0 JSON structure.`;
       if (normalizedMeta.canonical_url) vdp.metadata.canonical_url = normalizedMeta.canonical_url;
       if (normalizedMeta.source_url) vdp.metadata.source_url = normalizedMeta.source_url;
       if (normalizedMeta.original_url) vdp.metadata.original_url = normalizedMeta.original_url;
+      
+      // 🚀 GPT-5 Pro CTO Solution: 저장 직전 강제 병합 (T1에서 전달된 실제 메타데이터)
+      if (req.body.metadata && typeof req.body.metadata === 'object') {
+        console.log(`[Metadata Merge] 🔗 Merging T1 metadata:`, JSON.stringify(req.body.metadata, null, 2));
+        vdp.metadata = {
+          ...vdp.metadata,
+          ...req.body.metadata  // T1에서 전달된 like_count, comment_count, title, author 등 병합
+        };
+        console.log(`[Metadata Merge] ✅ Final merged metadata:`, JSON.stringify(vdp.metadata, null, 2));
+      }
     }
 
     // 6) Hook Genome Validation (NEW hybrid schema structure)

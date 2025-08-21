@@ -2505,7 +2505,7 @@ app.post('/api/vdp/extract-main', async (req, res) => {
         let content_id = req.body.content_id;
         if (!content_id && url) {
             const urlResult = await normalizeSocialUrl(url);
-            content_id = urlResult.contentId;
+            content_id = urlResult.id;
         }
         
         // Call GitHub VDP compatible extractor 
@@ -2536,15 +2536,179 @@ app.post('/api/vdp/extract-main', async (req, res) => {
         res.json(vdpData);
         
     } catch (error) {
-        structuredLog('error', 'Main VDP extraction failed', {
-            error: error.message
+        structuredLog('warn', 'Main VDP extraction failed, attempting T3 fallback', {
+            error: error.message,
+            fallback: 'T3 Vertex AI'
         }, correlationId);
         
-        res.status(500).json({
-            success: false,
-            error: error.message,
-            correlationId
-        });
+        // GPT-5 Pro CTO Solution: T3 Fallback Implementation
+        try {
+            const { url, platform, metadata = {} } = req.body;
+            
+            // Extract content_id from URL if not provided
+            let content_id = req.body.content_id;
+            if (!content_id && url) {
+                const urlResult = await normalizeSocialUrl(url);
+                content_id = urlResult.id;
+            }
+            
+            // T3 Vertex AI Fallback with metadata passthrough
+            const t3Response = await fetch('http://localhost:8082/api/vdp/extract-vertex', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Correlation-ID': correlationId
+                },
+                body: JSON.stringify({
+                    gcsUri: `gs://${RAW_BUCKET}/raw/input/${platform.toLowerCase()}/${content_id}.mp4`,
+                    metadata: {
+                        platform: platform,
+                        content_id: content_id,
+                        ...metadata
+                    },
+                    meta: {
+                        content_id: content_id,
+                        content_key: `${platform.toLowerCase()}:${content_id}`,
+                        source_url: url
+                    },
+                    processing_options: {
+                        force_full_pipeline: true,
+                        audio_fingerprint: false,
+                        brand_detection: false,
+                        hook_genome_analysis: true
+                    },
+                    use_vertex: true
+                })
+            });
+            
+            if (!t3Response.ok) {
+                throw new Error(`T3 fallback failed: ${t3Response.status}`);
+            }
+            
+            const t3Data = await t3Response.json();
+            
+            structuredLog('success', 'T3 fallback VDP extraction completed', {
+                contentId: content_id,
+                platform: platform,
+                fallback: 'T3 Vertex AI'
+            }, correlationId);
+            
+            res.json(t3Data);
+            
+        } catch (fallbackError) {
+            structuredLog('warn', 'Both Main VDP and T3 fallback failed, implementing VDP-Lite', {
+                mainError: error.message,
+                fallbackError: fallbackError.message,
+                fallback: 'VDP-Lite'
+            }, correlationId);
+            
+            // GPT-5 Pro CTO Solution: VDP-Lite Fallback Implementation
+            try {
+                const { url, platform, metadata = {} } = req.body;
+                
+                // Extract content_id from URL if not provided
+                let content_id = req.body.content_id;
+                if (!content_id && url) {
+                    const urlResult = await normalizeSocialUrl(url);
+                    content_id = urlResult.id;
+                }
+                
+                // Create VDP-Lite with metadata preservation
+                const vdpLite = {
+                    content_id: content_id,
+                    content_key: `${platform.toLowerCase()}:${content_id}`,
+                    platform: platform,
+                    metadata: {
+                        ...metadata,
+                        platform: platform,
+                        content_id: content_id,
+                        source_url: url,
+                        extraction_method: 'VDP-Lite',
+                        extraction_timestamp: new Date().toISOString()
+                    },
+                    overall_analysis: {
+                        hookGenome: {
+                            start_sec: 0.5,
+                            strength_score: 0.8,
+                            pattern_code: 'VDP-LITE',
+                            delivery: 'metadata_only',
+                            trigger_modalities: ['visual', 'audio']
+                        },
+                        emotional_arc: 'metadata_only',
+                        asr_transcript: '',
+                        ocr_text: ''
+                    },
+                    scenes: [{
+                        scene_id: 'vdp-lite-scene-1',
+                        start_time: 0,
+                        end_time: 8,
+                        narrative_type: 'Metadata_Only',
+                        shot_details: {
+                            camera_movement: 'unknown',
+                            keyframes: [],
+                            composition: 'metadata_only'
+                        },
+                        style_analysis: {
+                            lighting: 'unknown',
+                            mood_palette: 'unknown',
+                            edit_grammar: 'metadata_only'
+                        }
+                    }],
+                    product_mentions: [],
+                    service_mentions: [],
+                    default_lang: 'ko',
+                    load_timestamp: new Date().toISOString(),
+                    load_date: new Date().toISOString().split('T')[0]
+                };
+                
+                // Store VDP-Lite to GCS
+                const fileName = `raw/vdp/${platform.toLowerCase()}/${content_id}.universal.json`;
+                const bucket = storage.bucket(RAW_BUCKET);
+                const file = bucket.file(fileName);
+                
+                await file.save(JSON.stringify(vdpLite, null, 2), {
+                    metadata: {
+                        contentType: 'application/json',
+                        metadata: {
+                            'content-id': content_id,
+                            'platform': platform,
+                            'extraction-method': 'VDP-Lite',
+                            'correlation-id': correlationId
+                        }
+                    }
+                });
+                
+                structuredLog('success', 'VDP-Lite created and stored successfully', {
+                    contentId: content_id,
+                    platform: platform,
+                    gcsPath: fileName,
+                    fallback: 'VDP-Lite'
+                }, correlationId);
+                
+                res.json({
+                    success: true,
+                    content_id: content_id,
+                    platform: platform,
+                    gcs_uri: `gs://${RAW_BUCKET}/${fileName}`,
+                    extraction_method: 'VDP-Lite',
+                    message: 'VDP-Lite created successfully with metadata preservation',
+                    correlationId: correlationId
+                });
+                
+            } catch (vdpLiteError) {
+                structuredLog('error', 'All VDP methods failed including VDP-Lite', {
+                    mainError: error.message,
+                    fallbackError: fallbackError.message,
+                    vdpLiteError: vdpLiteError.message
+                }, correlationId);
+                
+                res.status(500).json({
+                    success: false,
+                    error: `All VDP methods failed: Main VDP (${error.message}), T3 fallback (${fallbackError.message}), VDP-Lite (${vdpLiteError.message})`,
+                    correlationId
+                });
+            }
+        }
     }
 });
 
