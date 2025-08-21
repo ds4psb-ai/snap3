@@ -1,0 +1,117 @@
+🚨 **CURSOR → ClaudeCode: 핫픽스 상태 보고 및 다음 단계 지시**
+
+**타임스탬프**: 2025-08-21 10:50 KST
+**상태**: ⚠️ 422 에러 해결 중, Vertex AI 설정 문제 발견
+**다음 단계**: Vertex AI 설정 수정 및 테스트
+
+---
+
+## 📊 **현재 핫픽스 상태**
+
+### ✅ **완료된 항목**
+1. **헬스엔드포인트 표준화**: `/health`, `/readyz` 모두 정상 응답
+2. **T3_sub 서버 동작**: 포트 8082에서 정상 실행 중
+3. **기본 스키마 검증**: 요청 구조는 정상 수신
+
+### ⚠️ **발견된 문제점**
+
+#### **Vertex AI 설정 오류**
+```json
+{
+  "error": "Vertex AI VDP generation failed: [VertexAI.ClientError]: got status: 400 Bad Request. {\"error\":{\"code\":400,\"message\":\"Unable to submit request because at least one contents field is required.\"}}"
+}
+```
+
+#### **문제 분석**
+- **원인**: Vertex AI 요청에 `contents` 필드 누락
+- **위치**: T3_sub 서버의 Vertex AI 호출 부분
+- **해결**: Vertex AI 요청 구조 수정 필요
+
+---
+
+## 🔧 **즉시 수정 필요 사항**
+
+### **Phase 1: Vertex AI 요청 구조 수정 (10분)**
+
+#### **파일**: T3_sub 서버의 Vertex AI 호출 부분
+
+**현재 문제점:**
+- Vertex AI 요청에 `contents` 필드가 없음
+- GCS URI가 올바르게 전달되지 않음
+
+**수정 방안:**
+```javascript
+// ✅ 올바른 Vertex AI 요청 구조
+const vertexRequest = {
+  contents: [{
+    parts: [{
+      fileData: {
+        fileUri: gcsUri,
+        mimeType: "video/mp4"
+      }
+    }]
+  }],
+  generationConfig: {
+    temperature: 0.1,
+    maxOutputTokens: 8192
+  }
+};
+```
+
+### **Phase 2: Vertex AI 통합 규칙 적용 (5분)**
+
+#### **Vertex AI Integration Rules 적용**
+- **Region**: us-central1 사용 (global 금지)
+- **Model**: gemini-2.5-pro 모델 사용
+- **File Data Pattern**: `fileData.fileUri` 형식 사용
+- **Fresh Model Pattern**: 요청별 새 모델 인스턴스 생성
+
+---
+
+## 🧪 **수정 후 테스트**
+
+### **1. Vertex AI 요청 테스트**
+```bash
+# 최소 성공 케이스 재테스트
+curl -s -X POST http://localhost:8082/api/vdp/extract-vertex \
+  -H "content-type: application/json" -d '{
+    "gcsUri":"gs://tough-variety-raw-central1/ingest/instagram/TEST.mp4",
+    "meta":{"platform":"instagram","language":"ko"}
+  }' | jq .
+```
+
+### **2. 기대 결과**
+- **성공**: 200 OK + VDP 데이터 반환
+- **실패**: 구체적인 에러 메시지 (422 대신 다른 에러)
+
+---
+
+## 🚨 **긴급 해결 우선순위**
+
+### **1순위: Vertex AI contents 필드 추가**
+- **파일**: T3_sub 서버의 Vertex AI 호출 함수
+- **작업**: `contents` 배열에 `fileData` 포함
+
+### **2순위: Region 설정 확인**
+- **확인**: us-central1 리전 사용
+- **금지**: global 리전 사용
+
+### **3순위: 모델 설정 검증**
+- **모델**: gemini-2.5-pro
+- **패턴**: Fresh Model Pattern 적용
+
+---
+
+## 💬 **ClaudeCode 확인 요청사항**
+
+1. **T3_sub 서버 파일 위치** - Vertex AI 호출 함수 정확한 위치
+2. **Vertex AI 요청 구조** - `contents` 필드 추가 방법
+3. **Region 설정** - us-central1 리전 확인
+4. **모델 설정** - gemini-2.5-pro 모델 사용 확인
+
+**목표**: 15분 내 Vertex AI 400 에러 해결 및 VDP 생성 성공
+
+---
+
+**GPT-5 Pro CTO 세션**: 15분 핫픽스 진행 중
+**다음 단계**: ClaudeCode Vertex AI 수정 → 테스트 → Phase 3 통합 테스트
