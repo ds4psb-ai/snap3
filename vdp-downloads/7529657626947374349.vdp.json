@@ -1,0 +1,111 @@
+{
+  "content_id": "7529657626947374349",
+  "default_lang": "en",
+  "metadata": {
+    "platform": "tiktok",
+    "source_url": "https://www.tiktok.com/@lovedby4bxnia/video/7529657626947374349",
+    "upload_date": "2025-08-21T13:56:24.003Z",
+    "view_count": 0,
+    "like_count": 0,
+    "comment_count": 0,
+    "share_count": 0,
+    "hashtags": [],
+    "video_origin": "Real-Footage",
+    "cta_types": [],
+    "original_sound": {
+      "sound_id": null,
+      "sound_title": null,
+      "is_commercial": true
+    }
+  },
+  "overall_analysis": {
+    "summary": "A short, candid video that begins with a close-up of a modern black door handle. The door then opens to reveal a young child peeking out from behind it into a hallway. The video is set to what sounds like a commercial jingle for a holiday company.",
+    "emotional_arc": "The video starts with a neutral focus on an inanimate object, building slight anticipation, and then transitions to a heartwarming and surprising moment with the appearance of the child.",
+    "hookGenome": {
+      "hook_type": "Surprise Reveal",
+      "hook_description": "The video focuses on a door handle before the door is opened, revealing a cute child peeking out, creating a simple and sweet surprise for the viewer.",
+      "hook_strength": "Moderate"
+    },
+    "audience_reaction": {
+      "label": "Heartwarming",
+      "description": "The video is likely to be perceived as cute and heartwarming due to the reveal of the young child. It's a relatable family moment that would typically elicit positive, albeit mild, engagement.",
+      "score": 0.8
+    },
+    "safety_flags": [
+      "Minor Present"
+    ],
+    "confidence": "High",
+    "graph_refs": [],
+    "asr_transcript": "Darling hold my hand. Nothing beats a Jet2 holiday. And right now",
+    "asr_lang": "en",
+    "asr_translation_en": "Darling hold my hand. Nothing beats a Jet2 holiday. And right now",
+    "ocr_text": []
+  },
+  "scenes": [
+    {
+      "scene_id": 1,
+      "time_start": 0,
+      "time_end": 3.5,
+      "duration_sec": 3.5,
+      "importance": "Primary",
+      "narrative_unit": "Setup",
+      "setting": {
+        "type": "Indoor",
+        "location": "Home",
+        "description": "A close-up of a white door with a modern, matte black lever-style handle and a square backplate."
+      },
+      "shots": [
+        {
+          "shot_id": 1,
+          "shot_type": "Close-up",
+          "camera_angle": "Eye-level",
+          "camera_movement": "Handheld",
+          "subjects": [
+            "Door handle"
+          ],
+          "actions": [
+            "The door begins to open towards the end of the shot."
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": 2,
+      "time_start": 3.5,
+      "time_end": 5,
+      "duration_sec": 1.5,
+      "importance": "Primary",
+      "narrative_unit": "Climax",
+      "setting": {
+        "type": "Indoor",
+        "location": "Home",
+        "description": "A hallway with white marble-patterned tile flooring, viewed from the perspective of an opening door."
+      },
+      "shots": [
+        {
+          "shot_id": 1,
+          "shot_type": "Medium Shot",
+          "camera_angle": "Eye-level",
+          "camera_movement": "Whip Pan",
+          "subjects": [
+            "Child"
+          ],
+          "actions": [
+            "A young child peeks out from behind the opening door."
+          ]
+        }
+      ]
+    }
+  ],
+  "product_mentions": [],
+  "service_mentions": [
+    {
+      "service_name": "Jet2holidays",
+      "type": "Travel Agency",
+      "time_start": 2,
+      "time_end": 3.5,
+      "mention_type": "Audio",
+      "confidence": "High"
+    }
+  ]
+}

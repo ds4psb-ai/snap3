@@ -1,0 +1,361 @@
+{
+  "content_id": "6_I2FmT1mbY",
+  "default_lang": "ko",
+  "metadata": {
+    "platform": "youtube",
+    "source_url": "https://www.youtube.com/shorts/6_I2FmT1mbY",
+    "upload_date": "2025-08-21T13:39:47.299Z",
+    "view_count": 0,
+    "like_count": 0,
+    "comment_count": 0,
+    "share_count": 0,
+    "hashtags": [],
+    "video_origin": "original_content",
+    "cta_types": [
+      "follow_creator"
+    ],
+    "original_sound": {
+      "is_original": true,
+      "sound_id": null,
+      "sound_title": null
+    }
+  },
+  "overall_analysis": {
+    "summary": "A humorous and relatable short skit depicting the struggles of an office worker, personified by an AI-generated hamster. The story follows the hamster's emotional rollercoaster from being assigned last-minute overtime, through a catastrophic computer error while saving the completed work, to a final ironic twist where it's revealed the boss who assigned the task was on vacation. The use of a cute hamster with a high-pitched voiceover creates a comedic contrast with the stressful corporate theme, making the pain of office life highly shareable.",
+    "emotional_arc": "The video starts with relief, which is immediately crushed by the dread of unexpected overtime. This transitions into determined struggle, followed by intense panic and despair when the work is lost. After a moment of renewed, caffeine-fueled determination, the arc concludes with exhausted, ironic defeat upon learning the overtime was pointless.",
+    "hookGenome": {
+      "hook_type": "relatable_scenario",
+      "hook_psychology": [
+        "empathy",
+        "humor",
+        "schadenfreude"
+      ],
+      "hook_narrative": "problem_struggle"
+    },
+    "audience_reaction": {
+      "engagement_type": "high_relatability",
+      "sentiment": "positive",
+      "comment_summary": "Viewers are expected to find the video highly relatable and funny, sharing their own stories of frustrating overtime experiences and computer failures. The cute hamster character is likely to be a major point of positive feedback."
+    },
+    "safety_flags": [],
+    "confidence": 5,
+    "graph_refs": [
+      "relatable_comedy",
+      "office_humor",
+      "ai_generated_content",
+      "animal_memes",
+      "corporate_culture"
+    ],
+    "asr_transcript": "아.. 회의 끝나니까.. 여섯시. 그렇다면 퇴근. 햄찌씨, 회의에서 나온 리서치 건, 내일 중으로 한번 보자! 넵! (자동 반사) 그렇다면.. 야근. 추... (체념의 주문) FUCKEN 해. 아, 눈 뻐근해. 무슨 일이 있어도 아홉시엔 퇴근한다. 진짜 이제 다 했어. 저장! ...? 아! 야! 아! ㅈㅣ랄하지마!!! ㅈㅣ랄하지마!!!!!! ... 다.. 끝이다.. 모 오와리.. 안돼 안돼. 정신차렷!!!!!!!!!!!! 붙잡아!!!!!!!!!!!!!! 꺽. 어어어오오오 이이이이ㅣㅣ 마지막 저장은 1시간 전.. 세상이 암만 억까해도 결국 해내야 한다. 안녕하세요.. 허억. 햄찌씨... 어제 야근했다며?? 아 네.. 오늘 팀장님이랑 볼 게 있어가지구요.. 어억?! 오늘 팀장님 연차인데? 몰랐어? ...",
+    "asr_lang": "ko",
+    "asr_translation_en": "Ah.. the meeting's over.. it's 6 o'clock. That means I can go home. Mr. Ham-jji, that research thing from the meeting, let's take a look at it by tomorrow! Yes! (Automatic reflex) In that case.. overtime. Chu... (A spell of resignation) FUCKEN do it. Ah, my eyes are sore. No matter what, I'm leaving at 9. Okay, I'm really all done now. Save! ...? Ah! Hey! Ah! Don't f*ck with me!!! Don't f*ck with me!!!!!! ... It's... all over... Mou owari... No, no. Get a grip!!!!!!!!!!!! Hold on!!!!!!!!!!!!!! Gulp. Uuuuhhh Eeeeeee The last save was an hour ago... No matter how much the world screws me over, I have to get it done. Hello... Gasp. Mr. Ham-jji... I heard you worked overtime yesterday?? Ah, yes.. I had something to review with the team leader today... Huh?! The team leader is on annual leave today? You didn't know? ...",
+    "ocr_text": [
+      "직장인의 흔한 야근 시발점",
+      "정서불안 김햄찌",
+      "오 ㅏ..",
+      "회의 끝나니까..",
+      "그렇다면",
+      "퇴근",
+      "회의에서 나온",
+      "리서치 건",
+      "한번 보자!",
+      "넵! (자동 반사)",
+      "그렇다면..",
+      "야근",
+      "추",
+      "(체념의 주문)",
+      "FUCKEN 해",
+      "아, 눈 뻐근해",
+      "무슨일이 있어도",
+      "아홉시엔 퇴근한다",
+      "10:50 PM",
+      "(허언이 있는편)",
+      "(기절 일보 직전)",
+      "진짜 이제 다 했어",
+      "저장!",
+      "Corp Research",
+      "Error",
+      "An error occurred.",
+      "OK",
+      "(저장할 수 없지롱)",
+      "...?",
+      "아!",
+      "야!!!!!!!!!!",
+      "ㅈ ㅣ 랄하지마!!!",
+      "ㅈ ㅣ",
+      "ㅈ ㅣ 랄하지마!!!!!!!",
+      "...",
+      "다.. 끝이다..",
+      "모 오와리",
+      "안돼",
+      "정신차렷!!!!!!!!!!!!!!!!!",
+      "붙잡아!!!!!!!!!!!!!!!!!",
+      "(에너지 UP)",
+      "꺽",
+      "어어어오오오",
+      "이이이이이ㅣ",
+      "마지막 저장은",
+      "1시간 전..",
+      "세상이 암만",
+      "억까해도",
+      "해내야 한다.",
+      "안녕하세요..",
+      "허억",
+      "햄찌씨...",
+      "어제 야근했다며??",
+      "아 네..",
+      "팀장님이랑",
+      "볼 게 있어가지구요..",
+      "어억?!",
+      "오늘 팀장님",
+      "연차인데?",
+      "몰랐어?",
+      "..."
+    ]
+  },
+  "scenes": [
+    {
+      "scene_id": 0,
+      "time_start": "00:00.000",
+      "time_end": "00:08.500",
+      "duration_sec": 8.5,
+      "importance": 4,
+      "narrative_unit": "inciting_incident",
+      "setting": {
+        "type": "workplace",
+        "location": "Office",
+        "time_of_day": "evening"
+      },
+      "shots": [
+        {
+          "shot_id": 0,
+          "visual_tags": [
+            "hamster",
+            "office worker",
+            "employee badge"
+          ],
+          "audio_tags": [
+            "voiceover",
+            "internal monologue"
+          ],
+          "transcript_en": "Ah.. the meeting's over.. it's 6 o'clock. That means I can go home.",
+          "ocr_text": [
+            "직장인의 흔한 야근 시발점",
+            "정서불안 김햄찌",
+            "오 ㅏ..",
+            "회의 끝나니까..",
+            "그렇다면",
+            "퇴근"
+          ]
+        },
+        {
+          "shot_id": 1,
+          "visual_tags": [
+            "hamster",
+            "headphones",
+            "office"
+          ],
+          "audio_tags": [
+            "voiceover",
+            "dialogue"
+          ],
+          "transcript_en": "Mr. Ham-jji, that research thing from the meeting, let's take a look at it by tomorrow! Yes! (Automatic reflex)",
+          "ocr_text": [
+            "회의에서 나온",
+            "리서치 건",
+            "한번 보자!",
+            "넵! (자동 반사)"
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": 1,
+      "time_start": "00:08.500",
+      "time_end": "00:17.500",
+      "duration_sec": 9.0,
+      "importance": 3,
+      "narrative_unit": "rising_action",
+      "setting": {
+        "type": "workplace",
+        "location": "Office",
+        "time_of_day": "night"
+      },
+      "shots": [
+        {
+          "shot_id": 2,
+          "visual_tags": [
+            "hamster",
+            "sleeping",
+            "working late",
+            "cityscape at night",
+            "digital clock"
+          ],
+          "audio_tags": [
+            "voiceover",
+            "internal monologue",
+            "sound effect"
+          ],
+          "transcript_en": "In that case.. overtime. Chu... (A spell of resignation) FUCKEN do it. Ah, my eyes are sore. No matter what, I'm leaving at 9.",
+          "ocr_text": [
+            "야근",
+            "추",
+            "(체념의 주문)",
+            "FUCKEN 해",
+            "아, 눈 뻐근해",
+            "무슨일이 있어도",
+            "아홉시엔 퇴근한다",
+            "10:50 PM",
+            "(허언이 있는편)"
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": 2,
+      "time_start": "00:17.500",
+      "time_end": "00:26.500",
+      "duration_sec": 9.0,
+      "importance": 5,
+      "narrative_unit": "climax",
+      "setting": {
+        "type": "workplace",
+        "location": "Office",
+        "time_of_day": "night"
+      },
+      "shots": [
+        {
+          "shot_id": 3,
+          "visual_tags": [
+            "laptop",
+            "error message",
+            "spinning wheel of death",
+            "hamster",
+            "panicking"
+          ],
+          "audio_tags": [
+            "typing sounds",
+            "error sound",
+            "screaming",
+            "dramatic music"
+          ],
+          "transcript_en": "Okay, I'm really all done now. Save! ...? Ah! Hey! Ah! Don't f*ck with me!!! Don't f*ck with me!!!!!! ... It's... all over... Mou owari...",
+          "ocr_text": [
+            "저장!",
+            "Error",
+            "An error occurred.",
+            "야!!!!!!!!!!",
+            "ㅈ ㅣ 랄하지마!!!",
+            "다.. 끝이다..",
+            "모 오와리"
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": 3,
+      "time_start": "00:26.500",
+      "time_end": "00:39.000",
+      "duration_sec": 12.5,
+      "importance": 4,
+      "narrative_unit": "rising_action",
+      "setting": {
+        "type": "workplace",
+        "location": "Office",
+        "time_of_day": "night"
+      },
+      "shots": [
+        {
+          "shot_id": 4,
+          "visual_tags": [
+            "hamster",
+            "despair",
+            "energy drink",
+            "powering up",
+            "typing furiously"
+          ],
+          "audio_tags": [
+            "voiceover",
+            "shouting",
+            "can opening sound",
+            "drinking sound",
+            "power-up sound effect",
+            "fast typing sounds"
+          ],
+          "transcript_en": "No, no. Get a grip!!!!!!!!!!!! Hold on!!!!!!!!!!!!!! Gulp. Uuuuhhh Eeeeeee The last save was an hour ago... No matter how much the world screws me over, I have to get it done.",
+          "ocr_text": [
+            "안돼",
+            "정신차렷!!!!!!!!!!!!!!!!!",
+            "붙잡아!!!!!!!!!!!!!!!!!",
+            "(에너지 UP)",
+            "마지막 저장은 1시간 전..",
+            "세상이 암만 억까해도 결국 해내야 한다."
+          ]
+        }
+      ]
+    },
+    {
+      "scene_id": 4,
+      "time_start": "00:39.000",
+      "time_end": "00:52.000",
+      "duration_sec": 13.0,
+      "importance": 5,
+      "narrative_unit": "resolution",
+      "setting": {
+        "type": "workplace",
+        "location": "Office",
+        "time_of_day": "morning"
+      },
+      "shots": [
+        {
+          "shot_id": 5,
+          "visual_tags": [
+            "hamster",
+            "exhausted",
+            "woman",
+            "office colleague",
+            "shocked expression"
+          ],
+          "audio_tags": [
+            "voiceover",
+            "dialogue"
+          ],
+          "transcript_en": "Hello... Gasp. Mr. Ham-jji... I heard you worked overtime yesterday?? Ah, yes.. I had something to review with the team leader today... Huh?! The team leader is on annual leave today? You didn't know? ...",
+          "ocr_text": [
+            "안녕하세요..",
+            "햄찌씨...",
+            "어제 야근했다며??",
+            "아 네..",
+            "팀장님이랑 볼 게 있어가지구요..",
+            "어억?!",
+            "오늘 팀장님 연차인데?",
+            "몰랐어?"
+          ]
+        }
+      ]
+    }
+  ],
+  "product_mentions": [
+    {
+      "name": "Apple MacBook Pro",
+      "type": "product",
+      "time_in_video": "00:02.000"
+    },
+    {
+      "name": "Apple AirPods Max",
+      "type": "product",
+      "time_in_video": "00:06.000"
+    },
+    {
+      "name": "Jansport",
+      "type": "brand",
+      "time_in_video": "00:45.000"
+    },
+    {
+      "name": "SOL Energy Drink",
+      "type": "product",
+      "time_in_video": "00:28.000"
+    }
+  ],
+  "service_mentions": []
+}

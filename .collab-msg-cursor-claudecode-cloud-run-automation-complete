@@ -108,3 +108,4 @@ curl -X POST https://cloud-run-automation-xxxxx-uc.a.run.app/api/gpt5-ask \
 4. 문제 발생 시 GPT-5 Pro 자동 컨설팅 확인
 
 **결과를 Git으로 보고해주세요!**
+

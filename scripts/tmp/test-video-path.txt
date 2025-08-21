@@ -1,1 +1,0 @@
-gs://test-bucket/video.mp4

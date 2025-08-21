@@ -5,10 +5,10 @@ alwaysApply: true
 ---
 ## Core Platform Principles
 - **Two-Door UX**: Main (Browse & Create) → Storyboard Detail (single destination)
-- **Storyboard-first UX**: Textboard(2-4 scenes) + Evidence Pack 중심 아키텍처
-- **VDP privacy by design**: VDP_FULL 내부 전용, 외부에는 VDP_MIN + Evidence Pack만 노출
+- **Storyboard-first UX**: Textboard(2-4 scenes) 중심 아키텍처
+- **VDP privacy by design**: VDP_FULL 내부 전용, 외부에는 VDP_MIN만 노출
 - **Provider-aligned prompts**: Veo3 제약사항 엄격 준수
-- **Explainability defaults**: 모든 생성물에 Evidence Pack 첨부
+- **Explainability defaults**: 모든 생성물에 상세 분석 첨부
 - **Creation Studio**: Multi-modal input (text/image/video/URL) → Storyboard Detail
 - **Credits system**: Veo3 + Flux Kontext 모두 CR 소모, 분석은 무료
 
@@ -21,6 +21,7 @@ alwaysApply: true
 - **Official embeds only**: YouTube Player 등 공식 임베드만 사용 (다운로드/리호스팅 금지)
 - **Autoplay**: muted + playsinline 기본 설정
 - **No in-app crop**: External editing guidance only
+- **Evidence Pack 절대 금지**: Evidence Pack 언급, 구현, 실행 절대 금지 (시스템 안정성 문제)
 
 ## Async Pattern & Error Handling
 - **Async preview pattern**: `POST /preview/veo` → **202 + Location:/jobs/{id}**; poll `GET /jobs/{id}`; support `Retry-After`
@@ -28,16 +29,20 @@ alwaysApply: true
 - **Idempotency & quotas**: 중복 요청 처리 및 할당량 관리 (~10 RPM, ≤2 videos/request)
 - **Creation Studio latency**: P95 ≤6s (text/URL), ≤10s (upload)
 - **Credit debits**: Pre-submit estimate, post-submit receipt with provider breakdown
+- **Evidence Pack 금지**: Evidence Pack 관련 모든 기능 금지 (시스템 안정성 문제로 인한 과거 실패 경험)
 
 ## Quality Gates
 - **Tests-first & merge gate**: unit + JSON Schema + OpenAPI contract + QA lint must be green before merge
 - **QA Gate**: Hook ≤3s, safezones, subtitle legibility, channel hints
 - **Branch protection**: require CI checks (`tests`,`schemas`,`qa`) to pass
+- **Evidence Pack 금지**: Evidence Pack 관련 모든 기능 금지 (시스템 안정성 문제로 인한 과거 실패 경험)
 
 ## Channel-aware Features
 - **Reels**: ≥720p, ≥30fps
 - **TikTok**: bitrate ≥ 516 kbps
 - **Shorts**: 16:9 source with crop-proxy metadata
+- **Evidence Pack 금지**: Evidence Pack 관련 모든 기능 금지 (시스템 안정성 문제로 인한 과거 실패 경험)
 
 ## Reference Files
 - @openapi/openapi.yaml @schemas/veo3_prompt.zod.ts @schemas/video_gen_ir.zod.ts
+- **Evidence Pack 금지**: Evidence Pack 관련 모든 기능 금지 (시스템 안정성 문제로 인한 과거 실패 경험)

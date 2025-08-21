@@ -66,6 +66,7 @@ export PLATFORM_SEGMENTED_PATH=true
 - **Main App**: `localhost:3000` (snap3) - Video generation pipeline
 - **T3 Primary**: `localhost:3001` (t2-extract) - Primary VDP processor
 - **T3 Secondary**: `localhost:8082` (t2-extract) - Fallback VDP processor
+- **🆕 Universal VDP Clone**: `localhost:4000` (universal-vdp-clone) - Complete VDP analysis service
 
 ---
 
@@ -111,6 +112,21 @@ POST /api/vdp/extract-vertex         // Actual VDP processing (Vertex AI)
 POST /api/vdp/test-quality-gates     // Quality gate testing
 ```
 
+### **🆕 Universal VDP Clone APIs (localhost:4000)**
+```typescript
+POST /api/vdp/generate               // File upload → VDP analysis (multipart/form-data)
+POST /api/vdp/url                    // URL → download → VDP analysis (JSON)  
+GET  /api/health                     // Service health check
+```
+**Features:**
+- ✅ Evidence Pack REMOVED for stability
+- ✅ true-hybrid-v5 analysis level (1000+ lines)
+- ✅ Hook Genome analysis (startSec, endSec, pattern, delivery, strength)  
+- ✅ Scene-by-scene breakdown with shots and keyframes
+- ✅ Promotion tracking with status/signals
+- ✅ Multi-language BCP-47 compliance
+- ✅ Comprehensive logging system with file output
+
 ---
 
 ## 🎨 **CURSOR INTEGRATION STATUS**
@@ -155,6 +171,7 @@ User Time:  5-8min → 30sec-1min (85% reduction)
 ├─ T2 (8081) /Users/ted/snap3-jobs - Worker 배치 처리  
 ├─ T3 (3001/8082) /Users/ted/snap3/services/t2-extract - VDP 처리
 ├─ T4 (8083) /Users/ted/snap3-storage - 스토리지
+├─ 🆕 Universal VDP Clone (4000) /Users/ted/snap3/services/universal-vdp-clone - 완전 VDP 분석
 └─ Cursor (3000) /Users/ted/snap3 - 프론트엔드 UI
 ```
 

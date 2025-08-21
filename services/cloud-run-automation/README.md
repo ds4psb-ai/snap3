@@ -126,3 +126,4 @@ watch -n 5 'curl -s http://localhost:5000/api/status | jq'
 - **Universal VDP Clone**: VDP 생성 서비스 (포트 4000)
 - **GPT-5 Pro**: AI 컨설팅 서비스
 - **Cloud Run**: 서버리스 배포 플랫폼
+

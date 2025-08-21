@@ -1,0 +1,134 @@
+{
+  "content_id": "DLx4668NGGv",
+  "default_lang": "en",
+  "metadata": {
+    "platform": "instagram",
+    "source_url": "https://www.instagram.com/reel/DLx4668NGGv/",
+    "upload_date": "2025-08-21T13:57:24.996Z",
+    "view_count": 0,
+    "like_count": 0,
+    "comment_count": 0,
+    "share_count": 0,
+    "hashtags": [],
+    "video_origin": "Real-Footage",
+    "cta_types": [
+      "implicit_engagement"
+    ],
+    "original_sound": {
+      "id": null,
+      "title": null
+    }
+  },
+  "overall_analysis": {
+    "summary": "This is a satirical sketch, repurposed from a music video, that serves as a powerful social commentary on racism and privilege. Two Black men discover a store offering a \"Skin Change\" for 99 cents. One man, who has a dollar, goes inside, promising to give his friend the leftover penny. He emerges as a white man. When his friend asks for the promised penny, the newly white man dismisses him with a racial slur and tells him to get a job. The shocking punchline highlights a perceived immediate shift in attitude and social standing that comes with the change in race. The on-screen text \"AI getting out of hand\" is a common meme caption applied to surreal content but is factually incorrect, as the clip is from Joyner Lucas's music video \"I'm Not Racist.\"",
+    "emotional_arc": "The video starts with curiosity and light humor, builds anticipation as one character undergoes a transformation, and culminates in a shocking and disturbing punchline, leaving the viewer with feelings of surprise, discomfort, and provoking thought on social issues.",
+    "hookGenome": {
+      "hook_type": "pattern_interrupt",
+      "hook_strategy": "shock_value"
+    },
+    "audience_reaction": "The audience is likely to be shocked and provoked by the video's blunt and controversial ending. It is expected to generate significant discussion about racism, white privilege, and the power of satire. Many comments will likely point out the video's origin (Joyner Lucas's music video) and correct the caption's claim about AI.",
+    "safety_flags": [
+      "hate_speech",
+      "profanity",
+      "sensitive_topics"
+    ],
+    "confidence": 5,
+    "graph_refs": [
+      "social_commentary",
+      "dark_humor",
+      "racism",
+      "satire",
+      "viral_skit"
+    ],
+    "asr_transcript": "Wow. Skin change for 99 cents. I have a dollar. I only have 98 cents. I'll go in and I'll come back out and give you a penny. Hey, you look great. Can I get that penny? Get a job, n****.",
+    "asr_lang": "en",
+    "asr_translation_en": "Wow. Skin change for 99 cents. I have a dollar. I only have 98 cents. I'll go in and I'll come back out and give you a penny. Hey, you look great. Can I get that penny? Get a job, n****.",
+    "ocr_text": [
+      "AI getting out of hand 😭🙏",
+      "SKIN CHANGE",
+      "SALE!",
+      "99 CENTS",
+      "ON: 99 CENTS",
+      "Vevo"
+    ]
+  },
+  "scenes": [
+    {
+      "scene_id": "1",
+      "time_start": "00:00:00.000",
+      "time_end": "00:00:07.500",
+      "duration_sec": 7.5,
+      "importance": 4,
+      "narrative_unit": "inciting_incident",
+      "setting": {
+        "type": "urban_street",
+        "description": "Two Black men stand on a sidewalk in front of a store with a large sign that reads 'SKIN CHANGE' and a sale sign for '99 CENTS'."
+      },
+      "shots": [
+        {
+          "shot_id": "1",
+          "shot_type": "medium_shot",
+          "camera_movement": "static",
+          "description": "The two men discuss the price of the 'skin change' service, establishing the premise of the sketch."
+        }
+      ]
+    },
+    {
+      "scene_id": "2",
+      "time_start": "00:00:07.500",
+      "time_end": "00:00:12.500",
+      "duration_sec": 5,
+      "importance": 4,
+      "narrative_unit": "rising_action",
+      "setting": {
+        "type": "urban_street",
+        "description": "The man in the grey hoodie enters the 'Skin Change' store while his friend waits outside on a more modern-looking city street."
+      },
+      "shots": [
+        {
+          "shot_id": "1",
+          "shot_type": "medium_shot",
+          "camera_movement": "static",
+          "description": "The man in the hoodie enters the store."
+        },
+        {
+          "shot_id": "2",
+          "shot_type": "medium_shot",
+          "camera_movement": "static",
+          "description": "The friend waits outside as the man who entered the store emerges, now as a white man."
+        }
+      ]
+    },
+    {
+      "scene_id": "3",
+      "time_start": "00:00:12.500",
+      "time_end": "00:00:17.800",
+      "duration_sec": 5.3,
+      "importance": 5,
+      "narrative_unit": "climax",
+      "setting": {
+        "type": "urban_street",
+        "description": "The two men, one Black and one now white, confront each other on the sidewalk."
+      },
+      "shots": [
+        {
+          "shot_id": "1",
+          "shot_type": "medium_shot",
+          "camera_movement": "static",
+          "description": "The Black man compliments his friend's new look and asks for the penny he was promised. The white man looks at him dismissively and delivers the shocking punchline, telling him to 'get a job' and using a racial slur."
+        }
+      ]
+    }
+  ],
+  "product_mentions": [],
+  "service_mentions": [
+    {
+      "service_name": "Skin Change",
+      "service_category": "Fictional Service",
+      "brand": "Skin Change",
+      "time_start": "00:00:00.000",
+      "time_end": "00:00:02.000",
+      "description": "A fictional service offered by a storefront that allows a person to change their skin color."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{"level":"info","message":"🚀 Cloud Run Automation Service running on port 5001","timestamp":"2025-08-21T12:28:07.849Z"}
+{"level":"info","message":"📊 Health check: http://localhost:5001/api/health","timestamp":"2025-08-21T12:28:07.850Z"}
+{"level":"info","message":"🎯 Automation status: http://localhost:5001/api/status","timestamp":"2025-08-21T12:28:07.850Z"}
+{"level":"info","message":"🚀 Start automation: POST http://localhost:5001/api/start","timestamp":"2025-08-21T12:28:07.850Z"}
+{"level":"info","message":"🤖 GPT-5 Pro ask: POST http://localhost:5001/api/gpt5-ask","timestamp":"2025-08-21T12:28:07.850Z"}
+{"level":"info","message":"📊 VDP generate: POST http://localhost:5001/api/vdp-generate","timestamp":"2025-08-21T12:28:07.851Z"}
+{"level":"info","message":"Phase 1: Requesting strategy from GPT-5 Pro","timestamp":"2025-08-21T12:28:38.977Z"}
+{"level":"info","message":"Calling GPT-5 Pro API...","timestamp":"2025-08-21T12:28:38.977Z"}
+{"level":"error","message":"GPT-5 Pro API call failed:","timestamp":"2025-08-21T12:28:39.323Z"}
+{"level":"error","message":"Automation workflow failed: GPT-5 Pro API error: Request failed with status code 401","stack":"Error: GPT-5 Pro API error: Request failed with status code 401\n    at callGPT5Pro (/Users/ted/snap3/services/cloud-run-automation/server.js:80:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async runAutomationWorkflow (/Users/ted/snap3/services/cloud-run-automation/server.js:146:26)","timestamp":"2025-08-21T12:28:39.323Z"}
+{"level":"info","message":"Scheduled automation check","timestamp":"2025-08-21T12:30:00.020Z"}
+{"level":"info","message":"Phase 1: Requesting strategy from GPT-5 Pro","timestamp":"2025-08-21T12:30:00.020Z"}
+{"level":"info","message":"Calling GPT-5 Pro API...","timestamp":"2025-08-21T12:30:00.020Z"}
+{"level":"error","message":"GPT-5 Pro API call failed:","timestamp":"2025-08-21T12:30:00.228Z"}
+{"level":"error","message":"Automation workflow failed: GPT-5 Pro API error: Request failed with status code 401","stack":"Error: GPT-5 Pro API error: Request failed with status code 401\n    at callGPT5Pro (/Users/ted/snap3/services/cloud-run-automation/server.js:80:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async runAutomationWorkflow (/Users/ted/snap3/services/cloud-run-automation/server.js:146:26)","timestamp":"2025-08-21T12:30:00.228Z"}

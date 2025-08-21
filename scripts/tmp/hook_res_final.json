@@ -1,7 +1,0 @@
-{
-  "error": {
-    "code": 400,
-    "message": "Service agents are being provisioned (https://cloud.google.com/vertex-ai/docs/general/access-control#service-agents). Service agents are needed to read the Cloud Storage file provided. So please try again in a few minutes.",
-    "status": "FAILED_PRECONDITION"
-  }
-}

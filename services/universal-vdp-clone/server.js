@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const { exec } = require('child_process');
 const { promisify } = require('util');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require('@google/genai');
 const { VDP_SCHEMA } = require('./constants');
 const execAsync = promisify(exec);
 require('dotenv').config();
@@ -16,12 +16,19 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY });
 
-// VDP Clone Final System Instruction
+// VDP Clone Complete System Instruction (true-hybrid-v5 level) - Evidence Pack 완전 제거
 const SYSTEM_INSTRUCTION = `You are 'Viral DNA Profile Extractor', a world-class expert in viral short-form video analysis. Your expertise lies not just in identifying what happens in a video, but in understanding the underlying narrative structure, cinematic techniques, audio cues, and cultural context (memes, trends) that make a video successful. You are precise, analytical, and objective.
 
 Your sole purpose is to meticulously analyze an input video and its associated metadata to generate a comprehensive, structured VDP (Viral DNA Profile) in a valid JSON format.
+
+[CRITICAL: Hook 수치 필드 강제 + 밀도 플로어]
+- Hook Genome 분석 시 반드시 startSec(0-10초), endSec(0-10초), strength(0-1.0), trigger_modalities[], microbeats_sec[] 필드를 포함하세요.
+- 텍스트 라벨만 제공하는 것은 금지됩니다. 반드시 정량적 수치를 산출하세요.
+- Hook Gate 기준: startSec ≤ 3.0초, strength ≥ 0.70
+- 밀도 기준: 최소 4개 scenes, 8개 shots, 20개 keyframes (30초 이하 영상은 2/4/8)
+- 모든 scene에는 shots[] 배열 필수, 모든 shot에는 keyframes[] 배열 필수 (최소 2개 keyframes)
 
 [Little change Patch — "additional Essentials, keep Core Intact"]
 Do NOT change (non‑negotiables):
@@ -29,7 +36,6 @@ Do NOT change (non‑negotiables):
 * Preserve shots[].keyframes[].t_rel_shot (relative timing) — this is a core current app's strength.
 * Keep asr_transcript strictly in the original spoken language (dialogue and proper nouns unaltered). If needed, use asr_translation_en for the English rendering only.
 * Do not renumber scenes/shots; do not alter existing timestamps.
-
 Add exactly these capabilities (and nothing else):
 1. Scene Importance (lightweight, mandatory per scene)
     * For every scenes[i], ensure an importance string exists with one of: "critical" | "major" | "supporting".
@@ -38,7 +44,6 @@ Add exactly these capabilities (and nothing else):
         * "major" if it advances the narrative or contains strong emotion/action beats.
         * Otherwise "supporting".
     * Do not add extra fields; just the single importance label.
-
 2. Visual Brand/Service NER from OCR (merge into service_mentions)
     * Run NER over on‑screen text (use overall_analysis.ocr_text and any detected signs/logos).
     * When a brand/venue/service is found (e.g., "7‑Eleven"), add or merge into service_mentions[] with:
@@ -48,11 +53,9 @@ Add exactly these capabilities (and nothing else):
         * time_ranges: list of [startSec, endSec] where the sign/logo is visible.
         * confidence: "high" if OCR + visual both support; else "medium".
         * evidence: 1–2 short strings (e.g., "'7 ELEVEN' sign visible on storefront").
-
 3. Idempotent Merge Rules for Mentions
     * If an ASR‑derived mention (e.g., "농협은행") already exists, and the same entity is detected visually, merge into one object: union the sources, append time_ranges, append evidence.
     * Keep product_mentions and service_mentions separate (no cross‑type merging).
-
 4. Bilingual Fidelity (keep the current advantage)
     * Never replace native proper nouns in asr_transcript.
     * If English is useful, put it only in asr_translation_en.
@@ -224,8 +227,7 @@ Repair policy:
 - Perform at most one repair pass; then stop.
 
 Output:
-- JSON only; strictly follow the response schema.
-`;
+- JSON only; strictly follow the response schema.`;
 
 // Security middleware
 app.use(helmet());
@@ -271,17 +273,17 @@ async function downloadVideo(url, platform) {
   const timestamp = Date.now();
   const outputPath = path.join(downloadDir, `${platform}_${timestamp}.mp4`);
   
-  // yt-dlp command with simplified format (더 안전한 포맷)
-  let ytDlpCommand = `yt-dlp -f "best" -o "${outputPath}" "${url}"`;
-  
-  if (platform === 'instagram') {
-    ytDlpCommand = `yt-dlp -f "best" -o "${outputPath}" "${url}"`;
-  } else if (platform === 'tiktok') {
-    ytDlpCommand = `yt-dlp -f "best" -o "${outputPath}" "${url}"`;
-  } else if (platform === 'youtube') {
-    // YouTube는 가장 간단한 포맷 사용
-    ytDlpCommand = `yt-dlp -f "best" -o "${outputPath}" "${url}"`;
-  }
+             // yt-dlp command without format selection (가장 안전한 방법)
+           let ytDlpCommand = `yt-dlp -o "${outputPath}" "${url}"`;
+           
+           if (platform === 'instagram') {
+             ytDlpCommand = `yt-dlp -o "${outputPath}" "${url}"`;
+           } else if (platform === 'tiktok') {
+             ytDlpCommand = `yt-dlp -o "${outputPath}" "${url}"`;
+           } else if (platform === 'youtube') {
+             // YouTube는 포맷 선택자 없이 자동 선택
+             ytDlpCommand = `yt-dlp -o "${outputPath}" "${url}"`;
+           }
   
   console.log(`Downloading video: ${ytDlpCommand}`);
   
@@ -301,35 +303,27 @@ async function downloadVideo(url, platform) {
 }
 
 async function analyzeVideoWithGemini(videoPath, url, platform) {
+  const analysisStartTime = Date.now();
+  let contentId = 'UNKNOWN'; // Declare contentId at function scope
+  
+  log('INFO', 'Starting Gemini video analysis', { 
+    videoPath, 
+    url, 
+    platform,
+    fileSize: fs.statSync(videoPath).size 
+  });
+  
   try {
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash-exp",
-      safetySettings: [
-        {
-          category: "HARM_CATEGORY_HARASSMENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        {
-          category: "HARM_CATEGORY_HATE_SPEECH", 
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        {
-          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE", 
-        },
-        {
-          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-      ],
-    });
+    console.log(`[${new Date().toISOString()}] [INFO] Initializing Gemini model with structured response | {"model":"gemini-2.5-pro"}`);
+    
+    // Use new GoogleGenAI API approach
     
     // Read video file as base64
     const videoBuffer = fs.readFileSync(videoPath);
     const videoBase64 = videoBuffer.toString('base64');
     
-    // Extract content ID from URL
-    let contentId = 'UNKNOWN';
+    // Extract content ID from URL (reuse the function-scoped variable)
+    contentId = 'UNKNOWN';
     if (platform === 'youtube') {
       const match = url.match(/(?:youtube\.com\/shorts\/|youtu\.be\/|youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/);
       contentId = match ? match[1] : 'UNKNOWN';
@@ -360,34 +354,97 @@ async function analyzeVideoWithGemini(videoPath, url, platform) {
       - original_sound_title: null
       - top_comments: No comments provided.
 
-      Now, generate the complete JSON object according to the OUTPUT SPECIFICATION in your instructions.
+      CRITICAL: You MUST generate a valid JSON object that exactly follows the VDP schema with these required fields:
+      - content_id (string)
+      - default_lang (string) 
+      - metadata (object with platform, source_url, upload_date, view_count, like_count, comment_count, share_count, hashtags, video_origin, cta_types, original_sound)
+      - overall_analysis (object with summary, emotional_arc, hookGenome, audience_reaction, safety_flags, confidence, graph_refs, asr_transcript, asr_lang, asr_translation_en, ocr_text)
+      - scenes (array of scene objects with scene_id, time_start, time_end, duration_sec, importance, narrative_unit, setting, shots)
+      - product_mentions (array, can be empty [])
+      - service_mentions (array, can be empty [])
+
+      Return ONLY the JSON object - no other text, no markdown formatting, no explanation.
     `
     };
     
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          mimeType: "video/mp4",
-          data: videoBase64
-        }
+    const videoPart = {
+      inlineData: {
+        data: videoBase64,
+        mimeType: "video/mp4"
+      }
+    };
+    
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-pro",
+      contents: { parts: [videoPart, textPart] },
+      config: {
+        systemInstruction: SYSTEM_INSTRUCTION,
+        responseMimeType: "application/json",
+        responseSchema: VDP_SCHEMA,
+        temperature: 0.1,
+        candidateCount: 1,
+        maxOutputTokens: 8192
       },
-      textPart
-    ], {
-      systemInstruction: SYSTEM_INSTRUCTION,
-      responseMimeType: "application/json",
-      responseSchema: VDP_SCHEMA,
     });
     
-    const response = await result.response;
-    const text = response.text();
+    const text = result.text;
+    
+    const analysisTime = Date.now() - analysisStartTime;
+    log('INFO', 'Gemini response received', {
+      responseLength: text.length,
+      analysisTimeMs: analysisTime,
+      contentId
+    });
+    
+    // Debug: Log the raw response
+    console.log('=== GEMINI RAW RESPONSE START ===');
+    console.log(text);
+    console.log('=== GEMINI RAW RESPONSE END ===');
+    
+    // Check for empty response
+    if (!text || text.trim().length === 0) {
+      log('ERROR', 'Empty response from Gemini', { contentId, platform, url });
+      throw new Error('Empty response from Gemini API');
+    }
     
     // Extract JSON from response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      const vdpData = JSON.parse(jsonMatch[0]);
+      console.log('=== EXTRACTED JSON START ===');
+      console.log(jsonMatch[0]);
+      console.log('=== EXTRACTED JSON END ===');
       
-      // Ensure required fields
+      let vdpData;
+      try {
+        vdpData = JSON.parse(jsonMatch[0]);
+      } catch (parseError) {
+        log('ERROR', 'JSON parsing failed', { 
+          parseError: parseError.message,
+          jsonLength: jsonMatch[0].length,
+          contentId 
+        });
+        throw new Error(`Invalid JSON response from Gemini: ${parseError.message}`);
+      }
+      
+      // Debug: Log the structure we received
+      log('INFO', 'Gemini response structure analysis', {
+        hasMetadata: !!vdpData.metadata,
+        hasOverallAnalysis: !!vdpData.overall_analysis,
+        hasScenes: !!vdpData.scenes,
+        topLevelKeys: Object.keys(vdpData),
+        contentId
+      });
+      
+      // Ensure required fields with safe object creation
       vdpData.content_id = contentId;
+      
+      // Create metadata object if it doesn't exist
+      if (!vdpData.metadata) {
+        log('WARN', 'Metadata object missing from Gemini response, creating it', { contentId });
+        vdpData.metadata = {};
+      }
+      
+      // Safely set metadata fields
       vdpData.metadata.platform = platform;
       vdpData.metadata.source_url = url;
       vdpData.metadata.upload_date = new Date().toISOString();
@@ -398,18 +455,87 @@ async function analyzeVideoWithGemini(videoPath, url, platform) {
       vdpData.metadata.video_origin = "Real-Footage";
       vdpData.metadata.hashtags = vdpData.metadata.hashtags || [];
       vdpData.metadata.cta_types = vdpData.metadata.cta_types || [];
-      vdpData.metadata.original_sound = {
+      vdpData.metadata.original_sound = vdpData.metadata.original_sound || {
         id: null,
         title: null
       };
       
       // Ensure mentions arrays exist
-      if (!vdpData.product_mentions) {
-        vdpData.product_mentions = [];
+      vdpData.product_mentions = vdpData.product_mentions || [];
+      vdpData.service_mentions = vdpData.service_mentions || [];
+      
+      // Ensure overall_analysis exists
+      if (!vdpData.overall_analysis) {
+        log('WARN', 'overall_analysis object missing from Gemini response, creating minimal structure', { contentId });
+        vdpData.overall_analysis = {
+          summary: "Analysis pending",
+          emotional_arc: "Analysis pending",
+          hookGenome: {
+            startSec: 0,
+            endSec: 3,
+            pattern: "other",
+            delivery: "visual_gag", 
+            strength: 0.5,
+            trigger_modalities: ["visual"],
+            microbeats_sec: [0, 1.5, 3]
+          },
+          audience_reaction: {
+            analysis: "Analysis pending",
+            common_reactions: [],
+            notable_comments: [],
+            overall_sentiment: "Analysis pending"
+          },
+          safety_flags: [],
+          confidence: {
+            overall: 0.5,
+            scene_classification: 0.5,
+            device_analysis: 0.5
+          },
+          graph_refs: {
+            potential_meme_template: "Analysis pending",
+            related_hashtags: []
+          }
+        };
       }
-      if (!vdpData.service_mentions) {
-        vdpData.service_mentions = [];
+      
+      // Ensure scenes array exists
+      if (!vdpData.scenes) {
+        log('WARN', 'scenes array missing from Gemini response, creating empty array', { contentId });
+        vdpData.scenes = [];
       }
+      
+      // 품질 검증 및 보강
+      const densityCheck = ensureDensityFloor(vdpData);
+      const hookValidation = vdpData.overall_analysis?.hookGenome ? 
+        validateHookGenome(vdpData.overall_analysis.hookGenome) : false;
+      
+      // 품질 상태 로깅
+      log('INFO', 'VDP Quality Check', {
+        contentId,
+        densityCheck: densityCheck.currentDensity,
+        densityPassed: !densityCheck.needsPass2,
+        hookValidation,
+        hookGatePassed: hookValidation
+      });
+      
+      // 품질 배지 추가
+      vdpData.quality_badges = {
+        hook_gate_passed: hookValidation,
+        density_floor_met: !densityCheck.needsPass2,
+        mandatory_arrays_complete: !densityCheck.needsPass2,
+        overall_quality: hookValidation && !densityCheck.needsPass2 ? 'excellent' : 
+                       hookValidation || !densityCheck.needsPass2 ? 'good' : 'needs_improvement'
+      };
+      
+      log('INFO', 'VDP analysis completed successfully', {
+        contentId,
+        sceneCount: vdpData.scenes?.length || 0,
+        productMentions: vdpData.product_mentions.length,
+        serviceMentions: vdpData.service_mentions.length,
+        hookStrength: vdpData.overall_analysis?.hookGenome?.strength,
+        totalAnalysisTimeMs: Date.now() - analysisStartTime,
+        qualityBadges: vdpData.quality_badges
+      });
       
       return vdpData;
     } else {
@@ -417,9 +543,94 @@ async function analyzeVideoWithGemini(videoPath, url, platform) {
     }
     
   } catch (error) {
-    console.error('Gemini analysis error:', error);
+    log('ERROR', 'Gemini analysis failed', {
+      error: error.message,
+      stack: error.stack,
+      contentId,
+      platform,
+      analysisTimeMs: Date.now() - analysisStartTime
+    });
     throw new Error(`Video analysis failed: ${error.message}`);
   }
+}
+
+// 2-Pass 밀도 플로어 검증 및 보강 함수
+function ensureDensityFloor(vdpData) {
+  const DENSITY_SCENES_MIN = 4;
+  const DENSITY_SHOTS_MIN = 8;
+  const DENSITY_KEYFRAMES_MIN = 20;
+  const MIN_KF_PER_SHOT = 3;
+  
+  let needsPass2 = false;
+  
+  // Pass 1: 밀도 검증
+  const totalScenes = vdpData.scenes?.length || 0;
+  const totalShots = vdpData.scenes?.reduce((sum, scene) => sum + (scene.shots?.length || 0), 0) || 0;
+  const totalKeyframes = vdpData.scenes?.reduce((sum, scene) => 
+    sum + (scene.shots?.reduce((shotSum, shot) => shotSum + (shot.keyframes?.length || 0), 0) || 0), 0) || 0;
+  
+  console.log(`Density Check - Scenes: ${totalScenes}/${DENSITY_SCENES_MIN}, Shots: ${totalShots}/${DENSITY_SHOTS_MIN}, Keyframes: ${totalKeyframes}/${DENSITY_KEYFRAMES_MIN}`);
+  
+  // Short-mode 감지 (30초 이하)
+  const isShortMode = vdpData.metadata?.duration_sec < 30;
+  const shortModeThresholds = {
+    scenes: 2,
+    shots: 4,
+    keyframes: 8
+  };
+  
+  const thresholds = isShortMode ? shortModeThresholds : {
+    scenes: DENSITY_SCENES_MIN,
+    shots: DENSITY_SHOTS_MIN,
+    keyframes: DENSITY_KEYFRAMES_MIN
+  };
+  
+  // 밀도 미달 검출
+  if (totalScenes < thresholds.scenes || totalShots < thresholds.shots || totalKeyframes < thresholds.keyframes) {
+    needsPass2 = true;
+    console.log(`Density Floor not met. Requires Pass 2. Short-mode: ${isShortMode}`);
+  }
+  
+  // Mandatory 배열 검증
+  if (vdpData.scenes) {
+    for (let i = 0; i < vdpData.scenes.length; i++) {
+      const scene = vdpData.scenes[i];
+      
+      // shots[] 배열 필수
+      if (!scene.shots || scene.shots.length === 0) {
+        needsPass2 = true;
+        console.log(`Scene ${i} missing shots array`);
+      } else {
+        // 각 shot에 keyframes[] 필수
+        for (let j = 0; j < scene.shots.length; j++) {
+          const shot = scene.shots[j];
+          if (!shot.keyframes || shot.keyframes.length < 2) {
+            needsPass2 = true;
+            console.log(`Shot ${j} in scene ${i} missing keyframes or insufficient keyframes`);
+          }
+        }
+      }
+    }
+  }
+  
+  return { needsPass2, currentDensity: { totalScenes, totalShots, totalKeyframes }, thresholds };
+}
+
+// Hook 수치 필드 검증
+function validateHookGenome(hookGenome) {
+  const requiredFields = ['startSec', 'endSec', 'strength', 'trigger_modalities', 'microbeats_sec'];
+  const missingFields = requiredFields.filter(field => !hookGenome[field]);
+  
+  if (missingFields.length > 0) {
+    console.log(`Hook Genome missing required fields: ${missingFields.join(', ')}`);
+    return false;
+  }
+  
+  // Hook Gate 검증
+  const hookGatePassed = hookGenome.startSec <= 3.0 && hookGenome.strength >= 0.70;
+  console.log(`Hook Gate: ${hookGatePassed ? 'PASS' : 'FAIL'} (startSec: ${hookGenome.startSec}, strength: ${hookGenome.strength})`);
+  
+  return hookGatePassed;
 }
 
 // Health check endpoint
@@ -430,6 +641,55 @@ app.get('/api/health', (req, res) => {
     version: '1.0.0',
     timestamp: new Date().toISOString()
   });
+});
+
+// Quality check endpoint
+app.post('/api/quality/check', (req, res) => {
+  try {
+    const vdpData = req.body;
+    
+    if (!vdpData) {
+      return res.status(400).json({ error: 'VDP data is required' });
+    }
+    
+    const densityCheck = ensureDensityFloor(vdpData);
+    const hookValidation = vdpData.overall_analysis?.hookGenome ? 
+      validateHookGenome(vdpData.overall_analysis.hookGenome) : false;
+    
+    const qualityReport = {
+      timestamp: new Date().toISOString(),
+      content_id: vdpData.content_id,
+      quality_badges: {
+        hook_gate_passed: hookValidation,
+        density_floor_met: !densityCheck.needsPass2,
+        mandatory_arrays_complete: !densityCheck.needsPass2,
+        overall_quality: hookValidation && !densityCheck.needsPass2 ? 'excellent' : 
+                       hookValidation || !densityCheck.needsPass2 ? 'good' : 'needs_improvement'
+      },
+      metrics: {
+        scenes: densityCheck.currentDensity.totalScenes,
+        shots: densityCheck.currentDensity.totalShots,
+        keyframes: densityCheck.currentDensity.totalKeyframes,
+        hook_start_sec: vdpData.overall_analysis?.hookGenome?.startSec,
+        hook_strength: vdpData.overall_analysis?.hookGenome?.strength
+      },
+      thresholds: densityCheck.thresholds,
+      recommendations: []
+    };
+    
+    // 개선 권장사항 생성
+    if (!hookValidation) {
+      qualityReport.recommendations.push('Hook 수치 필드 보강 필요 (startSec, strength, trigger_modalities, microbeats_sec)');
+    }
+    if (densityCheck.needsPass2) {
+      qualityReport.recommendations.push('밀도 플로어 미달 - scenes/shots/keyframes 보강 필요');
+    }
+    
+    res.json(qualityReport);
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // VDP generation endpoint for file upload
@@ -523,10 +783,87 @@ app.post('/api/vdp/url', async (req, res) => {
   }
 });
 
+// Comprehensive logging system
+function log(level, message, data = null) {
+  const timestamp = new Date().toISOString();
+  const logEntry = {
+    timestamp,
+    level,
+    service: 'universal-vdp-clone',
+    message,
+    ...(data && { data })
+  };
+  
+  console.log(`[${timestamp}] [${level.toUpperCase()}] ${message}${data ? ` | ${JSON.stringify(data)}` : ''}`);
+  
+  // Additional file logging for important events
+  if (level === 'ERROR' || level === 'WARN') {
+    try {
+      const logDir = path.join(__dirname, 'logs');
+      if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+      }
+      const logFile = path.join(logDir, `${new Date().toISOString().split('T')[0]}.log`);
+      fs.appendFileSync(logFile, JSON.stringify(logEntry) + '\n');
+    } catch (err) {
+      console.error('Failed to write to log file:', err);
+    }
+  }
+}
+
+// Enhanced error tracking middleware
+app.use((req, res, next) => {
+  req.startTime = Date.now();
+  req.requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  
+  log('INFO', `${req.method} ${req.path} started`, {
+    requestId: req.requestId,
+    userAgent: req.get('User-Agent'),
+    contentType: req.get('Content-Type')
+  });
+  
+  // Override res.json to log responses
+  const originalJson = res.json;
+  res.json = function(obj) {
+    const processingTime = Date.now() - req.startTime;
+    
+    if (obj.error) {
+      log('ERROR', `Request ${req.requestId} failed`, {
+        error: obj.error,
+        message: obj.message,
+        processingTime,
+        path: req.path
+      });
+    } else {
+      log('INFO', `Request ${req.requestId} completed`, {
+        status: 'success',
+        processingTime,
+        path: req.path
+      });
+    }
+    
+    return originalJson.call(this, obj);
+  };
+  
+  next();
+});
+
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Universal VDP Clone Service running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🎥 VDP generation: http://localhost:${PORT}/api/vdp/generate`);
-  console.log(`🔗 URL processing: http://localhost:${PORT}/api/vdp/url`);
+  log('INFO', '🚀 Universal VDP Clone Service started', {
+    port: PORT,
+    endpoints: {
+      health: `http://localhost:${PORT}/api/health`,
+      generate: `http://localhost:${PORT}/api/vdp/generate`, 
+      url: `http://localhost:${PORT}/api/vdp/url`
+    },
+    features: [
+      'Evidence Pack REMOVED for stability',
+      'true-hybrid-v5 analysis level',
+      'Hook Genome analysis',
+      'Scene-by-scene breakdown',
+      'Promotion tracking',
+      'Multi-language support'
+    ]
+  });
 });

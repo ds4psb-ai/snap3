@@ -1,6 +1,3 @@
-// VDP Clone Final - Constants (Node.js version)
-// Converted from TypeScript to JavaScript
-
 const NOTABLE_COMMENT_SCHEMA = {
     type: "object",
     required: ["text", "lang"],
@@ -63,13 +60,46 @@ const HOOK_GENOME_SCHEMA = {
     type: "object",
     description: "Detailed breakdown of the video's primary hook.",
     properties: {
-        startSec: { type: "number", description: "Start time of the hook in seconds." },
-        endSec: { type: "number", description: "End time of the hook in seconds." },
-        pattern: { type: "string", enum: ["problem_solution", "pattern_break", "question", "proof", "other"], description: "The narrative pattern of the hook." },
-        delivery: { type: "string", enum: ["dialogue", "voiceover", "on_screen_text", "visual_gag", "sfx_only"], description: "How the hook is delivered to the audience." },
-        strength: { type: "number", description: "A score from 0.0 to 1.0 indicating the hook's effectiveness." }
+        startSec: { 
+            type: "number", 
+            description: "Start time of the hook in seconds.",
+            minimum: 0,
+            maximum: 10
+        },
+        endSec: { 
+            type: "number", 
+            description: "End time of the hook in seconds.",
+            minimum: 0,
+            maximum: 10
+        },
+        pattern: { 
+            type: "string", 
+            enum: ["problem_solution", "pattern_break", "question", "proof", "other"], 
+            description: "The narrative pattern of the hook." 
+        },
+        delivery: { 
+            type: "string", 
+            enum: ["dialogue", "voiceover", "on_screen_text", "visual_gag", "sfx_only"], 
+            description: "How the hook is delivered to the audience." 
+        },
+        strength: { 
+            type: "number", 
+            description: "A score from 0.0 to 1.0 indicating the hook's effectiveness.",
+            minimum: 0,
+            maximum: 1
+        },
+        trigger_modalities: {
+            type: "array",
+            items: { type: "string" },
+            description: "Primary modalities that trigger the hook (visual, audio, text, etc.)"
+        },
+        microbeats_sec: {
+            type: "array",
+            items: { type: "number" },
+            description: "Key micro-beats within the hook timeframe in seconds"
+        }
     },
-    required: ["startSec", "endSec", "pattern", "delivery", "strength"]
+    required: ["startSec", "endSec", "pattern", "delivery", "strength", "trigger_modalities", "microbeats_sec"]
 };
 
 const OVERALL_ANALYSIS_SCHEMA = {
@@ -316,15 +346,5 @@ module.exports = {
   SCENE_SCHEMA,
   SHOT_SCHEMA,
   AUDIENCE_REACTION_SCHEMA,
-  CONFIDENCE_SCORE_SCHEMA,
-  GRAPH_REFS_SCHEMA,
-  OCR_TEXT_SCHEMA,
-  NOTABLE_COMMENT_SCHEMA,
-  EDIT_GRAMMAR_SCHEMA,
-  AUDIO_EVENT_SCHEMA,
-  KEYFRAME_SCHEMA,
-  CAMERA_SCHEMA,
-  COMPOSITION_SCHEMA,
-  PROMOTION_SCHEMA,
   MENTION_ITEM_SCHEMA
 };

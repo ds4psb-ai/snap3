@@ -63,3 +63,4 @@ echo "📝 Test commands:"
 echo "curl $SERVICE_URL/api/health"
 echo "curl -X POST $SERVICE_URL/api/start"
 echo "curl $SERVICE_URL/api/status"
+
