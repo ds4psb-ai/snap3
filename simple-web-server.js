@@ -2791,49 +2791,63 @@ app.post('/api/vdp/extract-main', async (req, res) => {
         
         const T3_ROUTES = getT3Routes(platform);
         
+        // GPT-5 Pro CTO: 향상된 T3 추출 함수 (IntegratedGenAI 우선 전략)
         async function callT3Extract(payload) {
+            const errors = [];
+            
             for (const route of T3_ROUTES) {
                 try {
-                    // 헬스체크 먼저 수행
+                    // GPT-5 Pro CTO: 헬스체크 타임아웃 최적화 (1.5s → 2s)
                     const healthResponse = await fetch(route.health, {
                         cache: 'no-store',
-                        signal: AbortSignal.timeout(1500)
+                        signal: AbortSignal.timeout(2000)
                     });
                     
                     if (!healthResponse.ok) {
+                        const error = `Health check failed: ${healthResponse.status}`;
                         console.log(`❌ T3 ${route.name} 헬스체크 실패: ${healthResponse.status}`);
+                        errors.push({ route: route.name, error });
                         continue;
                     }
                     
-                    console.log(`✅ T3 ${route.name} 헬스체크 성공, VDP 생성 시도...`);
+                    console.log(`✅ T3 ${route.name} 헬스체크 성공, VDP 생성 시도... (Engine: ${payload.engine_preference || 'integrated-genai-first'})`);
                     
-                    // VDP 생성 요청
+                    // GPT-5 Pro CTO: VDP 생성 타임아웃 최적화 (300s → 120s for better responsiveness)
                     const vdpResponse = await fetch(route.url, {
                         method: 'POST',
                         body: JSON.stringify(payload),
                         headers: {
-                            'content-type': 'application/json'
+                            'content-type': 'application/json',
+                            'x-engine-preference': payload.engine_preference || 'integrated-genai-first'
                         },
-                        signal: AbortSignal.timeout(300000) // 300초 타임아웃 (5분)
+                        signal: AbortSignal.timeout(120000) // 120초 타임아웃 (GPT-5 Pro 권장)
                     });
                     
                     if (vdpResponse.ok) {
                         const vdpData = await vdpResponse.json();
-                        console.log(`✅ T3 ${route.name} VDP 생성 성공`);
+                        console.log(`✅ T3 ${route.name} VDP 생성 성공 (Engine: ${vdpData.engine_used || 'unknown'})`);
                         return vdpData;
                     } else {
+                        const errorText = await vdpResponse.text().catch(() => 'Unknown error');
+                        const error = `VDP generation failed: ${vdpResponse.status} - ${errorText}`;
                         console.log(`❌ T3 ${route.name} VDP 생성 실패: ${vdpResponse.status}`);
+                        errors.push({ route: route.name, error });
                     }
                     
                 } catch (error) {
+                    const errorMsg = `Connection failed: ${error.message}`;
                     console.log(`❌ T3 ${route.name} 연결 실패: ${error.message}`);
+                    errors.push({ route: route.name, error: errorMsg });
                 }
             }
             
-            throw new Error('T3_UNAVAILABLE - 모든 T3 서버가 사용 불가능합니다');
+            // GPT-5 Pro CTO: 향상된 에러 보고 (디버깅 개선)
+            const errorSummary = errors.map(e => `${e.route}: ${e.error}`).join('; ');
+            throw new Error(`T3_ALL_UNAVAILABLE - 모든 T3 서버 실패: ${errorSummary}`);
         }
         
         // T3 호출 시도
+        // GPT-5 Pro CTO: IntegratedGenAI 우선 폴백 시스템
         const t3Payload = {
             gcsUri: `gs://${RAW_BUCKET}/raw/input/${(platform || 'unknown').toLowerCase()}/${content_id}.mp4`,
             metadata: {
@@ -2852,7 +2866,9 @@ app.post('/api/vdp/extract-main', async (req, res) => {
                 brand_detection: false,
                 hook_genome_analysis: true
             },
-            use_vertex: false
+            // GPT-5 Pro CTO: IntegratedGenAI 우선 전략 (더 안정적, 빠른 응답)
+            use_vertex: false,
+            engine_preference: 'integrated-genai-first'
         };
         
         try {
@@ -3589,6 +3605,86 @@ async function startServer() {
         }
     });
 
+    // Universal VDP Clone Service Integration
+    app.post('/api/vdp/universal', async (req, res) => {
+        const startTime = Date.now();
+        const correlationId = req.correlationId;
+        
+        try {
+            const { url, platform, content_id, content_key } = req.body;
+            
+            if (!url) {
+                return res.status(400).json({
+                    error: 'URL_REQUIRED',
+                    message: 'URL is required for Universal VDP processing'
+                });
+            }
+            
+            structuredLog('info', 'Universal VDP processing started', {
+                url: url.substring(0, 50) + '...',
+                platform,
+                content_id,
+                content_key
+            }, correlationId);
+            
+            // Call Universal VDP Clone Service
+            const universalVdpResponse = await fetch('http://localhost:4000/api/vdp/url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Correlation-ID': correlationId
+                },
+                body: JSON.stringify({
+                    url,
+                    platform: platform || 'unknown'
+                }),
+                signal: AbortSignal.timeout(120000) // 2 minutes timeout
+            });
+            
+            if (!universalVdpResponse.ok) {
+                throw new Error(`Universal VDP service error: ${universalVdpResponse.status}`);
+            }
+            
+            const vdpResult = await universalVdpResponse.json();
+            
+            // Merge with T1 metadata
+            const finalVdp = {
+                ...vdpResult.vdp,
+                content_id: content_id || vdpResult.vdp.content_id,
+                content_key: content_key || vdpResult.vdp.content_key,
+                metadata: {
+                    ...vdpResult.vdp.metadata,
+                    platform: platform || vdpResult.vdp.metadata.platform,
+                    source_url: url
+                }
+            };
+            
+            structuredLog('success', 'Universal VDP processing completed', {
+                processingTime: Date.now() - startTime,
+                contentKey: finalVdp.content_key
+            }, correlationId);
+            
+            res.json({
+                status: 'success',
+                vdp: finalVdp,
+                processing_time: Date.now() - startTime,
+                service: 'universal-vdp-clone'
+            });
+            
+        } catch (error) {
+            structuredLog('error', 'Universal VDP processing failed', {
+                error: error.message,
+                processingTime: Date.now() - startTime
+            }, correlationId);
+            
+            res.status(500).json({
+                error: 'UNIVERSAL_VDP_FAILED',
+                message: error.message,
+                processing_time: Date.now() - startTime
+            });
+        }
+    });
+
     app.listen(PORT, () => {
         structuredLog('success', 'VDP Enhanced Web Server started successfully', {
             serverUrl: `http://localhost:${PORT}`,
@@ -3596,6 +3692,7 @@ async function startServer() {
                 normalization: 'POST /api/normalize-url',
                 vdpExtract: 'POST /api/vdp/extract-vertex',
                 mainVdpExtract: 'POST /api/vdp/extract-main',
+                universalVdp: 'POST /api/vdp/universal',
                 socialMetadata: 'POST /api/extract-social-metadata',
                 metrics: 'GET /metrics (T3 integration)',
                 health: 'GET /api/health'
@@ -3604,12 +3701,14 @@ async function startServer() {
                 jsonOnlyProcessing: true,
                 platformSegmentation: true,
                 contentKeyEnforcement: true,
+                universalVdpIntegration: true,
                 regionalAlignment: RAW_BUCKET === 'tough-variety-raw-central1'
             }
         });
         
         console.log(`🚀 Simple web server running on http://localhost:${PORT}`);
         console.log(`📝 URL normalization endpoint: POST /api/normalize-url`);
+        console.log(`🎥 Universal VDP endpoint: POST /api/vdp/universal`);
         console.log(`🔗 UI available at: http://localhost:${PORT}`);
     });
 }

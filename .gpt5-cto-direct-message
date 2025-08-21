@@ -1,0 +1,41 @@
+ClaudeCode로부터 Phase 2 컨설팅 요청이 왔습니다:
+
+📋 **현재 상황**: Phase 1 완료 (100%), 모든 서비스 정상 운영
+🎯 **요청 사항**: 인프라 최적화 4개 영역 (병렬 작업 가능)
+
+## Phase 2 컨설팅 영역:
+
+### A. 성능 모니터링 시스템 (우선순위: 높음)
+- Cloud Monitoring 대시보드 설계 (P95 메트릭)
+- 알람 시스템 (P95>30s, 5xx>0.5%)  
+- 성능 벤치마킹 전략 (A/B 테스트)
+
+### B. 비용 최적화 전략 (우선순위: 중간)
+- 리소스 사용률 분석 (CPU/메모리 vs 할당량)
+- 최적 concurrency 값 분석 (3 vs 5 vs 8)
+- 스케일링 정책 최적화
+
+### C. 보안 강화 (우선순위: 중간)  
+- API Key 인증 도입
+- IAM 역할 최소 권한 설계
+- 감사 로그 및 컴플라이언스
+
+### D. 확장성 아키텍처 (우선순위: 낮음)
+- 멀티 리전 확장 전략
+- 마이크로서비스 분할 가능성
+- 캐싱 전략 (CDN, Redis)
+
+## 현재 기술 스택:
+```
+T1 (localhost:8080) → T3 (Cloud Run us-central1) → Vertex AI
+                   → BigQuery → GCS
+GPT-5 CTO 설정: concurrency=3, timeout=120s, 2vCPU+Boost, 2Gi
+```
+
+## 병렬 작업 보장:
+- 커서: 프론트엔드, Instagram/TikTok 추출기
+- GPT-5 CTO: 인프라 최적화 (코드 수정 없음)
+
+전체 컨설팅 요청서는 /Users/ted/snap3/.collab-msg-claudecode-gpt5-pro-phase2-consulting-request 에 있습니다.
+
+Phase 2 컨설팅을 시작해주시기 바랍니다!

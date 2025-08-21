@@ -45,14 +45,20 @@ const VDP_SYSTEM_INSTRUCTION = `당신은 'Viral DNA Profile Extractor', 바이�
 
 출력은 반드시 유효한 JSON이어야 하며, 스키마를 완전히 준수해야 합니다.`;
 
-// Convert GCS URI to generative part for Vertex AI
+// GPT-5 Pro CTO: 표준화된 GCS URI to GenerativePart 변환 (페이로드 일관성 보장)
 async function gcsUriToGenerativePart(gcsUri) {
-  return {
+  // 표준 fileData 구조 (Vertex AI 권장 패턴)
+  const standardPart = {
     fileData: {
       fileUri: gcsUri,
       mimeType: 'video/mp4'
     }
   };
+  
+  // GPT-5 Pro CTO: 페이로드 검증 로깅
+  console.log(`[VertexAI Payload] 🔧 Standard fileData structure: ${JSON.stringify(standardPart, null, 2)}`);
+  
+  return standardPart;
 }
 
 class VertexAIVDP {
@@ -88,7 +94,7 @@ class VertexAIVDP {
         systemInstruction: VDP_SYSTEM_INSTRUCTION + '\n\nOutput: Valid JSON only. Include at minimum: content_id, metadata, overall_analysis with hookGenome, scenes array.'
       });
 
-      // Prepare parts
+      // GPT-5 Pro CTO: 표준화된 페이로드 준비 (T1 입력 형식 호환)
       const videoPart = await gcsUriToGenerativePart(gcsUri);
       const textPart = {
         text: `**Analysis Input:**
@@ -96,6 +102,7 @@ class VertexAIVDP {
 - platform: "${meta.platform}"
 - source_url: "${meta.source_url || gcsUri}"
 - language: "${meta.language || 'ko'}"
+- engine_preference: "${meta.engine_preference || 'vertex-ai'}"
 
 Now, generate the complete Vertex AI VDP JSON according to the specifications.`
       };
@@ -103,15 +110,17 @@ Now, generate the complete Vertex AI VDP JSON according to the specifications.`
       console.log(`[VertexAI VDP] 🔧 Debug - videoPart:`, JSON.stringify(videoPart, null, 2));
       console.log(`[VertexAI VDP] 🔧 Debug - textPart:`, JSON.stringify(textPart, null, 2));
 
-      // Make the request with proper content structure
-      const content = {
-        role: 'user',
-        parts: [videoPart, textPart]
+      // GPT-5 Pro CTO: 표준화된 요청 구조 (contents 배열 패턴)
+      const standardRequest = {
+        contents: [{
+          role: 'user',
+          parts: [videoPart, textPart]
+        }]
       };
       
-      console.log(`[VertexAI VDP] 🔧 Debug - final content:`, JSON.stringify(content, null, 2));
+      console.log(`[VertexAI VDP] 🔧 GPT-5 Pro Standard Request:`, JSON.stringify(standardRequest, null, 2));
       
-      const result = await model.generateContent([content]);
+      const result = await model.generateContent(standardRequest);
       const responseText = result.response.text();
       
       console.log(`[VertexAI VDP] 📄 Structured response received: ${responseText.length} chars`);
@@ -132,6 +141,7 @@ Now, generate the complete Vertex AI VDP JSON according to the specifications.`
       const processingTime = Date.now() - startTime;
       console.log(`[VertexAI VDP] ✅ Structured generation complete in ${processingTime}ms`);
       
+      // GPT-5 Pro CTO: 표준화된 엔진 메타데이터 (T1 호환성)
       return {
         ...vdp,
         processing_metadata: {
@@ -140,6 +150,8 @@ Now, generate the complete Vertex AI VDP JSON according to the specifications.`
           processing_time_ms: processingTime,
           structured_output: true,
           schema_enforced: true,
+          payload_standard: 'gpt5-pro-cto-v1.0',
+          filedata_pattern: 'contents[].parts[].fileData',
           generation_metadata: {
             platform: meta.platform || 'unknown',
             timestamp: new Date().toISOString(),

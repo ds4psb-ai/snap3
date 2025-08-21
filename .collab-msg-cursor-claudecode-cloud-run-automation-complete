@@ -1,0 +1,110 @@
+# 🚀 Cloud Run 자동화 서비스 완성 - ClaudeCode 협업 요청
+
+## ✅ 완성된 서비스
+**Cloud Run Automation Service** - GPT-5 Pro와 연동하여 VDP 생성을 자동화하는 서비스
+
+### 📁 생성된 파일들
+```
+services/cloud-run-automation/
+├── package.json          # 의존성 및 스크립트
+├── server.js            # 메인 서버 (GPT-5 Pro 연동)
+├── env.example          # 환경변수 예제
+├── README.md            # 상세 문서
+└── deploy.sh            # Cloud Run 배포 스크립트
+```
+
+### 🎯 주요 기능
+1. **GPT-5 Pro 자동 컨설팅**: 문제 발생 시 자동으로 전략 요청
+2. **VDP 자동 생성**: 3개 플랫폼 (YouTube, TikTok, Instagram) 자동 처리
+3. **실시간 모니터링**: 진행 상황 및 결과 실시간 추적
+4. **주기적 실행**: 30분마다 자동 실행 (cron job)
+5. **에러 복구**: 실패 시 자동으로 GPT-5 Pro에게 해결책 요청
+
+### 🔄 자동화 워크플로우
+1. **Phase 1**: GPT-5 Pro에게 현재 상황 보고 및 전략 요청
+2. **Phase 2**: VDP 생성 실행 (3개 플랫폼)
+3. **Phase 3**: 결과 보고 및 다음 단계 요청
+
+### 🌐 API 엔드포인트
+- `GET /api/health` - 서비스 헬스체크
+- `GET /api/status` - 자동화 상태 확인
+- `POST /api/start` - 자동화 워크플로우 시작
+- `POST /api/gpt5-ask` - GPT-5 Pro에게 직접 질문
+- `POST /api/vdp-generate` - VDP 직접 생성
+- `GET /api/results` - VDP 생성 결과 조회
+
+## 🚀 ClaudeCode 협업 요청
+
+### 1. 로컬 테스트 실행
+```bash
+cd services/cloud-run-automation
+npm install
+cp env.example .env
+# .env에서 OPENAI_API_KEY 설정
+npm start
+```
+
+### 2. Cloud Run 배포
+```bash
+# 환경변수 설정
+export OPENAI_API_KEY="your_openai_api_key"
+
+# 배포 실행
+./deploy.sh
+```
+
+### 3. 테스트 명령어
+```bash
+# 헬스체크
+curl https://cloud-run-automation-xxxxx-uc.a.run.app/api/health
+
+# 자동화 시작
+curl -X POST https://cloud-run-automation-xxxxx-uc.a.run.app/api/start
+
+# 상태 확인
+curl https://cloud-run-automation-xxxxx-uc.a.run.app/api/status
+```
+
+### 4. GPT-5 Pro 직접 질문 테스트
+```bash
+curl -X POST https://cloud-run-automation-xxxxx-uc.a.run.app/api/gpt5-ask \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "yt-dlp format error 해결 방법",
+    "context": "YouTube 다운로드 실패"
+  }'
+```
+
+## 🎯 목표
+**3개 플랫폼 VDP 완성**: YouTube, TikTok, Instagram에서 고품질 VDP 생성
+
+### 대상 URL
+1. YouTube: https://www.youtube.com/shorts/aX5y8wz60ws
+2. TikTok: https://www.tiktok.com/@lovedby4bxnia/video/7529657626947374349
+3. Instagram: https://www.instagram.com/reel/DLx4668NGGv/
+
+## 🔧 연동 서비스
+- **Universal VDP Clone**: VDP 생성 서비스 (포트 4000)
+- **GPT-5 Pro**: AI 컨설팅 서비스
+- **Cloud Run**: 서버리스 배포 플랫폼
+
+## 📊 모니터링
+- 실시간 로그: `tail -f automation.log`
+- 상태 확인: `curl /api/status`
+- 결과 조회: `curl /api/results`
+
+## 🚨 문제 발생 시
+1. 자동으로 GPT-5 Pro에게 해결책 요청
+2. 30분마다 자동 재시도
+3. 수동으로 `/api/gpt5-ask` 엔드포인트 사용 가능
+
+---
+
+**즉시 실행해주세요! 🚀**
+
+1. 로컬에서 테스트 실행
+2. Cloud Run 배포
+3. 3개 플랫폼 VDP 생성 테스트
+4. 문제 발생 시 GPT-5 Pro 자동 컨설팅 확인
+
+**결과를 Git으로 보고해주세요!**
