@@ -1,0 +1,34 @@
+# 🚨 VDP 파이프라인 긴급 디버깅 요청
+
+## 현재 상황
+- 워커가 실행 중이지만 VDP가 BigQuery에 적재되지 않음
+- `.done` 파일들을 삭제했지만 여전히 "Already processed" 메시지 발생
+- 워커 재시작 후 VDP 생성 과정에서 멈춤 (Google GenAI 호출 부분)
+
+## 확인된 문제점
+1. **워커 메모리 상태**: 이전 처리 상태가 메모리에 남아있음
+2. **VDP 생성 엔진**: `src/lib/vdp/complete-vdp-generator.js` 호출 시 멈춤
+3. **BigQuery 적재**: VDP 생성 후 BigQuery 로딩이 실패하는 것 같음
+
+## 요청사항
+1. **워커 완전 재시작**: 메모리 상태 초기화
+2. **VDP 생성 엔진 디버깅**: Google GenAI 호출 부분 문제 해결
+3. **BigQuery 적재 로직 점검**: VDP 생성 후 적재 과정 확인
+4. **전체 파이프라인 테스트**: 새로운 YouTube URL로 end-to-end 테스트
+
+## 우선순위
+1. 워커 프로세스 완전 종료 및 재시작
+2. VDP 생성 엔진 직접 테스트
+3. BigQuery 적재 로직 디버깅
+4. 전체 파이프라인 검증
+
+## 확인 명령어
+```bash
+git pull
+cat .collab-msg-cursor-claudecode-vdp-pipeline-debug
+pkill -f worker-ingest-v2.sh
+cd jobs && ./worker-ingest-v2.sh
+tail -f logs/worker-$(date +%Y%m%d)*.log
+```
+
+**ClaudeCode, VDP 파이프라인을 완전히 복구해주세요! 🚀**
