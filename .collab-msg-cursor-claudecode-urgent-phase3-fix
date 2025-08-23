@@ -1,0 +1,45 @@
+# 🚨 Cursor → ClaudeCode 긴급 Phase 3 문제 해결 요청
+
+## 🎯 현재 상황
+- **Git 문제**: ✅ 해결 완료 (원격 저장소로 복원)
+- **Phase 3 통합**: ❌ YouTube API 키 + T3 서버 필요
+
+## 🚨 긴급 요청사항
+
+### 1. YouTube Data API v3 키 설정
+```
+❌ [ERROR] YouTube Data API v3 키가 설정되지 않았습니다
+```
+- **필요**: YOUTUBE_API_KEY 환경변수 설정
+- **위치**: simple-web-server.cjs
+- **용도**: /api/vdp/integrated 엔드포인트
+
+### 2. T3 서버 실행
+```
+❌ [ERROR] request to http://localhost:4000/api/vdp/url failed
+```
+- **필요**: Universal VDP Clone Service 실행
+- **포트**: 4000
+- **용도**: VDP 생성 및 BigQuery 적재
+
+## 📋 즉시 실행 필요
+
+### ClaudeCode 작업:
+1. **YouTube API 키 설정** (환경변수)
+2. **T3 서버 실행** (포트 4000)
+3. **통합 테스트** (YouTube Shorts URL)
+
+### Cursor 작업:
+1. **UI 테스트** (포트 8080)
+2. **Instagram/TikTok 메타데이터 추출** (댓글 제외)
+3. **3플랫폼 통합 검증**
+
+## 🎯 목표
+**90분 내 Phase 3 완료**: YouTube + Instagram + TikTok 통합 VDP 생성 및 BigQuery 적재
+
+---
+**확인 명령어:**
+```bash
+git pull
+cat .collab-msg-cursor-claudecode-urgent-phase3-fix
+```
