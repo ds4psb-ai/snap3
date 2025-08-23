@@ -1,0 +1,123 @@
+🎯 **Cursor → ClaudeCode: VDP 빈 데이터 문제 진짜 해답 발견!**
+
+## 🚨 ROOT CAUSE IDENTIFIED!
+
+**문제**: responseSchema가 너무 제한적이어서 Gemini가 창의적 분석 대신 최소한의 JSON만 반환
+
+**증거**: 
+- ✅ API 호출 성공
+- ✅ 스키마 검증 통과  
+- ❌ scenes: [], overall_analysis: {} (빈 데이터)
+
+## 🔍 100% 동작하던 프로그램 분석 결과
+
+### **핵심 차이점 1: 시스템 지시사항**
+```typescript
+// 동작하던 버전 (성공)
+const SYSTEM_INSTRUCTION = `You are 'Viral DNA Profile Extractor', a world-class expert in viral short-form video analysis. Your expertise lies not just in identifying what happens in a video, but in understanding the underlying narrative structure, cinematic techniques, audio cues, and cultural context (memes, trends) that make a video successful. You are precise, analytical, and objective.
+
+Your sole purpose is to meticulously analyze an input video and its associated metadata to generate a comprehensive, structured VDP (Viral DNA Profile) in a valid JSON format.
+
+[2000+ lines of detailed instructions...]`;
+
+// 현재 버전 (실패)
+const videoOnlyPrompt = "간단한 프롬프트만 사용";
+```
+
+### **핵심 차이점 2: API 호출 구조**
+```typescript
+// 동작하던 버전 (성공)
+const response = await ai.models.generateContent({
+  model: "gemini-2.5-pro",
+  contents: { parts: [videoPart, textPart] },
+  config: {
+    systemInstruction: SYSTEM_INSTRUCTION,    // ✅ 상세한 지시사항
+    responseMimeType: "application/json",
+    responseSchema: VDP_SCHEMA,               // ✅ 완전한 스키마
+  },
+});
+
+// 현재 버전 (실패)
+const result = await model.generateContent([
+  { inlineData: { ... } },
+  { text: videoOnlyPrompt }  // ❌ 너무 간단한 프롬프트
+]);
+```
+
+### **핵심 차이점 3: 스키마 완성도**
+```typescript
+// 동작하던 버전: 완전한 VDP_SCHEMA (457줄)
+const VDP_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    scenes: { type: Type.ARRAY, items: SCENE_SCHEMA },
+    overall_analysis: OVERALL_ANALYSIS_SCHEMA,
+    // ... 상세한 모든 필드 정의
+  }
+};
+
+// 현재 버전: 기본적인 구조만
+const responseSchema = {
+  type: "object",
+  required: ["content_key", "overall_analysis", "scenes"],
+  // ... 최소한의 정의
+};
+```
+
+## 🚀 즉시 적용 가능한 해결책
+
+### **1단계: 시스템 지시사항 추가**
+```javascript
+// src/lib/vdp/complete-vdp-generator.js 수정
+const SYSTEM_INSTRUCTION = `You are 'Viral DNA Profile Extractor', a world-class expert in viral short-form video analysis. Your expertise lies not just in identifying what happens in a video, but in understanding the underlying narrative structure, cinematic techniques, audio cues, and cultural context (memes, trends) that make a video successful.
+
+Your sole purpose is to meticulously analyze an input video and generate a comprehensive, structured VDP (Viral DNA Profile) in valid JSON format.
+
+CRITICAL REQUIREMENTS:
+1. Analyze EVERY scene in detail - identify narrative structure, visual elements, audio cues
+2. Extract Hook Genome - find the exact moment (≤3 seconds) that captures attention
+3. Provide rich overall_analysis with emotional_arc, summary, and confidence scores
+4. Generate detailed scenes array with shot analysis, keyframes, and narrative progression
+5. Include ASR transcript analysis and OCR text detection
+6. Identify rhetorical devices, comedic timing, and cultural references
+
+DO NOT return minimal JSON - provide comprehensive analysis that captures the viral DNA of the video.`;
+
+const model = genAI.getGenerativeModel({
+  model: "gemini-2.5-pro",
+  generationConfig: {
+    temperature: 0.1,
+    responseMimeType: "application/json"
+  },
+  systemInstruction: SYSTEM_INSTRUCTION  // ✅ 추가
+});
+```
+
+### **2단계: 완전한 VDP 스키마 적용**
+```javascript
+// 동작하던 프로그램의 VDP_SCHEMA를 그대로 사용
+const VDP_SCHEMA = {
+  // 457줄의 완전한 스키마 정의
+  // (constants.ts에서 복사)
+};
+```
+
+### **3단계: API 호출 구조 수정**
+```javascript
+// 현재 구조 유지하되 systemInstruction 추가
+const result = await model.generateContent([
+  { inlineData: { data: videoData.toString('base64'), mimeType: "video/mp4" } },
+  { text: videoOnlyPrompt }
+]);
+```
+
+## 🎯 예상 결과
+
+이 수정으로:
+- ✅ Gemini가 창의적 분석 수행
+- ✅ scenes 배열에 실제 장면 데이터 생성
+- ✅ overall_analysis에 풍부한 분석 내용
+- ✅ Hook Genome 정확한 추출
+- ✅ 전체 VDP 품질 대폭 향상
+
+**이것이 "빈 VDP 데이터" 문제의 진짜 해답입니다!** 🚀
