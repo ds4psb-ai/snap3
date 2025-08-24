@@ -1,0 +1,123 @@
+# 🚀 VDP 제출 기능 & BigQuery 병합 아키텍처 구현
+
+## 📋 작업 개요
+**목표**: 인제스터 UI에서 제출 버튼 클릭 시 "One-Envelope, Two-Tables" 아키텍처로 VDP 생성 및 BigQuery 병합
+
+## 🏗️ 아키텍처 요구사항
+
+### One-Envelope (VDP 생성)
+- **영상 파일 + 댓글**: VDP 생성에 필수 참여
+- **VDP Complete Generator**: 기존 `complete-vdp-generator.js` 사용 (수정 금지)
+- **출력**: 완전한 VDP JSON (댓글 분석 포함)
+
+### Two-Tables (BigQuery 병합)
+- **VDP 테이블**: 핵심 분석 결과
+- **메타데이터 테이블**: 조회수, 좋아요, 작성자 등
+- **병합 로직**: content_key로 연결
+
+## 🔧 구현 작업
+
+### 1. 제출 API 엔드포인트 생성
+**파일**: `src/app/api/vdp/submit/route.ts`
+```typescript
+// 플랫폼별 제출 처리
+- YouTube: 영상 다운로드 + 댓글 + VDP 생성
+- Instagram/TikTok: 업로드된 영상 + 댓글 + VDP 생성
+- 메타데이터는 별도 저장 (BigQuery 병합용)
+```
+
+### 2. VDP 생성 파이프라인
+**파일**: `scripts/vdp-submission-pipeline.sh`
+```bash
+# 1. 영상 처리 (yt-dlp 또는 업로드)
+# 2. 댓글 준비 (UI에서 수집된 댓글)
+# 3. VDP Complete Generator 호출
+# 4. BigQuery 업로드 (VDP + 메타데이터)
+```
+
+### 3. BigQuery 스키마 설계
+**파일**: `supabase/migrations/002_vdp_bigquery_schema.sql`
+```sql
+-- VDP 테이블 (핵심 분석)
+CREATE TABLE vdp_analysis (
+  content_key STRING PRIMARY KEY,
+  vdp_json JSON,
+  created_at TIMESTAMP,
+  platform STRING
+);
+
+-- 메타데이터 테이블 (통계 정보)
+CREATE TABLE vdp_metadata (
+  content_key STRING PRIMARY KEY,
+  view_count INT64,
+  like_count INT64,
+  comment_count INT64,
+  author STRING,
+  upload_date TIMESTAMP,
+  hashtags ARRAY<STRING>,
+  FOREIGN KEY(content_key) REFERENCES vdp_analysis(content_key)
+);
+```
+
+### 4. JavaScript 제출 로직
+**파일**: `web/scripts/main.js` (handleSubmit 함수 수정)
+```javascript
+// 플랫폼별 제출 버튼 이벤트 처리
+- YouTube: /api/vdp/submit/youtube
+- Instagram: /api/vdp/submit/instagram  
+- TikTok: /api/vdp/submit/tiktok
+```
+
+## 🎯 핵심 요구사항
+
+### ✅ 필수 사항
+1. **댓글 필수 참여**: VDP 생성 시 댓글이 반드시 포함
+2. **VDP Complete 보존**: 기존 생성기 수정 금지
+3. **BigQuery 병합**: content_key로 VDP + 메타데이터 연결
+4. **플랫폼별 처리**: YouTube/Instagram/TikTok 각각 최적화
+
+### 🔄 데이터 플로우
+```
+UI 제출 → 영상+댓글 수집 → VDP 생성 → BigQuery 저장 → 메타데이터 병합
+```
+
+## 📁 파일 구조
+```
+src/app/api/vdp/submit/
+├── route.ts (메인 제출 엔드포인트)
+├── youtube.ts (YouTube 전용 처리)
+├── instagram.ts (Instagram 전용 처리)
+└── tiktok.ts (TikTok 전용 처리)
+
+scripts/
+├── vdp-submission-pipeline.sh (메인 파이프라인)
+└── bigquery-upload.sh (BigQuery 업로드)
+
+supabase/migrations/
+└── 002_vdp_bigquery_schema.sql (BigQuery 스키마)
+```
+
+## 🚨 주의사항
+- **VDP Complete Generator 수정 금지**: 기존 로직 보존
+- **댓글 필수**: VDP 생성 시 댓글이 반드시 포함되어야 함
+- **BigQuery 연결**: content_key 기반 병합 로직 구현
+- **에러 처리**: 각 단계별 상세한 에러 로깅
+
+## 🎯 성공 기준
+1. ✅ 제출 버튼 클릭 시 VDP 생성 시작
+2. ✅ 댓글이 포함된 완전한 VDP JSON 생성
+3. ✅ BigQuery에 VDP + 메타데이터 저장
+4. ✅ content_key로 두 테이블 병합 가능
+
+---
+
+**ClaudeCode 확인 명령어**:
+```bash
+git pull
+cat .collab-msg-cursor-claudecode-vdp-submission-integration
+```
+
+**작업 시작 후 진행상황 보고 요청**:
+- 각 단계별 구현 완료 시 상세 로그
+- BigQuery 스키마 설계 검토
+- VDP 생성 파이프라인 테스트 결과
